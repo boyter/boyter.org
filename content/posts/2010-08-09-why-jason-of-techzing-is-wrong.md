@@ -1,0 +1,19 @@
+---
+title: Why Jason of TechZing is Wrong
+author: Ben E. Boyter
+type: post
+date: 2010-08-09T09:43:54+00:00
+url: /2010/08/why-jason-of-techzing-is-wrong/
+
+---
+Let me prefix this with that I am a big fan of techzing, listen to it regularly on my daily commute (along with other pod-casts) and find most of his ideas interesting. However in the latest episode [Jasonism][1] Jason made a rather large and what I feel is wrong statement. Discussing blogs and how he was going to start one for his application Appignite he mentioned that blogs with features like search/tags/dates make no difference. He said that he was going to go with HTML files and hand write everything. With all due respect I disagree and here is why.
+
+To begin with one of the basic principles of development, and indeed start-ups is to automate everything you can. Using a pre built or indeed custom system benefits you in a few ways. Firstly you can have your RSS auto generated. Sure you can do RSS by hand, and while the format isn&#8217;t that complex you will by law of averages make a mistake and bork every-one&#8217;s RSS feeders. Not only is this not nice it may cause people to unsubscribe. Secondly you can add in comments in an easy way. Now Jason mentioned using discuss for his comment system, which is fine, but you still need to generate a unique key for your blog to hook it up. This is something that you get for free by adding a unique id to your database. Finally you get the benefits of having all your links all generated correctly for you. While its pretty easy to add a link to your other pages, as with the RSS eventually you will make a mistake, people will get lost on your site and Google will miss your older content.
+
+Now search is something close to my heart. Jason mentioned specifically that nobody uses site search/links. Now on one hand Google is pretty good at sucking up everything you throw on the web. So anything you post is likely to appear in it. However on the other hand this isn&#8217;t a certainty and what happens when someone is looking for that awesome post you had about using Appignite for their web application and cant find it? Do you trust Google enough that you are willing to bet singly on their ability to find content on your site? Why not just implement a search option? Its not difficult and could provide someone looking at your site with the incentive to investigate further. You never know, doing this might encourage someone to subscribe to your feed or newsletter.
+
+Justin mentioned something about NIH (not invented here) syndrome which Jason seems afflicted with. Fair enough since most developers have the same thoughts. Coding is something fulfilling and even writing unit tests can make you feel awesome for having produced something. However how fulfilling is it to write another HTML page, and add some links at the bottom and top? If you don&#8217;t like word-press then write your own simple blog which should take a few minutes at most and automate everything I mentioned above. By all means write your html by hand, but then run a script which fixes your RSS feed, and generates everything else for you. Should take a few minutes for a coder of your skill and will make everything much smoother.
+
+You know Jason, this would be an excellent way to showcase your project AppIgnite. It seems quite powerful, so why not generate a blog using it? Dogfooding really can be the best way to show off your stuff. Failing that I don&#8217;t see why you wouldn&#8217;t invest (yes it is an investment) an hour or so to create a simple PHP script which automates at least the above stuff for you.
+
+ [1]: http://techzinglive.com/?p=295

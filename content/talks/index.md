@@ -1,0 +1,23 @@
+---
+title: Talks
+author: Ben E. Boyter
+type: page
+date: 2015-07-04T06:12:08+00:00
+nkweb_code_in_head:
+  - default
+nkweb_Use_Custom_js:
+  - default
+nkweb_Use_Custom_Values:
+  - default
+nkweb_Use_Custom:
+  - 'false'
+
+---
+A few of the talks I have given and the slide desks are included below.
+
+  * Python @ searchcode.com [sypy_searchcode.key][1] (keynote) [sypy_searchcode][2] (powerpoint)
+  * Decoding CAPTCHA&#8217;s for Fun and Profit [DecodingCaptchas Reveal.js][3] (futher details can be found <http://www.boyter.org/2015/03/decoding-captchas-presentation/>)
+
+ [1]: http://www.boyter.org/wp-content/uploads/2015/07/sypy_searchcode.key.zip
+ [2]: http://www.boyter.org/wp-content/uploads/2015/07/sypy_searchcode.pptx
+ [3]: https://github.com/boyter/decodingcaptchas

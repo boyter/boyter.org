@@ -1,0 +1,151 @@
+---
+title: A quick comparison between different Go file walk implementations
+author: Ben E. Boyter
+type: post
+date: 2018-03-11T09:58:51+00:00
+url: /2018/03/quick-comparison-go-file-walk-implementations/
+nkweb_code_in_head:
+  - default
+nkweb_Use_Custom_js:
+  - default
+nkweb_Use_Custom_Values:
+  - default
+nkweb_Use_Custom:
+  - 'false'
+categories:
+  - Go
+  - Performance
+
+---
+Whats the fastest way to get all the names of all files in a directory using Go? I had a feeling that the native walk might not be the fastest way to do it. A quick search showed that several projects claimed to be faster. Since the [application][1] I am currently working on needs a high performance scanner I thought I would try the main ones out.
+
+Note that I have updated the code and the results based on feedback from reddit. The first change is I set it to just count the files rather than print the output to avoid measuring output buffering. I did do this before but noticed that while running in hyperfine it made no difference. I updated it anyway to avoid this being called into question again. The second was based on feedback from the godirwalk author. Setting the &#8220;unsorted&#8221; true option manages to pull another ~150ms of speed out of the bag which is perfect for me. Since the goroutine implementations have the same sorting issue (as far as I can see) it seemed fair to turn it on.
+
+<pre>package main
+
+import (
+	"fmt"
+	"os"
+	"path/filepath"
+)
+
+func main() {
+	count := 0
+	filepath.Walk("./", func(root string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		count++
+		return nil
+	})
+
+	fmt.Println(count)
+}
+
+</pre>
+
+<pre>package main
+
+import (
+	"fmt"
+	"github.com/MichaelTJones/walk"
+	"os"
+)
+
+func main() {
+	count := 0
+	walk.Walk("./", func(root string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		count++
+
+		return nil
+	})
+
+	fmt.Println(count)
+}
+
+</pre>
+
+<pre>package main
+
+import (
+	"fmt"
+	"github.com/iafan/cwalk"
+	"os"
+)
+
+func main() {
+	count := 0
+	cwalk.Walk("./", func(root string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		count++
+		return nil
+	})
+	fmt.Println(count)
+}
+</pre>
+
+<pre>package main
+
+import (
+	"fmt"
+	"github.com/karrick/godirwalk"
+)
+
+func main() {
+	count := 0
+	godirwalk.Walk("./", &godirwalk.Options{
+		Unsorted: true,
+		Callback: func(osPathname string, de *godirwalk.Dirent) error {
+			count++
+			return nil
+		},
+		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
+			return godirwalk.SkipNode
+		},
+	})
+	fmt.Println(count)
+}
+
+</pre>
+
+And the results. All were run in the WSL for Linux on a Surface Book 2 against a recent checkout of the Linux kernel with there being 67359 files in the directory.
+
+<pre>$ hyperfine './cwalk' && hyperfine './godirwalk' && hyperfine './nativewalk' && hyperfine './walk'
+Benchmark #1: ./cwalk
+
+  Time (mean ± σ):      1.812 s ±  0.059 s    [User: 368.4 ms, System: 6545.8 ms]
+
+  Range (min … max):    1.753 s …  1.934 s
+
+Benchmark #1: ./godirwalk
+
+  Time (mean ± σ):     695.9 ms ±  16.7 ms    [User: 73.0 ms, System: 619.2 ms]
+
+  Range (min … max):   671.2 ms … 725.6 ms
+
+Benchmark #1: ./nativewalk
+
+  Time (mean ± σ):      3.896 s ±  0.489 s    [User: 153.0 ms, System: 3757.4 ms]
+
+  Range (min … max):    3.560 s …  5.034 s
+
+Benchmark #1: ./walk
+
+  Time (mean ± σ):      1.674 s ±  0.071 s    [User: 399.7 ms, System: 6383.3 ms]
+
+  Range (min … max):    1.571 s …  1.769 s
+</pre>
+
+For comparison ripgrep which is probably the fastest disk scanner comes in at ~600ms. That is not a fair comparison though as it ignores certain directories but it gives you an idea of the upper bounds of useful performance.
+
+Turns out that the native implementation that ships with Go is indeed the slowest. The fastest by a long shot is godirwalk however. It is at least 2x as fast as the next quickest implementation. So if bleeding performance matters it would seem that using godirwalk is the best option. If however you want a drop in replacement for some additional speed I would suggest going with cwalk or walk. Of course if you aren&#8217;t scanning the linux kernel its hard to go wrong with even the native implementation which is generally fast enough for most cases.
+
+ [1]: https://github.com/boyter/scc

@@ -1,0 +1,17 @@
+---
+title: Billions of lines of code
+author: Ben E. Boyter
+type: post
+date: 2012-07-16T23:43:44+00:00
+url: /2012/07/billions-of-lines-of-code/
+categories:
+  - searchcode
+
+---
+Recently I fired off the spiders to pull in an additional 30,000 projects I was aware of and then added them to the index. The result being searchcode now has 3.8 billion lines of code indexed. The exact count being 3,863,756,553 lines. Of course the reason this is most exciting for me is that koders.com which is the default code search (now that Google Code search has been retired) has 3.3 billion lines of code index according to their website. Of course, searchcode does index anything considered &#8220;textual&#8221; data so there is a lot of non-code results in the index so the counts are probably fairly close in terms of what&#8217;s relevant. In short though, for a single person operation running on a single server I think its pretty impressive.
+
+In other news I have cleaned the index of &#8220;compiled&#8221; code. Essentially any result with extremely long lines has been stripped. An example of this would be minified JavaScript libraries such as jQuery which made searching rather painful sometimes. With the cleaned index things like &#8220;[jQuery][1]&#8221; produces reasonable results.
+
+What&#8217;s next? I am starting to play with blending of results. There seems to be a lot of people expecting to search &#8220;mysql_query&#8221; and get both the API documentation and code examples together which makes sense. I am also looking to integrate my own web results for selected websites with Bing turning off, but how soon this gets rolled out depends on how well I can get the results to turn out. In short come back and check now and then as exciting things are in the pipeline.
+
+ [1]: http://searchco.de/?q=jQuery&cs=on
