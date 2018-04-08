@@ -153,10 +153,12 @@ tri-grams
 
 Thankfully this is pretty easy to do in Python so I borrowed an existing bit of code to do it for me, <http://locallyoptimal.com/blog/2013/01/20/elegant-n-gram-generation-in-python/>
 
-<pre>input_list = ['all', 'this', 'happened', 'more', 'or', 'less']
+{{<highlight python>}}
+input_list = ['all', 'this', 'happened', 'more', 'or', 'less']
 
 def find_ngrams(input_list, n):
-  return zip(*[input_list[i:] for i in range(n)])</pre>
+  return zip(*[input_list[i:] for i in range(n)])
+{{</highlight>}}
 
 For the record I am totally aware that NTLK can also do this but since I don't currently have that installed lets go pure Python. It will be a little slower but considering this should rarely run this calculation I am not too worried about performance yet. Of course thats a good idea to live by anyway. Only worry about performance when it becomes an issue.
 

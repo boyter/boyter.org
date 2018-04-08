@@ -67,7 +67,7 @@ Functional tests generally consist of stories focused around the users ability t
 
 Installation
   
-: Ensures that software is installed correctly and works as expected on a new piece of hardware or system. Commonly seen after software has been installed as a post check.
+Ensures that software is installed correctly and works as expected on a new piece of hardware or system. Commonly seen after software has been installed as a post check.
 
 _Internationalisation_
   

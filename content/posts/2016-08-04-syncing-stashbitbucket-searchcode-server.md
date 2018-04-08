@@ -22,8 +22,7 @@ Below is the code used. It pulls out all of the repositories from every project,
 
 Note that this does not remove repositories that have been indexed, but it would not take much work to achieve it.
 
-`</p>
-<pre>
+{{<highlight python>}}
 import stashy
 from hashlib import sha1
 from hmac import new as hmac
@@ -94,4 +93,4 @@ existingrepos = [x['name'] for x in data['repoResultList']]
 for repo in getstashrepos():
     if repo['name'] not in existingrepos:
         addtosearchcode(repo)
-` </pre>
+{{</highlight>}}

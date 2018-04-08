@@ -22,7 +22,7 @@ One thing that occurred to me when I started work was that it would be nice to c
 
 Below is the what has been added into searchcode server.
 
-[<img class="alignnone size-large wp-image-1400" src="http://www.boyter.org/wp-content/uploads/2017/01/busfactor-1024x560.jpg" alt="" width="525" height="287" srcset="http://localhost/boyter.org/wp-content/uploads/2017/01/busfactor-1024x560.jpg 1024w, http://localhost/boyter.org/wp-content/uploads/2017/01/busfactor-300x164.jpg 300w, http://localhost/boyter.org/wp-content/uploads/2017/01/busfactor-768x420.jpg 768w, http://localhost/boyter.org/wp-content/uploads/2017/01/busfactor.jpg 1280w" sizes="(max-width: 525px) 100vw, 525px" />][1]
+![Bus Factor](/static/busfactor.jpg)
 
 The most interesting part of the above in my opinion is the overview blurb. It attempts to summarise all of the figures below and let anyone know in plain english where the repository stands.
 

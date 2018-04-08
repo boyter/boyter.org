@@ -20,4 +20,4 @@ A very brief update about the progress of searchcode server. Currently I am in t
 
 Edit. People keep asking me what App I used to create this. It was made Pureflow for iOS and then exported.
 
-<img class="alignnone size-large" src="https://raw.githubusercontent.com/boyter/searchcode-server/master/assets/design/indexer-pipeline.png" width="2228" height="2398" />
+<img class="alignnone size-large" src="https://raw.githubusercontent.com/boyter/searchcode-server/master/assets/design/indexer-pipeline.png" width="1000" height="1000" />
