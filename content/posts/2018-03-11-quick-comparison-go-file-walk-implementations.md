@@ -21,7 +21,8 @@ Whats the fastest way to get all the names of all files in a directory using Go?
 
 Note that I have updated the code and the results based on feedback from reddit. The first change is I set it to just count the files rather than print the output to avoid measuring output buffering. I did do this before but noticed that while running in hyperfine it made no difference. I updated it anyway to avoid this being called into question again. The second was based on feedback from the godirwalk author. Setting the &#8220;unsorted&#8221; true option manages to pull another ~150ms of speed out of the bag which is perfect for me. Since the goroutine implementations have the same sorting issue (as far as I can see) it seemed fair to turn it on.
 
-<pre>package main
+{{<highlight go>}}
+package main
 
 import (
 	"fmt"
@@ -42,10 +43,10 @@ func main() {
 
 	fmt.Println(count)
 }
+{{</highlight>}}
 
-</pre>
-
-<pre>package main
+{{<highlight go>}}
+package main
 
 import (
 	"fmt"
@@ -67,10 +68,10 @@ func main() {
 
 	fmt.Println(count)
 }
+{{</highlight>}}
 
-</pre>
-
-<pre>package main
+{{<highlight go>}}
+package main
 
 import (
 	"fmt"
@@ -90,9 +91,10 @@ func main() {
 	})
 	fmt.Println(count)
 }
-</pre>
+{{</highlight>}}
 
-<pre>package main
+{{<highlight go>}}
+package main
 
 import (
 	"fmt"
@@ -113,8 +115,7 @@ func main() {
 	})
 	fmt.Println(count)
 }
-
-</pre>
+{{</highlight>}}
 
 And the results. All were run in the WSL for Linux on a Surface Book 2 against a recent checkout of the Linux kernel with there being 67359 files in the directory.
 

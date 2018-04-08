@@ -29,33 +29,26 @@ The challange itself is not as simple as you would initally think and taken from
 > Three people are playing the following betting game.
   
 > Every five minutes, a turn takes place in which a random player rests and the other two bet
-  
 > against one another with all of their money.
   
 > The player with the smaller amount of money always wins,
-  
 > doubling his money by taking it from the loser.
   
 > For example, if the initial amounts of money are 1, 4, and 6,
-  
 > then the result of the first turn can be either
   
 > 2,3,6 (1 wins against 4);
-  
 > 1,8,2 (4 wins against 6); or
-  
 > 2,4,5 (1 wins against 6).
   
 > If two players with the same amount of money play against one another,
-  
 > the game immediately ends for all three players.
-  
+>
 > Find initial amounts of money for the three players, where none of the three has more than 255,
-  
 > and in such a way that the game cannot end in less than one hour. (So at least 12 turns)
-  
+>
 > In the example above (1,4,6), there is no way to end the game in less than 15 minutes.
-  
+>
 > All numbers must be positive integers.
 
 Only one person managed to find an answer, lets call him Josh (because that&#8217;s his name), having spent a few hours writing up a solution using his favourite programming language Go. Come Monday morning I arrived, looked at the quiz I and became intrigued. Could I write a version that would outperform his. After all Go is a pretty performant language, but I suspected that he may have missed some easy optimisations, and if I picked something equally as fast I should be able to at least equal it.
@@ -68,76 +61,76 @@ Given that the existing solution was written in Go it seemed insane to some that
 
 The first thing to note is that you need to generate a tree of every possible combination that a game can take. Then you iterate over each one for the inital starting amounts of money to determine if the game ever ends, and if not mark it as a game that does not finish. To generate the combinations I went with a fairly simple recursive strategy,
 
-    
-    # Calculate all the possible sequences for who misses out for each turn
-    def calc_events(current=[], turn=0):
-        if turn == DESIRED_TURNS:
-            return [current]
-    
-        one = list(current)
-        one.append(0)
-    
-        two = list(current)
-        two.append(1)
-    
-        three = list(current)
-        three.append(2)
-    
-        turn += 1
-        path1 = calc_events(current=one, turn=turn)
-        path2 = calc_events(current=two, turn=turn)
-        path3 = calc_events(current=three, turn=turn)
-    
-        return path1 + path2 + path3
-    
+{{<highlight python>}}
+# Calculate all the possible sequences for who misses out for each turn
+def calc_events(current=[], turn=0):
+    if turn == DESIRED_TURNS:
+        return [current]
+
+    one = list(current)
+    one.append(0)
+
+    two = list(current)
+    two.append(1)
+
+    three = list(current)
+    three.append(2)
+
+    turn += 1
+    path1 = calc_events(current=one, turn=turn)
+    path2 = calc_events(current=two, turn=turn)
+    path3 = calc_events(current=three, turn=turn)
+
+    return path1 + path2 + path3
+{{</highlight>}}
 
 The result of running the above is an array of arrays containing each situation where someone sits out a turn. It is important to note that his produces a list that modifies from the back (big-endian so to speak) as this will be a very important consideration later.
 
 The result looks something like this (truncated to just 4 results),
 
-    
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2]
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
-    
+{{<highlight python>}}
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2]
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]
+{{</highlight>}}
 
 Given the above I coded up a simple solution which simply looped through the combinations. Here it is in pseudocode.
 
-    
-    for player1 money:
-      for player2 money:
-        for player3 money:
-          for game in games:
-            for turn in game:
-              result = play turn using money amounts
-            if result:
-              print player1, player2, player3
-    
+{{<highlight python>}}
+for player1 money:
+  for player2 money:
+    for player3 money:
+      for game in games:
+        for turn in game:
+          result = play turn using money amounts
+        if result:
+          print player1, player2, player3
+{{</highlight>}}
 
 The above is about as bad as it gets for an algorithm as we have 5 nested loops. As expected the runtime performance was horrible. In fact I added a progress bar which simply calculated how far into the first loop the application had reached. Using Python I worked out that it was going to take several hours to get a result using the above. Not good enough.
 
 A few calculations and I realised that I was asking my poor program to calculate something like 50 billion games. Clearly I needed to reduce the number of games and speed up the processing as much as possible. The first change I made was to only calculate the game turn events once and keep the result. I had also written the code to be as readable as possible, which how you should write anything but as this can be an issue also removed the following function by inlining it for improved performance.
 
-    
-    def turn(p1, p2):
-        if p1 == p2:
-            return False, p1, p2
-    
-        if p1 > p2:
-            p1 = p1 - p2
-            p2 = p2 + p2
-        else:
-            p2 = p2 - p1
-            p1 = p1 + p1
-        return True, p1, p2
-    
+{{<highlight python>}}
+def turn(p1, p2):
+    if p1 == p2:
+        return False, p1, p2
+
+    if p1 > p2:
+        p1 = p1 - p2
+        p2 = p2 + p2
+    else:
+        p2 = p2 - p1
+        p1 = p1 + p1
+    return True, p1, p2
+{{</highlight>}}
 
 The next thing I did was generate all the permutations of money amounts to play games with into a single list. The last thing I did was switch from using Python to PyPy which with its JIT should speed up the loops considerably. The result of all this can be found here <https://gist.github.com/boyter/cab749f4713201f5b409c5b1353fc36c> and its runtime using PyPy dropped to ~8 minutes.
 
-8 minutes was about 5 times slower then the GoLang program at this point, which is pretty good for a dynamic language like Python, and consider that my implementation was single threaded where as the Go was using as many cores as it could get. My next step was to implement the same program in a faster language. The only other faster languages I know that I have any experience in are C# and Java. Since I already had Java setup I went with that. I will also admint it was about proving a point. Go may be fast, but at writing Java should be able to equal it for most tasks.
+8 minutes was about 5 times slower then the GoLang program at this point, which is pretty good for a dynamic language like Python, and consider that my implementation was single threaded where as the Go was using as many cores as it could get. My next step was to implement the same program in a faster language. The only other faster languages I know that I have any experience in are C# and Java. Since I already had Java setup I went with that. I will also admit it was about proving a point. Go may be fast, but at writing Java should be able to equal it for most tasks.
 
-At this point however I mentioned to Josh that his Go program had some inefficiencies. The big one being that he was calculating the 12th game needlessly. I then modified his program and with some other changed reduced the Go program runtime down to ~40 seconds. I was starting to get worried at this point, as I was aiming to beat the Go program&#8217;s performance by 5%. No idea why I picked this number but it seemed reasonable if I was smart with the implementation.
+However I mentioned to Josh that his Go program had some inefficiencies. The big one being that he was calculating the 12th game needlessly. I then modified his program and with some other changed reduced the Go program runtime down to ~40 seconds. I was starting to get worried at this point, as I was aiming to beat the Go program&#8217;s performance by 5%. No idea why I picked this number but it seemed reasonable if I was smart with the implementation.
 
 At first I ported the Python program in its original readable reusable form to Java and ran it. The runtime was ~7 minutes. I then inlined the same functions and converted it over to use parallel streams. This time the runtime was about 90 seconds. This would have been fast enough had I not mentioned to Josh how he could improve his code. I had shifted the goalposts on myself and had a new target now of ~40 seconds.
 
