@@ -19,7 +19,7 @@ The first implementation has a few issues that are pretty apparent. Chiefly is p
 
 ### PERFORMANCE
 
-Not sure what video I was watching but it had the following line about performance &#8220;Don&#8217;t ever guess. You will be wrong. Measure.&#8221; In my opinion (whatever that is worth) this is 100% correct. If you aren&#8217;t a human compiler/runtime (and if you are why are you reading this?) there is no way you can know what is actually slow in your application. You can guess, and you might be right, but generally its faster to run your application through a profiler and you quite often will be surprised.
+Not sure what video I was watching but it had the following line about performance "Don't ever guess. You will be wrong. Measure." In my opinion (whatever that is worth) this is 100% correct. If you aren't a human compiler/runtime (and if you are why are you reading this?) there is no way you can know what is actually slow in your application. You can guess, and you might be right, but generally its faster to run your application through a profiler and you quite often will be surprised.
 
 * One example came when I was profiling [http://searchcode.com/][8] and trying to get the result templates to load faster. Considering it does all sorts of regex/formatting/etc&#8230; I expected the issue to be string processing. What actually turned out to be was a method I was calling to get the root location of the website IE http://searchcode.com/ it was called many times and ate most of the time. Simply calling it once and storing the value in a variable decreased page load times by about 30% *
 
@@ -31,7 +31,7 @@ PHP actually does have some decent profiling tools even if they can be a pain to
   
 3. 1000 documents in index. Add/index single document.
 
-The results showed that most of the time is spent writing things to disk, mostly in the building of the index rather then saving the documents themselves. This is because for each document it loads the index shard from disk, appends to it and then saves it without considering it might need to do it again really soon. This means a single index shard for a common word such as &#8220;the&#8221; will be loaded and saved to disk once for each document added. When doing 10,000 documents this is a massive bottleneck.
+The results showed that most of the time is spent writing things to disk, mostly in the building of the index rather then saving the documents themselves. This is because for each document it loads the index shard from disk, appends to it and then saves it without considering it might need to do it again really soon. This means a single index shard for a common word such as "the" will be loaded and saved to disk once for each document added. When doing 10,000 documents this is a massive bottleneck.
 
 ### INDEX IMPROVEMENTS
 
@@ -39,7 +39,7 @@ We need to consider how to spend less time writing or reading to disk while buil
 
 1. Keep the index in memory. Save every now and then or once at the end of the indexing process.
 
-This approach has a few issues. The main one being if we are indexing a popular word such as &#8220;the&#8221; the index is going to get VERY large very quickly and consume all available memory. [Stopwords https://en.wikipedia.org/wiki/Stop_words][9] would fix this issue for a while, but eventually we are going to need more memory then we can fit in a machine. Sure we could only take this approach for words which are not common and keep the common words using the existing approach, but we won&#8217;t get much performance gain as its the frequent reads/writes which are killing performance. That said I think its worth at least trying, as it should be very easy to implement. It may also get us over the million document mark which means we can spend more time focused on cool ranking algorithms.
+This approach has a few issues. The main one being if we are indexing a popular word such as "the" the index is going to get VERY large very quickly and consume all available memory. [Stopwords https://en.wikipedia.org/wiki/Stop_words][9] would fix this issue for a while, but eventually we are going to need more memory then we can fit in a machine. Sure we could only take this approach for words which are not common and keep the common words using the existing approach, but we won't get much performance gain as its the frequent reads/writes which are killing performance. That said I think its worth at least trying, as it should be very easy to implement. It may also get us over the million document mark which means we can spend more time focused on cool ranking algorithms.
 
 2. Flush outputs to disk occasionally, and post process.
 
@@ -47,7 +47,7 @@ This approach is more scale-able, but has the issue that the index is not search
 
 ### OPTION 1 A SLIGHTLY NAIVE INDEXER
 
-So in the list of improvements I identified two ways to speed things up and increase our ability to scale. The first being holding the index in memory while processing and flushing it to disk at the end of the process. Thankfully we already catered for this in the design. When we call the indexers index method we don&#8217;t have to pass one document, we can actually pass multiple. To implement the in memory saving we just need to change the indexer method to look like the below.
+So in the list of improvements I identified two ways to speed things up and increase our ability to scale. The first being holding the index in memory while processing and flushing it to disk at the end of the process. Thankfully we already catered for this in the design. When we call the indexers index method we don't have to pass one document, we can actually pass multiple. To implement the in memory saving we just need to change the indexer method to look like the below.
 
 <pre>public function index(array $documents) {
 		if(!is_array($documents)) {
@@ -114,7 +114,7 @@ So with the above simple fix lets load it up and see how it goes. I ran the foll
 	}
 	$indexer-&gt;index($toindex);</pre>
 
-Keep in mind this is saving the documents to disk as well which we will remove in our final version and the performance isn&#8217;t too bad.
+Keep in mind this is saving the documents to disk as well which we will remove in our final version and the performance isn't too bad.
 
 Searches work as well, however you need to add a time limit of 0
 
@@ -126,7 +126,7 @@ Im going to say that this totally surprised me. I really did expect that we woul
 
 ### A BETTER SEARCH
 
-One of the other issues we have is where duplicate results are returned when searching for more then one term IE a search for &#8220;AuthDBDUserRealmQuery SQL&#8221; will return the single document which contains AuthDBDUserRealmQuery twice. Lets implement some logic to remove duplicate documents from being returned.
+One of the other issues we have is where duplicate results are returned when searching for more then one term IE a search for "AuthDBDUserRealmQuery SQL" will return the single document which contains AuthDBDUserRealmQuery twice. Lets implement some logic to remove duplicate documents from being returned.
 
 The implementation is basically a copy of naievesearch and we modify the dosearch method like so
 

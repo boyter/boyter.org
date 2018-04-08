@@ -19,7 +19,7 @@ categories:
 ---
 I was recently tasked with exporting a large collection of documents from KnowledgeTree (KT) for a client. The collection was too large to use the download all functionality and too wide to attempt to export each folder individually.
 
-I had played around with the WebDav connection that KT provides but it either didn&#8217;t work or was designed deliberately to not allow exporting of the documents.
+I had played around with the WebDav connection that KT provides but it either didn't work or was designed deliberately to not allow exporting of the documents.
 
 I looked at where the documents were  stored on disk but KT stores them as numbered files in numbered directories sans extension or folder information.
 

@@ -6,7 +6,7 @@ date: 2010-08-18T00:44:49+00:00
 url: /2010/08/setting-git-follow-subversion-workflow/
 
 ---
-Moving from Subversion SVN to GIT can be a little confusing at first. I think the biggest thing I noticed was that GIT doesn&#8217;t have a specific work-flow; you have to pick your own. Personally I wanted to stick to my Subversion like work-flow with a central server which all my machines would pull and push too. Since it took a while to set up I thought I would throw up a blog post on how to do it.
+Moving from Subversion SVN to GIT can be a little confusing at first. I think the biggest thing I noticed was that GIT doesn't have a specific work-flow; you have to pick your own. Personally I wanted to stick to my Subversion like work-flow with a central server which all my machines would pull and push too. Since it took a while to set up I thought I would throw up a blog post on how to do it.
 
 First on your server or wherever you are going to host your repository you need to create a bare repository. I created a new user on my server called repo which holds all of my repositories. I then created a directory which would hold my repository. This is similar to naming your repository in subversion.
 

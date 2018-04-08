@@ -51,11 +51,11 @@ The challange itself is not as simple as you would initally think and taken from
 >
 > All numbers must be positive integers.
 
-Only one person managed to find an answer, lets call him Josh (because that&#8217;s his name), having spent a few hours writing up a solution using his favourite programming language Go. Come Monday morning I arrived, looked at the quiz I and became intrigued. Could I write a version that would outperform his. After all Go is a pretty performant language, but I suspected that he may have missed some easy optimisations, and if I picked something equally as fast I should be able to at least equal it.
+Only one person managed to find an answer, lets call him Josh (because that's his name), having spent a few hours writing up a solution using his favourite programming language Go. Come Monday morning I arrived, looked at the quiz I and became intrigued. Could I write a version that would outperform his. After all Go is a pretty performant language, but I suspected that he may have missed some easy optimisations, and if I picked something equally as fast I should be able to at least equal it.
 
 I took a copy of his code <https://gist.github.com/walesey/e2427c28a859c4f7bc920c9af2858492> (since modified to be much faster) with a runtime of 1 minute 40 seconds (on my laptop) started work.
 
-Looking at the problem itself we have a few pieces of information we can use. One is that we don&#8217;t ever need to calculate the 12th turn. If the game makes the 11th turn and still continues then it made 12 so that saves us some calculations. Another is that if any money amounts are the same we can stop the game instantlty, and more importantly not even add those to the loop.
+Looking at the problem itself we have a few pieces of information we can use. One is that we don't ever need to calculate the 12th turn. If the game makes the 11th turn and still continues then it made 12 so that saves us some calculations. Another is that if any money amounts are the same we can stop the game instantlty, and more importantly not even add those to the loop.
 
 Given that the existing solution was written in Go it seemed insane to some that I started writing my solution at least initally in Python. This however is not as crazy as it seems. Python being higly malleable allow some rapid iteration, trying out a few things before moving over to another language.
 
@@ -130,7 +130,7 @@ The next thing I did was generate all the permutations of money amounts to play 
 
 8 minutes was about 5 times slower then the GoLang program at this point, which is pretty good for a dynamic language like Python, and consider that my implementation was single threaded where as the Go was using as many cores as it could get. My next step was to implement the same program in a faster language. The only other faster languages I know that I have any experience in are C# and Java. Since I already had Java setup I went with that. I will also admit it was about proving a point. Go may be fast, but at writing Java should be able to equal it for most tasks.
 
-However I mentioned to Josh that his Go program had some inefficiencies. The big one being that he was calculating the 12th game needlessly. I then modified his program and with some other changed reduced the Go program runtime down to ~40 seconds. I was starting to get worried at this point, as I was aiming to beat the Go program&#8217;s performance by 5%. No idea why I picked this number but it seemed reasonable if I was smart with the implementation.
+However I mentioned to Josh that his Go program had some inefficiencies. The big one being that he was calculating the 12th game needlessly. I then modified his program and with some other changed reduced the Go program runtime down to ~40 seconds. I was starting to get worried at this point, as I was aiming to beat the Go program's performance by 5%. No idea why I picked this number but it seemed reasonable if I was smart with the implementation.
 
 At first I ported the Python program in its original readable reusable form to Java and ran it. The runtime was ~7 minutes. I then inlined the same functions and converted it over to use parallel streams. This time the runtime was about 90 seconds. This would have been fast enough had I not mentioned to Josh how he could improve his code. I had shifted the goalposts on myself and had a new target now of ~40 seconds.
 
@@ -140,11 +140,11 @@ This was the breakthrough I needed. Suddently the runtime dropped from ~60 secon
 
 The smile was soon turned to a frown. Josh implemented the same logic into his Go program and it now ran in ~6 seconds. It was suddently 5x times faster. At this point I had a mild panic and started playing with bitwise operations and other micro optimisations before realising that no matter what I did he could simply implement the same change and get the same performance benefit as we were both using roughtly the same algorithm.
 
-Something was clearly wrong. Either Go was suddently 5x faster at a basic for loop and integer math then Java OR I had a bug in my code somewhere which was making it worse. I looked. Josh looked. A few other people looked. Nobody could work out what the issue was. At this point I didn&#8217;t care about the runtime, I just wanted to know WHY did it appear to be running slower. I was so desperate for an answer I did what all programmers do at this point and outsourced to the collective brain known as Stack Overflow <http://stackoverflow.com/questions/43082115/why-is-this-golang-solution-faster-then-the-equivalent-java-solution>
+Something was clearly wrong. Either Go was suddently 5x faster at a basic for loop and integer math then Java OR I had a bug in my code somewhere which was making it worse. I looked. Josh looked. A few other people looked. Nobody could work out what the issue was. At this point I didn't care about the runtime, I just wanted to know WHY did it appear to be running slower. I was so desperate for an answer I did what all programmers do at this point and outsourced to the collective brain known as Stack Overflow <http://stackoverflow.com/questions/43082115/why-is-this-golang-solution-faster-then-the-equivalent-java-solution>
 
 A few un-constructive comments came back such as Java is slow (seriously its not 1995 anymore guys, Java is fast) etc&#8230; Thankfully one brilliant person managed to point out what I had missed. It was not the loop itself, but the input. Remember how I said that the generation of the events being big-endian was important? Turns out the Go program had done the reverse and implemented it little-endian.
 
-The thing about the core loop is that it has a bail-out condition. If two players have the same money amount we end the game and don&#8217;t process any further. The worst possible situation for the loop is to process almost every condition only to find out just at the end that it ended. Its a lot of processing work. Ideally you want to find the failing conditions as soon as possible. By changing the games from the end I was forcing the Java program to process about 5x times as many combinations as the Go program.
+The thing about the core loop is that it has a bail-out condition. If two players have the same money amount we end the game and don't process any further. The worst possible situation for the loop is to process almost every condition only to find out just at the end that it ended. Its a lot of processing work. Ideally you want to find the failing conditions as soon as possible. By changing the games from the end I was forcing the Java program to process about 5x times as many combinations as the Go program.
 
 It just happended to be that Josh has picked a more optimal path through the games.
 
@@ -152,16 +152,15 @@ A simple reverse of the games (line 126 of the linked solution) and suddenly the
 
 For fun I tried running it on a 16 core VPS and it ran in about ~2 seconds and maxed out all the cores so it seems parallel streams do what you expect them to.
 
-[<img class="alignnone size-large wp-image-1426" src="http://www.boyter.org/wp-content/uploads/2017/03/Screen-Shot-2017-03-29-at-8.40.04-am-1024x557.png" alt="" width="525" height="286" srcset="http://localhost/boyter.org/wp-content/uploads/2017/03/Screen-Shot-2017-03-29-at-8.40.04-am-1024x557.png 1024w, http://localhost/boyter.org/wp-content/uploads/2017/03/Screen-Shot-2017-03-29-at-8.40.04-am-300x163.png 300w, http://localhost/boyter.org/wp-content/uploads/2017/03/Screen-Shot-2017-03-29-at-8.40.04-am-768x418.png 768w" sizes="(max-width: 525px) 100vw, 525px" />][1]
+![VPS Core Usage](/static/Screen-Shot-2017-03-29-at-8.40.04-am.png)
 
-Interestingly while Josh&#8217;s starting positions was more optimal then mine, its probably still not the optimal path for this problem. There is bound to be a way to generate the game such that you hit the failing conditions as soon as possible saving needless processing. There is probably a Thesis for a PhD in there somewhere.
+Interestingly while Josh's starting positions was more optimal then mine, its probably still not the optimal path for this problem. There is bound to be a way to generate the game such that you hit the failing conditions as soon as possible saving needless processing. There is probably a Thesis for a PhD in there somewhere.
 
-I figure this is probably as far as I want to take this. I did play around with bitwise operations and loop un-rolling but the time didn&#8217;t change that much.
+I figure this is probably as far as I want to take this. I did play around with bitwise operations and loop un-rolling but the time didn't change that much.
 
 I certainly had fun with the implementation and working things out. Some may argue that optimising for a micro benchmark such as this is a waste of time, and generally they would be right. That said there are occasions where you really do need to optimise the hell out of something, say a diff algorithm or some such. In any case what developer does not dream of saving the day with some hand unrolled loop optimisation that saves the company millions and brings the developer the praise and respect of their peers!
 
 EDIT &#8211; A rather smart person by the name of dietrichepp pointed out that there is a better algorithm. Rather than brute force the states work backwards. You can read their comment on [Hacker News][2] and view their code in [C++ on Github][3].
 
- [1]: http://www.boyter.org/wp-content/uploads/2017/03/Screen-Shot-2017-03-29-at-8.40.04-am.png
  [2]: https://news.ycombinator.com/item?id=14010341
  [3]: https://gist.github.com/depp/3a6f0377284fbb9b33984063856051b1

@@ -1,5 +1,5 @@
 ---
-title: Why Writing a Web Crawler isn’t Easy
+title: Why Writing a Web Crawler isn't Easy
 author: Ben E. Boyter
 type: post
 date: 2010-08-05T10:38:32+00:00
@@ -8,13 +8,13 @@ url: /2010/08/why-writing-a-web-crawler-isnt-easy/
 ---
 The below is just a few things to keep in mind if you are writing a crawler or considering writing one.
 
-The first is to assume that all of the links you have are broken to begin with. When I write this I dont mean assume that the link goes nowhere, but that the URL itself is actually wrong. Even when you seed your own list (like I did) you can still get some bad URL&#8217;s in there.
+The first is to assume that all of the links you have are broken to begin with. When I write this I dont mean assume that the link goes nowhere, but that the URL itself is actually wrong. Even when you seed your own list (like I did) you can still get some bad URL's in there.
 
 Assume all websites are slow. If you assume that the website is a lot slower then yours and that it can take pages seconds to render then you are on the right track. Not assuming this means you might spawn more threads or processes to crawl then the website can respond to. Not only does this mean you get a lot of connection errors you can effectivly kill the site though an unintentional DOS attack.
 
-Assume you have more bandwidth. This might seem to be the wrong assumption, because odd&#8217;s are if you are writing your own crawler you don&#8217;t have as much bandwidth as Google, Yahoo or Bing. That is probably true, but as a technical person you probably will have more bandwidth then most people. Better to be safe, assume you have more bandwidth and throttle back before killing a site with your uber crawler.
+Assume you have more bandwidth. This might seem to be the wrong assumption, because odd's are if you are writing your own crawler you don't have as much bandwidth as Google, Yahoo or Bing. That is probably true, but as a technical person you probably will have more bandwidth then most people. Better to be safe, assume you have more bandwidth and throttle back before killing a site with your uber crawler.
 
-When running a process ensure you have some form of mutex, file lock or socket bind to prevent other instances running concurrently. This also seems probably counter intuitive but trust me it isn&#8217;t. If you don&#8217;t lock down the process, and then add it into your crontab or some other scheduler you may end up in the situation where your first process is still running (because the sites you are crawling are stressed) and the second process kicks off. This slows the site down more, causing more processes to overlap, slowing the site more etc&#8230; This ends only when someones code crashes, and on most websites which are database heavy odds are it will be them. Lock your process down initially and then spawn out a specific number of threads or processes. This way you can accuratly say &#8220;No more then 100 pages from this site will be crawled per minute&#8221;.
+When running a process ensure you have some form of mutex, file lock or socket bind to prevent other instances running concurrently. This also seems probably counter intuitive but trust me it isn't. If you don't lock down the process, and then add it into your crontab or some other scheduler you may end up in the situation where your first process is still running (because the sites you are crawling are stressed) and the second process kicks off. This slows the site down more, causing more processes to overlap, slowing the site more etc&#8230; This ends only when someones code crashes, and on most websites which are database heavy odds are it will be them. Lock your process down initially and then spawn out a specific number of threads or processes. This way you can accuratly say "No more then 100 pages from this site will be crawled per minute".
 
 Dont assume timeouts will save you. Adding timeouts to connections will not save you from having to consider and implement all of the above. You can still kill a website pretty quickly by getting thousands of connections all waiting on something in their stack (database, cache, presenter etc..) to catch up.
 

@@ -15,7 +15,7 @@ This is part 3 of a 5 part series.
 
 [Part 1][2] &#8211; [Part 2][3] &#8211; [Part 3][4] &#8211; [Part 4][5] &#8211; [Part 5][6] &#8211; [Downloads/Code][7]
 
-At this point I had a large chunk of the web sitting on my disk waiting to be indexed. The first thing we need to think about is what are we going to index. Since we are dealing with HTML files we have marked up content can can pick to a certain extent what we want to index on. For our search im going to index on the title and the meta description tags. Titles are still a part of search engine ranking algorithms as many people search for things like &#8220;Yahoo&#8221; and &#8220;Facebook&#8221; and the title/URL usually contains this information. The meta description had fallen out of favor with being something search engines use these days due to being gamed, but since its unlikely the top 1 million are going to be doing this I am going to use it as well. These two terms should work fairly well at our scale and ensure our index isn&#8217;t too massive. We can always add the rest of page content at a later point.
+At this point I had a large chunk of the web sitting on my disk waiting to be indexed. The first thing we need to think about is what are we going to index. Since we are dealing with HTML files we have marked up content can can pick to a certain extent what we want to index on. For our search im going to index on the title and the meta description tags. Titles are still a part of search engine ranking algorithms as many people search for things like "Yahoo" and "Facebook" and the title/URL usually contains this information. The meta description had fallen out of favor with being something search engines use these days due to being gamed, but since its unlikely the top 1 million are going to be doing this I am going to use it as well. These two terms should work fairly well at our scale and ensure our index isn't too massive. We can always add the rest of page content at a later point.
 
 Our first step is to loop over all of the downloaded documents, process them somehow IE extract the content we want to index and then add them into our index. Having a look at Google we can see that all we really need is the Title, Meta Description and URL to serve up a result. Lets build our documents such that they represent the above. A sample would be something like the below,
 
@@ -23,7 +23,7 @@ Our first step is to loop over all of the downloaded documents, process them som
 					  'Yahoo! Search - Web Search',
 					  'The search engine that helps you find exactly what you're looking for. Find the most relevant information, video, images, and answers from all across the Web.');</pre>
 
-This when stored allows us to display things nicely on the page similar to Google&#8217;s results. To accommodate this lets change add.php to perform the above. The below is what I came up with.
+This when stored allows us to display things nicely on the page similar to Google's results. To accommodate this lets change add.php to perform the above. The below is what I came up with.
 
 <pre>foreach(new RecursiveIteratorIterator (new RecursiveDirectoryIterator ('./crawler/documents/')) as $x) {
 		$filename = $x-&gt;getPathname();
@@ -101,9 +101,9 @@ So with that all done running it about 5000 documents works without to many issu
 	}
 	echo '&lt;/ul&gt;';</pre>
 
-which displays the results in a similar manner to Google. Of course we still have the same issue where if you search for something like &#8220;the&#8221; you get 5000 links on the page. Lets fix this issue.
+which displays the results in a similar manner to Google. Of course we still have the same issue where if you search for something like "the" you get 5000 links on the page. Lets fix this issue.
 
-There are a few things to keep in mind with this. When you search for a term you essentially load that term&#8217;s list of documents into memory. This can take some time because you are loading a file from disk and processing it. One thing you can do to speed this up is only read the top 1000 or so documents from the file. This is slightly problematic however when it comes to ranking. If someone searches for &#8220;Yahoo&#8221; and the Yahoo homepage is document 1001 in your documents it will never appear in your results. One possible solution is to sort the documents in the index by rank against the term. IE we know that the Yahoo homepage will rank very highly for the term &#8220;Yahoo&#8221; so lets make it first in line. This way when we pull back 1000 results we know that Yahoo will be at the top. While we are at it we should probably split the terms into separate folders as well. The new index we will call multifolderindex. Changing the index to work like this is very simple. We just modify the getFilePathName like so,
+There are a few things to keep in mind with this. When you search for a term you essentially load that term's list of documents into memory. This can take some time because you are loading a file from disk and processing it. One thing you can do to speed this up is only read the top 1000 or so documents from the file. This is slightly problematic however when it comes to ranking. If someone searches for "Yahoo" and the Yahoo homepage is document 1001 in your documents it will never appear in your results. One possible solution is to sort the documents in the index by rank against the term. IE we know that the Yahoo homepage will rank very highly for the term "Yahoo" so lets make it first in line. This way when we pull back 1000 results we know that Yahoo will be at the top. While we are at it we should probably split the terms into separate folders as well. The new index we will call multifolderindex. Changing the index to work like this is very simple. We just modify the getFilePathName like so,
 
 <pre>public function _getFilePathName($name) {
 		$md5 = md5($name);
@@ -180,7 +180,7 @@ Of course we need to add ranker into the constructor as well. Now when the index
 		return $doc;
 	}</pre>
 
-There is a lot going on in there but essentially we build the list as before (the OR list) but also keep each set desperately. We then take each one of those sets and get the intersection of them all. This is used as the top results, and assuming we don&#8217;t find enough revert to OR logic. Just something to keep in mind its actually easier to get AND logic when you sort lists by Id&#8217;s. You can just step through each list popping id&#8217;s on either side till you find enough intersecting results.
+There is a lot going on in there but essentially we build the list as before (the OR list) but also keep each set desperately. We then take each one of those sets and get the intersection of them all. This is used as the top results, and assuming we don't find enough revert to OR logic. Just something to keep in mind its actually easier to get AND logic when you sort lists by Id's. You can just step through each list popping id's on either side till you find enough intersecting results.
 
 The final thing to update before testing is to move the document store over to a multi folder document store. Thankfully changing this one is pretty easy as well as the design is similar to the multi folder index, all we need do is update the getFilePathName method, which looks like the following.
 
@@ -195,13 +195,13 @@ The final thing to update before testing is to move the document store over to a
 
 With that done the document store and index are good enough to try some much larger searches. At the time I had about 20,000 documents that I could index, so I indexed the lot and had a few tests. A few thoughts from this.
 
-1. When searching for things like &#8220;what the internet is talking about right now&#8221; the results are very slow to return.
+1. When searching for things like "what the internet is talking about right now" the results are very slow to return.
   
-2. When searching for things like the above we don&#8217;t get the result we would expect which would be Digg.com
+2. When searching for things like the above we don't get the result we would expect which would be Digg.com
   
-3. The ranking can still be pretty stupid at times for example &#8220;reverse image search&#8221; ranks emailfinder.com above tineye.com
+3. The ranking can still be pretty stupid at times for example "reverse image search" ranks emailfinder.com above tineye.com
   
-4. There is a lot of porn results returned which are rather annoying, for example &#8220;flat&#8221;
+4. There is a lot of porn results returned which are rather annoying, for example "flat"
 
 All of the above need to be resolved before we can say that this implementation works well and will be the focus of Part 4.
 

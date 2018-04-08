@@ -23,7 +23,7 @@ Long answer. Generally file servers work better with more RAM, which they can us
 
 For teamspeak the server requirements are a low end Pentium or Pentium 2 and 128 RAM. So no issues there. Even if you are using some other program I suspect that you will saturate your internet long before your VOIP is throttled by CPU and/or RAM.
 
-For a webserver what you have there will also be fine even if it is running a dynamic site using WordPress etc&#8230; so long as you don&#8217;t make the front page of digg or slashdot and then once again your bandwidth will give out before your server crashes. If your website does become popular you can always outsource or get a beefier server.
+For a webserver what you have there will also be fine even if it is running a dynamic site using WordPress etc&#8230; so long as you don't make the front page of digg or slashdot and then once again your bandwidth will give out before your server crashes. If your website does become popular you can always outsource or get a beefier server.
 
 Finally choice of OS. Mainly this should come down to your preference, experience and needs. For webserver generally you will want Apache or IIS. Apache is Windows and Linux, IIS is Windows only.
 

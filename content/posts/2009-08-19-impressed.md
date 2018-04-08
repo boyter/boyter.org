@@ -8,7 +8,7 @@ categories:
   - Uncategorized
 
 ---
-Was playing around with Python for a second there. I learnt about one of the new &#8220;multiprocessing&#8221; features. Its pretty standard stuff, but thankfully does what I actually wanted Python to always do. Allow me to multiprocess any Map function. Below is the sample code (2.6 and above only sorry).
+Was playing around with Python for a second there. I learnt about one of the new "multiprocessing" features. Its pretty standard stuff, but thankfully does what I actually wanted Python to always do. Allow me to multiprocess any Map function. Below is the sample code (2.6 and above only sorry).
 
 <pre>from multiprocessing import Pool
 import time

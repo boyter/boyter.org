@@ -29,7 +29,7 @@ Database calls tend to fail for the same reasons. They also can fail because of 
 
 Tests which interact with the filesystem despite seeming solid can fail at inopportune moments as well. The reasons are many but the first things to look at would be concurrency issues, tests not cleaning up files, read/write permissions and not releasing file locks. Without mocking away the filesystem (which is a solution which can fix these issues and improve performance) these tests can easy become flaky.
 
-Lets go through a concrete example using a test designed to check if a file has been written. I am using a pseudocode language similar to python but the idea&#8217;s should be the same for all languages.
+Lets go through a concrete example using a test designed to check if a file has been written. I am using a pseudocode language similar to python but the idea's should be the same for all languages.
 
 Here we have a function which writes a heartbeat file to the temp directory with the current date and time. Its a commonly used pattern for daemons and other background tasks to confirm they are still running.
 
@@ -81,4 +81,4 @@ Perfect. Now the test sets itself up correctly, performs the test and cleans up 
 
 The one thing to keep in mind when testing integrations
 
-&#8220;Leave it as you found it.&#8221;. This applies to system state, memory, filesystems or the database. If you make a change no matter how small be sure to reverse it. This simple rule will help cut down on flaky tests saving you a lot of time.
+"Leave it as you found it.". This applies to system state, memory, filesystems or the database. If you make a change no matter how small be sure to reverse it. This simple rule will help cut down on flaky tests saving you a lot of time.

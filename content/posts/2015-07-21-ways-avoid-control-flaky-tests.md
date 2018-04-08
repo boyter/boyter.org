@@ -17,7 +17,7 @@ categories:
   - Unit Testing
 
 ---
-Having a reliable test suite should always be the goal in software development. After all if you can&#8217;t trust the tests then why bother running them at all? This is especially important in a shared coding environment and when running through Continuous Integration (CI).
+Having a reliable test suite should always be the goal in software development. After all if you can't trust the tests then why bother running them at all? This is especially important in a shared coding environment and when running through Continuous Integration (CI).
 
 [<img class="alignnone size-full wp-image-1327" src="http://www.boyter.org/wp-content/uploads/2016/08/keep-calm-and-don-t-break-the-build-e1437343295860.png" alt="keep-calm-and-don-t-break-the-build-e1437343295860" width="200" height="233" />][1]
 
@@ -25,9 +25,9 @@ Having a reliable test suite should always be the goal in software development. 
 
 It may seem obvious but writing focused tests which do a single thing is one of the most effective ways to avoid them being flaky. Tests which do multiple things increases the chance for failure and can make the tests non deterministic. Always remember to test features and issues in isolation.
 
-2. Write Helpful Error&#8217;s
+2. Write Helpful Error's
 
-When a test does fail having an error such as &#8220;Error 23: Something went wrong ¯\_(ツ)_/¯&#8221; is incredibly frustrating. Firstly you need to run the test again with either a debugger or some code modifications to spot the bug which slows down development its also unprofessional. Write meaningful error messages. For example &#8220;Error: The value &#8220;a&#8221; was unexpected for this input&#8221; is a far better error. Another thing to remember is avoid swallowing the exception in languages which support exception handling.
+When a test does fail having an error such as "Error 23: Something went wrong ¯\_(ツ)_/¯" is incredibly frustrating. Firstly you need to run the test again with either a debugger or some code modifications to spot the bug which slows down development its also unprofessional. Write meaningful error messages. For example "Error: The value "a" was unexpected for this input" is a far better error. Another thing to remember is avoid swallowing the exception in languages which support exception handling.
 
 3. Control the Environment
 
@@ -35,7 +35,7 @@ Regularly run tests should run in a controlled environment which will be the sam
 
 4. Fix it, delete it or mark it
 
-A test that fails is proving its value, unless its flaky. Tests that fail randomly slow down your development process. In time they will be ignored and neglected. The moment a test is identified as failing it should be fixed. If it will take time then mark it as being flaky, remove it from the CI pipeline and investigate as part of paying down technical debt. If after time it still isn&#8217;t resolved it should be investigated to see if it is providing any actual value. Odds are if it hasn&#8217;t been fixed for a month it may be a test you can live without.
+A test that fails is proving its value, unless its flaky. Tests that fail randomly slow down your development process. In time they will be ignored and neglected. The moment a test is identified as failing it should be fixed. If it will take time then mark it as being flaky, remove it from the CI pipeline and investigate as part of paying down technical debt. If after time it still isn't resolved it should be investigated to see if it is providing any actual value. Odds are if it hasn't been fixed for a month it may be a test you can live without.
 
 5. Be forgiving but verify
 

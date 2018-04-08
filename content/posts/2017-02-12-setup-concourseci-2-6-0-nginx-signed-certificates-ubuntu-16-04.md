@@ -20,9 +20,9 @@ categories:
 ---
 [Concourse CI][1] is a very nice continuous integration server.
 
-However for installs there are a few gotcha&#8217;s you need to keep in mind. Mostly these relate to how TLS/SSL works.
+However for installs there are a few gotcha's you need to keep in mind. Mostly these relate to how TLS/SSL works.
 
-The first is that while it is possible to run concourse inside Docker I found this to cause a lot of issues with workers dying and not recovering. I would suggest installing the binarys on bare machines. When I moved from a docker cluser using Amazon&#8217;s ECS to a single t2.large instance not only were builds faster but it was a far more reliable solution.
+The first is that while it is possible to run concourse inside Docker I found this to cause a lot of issues with workers dying and not recovering. I would suggest installing the binarys on bare machines. When I moved from a docker cluser using Amazon's ECS to a single t2.large instance not only were builds faster but it was a far more reliable solution.
 
 I am also not going to automate this install, and will leave it as an excercise for you the reader to do this yourself. I would suggest using Python Fabric, or something like Puppet, Ansible or Saltstack to achive this.
 

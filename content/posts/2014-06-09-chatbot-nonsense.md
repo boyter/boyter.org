@@ -8,9 +8,9 @@ categories:
   - Uncategorized
 
 ---
-There has been a lot of coverage recently about a chat-bot &#8220;[Eugene Goostman][1]&#8221; passing a variance of the Turing test by convincing 30% of the testers that it was indeed a human by posing as Ukrainian 13 year old boy (to make misspellings and grammar mistakes forgivable I suppose).
+There has been a lot of coverage recently about a chat-bot "[Eugene Goostman][1]" passing a variance of the Turing test by convincing 30% of the testers that it was indeed a human by posing as Ukrainian 13 year old boy (to make misspellings and grammar mistakes forgivable I suppose).
 
-Naturally I had to give it a try and frankly I can&#8217;t see how something like this could convince anyone that its a living human being. I asked a few questions such as the following &#8220;Whereabouts in the Ukraine do you live?&#8221; the response being &#8220;It is a country in SE Europe that&#8217;s all I can tell you&#8221; which is not exactly promising.
+Naturally I had to give it a try and frankly I can't see how something like this could convince anyone that its a living human being. I asked a few questions such as the following "Whereabouts in the Ukraine do you live?" the response being "It is a country in SE Europe that's all I can tell you" which is not exactly promising.
 
 For fun I scripted it up against a copy of the Eliza chat-bot and had them talk among themselves. A quick excerpt is included below and is rather amusing.
 

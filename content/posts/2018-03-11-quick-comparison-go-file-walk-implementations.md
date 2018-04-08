@@ -19,7 +19,7 @@ categories:
 ---
 Whats the fastest way to get all the names of all files in a directory using Go? I had a feeling that the native walk might not be the fastest way to do it. A quick search showed that several projects claimed to be faster. Since the [application][1] I am currently working on needs a high performance scanner I thought I would try the main ones out.
 
-Note that I have updated the code and the results based on feedback from reddit. The first change is I set it to just count the files rather than print the output to avoid measuring output buffering. I did do this before but noticed that while running in hyperfine it made no difference. I updated it anyway to avoid this being called into question again. The second was based on feedback from the godirwalk author. Setting the &#8220;unsorted&#8221; true option manages to pull another ~150ms of speed out of the bag which is perfect for me. Since the goroutine implementations have the same sorting issue (as far as I can see) it seemed fair to turn it on.
+Note that I have updated the code and the results based on feedback from reddit. The first change is I set it to just count the files rather than print the output to avoid measuring output buffering. I did do this before but noticed that while running in hyperfine it made no difference. I updated it anyway to avoid this being called into question again. The second was based on feedback from the godirwalk author. Setting the "unsorted" true option manages to pull another ~150ms of speed out of the bag which is perfect for me. Since the goroutine implementations have the same sorting issue (as far as I can see) it seemed fair to turn it on.
 
 {{<highlight go>}}
 package main
@@ -147,6 +147,6 @@ Benchmark #1: ./walk
 
 For comparison ripgrep which is probably the fastest disk scanner comes in at ~600ms. That is not a fair comparison though as it ignores certain directories but it gives you an idea of the upper bounds of useful performance.
 
-Turns out that the native implementation that ships with Go is indeed the slowest. The fastest by a long shot is godirwalk however. It is at least 2x as fast as the next quickest implementation. So if bleeding performance matters it would seem that using godirwalk is the best option. If however you want a drop in replacement for some additional speed I would suggest going with cwalk or walk. Of course if you aren&#8217;t scanning the linux kernel its hard to go wrong with even the native implementation which is generally fast enough for most cases.
+Turns out that the native implementation that ships with Go is indeed the slowest. The fastest by a long shot is godirwalk however. It is at least 2x as fast as the next quickest implementation. So if bleeding performance matters it would seem that using godirwalk is the best option. If however you want a drop in replacement for some additional speed I would suggest going with cwalk or walk. Of course if you aren't scanning the linux kernel its hard to go wrong with even the native implementation which is generally fast enough for most cases.
 
  [1]: https://github.com/boyter/scc

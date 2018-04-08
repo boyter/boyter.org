@@ -103,13 +103,13 @@ We are now unsetting everything as we go. This should free some memory as we go 
 
 The createFlushFile method and addToFlushFile methods are pretty much copies of the methods used in the multifolderindex class. They could presumably be combined at some point, however this is fine for the moment. This takes care of the memory issues with any luck. The results were&#8230; promising. It ended up working and using far less memory they before, but because of its constant disk thrashing ended up being more disk bound then CPU. Which is not a good sign when it comes to indexers. This is pretty easy to rectify though, we just buffer the results to flush to disk till they hit some threshold and then dump the lot to disk and start over again.
 
-Fixing the above flaw wouldn&#8217;t take too much work, but this project has taken enough time as it is. If someone wants to fork it and fix the about feel free.
+Fixing the above flaw wouldn't take too much work, but this project has taken enough time as it is. If someone wants to fork it and fix the about feel free.
 
 Anyway I tried the above code, and it worked. The full index took about 24 hours to build (due the issue mentioned before). Searches were reasonably fast and once I increased the amount of documents read from disk quite accurate. Some sample searches like
 
-&#8220;source code hosting&#8221;
+"source code hosting"
 
-Turned up bitbucket as the main result. Something else like &#8220;microsoft windows&#8221; shows the official windows site at the top, followed by windows.net and various other microsoft sites.
+Turned up bitbucket as the main result. Something else like "microsoft windows" shows the official windows site at the top, followed by windows.net and various other microsoft sites.
 
 In fact here are a few queries I tried that I found interesting to play around with, most of which produce fairly decent results.
 

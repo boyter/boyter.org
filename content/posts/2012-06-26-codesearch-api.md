@@ -42,7 +42,7 @@ The return results are pretty self explanatory, except that they include a model
 
 exactmatch, closematch, regexexact, regexclose
 
-They allow you to highlight lines. Exact match means you entered a non regex IE not wrapped in / and there are exact matches. Close match means it couldn&#8217;t find anything exact and reverted to a loose match. Same with regexexact and regexclose except the first uses an exact regex match.
+They allow you to highlight lines. Exact match means you entered a non regex IE not wrapped in / and there are exact matches. Close match means it couldn't find anything exact and reverted to a loose match. Same with regexexact and regexclose except the first uses an exact regex match.
 
 The other important part is the below,
 
@@ -64,22 +64,22 @@ Previouspage = if there is a previous page IE not on 0 will point at the previou
   
 Cs = Used internally, but just indicates its a code search
 
-&#8220;page&#8221;: 0,
+"page": 0,
   
-&#8220;total&#8221;: &#8220;1000&#8221;,
+"total": "1000",
   
-&#8220;query&#8221;: &#8220;/test/ lang:perl&#8221;,
+"query": "/test/ lang:perl",
   
-&#8220;matchterm&#8221;: &#8220;/test/&#8221;,
+"matchterm": "/test/",
   
-&#8220;generalregex&#8221;: &#8220;/test/i&#8221;,
+"generalregex": "/test/i",
   
-&#8220;regex&#8221;: &#8220;/test/&#8221;,
+"regex": "/test/",
   
-&#8220;nextpage&#8221;: 1,
+"nextpage": 1,
   
-&#8220;previouspage&#8221;: null,
+"previouspage": null,
   
-&#8220;cs&#8221;: true
+"cs": true
 
-That should be enough to get you started. There are examples of how to call this in the <a href=&#8221;https://github.com/duckduckgo/zeroclickinfo-spice&#8221;>DuckDuckGo spice project</a>. If you do use this I would love to get a link so I can display it here, and a link back would be nice.
+That should be enough to get you started. There are examples of how to call this in the <a href="https://github.com/duckduckgo/zeroclickinfo-spice">DuckDuckGo spice project</a>. If you do use this I would love to get a link so I can display it here, and a link back would be nice.

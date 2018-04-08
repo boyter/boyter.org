@@ -8,7 +8,7 @@ categories:
   - searchcode
 
 ---
-Just a quick update to searchcode. A few small tweaks here and there, but the largest is that there is now a file tree listing option which will show the file tree for any project. An example would be going to [this file][1] and then clicking the &#8220;View File Tree&#8221; button on the top left.
+Just a quick update to searchcode. A few small tweaks here and there, but the largest is that there is now a file tree listing option which will show the file tree for any project. An example would be going to [this file][1] and then clicking the "View File Tree" button on the top left.
 
 An example screenshot of the result of this is included below.
 

@@ -133,7 +133,7 @@ The root licenses were identified as being both MIT and GPL-3.0+ however inside 
 
 Currently licencechecker (lc) does not indicate if a project may be in violation of license requirements. Assuming there is some sort of license compatibility chart in the future this would be something to add at a later point.
 
-There are a few known issues with the current version. License&#8217;s are fuzzy matched so its possible someone could fork an existing license and have it be a false positive match. The second issue is that license matches are based on licenses from SPDX and as such may miss some licenses.
+There are a few known issues with the current version. License's are fuzzy matched so its possible someone could fork an existing license and have it be a false positive match. The second issue is that license matches are based on licenses from SPDX and as such may miss some licenses.
 
 If you have read this far thanks for your time. Id love you to try licencechecker and report back any bugs. I would also love to hear how you are using it and with permission put a link in the README with your testimonial and link. If you want to contribute back use GitHub issues. As with anything I put online I am happy to get constructive feedback.
 

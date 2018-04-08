@@ -48,25 +48,25 @@ Pretty easy, we check if the user wants to see porn and if so just add it otherw
 
 <pre>function dosearch($searchterms,$seeporn=SEARCH_DISPLAYPORN)</pre>
 
-Trying it out on some questionable searches shows that it works fairly well. One example I tried was &#8220;sex&#8221; and the first few results were,
+Trying it out on some questionable searches shows that it works fairly well. One example I tried was "sex" and the first few results were,
 
-<http://modernman.com/> Advice and info for men on pop culture, love & sex, cars & gear, men&#8217;s health & grooming, and more.
+<http://modernman.com/> Advice and info for men on pop culture, love & sex, cars & gear, men's health & grooming, and more.
   
 <http://thefrisky.com/> Celebrity gossip, relationship advice, sex tips and more for real women everywhere!
   
 <http://countyjailinmatesearch.com/> The county jail inmate search provides facility addresses, phone numbers and options to lookup inmates, arrest warrants and sex offenders. 1-888-786-5245.
 
-Which looks fairly innocuous to me. **\*NB\*** This isnt implemented as some sort of moral crusade. I am just dealing with an issue that any serious search engine has to overcome at some point. Besides I didn&#8217;t want to see those results while testing as they can be distracting.
+Which looks fairly innocuous to me. **\*NB\*** This isnt implemented as some sort of moral crusade. I am just dealing with an issue that any serious search engine has to overcome at some point. Besides I didn't want to see those results while testing as they can be distracting.
 
-Ok moving on to the other issue which is that w searching for things like &#8220;what the internet is talking about right now&#8221; the results are very slow to return, and that we don&#8217;t get the result we would expect which would be Digg.com.
+Ok moving on to the other issue which is that w searching for things like "what the internet is talking about right now" the results are very slow to return, and that we don't get the result we would expect which would be Digg.com.
 
-The easiest way to fix this with our current implementation is to improve our ranking algorithm. Because we are preranking documents documents such as Digg will bubble to the top of searches for terms like &#8220;what the internet is talking about right now&#8221; and should fix the issue.
+The easiest way to fix this with our current implementation is to improve our ranking algorithm. Because we are preranking documents documents such as Digg will bubble to the top of searches for terms like "what the internet is talking about right now" and should fix the issue.
 
-Ranking however isn&#8217;t the easiet thing in the world. Google and Bing use hundreds of signals which determine a pages rank. These include terms, page speed, user behaviour, incoming links, how large the site is, terms locations, terms weight in html etc&#8230;. We have almost none of that. However everyone needs to start somewhere so here are a few ideas I had off the top of my head to use as signals.
+Ranking however isn't the easiet thing in the world. Google and Bing use hundreds of signals which determine a pages rank. These include terms, page speed, user behaviour, incoming links, how large the site is, terms locations, terms weight in html etc&#8230;. We have almost none of that. However everyone needs to start somewhere so here are a few ideas I had off the top of my head to use as signals.
 
-1. If the URL contains the search term, and how much of the url it is, IE a search for &#8220;microsoft&#8221; should rank higher for &#8220;http://microsoft.com&#8221; then &#8220;http://trymicrosoftoffice.com/&#8221;
+1. If the URL contains the search term, and how much of the url it is, IE a search for "microsoft" should rank higher for "http://microsoft.com" then "http://trymicrosoftoffice.com/"
 
-2. If the title contains the search term, and how much of the title it is. IE a search for &#8220;google email&#8221; will match the title &#8220;Gmail: Email from Google&#8221; more so then &#8220;The Tea Party&#8221; which is currently ranking above it.
+2. If the title contains the search term, and how much of the title it is. IE a search for "google email" will match the title "Gmail: Email from Google" more so then "The Tea Party" which is currently ranking above it.
 
 3. If the meta content contains the search term rank it more highly then those where it just appears in the content.
 
@@ -115,9 +115,9 @@ And now for the implementation.
 
 We just break things up and based on how many terms we find increase the rank. This means that this search is keyword heavy, IE if you want to rank highly for anything just keyword stuff your URL, Title and Meta tags with the term you are targeting. The reason we normalize the URLs is to create a basic pagerank algorithm, except rather then calculate our own page rank we will use the ranks we already know about.
 
-One other thing we can do to speed things up is to add in some stop words, and finally add a stemmer. The first is just a list of words we wont index, such as &#8220;AND&#8221; &#8220;THE&#8221; etc&#8230; A stemmer is an algorithm to reduce words to their stem. IE searches can be reduced to search since they are pretty much the same. Doing so really cuts down on our index. I took the [stop word list from http://norm.al/2009/04/14/list-of-english-stop-words/][9] and the [porter stemmer implementation from http://tartarus.org/~martin/PorterStemmer/][10]
+One other thing we can do to speed things up is to add in some stop words, and finally add a stemmer. The first is just a list of words we wont index, such as "AND" "THE" etc&#8230; A stemmer is an algorithm to reduce words to their stem. IE searches can be reduced to search since they are pretty much the same. Doing so really cuts down on our index. I took the [stop word list from http://norm.al/2009/04/14/list-of-english-stop-words/][9] and the [porter stemmer implementation from http://tartarus.org/~martin/PorterStemmer/][10]
 
-Of course all of this ranking means nothing for search terms such as &#8220;google mail&#8221; as it will just rank based on the last term not both terms so lets add that in. This actually turned out to be a little more complex then expected. Im not going to go through all of the changes required as I want to end these series of articles. You can however look though the code to see what was implemented.
+Of course all of this ranking means nothing for search terms such as "google mail" as it will just rank based on the last term not both terms so lets add that in. This actually turned out to be a little more complex then expected. Im not going to go through all of the changes required as I want to end these series of articles. You can however look though the code to see what was implemented.
 
 At this point the final step really is to run though getting as much performance out of the system that we can. A few profiling checks shows that most of the time lost is done when stemming. Thankfully we can cache the results of the stem to cut this down in the indexing stage and in the results. You could also save the stemmed words in the indexing portion and trade disk space for cpu burn time. This would increase performance when it comes to searching quite a bit. Another one to consider would be storing the porn flag in the index itself. This would allow us to skip the regex test and just discard the results before pulling them even from disk. Both of the above are something to consider for the future.
 

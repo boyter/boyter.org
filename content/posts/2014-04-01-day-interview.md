@@ -57,7 +57,7 @@ For the first, I was right about a lambda, which is just an anonymous function. 
         return h
     return function2()</pre>
 
-In the above function2 closes over function1 allowing it to access the the variables in function1&#8217;s environment such as h.
+In the above function2 closes over function1 allowing it to access the the variables in function1's environment such as h.
 
 The other thing that threw me was implementing a SQL like join in a nice way. See the thing is I have been spoilt by C# which makes this very simple using LINQ. You literally join the two lists in the same way SQL would and it just works. Not only that the implementation is really easy to read.
 

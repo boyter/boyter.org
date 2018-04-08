@@ -12,4 +12,4 @@ This is something that took me 2 years or so to learn. One day I realised nobody
 
 Since that time I have re-factored quite a few code-bases; added unit tests, fixed some build processes, improved performance and generally feel happier at work for getting things done that are important to me.
 
-Don&#8217;t get stuck in constant bug fix mode. If you cant get approval to fix things then change jobs because bug fix after bug fix is depressing and will bring you down.
+Don't get stuck in constant bug fix mode. If you cant get approval to fix things then change jobs because bug fix after bug fix is depressing and will bring you down.

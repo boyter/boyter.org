@@ -29,12 +29,12 @@ Then you get to the really good stuff. LINQ is awesome. The lazy loading allows 
 
 from person in _dbContext.GetPerson().ByUserName(username).ByPassword(password);
 
-100% elegant, easy to test, easy to write, easy to read and understand and generally works exactly as you would expect without any hidden gotchas. And because its lazy it doesn&#8217;t chew resources sucking back everything from the database.
+100% elegant, easy to test, easy to write, easy to read and understand and generally works exactly as you would expect without any hidden gotchas. And because its lazy it doesn't chew resources sucking back everything from the database.
 
 You can use functional programming techniques if you wish, and with the new async decorators you can work in a node.js style if you with, with static typing and all existing library support.
 
 Or you can continue to work in a C like manner, or mix it up with objects, procedural code and functional.
 
-I switched back to Java not that long ago to write a simple server using Jetty and even with things like Guice (best DI implementation I have used so far) and Guava it was still painful. Less painful, but I really felt that the compiler was fighting me from doing things in an elegant manner most of the time. Even adding the &#8220;var&#8221; keyword would improve Java in a massive way. Add some functional programming in there and I would be pretty happy.
+I switched back to Java not that long ago to write a simple server using Jetty and even with things like Guice (best DI implementation I have used so far) and Guava it was still painful. Less painful, but I really felt that the compiler was fighting me from doing things in an elegant manner most of the time. Even adding the "var" keyword would improve Java in a massive way. Add some functional programming in there and I would be pretty happy.
 
-I just wish C# would run on the JVM as I would use it for pretty much everything in a heartbeat. As it is the Mono support is missing the stuff I really want and isn&#8217;t as seamless as the experience should be. A pity really as C# really is in my experience the nicest language to work today that&#8217;s production ready.
+I just wish C# would run on the JVM as I would use it for pretty much everything in a heartbeat. As it is the Mono support is missing the stuff I really want and isn't as seamless as the experience should be. A pity really as C# really is in my experience the nicest language to work today that's production ready.

@@ -52,7 +52,7 @@ Now we can call it with a simple uname function to get the output for all of the
     Disconnecting from box2... done.
     
 
-You can create individual tasks for each group of servers you control using this technique but that&#8217;s not very dry (don&#8217;t repeat yourself) or neat. Lets modify our all task to accept a parameter so we can filter down our servers at run time.
+You can create individual tasks for each group of servers you control using this technique but that's not very dry (don't repeat yourself) or neat. Lets modify our all task to accept a parameter so we can filter down our servers at run time.
 
     
     def all(server_filter=None):

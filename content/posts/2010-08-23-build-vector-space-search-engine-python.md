@@ -35,7 +35,7 @@ The above method simply allows us to pass in a clean text document and get back 
 
 The only other thing we need is a vector space. A vector space for those not in the know is a way of calculating the distances between two points. Essentially it works the same way calculating the 3rd side of a triangle. Except that instead of 2 planes (x and y) or even 3 planes (x,y,z) you can have as many planes as you want. The actual idea takes a while to understand but you can read about it here, [Vector Space Search Engine Theory][1] (PDF).
 
-Thankfully I already have implemented the algorithm in my [Decoding CAPTCHA&#8217;s][2] post and can just copy paste it from there. I have modified it a little bit to avoid divide by zero issues, check types and to add the above concordance method in since it really does belong together.
+Thankfully I already have implemented the algorithm in my [Decoding CAPTCHA's][2] post and can just copy paste it from there. I have modified it a little bit to avoid divide by zero issues, check types and to add the above concordance method in since it really does belong together.
 
 <pre>class VectorCompare:
   def magnitude(self,concordance):
@@ -121,11 +121,11 @@ Enter Search Term: mysql stallman
 0.140028008403 Richard Stallman to visit Australia Im not usually one to promote events and the like unless I feel
 0.110096376513 MySQL Backups Done Easily One thing that comes up a lot on siteslike Stackoverflow and the like is</pre>
 
-Results are not too bad I think! Now there are some problems with this technique. Firstly it doesn&#8217;t support boolean searches which can be an issue, although most people tend to just type some terms. Secondly it has problems with larger documents. The way the vector space works is biased towards smaller documents since they are closer to the search term space. You can get around this by breaking larger documents up into smaller ones though. The final and biggest issue though is that it is pretty CPU intensive. I have tested a search like this with 50,000 documents and it was OK but you wouldn&#8217;t want to go much further then that. It is a pretty naive implementation though. With some caching and checking which documents are worth comparing you could take this up to millions of documents.
+Results are not too bad I think! Now there are some problems with this technique. Firstly it doesn't support boolean searches which can be an issue, although most people tend to just type some terms. Secondly it has problems with larger documents. The way the vector space works is biased towards smaller documents since they are closer to the search term space. You can get around this by breaking larger documents up into smaller ones though. The final and biggest issue though is that it is pretty CPU intensive. I have tested a search like this with 50,000 documents and it was OK but you wouldn't want to go much further then that. It is a pretty naive implementation though. With some caching and checking which documents are worth comparing you could take this up to millions of documents.
 
 I remember reading somewhere (no source sorry) that Altavista and some of the other early search engines used a technique similar to the above for calculating rankings, so it seems the idea really can be taken to a large scale.
 
-By now I am sure someone is thinking, &#8220;Hang on, if its that simple then why is it so hard to make the next Google?&#8221;. Well the answer is that its pretty easy to index 10,000 to 100,000,000 pages it gets considerably more difficult to index 1,000,000,000+ pages. You have to shard out to multiple computers and the margin for error is pretty low. You can read this post [Why Writing a Search Engine is Hard written by Anna Patterson][3] (one of the co-founders of [Cuil][4]) which explains the problem nicely.
+By now I am sure someone is thinking, "Hang on, if its that simple then why is it so hard to make the next Google?". Well the answer is that its pretty easy to index 10,000 to 100,000,000 pages it gets considerably more difficult to index 1,000,000,000+ pages. You have to shard out to multiple computers and the margin for error is pretty low. You can read this post [Why Writing a Search Engine is Hard written by Anna Patterson][3] (one of the co-founders of [Cuil][4]) which explains the problem nicely.
 
 A few people have expressed difficulty getting the above to run. To do so just copy it all into a single file and run it.
 

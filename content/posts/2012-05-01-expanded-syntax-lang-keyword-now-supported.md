@@ -8,7 +8,7 @@ categories:
   - Uncategorized
 
 ---
-Trawling through the logs of search queries I noticed that some people are using the Google Code Search lang syntax. An example that I spotted was the following [&#8220;throw.* runtime_error lang:c++&#8221;][1] Note the lang:c++ portion.
+Trawling through the logs of search queries I noticed that some people are using the Google Code Search lang syntax. An example that I spotted was the following ["throw.* runtime_error lang:c++"][1] Note the lang:c++ portion.
 
 Of couse this ended up spitting back no useful results because the lang:c++ was treated as part of the search. Well no longer is this the case. searchcode now supports the lang keyword in addition to the existing ext one (useful for extensions).
 

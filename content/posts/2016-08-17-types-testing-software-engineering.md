@@ -63,7 +63,7 @@ Development testing is testing done by both the developer and tests during the d
 
 _Functional_
   
-Functional tests generally consist of stories focused around the users ability to perform actions or use cases checking if functionality works. An example would be &#8220;can the user save the document with changes&#8221;.
+Functional tests generally consist of stories focused around the users ability to perform actions or use cases checking if functionality works. An example would be "can the user save the document with changes".
 
 Installation
   

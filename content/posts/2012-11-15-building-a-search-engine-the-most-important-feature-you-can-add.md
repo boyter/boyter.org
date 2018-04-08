@@ -20,7 +20,7 @@ Let me explain. Your current search engine is like a favorite couch. Its comfort
   </p>
   
   <p>
-    NB* Switching to Bing probably isn&#8217;t as painful as sitting in a sadists chair</center>
+    NB* Switching to Bing probably isn't as painful as sitting in a sadists chair</center>
   </p>
   
   <p>
@@ -28,7 +28,7 @@ Let me explain. Your current search engine is like a favorite couch. Its comfort
   </p>
   
   <p>
-    Just recently a new one popped up, <a href="http://www.procog.com/">Procog</a>. I have always had a great deal of respect for Matt Wells (technical guy behind Procog), things like his <a href="http://www.gigablast.com/rants.html">technical rants</a>, this <a href="http://queue.acm.org/detail.cfm?id=988401">technical interview</a> and <a href="http://www.gigablast.com/">Gigablast</a> itself are pretty impressive. I think the results are pretty good (for most of the queries I have tried), and I really like the transparency behind the ranking algorithm. The catch? The same one that gets me nearly *every* time I try a new search engine; any query that dosn&#8217;t give me the results I need. It may be because the engine is lacking or it could be because I don&#8217;t know how to bend it to my will. Either way, it&#8217;s crippling.
+    Just recently a new one popped up, <a href="http://www.procog.com/">Procog</a>. I have always had a great deal of respect for Matt Wells (technical guy behind Procog), things like his <a href="http://www.gigablast.com/rants.html">technical rants</a>, this <a href="http://queue.acm.org/detail.cfm?id=988401">technical interview</a> and <a href="http://www.gigablast.com/">Gigablast</a> itself are pretty impressive. I think the results are pretty good (for most of the queries I have tried), and I really like the transparency behind the ranking algorithm. The catch? The same one that gets me nearly *every* time I try a new search engine; any query that dosn't give me the results I need. It may be because the engine is lacking or it could be because I don't know how to bend it to my will. Either way, it's crippling.
   </p>
   
   <p>
@@ -36,7 +36,7 @@ Let me explain. Your current search engine is like a favorite couch. Its comfort
   </p>
   
   <p>
-    DDG&#8217;s !bang syntax solved this by allowing me to easily redirect my query when I find it lacking. When I think Google might have a result DDG dosn&#8217;t I add !g to confirm. The more I do this and refine my behaviour the more confidence I have in DDG&#8217;s abilities.
+    DDG's !bang syntax solved this by allowing me to easily redirect my query when I find it lacking. When I think Google might have a result DDG dosn't I add !g to confirm. The more I do this and refine my behaviour the more confidence I have in DDG's abilities.
   </p>
   
   <p>
@@ -48,7 +48,7 @@ Let me explain. Your current search engine is like a favorite couch. Its comfort
   </p>
   
   <p>
-    Then do me a favor, while im getting familiar with it&#8217;s quirks, allow me to easily switch to something im comfortable with. I want to like your search engine. I really want to try your search engine. Implement !bang&#8217;s before working on your awesome Google beating algorithms and you will get my attention for at least a week, and if you <a href="http://duckduckgo.com/privacy.html">offer</a> <a href="http://procog.com/help/rank_details">something</a> <a href="http://www.verticalset.com/documentation/index">different</a> you might get it for longer then that.
+    Then do me a favor, while im getting familiar with it's quirks, allow me to easily switch to something im comfortable with. I want to like your search engine. I really want to try your search engine. Implement !bang's before working on your awesome Google beating algorithms and you will get my attention for at least a week, and if you <a href="http://duckduckgo.com/privacy.html">offer</a> <a href="http://procog.com/help/rank_details">something</a> <a href="http://www.verticalset.com/documentation/index">different</a> you might get it for longer then that.
   </p>
 
  [1]: https://duckduckgo.com/bang.html

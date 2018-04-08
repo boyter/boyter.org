@@ -37,7 +37,7 @@ Numerous things are able to be A/B split tested and are limited to what you have
   
 * Testimonials E.G. adding more or less, increasing the length
   
-* Call to Action (text, links, buttons or images) E.G. &#8220;add to cart&#8221; vs &#8220;buy now&#8221;
+* Call to Action (text, links, buttons or images) E.G. "add to cart" vs "buy now"
   
 * Movement of content around the page
   
@@ -45,7 +45,7 @@ Numerous things are able to be A/B split tested and are limited to what you have
 
 Things to keep in mind when A/B testing is that running your tests for a long time can result in SEO penalties from Google and other search engines. Quoted from the [Google Webmaster Central Blog on Website Testing][1],
 
-> &#8220;If we discover a site running an experiment for an unnecessarily long time, we may interpret this as an attempt to deceive search engines and take action accordingly. This is especially true if you’re serving one content variant to a large percentage of your users.&#8221;
+> "If we discover a site running an experiment for an unnecessarily long time, we may interpret this as an attempt to deceive search engines and take action accordingly. This is especially true if you're serving one content variant to a large percentage of your users."
 
 It is highly recommended to read and understand the post mentioned in order to ensure you are following best practices. The consequences can be dire indeed including being black listed by Google and other search engines as the worst possible result.
 
@@ -59,13 +59,13 @@ A few things to keep in mind when doing A/B testing.
   
 * Trust the data over feeling. If the data is telling you that an ugly button works better then your beautiful one either trust the data or run the test again at a later date to confirm. It can be hard to do what feels counter intuitive but you need to remember that humans generally are not rational and will not behave how you expect.
   
-* If a user complains about seeing a different price offer them the better deal. Always respect your users and customers. It builds good will. Another thing to do is avoid split testing paying customers. Adobe Omniture runs a lot of A/B tests in their online product and it drives some customer&#8217;s crazy as everything they need moves around on a regular basis. Just don&#8217;t do it.
+* If a user complains about seeing a different price offer them the better deal. Always respect your users and customers. It builds good will. Another thing to do is avoid split testing paying customers. Adobe Omniture runs a lot of A/B tests in their online product and it drives some customer's crazy as everything they need moves around on a regular basis. Just don't do it.
   
-* Don&#8217;t A/B test multiple things at the same time. If you are doing to A/B test a better design then test the better design against the other one. Don&#8217;t chop and change various parts of the website. It will be confusing.
+* Don't A/B test multiple things at the same time. If you are doing to A/B test a better design then test the better design against the other one. Don't chop and change various parts of the website. It will be confusing.
   
 * Keep trying. Its possible a single test will produce no meaningful results. If so try again. Not only will you get better with experience you are more likely to find the correct things to optimise.
 
-A real genius in this space is [Patrick McKenzie][3] and a few very worthwhile articles to read about it are [A-B Testing Made Me a Small Fortune][4] and [A-B Testing][5]. Other articles worth reading include, [Practical Guide to Controlled Experiments on the Web by Microsoft Research (PDF)][6], [Writing Decisions: Headline Tests on the Highrise Sign-Up Page][7]], [&#8220;You Should Follow Me on Twitter Here&#8221;][8], [How We Increased our Conversion Rate by 72%][9], [Human Photos Double your Conversion Rate][10]
+A real genius in this space is [Patrick McKenzie][3] and a few very worthwhile articles to read about it are [A-B Testing Made Me a Small Fortune][4] and [A-B Testing][5]. Other articles worth reading include, [Practical Guide to Controlled Experiments on the Web by Microsoft Research (PDF)][6], [Writing Decisions: Headline Tests on the Highrise Sign-Up Page][7]], ["You Should Follow Me on Twitter Here"][8], [How We Increased our Conversion Rate by 72%][9], [Human Photos Double your Conversion Rate][10]
 
  [1]: http://googlewebmastercentral.blogspot.in/2012/08/website-testing-google-search.html
  [2]: https://vwo.com/

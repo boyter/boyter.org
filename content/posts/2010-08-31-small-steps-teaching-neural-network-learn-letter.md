@@ -6,7 +6,7 @@ date: 2010-08-31T00:48:14+00:00
 url: /2010/08/small-steps-teaching-neural-network-learn-letter/
 
 ---
-I&#8217;m going to make the assumption that if you are reading this you already know what a NN is, and you are trying to do some sort of image recognition. I&#8217;m also going to assume you are somewhat familiar with programming preferably in Python since that&#8217;s what all the examples will be using.
+I'm going to make the assumption that if you are reading this you already know what a NN is, and you are trying to do some sort of image recognition. I'm also going to assume you are somewhat familiar with programming preferably in Python since that's what all the examples will be using.
 
 **Get the source to everything below in [Step1.zip][1]**
 
@@ -45,7 +45,7 @@ The images we are going to use are the following,
             </p>
             
             <p>
-              The first is the easiest to code so I am going to go with that. The first thing we need is a way to open the image and convert it to a list of data. I am going to just iterate over each row and for each pixel that&#8217;s black add a 1 to a list otherwise a 0. I also added some methods to save and load the network to disk.
+              The first is the easiest to code so I am going to go with that. The first thing we need is a way to open the image and convert it to a list of data. I am going to just iterate over each row and for each pixel that's black add a 1 to a list otherwise a 0. I also added some methods to save and load the network to disk.
             </p>
             
             <p>
@@ -100,10 +100,10 @@ error 0.71834</pre>
             
             <ul>
               <li>
-                Not enough hidden nodes &#8211; So not enough memory to &#8220;learn&#8221; the difference
+                Not enough hidden nodes &#8211; So not enough memory to "learn" the difference
               </li>
               <li>
-                Not enough training time &#8211; Unlikely since the error isn&#8217;t decreasing
+                Not enough training time &#8211; Unlikely since the error isn't decreasing
               </li>
               <li>
                 Not enough inputs &#8211; Unlikely since we have 400 inputs but is possible
@@ -131,7 +131,7 @@ error 0.00006</pre>
             </p>
             
             <p>
-              We can test this pretty easily with the following test script which uses unit tests to ensure we don&#8217;t break the network in the future
+              We can test this pretty easily with the following test script which uses unit tests to ensure we don't break the network in the future
             </p>
             
             <pre>

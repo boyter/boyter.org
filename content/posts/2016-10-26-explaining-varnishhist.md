@@ -46,8 +46,8 @@ The times on the X-axis are as such,
 Below is the varnishhist for searchcode.com showing that while most responses are served in about 100ms not many are cached. This can mean one of a few things.
 
   * The responses are not cache-able and you need to adjust the back-end responses to have the correct headers (or override the settings with VCL config).
-  * The cache timeout for the back-end responses isn&#8217;t high enough to ensure that later requests are served from cache.
-  * There isn&#8217;t a large enough cache to hold all the responses (that&#8217;s the problem in this case).
+  * The cache timeout for the back-end responses isn't high enough to ensure that later requests are served from cache.
+  * There isn't a large enough cache to hold all the responses (that's the problem in this case).
 
 <pre>1:20, n = 2000
 

@@ -13,4 +13,4 @@ Without adding a git commit hook I wanted to be able to check if my Python code 
 
 `git status -s -u | grep '\.py$' | awk '{split($0,a," "); print a[2]}' | xargs pep8`
 
-Just run the above in your projects directory. It&#8217;s fairly simple but quite effective at ensuring your Python code becomes cleaner ever time you commit to the repository. The nice thing about it is that it only checks files you have modified, allowing you to slowly clean up existing code bases.
+Just run the above in your projects directory. It's fairly simple but quite effective at ensuring your Python code becomes cleaner ever time you commit to the repository. The nice thing about it is that it only checks files you have modified, allowing you to slowly clean up existing code bases.

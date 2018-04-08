@@ -18,11 +18,11 @@ categories:
 ---
 I am going to copy the searchcode pitch itself below quickly before explaining it a bit further.
 
-&#8220;searchcode offers powerful code search over billions of lines of open source code. Imagine what it could do with your private repositories.
+"searchcode offers powerful code search over billions of lines of open source code. Imagine what it could do with your private repositories.
 
 There have been requests to offer a downloadable version of searchcode. Given enough interest a downloadable hostable version of searchcode will be offered. Register your email below to register your interest.
 
-Note that there would be a free Community version available for all users as well as paid version offering support. Functionality would remain the same across all versions. This would be similar to how [Octopus Deploy][1] is offered.&#8221;
+Note that there would be a free Community version available for all users as well as paid version offering support. Functionality would remain the same across all versions. This would be similar to how [Octopus Deploy][1] is offered."
 
 In short I am considering writing a hostable version of searchcode. Most likely it would consist of a Java application one could download and use to get similar results to searchcode.com itself (probably at smaller scale however).
 

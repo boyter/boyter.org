@@ -23,7 +23,7 @@ _What is Chaos Testing?_
 
 First coined by the afore-mentioned Netflix blog post, chaos engineering takes the approach that regardless how encompassing your test suite is, once your code is running on enough machines and reaches enough complexity errors are going to happen. Since failure is unavoidable, why not deliberately introduce it to ensure your systems and processes can deal with the failure?
 
-To accomplish this, Netflix created the Netflix Simian Army, which consists of a series of tools known as &#8220;monkeys&#8221; (AKA Chaos Monkey&#8217;s) that deliberately inject failure into their services and systems. Microsoft adopted a similar approach by creating their own monkey&#8217;s which were able to inject faults into their test environments.
+To accomplish this, Netflix created the Netflix Simian Army, which consists of a series of tools known as "monkeys" (AKA Chaos Monkey's) that deliberately inject failure into their services and systems. Microsoft adopted a similar approach by creating their own monkey's which were able to inject faults into their test environments.
 
 _What are the advantages of Chaos Testing?_
 
@@ -39,13 +39,13 @@ _Should I be Chaos Testing?_
 
 This really depends on what your tolerances for failure are and based on the likelihood of them happening. If you are writing desktop software chaos testing is unlikely to yield any value. Much the same applies if you are running a financial system where failures are acceptable so long as everything reconciles at the end of the day.
 
-If however you are running large distributed systems using cloud computing (think 50 or more instances) with a variety of services and process&#8217;s designed to scale up and out injecting some chaos will potentially be very valuable.
+If however you are running large distributed systems using cloud computing (think 50 or more instances) with a variety of services and process's designed to scale up and out injecting some chaos will potentially be very valuable.
 
 _How to start Chaos Testing?_
 
-Thankfully with cloud computing and the API&#8217;s provided it can be relatively easy to begin chaos testing. These tools by allowing you to control the infrastructure through code allow the replication of many errors not easily reproducible when running bare hardware. This does not mean that bare hardware systems cannot perform chaos testing, just that some classes of errors will be harder to reproduce.
+Thankfully with cloud computing and the API's provided it can be relatively easy to begin chaos testing. These tools by allowing you to control the infrastructure through code allow the replication of many errors not easily reproducible when running bare hardware. This does not mean that bare hardware systems cannot perform chaos testing, just that some classes of errors will be harder to reproduce.
 
-Lets start by looking at the way Microsoft and Netflix classify their &#8220;monkey&#8217;s&#8221;.
+Lets start by looking at the way Microsoft and Netflix classify their "monkey's".
 
 **_Low chaos_**
   
@@ -63,7 +63,7 @@ Are failures that are more catastrophic and will interrupt service availability.
   
 Are operations that are failures which cause ungraceful degradation of the service, result in data loss, or that simply fail silently without raising alerts.
 
-Microsoft found that by setting up a testing environment and letting the monkey&#8217;s loose that they were able to identify a variety of issues with provisioning instances and services as well as scaling them to suit. They also split the environments into periods of chaos where the monkey&#8217;s ran and dormant periods where they did not. Errors found in dormant periods were considered bugs, and flagged to be investigated and fixed. During chaos periods any low issues were also considered bugs and scheduled to be investigated and fixed. Medium issues raised low priority issues to on call staff to investigate along with high level issues. Extreme operations once identified were not run again until a fix had been introduced.
+Microsoft found that by setting up a testing environment and letting the monkey's loose that they were able to identify a variety of issues with provisioning instances and services as well as scaling them to suit. They also split the environments into periods of chaos where the monkey's ran and dormant periods where they did not. Errors found in dormant periods were considered bugs, and flagged to be investigated and fixed. During chaos periods any low issues were also considered bugs and scheduled to be investigated and fixed. Medium issues raised low priority issues to on call staff to investigate along with high level issues. Extreme operations once identified were not run again until a fix had been introduced.
 
 The process for fixing issues identified through this process was the following,
 
@@ -74,15 +74,15 @@ The process for fixing issues identified through this process was the following,
 
 Once done the monkey created through the automation step could be added the the regular suite of tests ensuring that whatever issue was identified would not occur again.
 
-Netflix uses a similar method for fixing issues, but by contrast runs their monkey&#8217;s in their live environments rather then in a pure testing environment. They also released some information on some of the monkey&#8217;s they used to introduce failures.
+Netflix uses a similar method for fixing issues, but by contrast runs their monkey's in their live environments rather then in a pure testing environment. They also released some information on some of the monkey's they used to introduce failures.
 
 **_Latency Monkey_**
   
-Induces artificial delays into the client-server communication layer to simulate service degradation and determine how consumers respond in this situation. By making very large delays they are able to simulate a node or even an entire service downtime. This can be useful as bringing an entire instance down can be problematic when an instance hosts multiple services and when it is not possible to do so through API&#8217;s.
+Induces artificial delays into the client-server communication layer to simulate service degradation and determine how consumers respond in this situation. By making very large delays they are able to simulate a node or even an entire service downtime. This can be useful as bringing an entire instance down can be problematic when an instance hosts multiple services and when it is not possible to do so through API's.
 
 **_Conformity Monkey / Security Monkey_**
   
-Finds instances that don’t adhere to best-practices and shuts them down. Examples for this would be checking that instances in AWS are launched into permission limited roles and if they are not shutting them down. This forces the owner of the instance to investigate and fix issues. Security monkey as an extension that performs SSL certificate validation / expiry and other security best practice checks.
+Finds instances that don't adhere to best-practices and shuts them down. Examples for this would be checking that instances in AWS are launched into permission limited roles and if they are not shutting them down. This forces the owner of the instance to investigate and fix issues. Security monkey as an extension that performs SSL certificate validation / expiry and other security best practice checks.
 
 **_Doctor Monkey_**
   

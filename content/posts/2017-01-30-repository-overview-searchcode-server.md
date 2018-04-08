@@ -26,9 +26,9 @@ Below is the what has been added into searchcode server.
 
 The most interesting part of the above in my opinion is the overview blurb. It attempts to summarise all of the figures below and let anyone know in plain english where the repository stands.
 
-An example for searchcode server&#8217;s code itself,
+An example for searchcode server's code itself,
 
-_&#8220;In this repository 2 committers have contributed to 228 files. The most important languages in this repository are Java, CSS and Freemarker Template. The project has a low bus factor of 2 and will be in trouble if Ben Boyter is hit by a bus. The average person who commits this project has ownership of 50% of files. The project relies on the following people; Ben Boyter, =.&#8221;_
+_"In this repository 2 committers have contributed to 228 files. The most important languages in this repository are Java, CSS and Freemarker Template. The project has a low bus factor of 2 and will be in trouble if Ben Boyter is hit by a bus. The average person who commits this project has ownership of 50% of files. The project relies on the following people; Ben Boyter, =."_
 
 Certainly there is room for improvement on this page and I am hoping to add what I am calling signals logic to it. This would involve scanning the code to determine what languages, features and libraries are being used and add those to the report. The end goal would be to find for instance C# code using MySQL and ReactJS.
 

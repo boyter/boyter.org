@@ -1,5 +1,5 @@
 ---
-title: Decoding Captcha’s Presentation
+title: Decoding Captcha's Presentation
 author: Ben E. Boyter
 type: post
 date: 2015-03-08T20:41:13+00:00

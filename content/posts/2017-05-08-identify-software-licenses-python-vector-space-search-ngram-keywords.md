@@ -25,13 +25,13 @@ One of the tickets raised for searchcode server is the ability to to filter by l
 
 This means that ideally all I want is a script that given a projects directory and a filename can tell me what licenses it is likely to be under. I can then port that over to searchcode-server and its Java codebase at my leisure.
 
-My first thought was that adding it for say the top 20 most popular licenses shouldn&#8217;t be too difficult, and its something that I could always expand on later if things are working well.
+My first thought was that adding it for say the top 20 most popular licenses shouldn't be too difficult, and its something that I could always expand on later if things are working well.
 
 As such the first thing I needed was to determine the top software licenses in use which thankfully Blackduck Software has already done <https://www.blackducksoftware.com/top-open-source-licenses>
 
 Then I needed to get a copy of them and in a nice format such as JSON to allow for processing. I decided to source them from SPDX.org since generally they should be considered the source of truth for license information. <https://spdx.org/licenses/>
 
-I then wrote a simple script [download.py][2] to pull all the licenses down (yes using regex to pull information out of HTML which is BAD but I am not trying to parse it so I am [pretty sure he won&#8217;t come][3]) locally and allow for further processing. Sorry SPDX people about crawling your site in a non robots compliant way. I did try to get what I needed and cache it locally so I suspect I impacted the site less than Googlebot would have.
+I then wrote a simple script [download.py][2] to pull all the licenses down (yes using regex to pull information out of HTML which is BAD but I am not trying to parse it so I am [pretty sure he won't come][3]) locally and allow for further processing. Sorry SPDX people about crawling your site in a non robots compliant way. I did try to get what I needed and cache it locally so I suspect I impacted the site less than Googlebot would have.
 
 I also added a simple filter to pull back the top 20+ licences that we previously identified so we can test things out.
 
@@ -50,9 +50,9 @@ To start with I made the following assumptions.
 
 A file with a name such as LICENSE or COPYING is likely to exist in the root folder of any project and contain license information. If not have a look inside the readme (if it exists). This file if found and it has a license that we can identify then it becomes the base license for all files inside the project. However files inside the project itself may have a header which must also be considered.
 
-One thing that I didn&#8217;t consider at first is that there may be another license/copying file somewhere deeper inside the file tree. Something to consider for later.
+One thing that I didn't consider at first is that there may be another license/copying file somewhere deeper inside the file tree. Something to consider for later.
 
-First thought was to just use the vector space search algorithm. It really is my hammer for every problem. It works reasonably well for a lot of them, is fast enough in most cases and generally gets the job done. Thankfully I had already written [one for Python][5] a while ago. Don&#8217;t hate please, I wrote this 10 years ago when I was first learning it and yes its not Pythonic but works. One thing to note is that licenses tend to be of different length. This means that licenses that are closer to each other in length will be matched more closely using the vector space which is a cool side effect of how it works.
+First thought was to just use the vector space search algorithm. It really is my hammer for every problem. It works reasonably well for a lot of them, is fast enough in most cases and generally gets the job done. Thankfully I had already written [one for Python][5] a while ago. Don't hate please, I wrote this 10 years ago when I was first learning it and yes its not Pythonic but works. One thing to note is that licenses tend to be of different length. This means that licenses that are closer to each other in length will be matched more closely using the vector space which is a cool side effect of how it works.
 
 So the algorithm is,
 
@@ -84,7 +84,7 @@ Against [wordpress][8],
     0.601642491832 GNU Library General Public License v2 only
     
 
-While it did pick up that its probably using GNU GPL v2.0 but it wasn&#8217;t as confident as it was with the previous. Lets try another one.
+While it did pick up that its probably using GNU GPL v2.0 but it wasn't as confident as it was with the previous. Lets try another one.
 
 Against [minitwit][9] (a Spark Java example project)
 
@@ -133,7 +133,7 @@ and buried in the middle of the JSON license
 
     The Software shall be used for Good, not Evil.
 
-Hah! I remember reading about that a while ago. Something about Google not being able to use it because apparently their motto &#8220;Don&#8217;t be evil&#8221; is more a guideline then a rule. In all seriousness though its actually due to the license being classified as a non-free license because it imposes conditions which restrict the usage see <https://www.cnet.com/news/dont-be-evil-google-spurns-no-evil-software/> for more details.
+Hah! I remember reading about that a while ago. Something about Google not being able to use it because apparently their motto "Don't be evil" is more a guideline then a rule. In all seriousness though its actually due to the license being classified as a non-free license because it imposes conditions which restrict the usage see <https://www.cnet.com/news/dont-be-evil-google-spurns-no-evil-software/> for more details.
 
 So what we would normally do about now is add keyword weighting to the terms so that in this case MIT makes it rank higher for MIT and JSON for JSON. In fact I started doing just that with keyword it then realised with 328 licenses this is going to be a painful process. Perhaps there is a better way.
 
@@ -158,7 +158,7 @@ Thankfully this is pretty easy to do in Python so I borrowed an existing bit of 
 def find_ngrams(input_list, n):
   return zip(*[input_list[i:] for i in range(n)])</pre>
 
-For the record I am totally aware that NTLK can also do this but since I don&#8217;t currently have that installed lets go pure Python. It will be a little slower but considering this should rarely run this calculation I am not too worried about performance yet. Of course thats a good idea to live by anyway. Only worry about performance when it becomes an issue.
+For the record I am totally aware that NTLK can also do this but since I don't currently have that installed lets go pure Python. It will be a little slower but considering this should rarely run this calculation I am not too worried about performance yet. Of course thats a good idea to live by anyway. Only worry about performance when it becomes an issue.
 
 We can then generate ngrams for each license, then check for its uniqueness in every other one. If no matches found then woohoo we have a gram that uniquely matches the license.
 
@@ -181,9 +181,9 @@ AGPL-1.0 2212
 
 For the BSD Zero Clause License there are apparently 188 unique ngrams between a length of 2-10 words in it. For the Affero General Public License v1.0 there are a whopping 2212! The numbers were so high that I changed the ngrams to start at 5 to 10. This dropped the numbers found by about 25% which seems about right as you would expect the most unique combinations of words to exist at the upper range of ngrams.
 
-One problem I noticed with this is that a lot of the ngrams are based on names that exist within the sample licenses that SPDX has. For example BSD Zero Clause has the name &#8220;Rob Landley&#8221; which produces a lot of ngrams with this name in it as is indeed unique, but is useless unless we happen to be checking code that Rob has written.
+One problem I noticed with this is that a lot of the ngrams are based on names that exist within the sample licenses that SPDX has. For example BSD Zero Clause has the name "Rob Landley" which produces a lot of ngrams with this name in it as is indeed unique, but is useless unless we happen to be checking code that Rob has written.
 
-However the performance issue that I was worried about before popped up. it was taking a long time to process. Not surprising considering the actual implementation consists of multiple nested loops. With the encouraging result that there is a lot of uniqueness for most licenses I tried just searching for ngrams of 4-5 words long to speed things up. Assuming we didn&#8217;t find 0 matches then happy days we can try implementing using what we have and everything should be fine. A few small tweaks later and I ran it again.
+However the performance issue that I was worried about before popped up. it was taking a long time to process. Not surprising considering the actual implementation consists of multiple nested loops. With the encouraging result that there is a lot of uniqueness for most licenses I tried just searching for ngrams of 4-5 words long to speed things up. Assuming we didn't find 0 matches then happy days we can try implementing using what we have and everything should be fine. A few small tweaks later and I ran it again.
 
 Doh! As it turns out some are not unique enough. The culprits,
 
@@ -239,9 +239,9 @@ COPYING.RUNTIME GPL-2.0
 COPYING3 GPL-3.0
 COPYING3.LIB GPL-3.0</pre>
 
-Which is correct. In fact further tests on various other repositories worked until I hit the react-armory which is under the BSD Clear License. Turns out most of the ngrams generated for it actually involve the project name meaning they are useless. Annoyingly the ngram of length 3 &#8220;BSD Clear License&#8221; which is unique was missed because the parser was set to look from 7-8 ngrams. Urgh.
+Which is correct. In fact further tests on various other repositories worked until I hit the react-armory which is under the BSD Clear License. Turns out most of the ngrams generated for it actually involve the project name meaning they are useless. Annoyingly the ngram of length 3 "BSD Clear License" which is unique was missed because the parser was set to look from 7-8 ngrams. Urgh.
 
-Thinking about this for a bit, it totally makes sense to look for ngrams from 2-8 even when we are truncating to the top 50. The smaller ones are going to be high value ones usually and there shouldn&#8217;t be too many of them. The only problem is the increased processing time to walk all of the combinations of things like [&#8216;the&#8217;, &#8216;license&#8217;] and the like. At the very least we should include trigrams (3 length ngrams) since it solves this specific issue and should work to be unique for a lot of licenses. Modifying the parse2.py script to take in a range of numbers defined was easy enough then just let it run and produce the new database to work with and try everything again. It took longer than before but not so much that it was annoying.
+Thinking about this for a bit, it totally makes sense to look for ngrams from 2-8 even when we are truncating to the top 50. The smaller ones are going to be high value ones usually and there shouldn't be too many of them. The only problem is the increased processing time to walk all of the combinations of things like [&#8216;the', &#8216;license'] and the like. At the very least we should include trigrams (3 length ngrams) since it solves this specific issue and should work to be unique for a lot of licenses. Modifying the parse2.py script to take in a range of numbers defined was easy enough then just let it run and produce the new database to work with and try everything again. It took longer than before but not so much that it was annoying.
 
 Due to how painful this was getting to test manually I started to build a small test harness ([test_attempt2.py][13]) which I could eyeball to see if I was getting closer to a result I wanted without regressions. Thankfully it was working perfectly for the tests I was trying.
 
@@ -386,13 +386,13 @@ Looking at the SPDX specification the rule is to define them as being under all.
 > 
 > _Multiple licenses can be represented using a SPDX license expression as defined in Appendix IV. A set of licenses must be enclosed in parentheses (this is a convention for SPDX expressions). As further described there:_
 > 
-> _When there is a choice between licenses (&#8220;disjunctive license&#8221;), they should be separated with &#8220;OR&#8221;. If presented with a choice between two or more licenses, use the disjunctive binary &#8220;OR&#8221; operator to construct a new license expression._
+> _When there is a choice between licenses ("disjunctive license"), they should be separated with "OR". If presented with a choice between two or more licenses, use the disjunctive binary "OR" operator to construct a new license expression._
   
->  _Similarly when multiple licenses need to be simultaneously applied (&#8220;conjunctive license&#8221;), they should be separated with &#8220;AND&#8221;. If required to simultaneously comply with two or more licenses, use the conjunctive binary &#8220;AND&#8221; operator to construct a new license expression._
+>  _Similarly when multiple licenses need to be simultaneously applied ("conjunctive license"), they should be separated with "AND". If required to simultaneously comply with two or more licenses, use the conjunctive binary "AND" operator to construct a new license expression._
   
->  _In some cases, a set of license terms apply except under special circumstances, in this case, use the &#8220;WITH&#8221; operator followed by one of the recognized exception identifiers._
+>  _In some cases, a set of license terms apply except under special circumstances, in this case, use the "WITH" operator followed by one of the recognized exception identifiers._
   
->  _Sometimes a set of license terms apply except under special circumstances. In this case, use the binary &#8220;WITH&#8221; operator to construct a new license expression to represent the special exception situation._
+>  _Sometimes a set of license terms apply except under special circumstances. In this case, use the binary "WITH" operator to construct a new license expression to represent the special exception situation._
   
 >  _Examples:_
 > 

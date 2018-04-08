@@ -22,7 +22,7 @@ I have mentioned this before somewhere but one of the first things I usually att
 
 You can see my previous implementation in [Python in a previous post][1].
 
-Anyway I have been playing with Go recently. After skimming though the tutorials I thought I would give my standard test the vector space a go. The below is my implementation. It&#8217;s probably full of bugs and various other issues but seems to work alright for the few tests I tried.
+Anyway I have been playing with Go recently. After skimming though the tutorials I thought I would give my standard test the vector space a go. The below is my implementation. It's probably full of bugs and various other issues but seems to work alright for the few tests I tried.
 
 <pre>package main
 

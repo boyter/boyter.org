@@ -1,5 +1,5 @@
 ---
-title: Issues with Google’s Bug Prediction Algorithm
+title: Issues with Google's Bug Prediction Algorithm
 author: Ben E. Boyter
 type: post
 date: 2015-07-08T07:58:57+00:00
@@ -26,15 +26,15 @@ Issues with bug prediction
 
 Since that time the topic has been reposted a few times and we have since discovered that the system has been discontinued at Google. Thankfully the author of the original post was able to respond and has given one of the [main reasons why it was discontinued][2].
 
-> TL;DR is that developers just didn&#8217;t find it useful. Sometimes they knew the code was a hot spot, sometimes they didn&#8217;t. But knowing that the code was a hot spot didn&#8217;t provide them with any means of effecting change for the better. Imagine a compiler that just said &#8220;Hey, I think this code you just wrote is probably buggy&#8221; but then didn&#8217;t tell you where, and even if you knew and fixed it, would still say it due to the fact it was maybe buggy recently. That&#8217;s what TWR essentially does. That became understandably frustrating, and we have many other signals that developers can act on (e.g. FindBugs), and we risked drowning out those useful signals with this one.
+> TL;DR is that developers just didn't find it useful. Sometimes they knew the code was a hot spot, sometimes they didn't. But knowing that the code was a hot spot didn't provide them with any means of effecting change for the better. Imagine a compiler that just said "Hey, I think this code you just wrote is probably buggy" but then didn't tell you where, and even if you knew and fixed it, would still say it due to the fact it was maybe buggy recently. That's what TWR essentially does. That became understandably frustrating, and we have many other signals that developers can act on (e.g. FindBugs), and we risked drowning out those useful signals with this one.
 > 
 > Some teams did find it useful for getting individual team reports so they could focus on places for refactoring efforts, but from a global perspective, it just seemed to frustrate, so it was turned down.
 > 
-> From an academic perspective, I consider the paper one of my most impactful contributions, because it highlights to the bug prediction community some harsh realities that need to be overcome for bug prediction to be useful to humans. So I think the whole project was quite successful&#8230; Note that the Rahman algorithm that TWR was based on did pretty well in developer reviews at finding bad code, so it&#8217;s possible it could be used for automated tools effectively, e.g. test case prioritization so you can find failures earlier in the test suite. I think automated uses are probably the most fruitful area for bug prediction efforts to focus on in the near-to-mid future.
+> From an academic perspective, I consider the paper one of my most impactful contributions, because it highlights to the bug prediction community some harsh realities that need to be overcome for bug prediction to be useful to humans. So I think the whole project was quite successful&#8230; Note that the Rahman algorithm that TWR was based on did pretty well in developer reviews at finding bad code, so it's possible it could be used for automated tools effectively, e.g. test case prioritization so you can find failures earlier in the test suite. I think automated uses are probably the most fruitful area for bug prediction efforts to focus on in the near-to-mid future.
 
 Another paper released which analyses the results of the Google bug predictor can be found [Does Bug Prediction Support Human Developers? Findings From a Google Case Study (PDF)][3].
 
-Another interesting thought is that the system requires a reasonably amount of code comment discipline. Some people and teams use bug fix commit&#8217;s to resolve feature requests. The result is that this system would mark actively developed code as being a bug hot spot. In this case being a poorly organised team or individual would not see their code appear. This is especially problematic where performance is being measured against these sort of metrics.
+Another interesting thought is that the system requires a reasonably amount of code comment discipline. Some people and teams use bug fix commit's to resolve feature requests. The result is that this system would mark actively developed code as being a bug hot spot. In this case being a poorly organised team or individual would not see their code appear. This is especially problematic where performance is being measured against these sort of metrics.
 
 If you are interested in trying this yourself there are some open source implementations of the algorithms presented in the Google Paper. See [bugspots in github][4] as an example of one which will work against any git repository.
 

@@ -1,5 +1,5 @@
 ---
-title: A Collection of O’rly book Covers
+title: A Collection of O'rly book Covers
 author: Ben E. Boyter
 type: post
 date: 2016-04-22T00:48:41+00:00
@@ -18,7 +18,7 @@ categories:
 ---
 A quick collection of all the fake Orly book covers I find around on the internet.
 
-I am seriously considering writing content for the &#8220;Expert Excuses for Not Writing Unit Tests&#8221; one.
+I am seriously considering writing content for the "Expert Excuses for Not Writing Unit Tests" one.
 
 [<img class="alignnone size-full wp-image-1200" src="http://www.boyter.org/wp-content/uploads/2016/06/Cj0Up_hUUAAn8-g.jpg" alt="Cj0Up_hUUAAn8-g" width="500" height="700" srcset="http://localhost/boyter.org/wp-content/uploads/2016/06/Cj0Up_hUUAAn8-g.jpg 500w, http://localhost/boyter.org/wp-content/uploads/2016/06/Cj0Up_hUUAAn8-g-214x300.jpg 214w" sizes="(max-width: 500px) 100vw, 500px" />][1]
   

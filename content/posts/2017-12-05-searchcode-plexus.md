@@ -17,7 +17,7 @@ categories:
   - searchcode
 
 ---
-### Plexus &#8220;A combination of interlaced parts; a network.&#8221;
+### Plexus "A combination of interlaced parts; a network."
 
 For a while I have been neglecting searchcode.com while working on searchcode server. This is of course not an ideal situation and as such I have started working on it again. The following is just a brief list of things I am considering, problems, issues etc&#8230;
 
@@ -31,7 +31,7 @@ Take for example the indexing pipeline.
 
 In searchcode.com the indexing pipeline is a bunch of cobbled together scripts of Python that do some analysis on code but mostly call out to external programs such as cloc and sloccount to determine what language is being used and to get other information. The current pointer to a repository is kept in the database and incremented every time the job is run so it picks up the next repository. There are a few of instances of the programming running and it runs constantly in the background on the lowest nice value.
 
-By contrast searchcode server works around background jobs. There are multiple jobs that perform different tasks. One fires off every 10 minutes adding repositories to be indexed. Another picks up the repositories, checks it out and processes it before putting the resulting files on a queue. Another picks up items from that queue and then indexes them. They run on low thread priority with checks to ensure that they don&#8217;t impact search performance.
+By contrast searchcode server works around background jobs. There are multiple jobs that perform different tasks. One fires off every 10 minutes adding repositories to be indexed. Another picks up the repositories, checks it out and processes it before putting the resulting files on a queue. Another picks up items from that queue and then indexes them. They run on low thread priority with checks to ensure that they don't impact search performance.
 
 To move from the former to the latter requires effectivly a rewrite. This is because on searchcode.com the code is stored in a central database whereas searchcode server keeps a local copy at all times. Also searchcode server performs all the code analysis itself using its own database of languages and other tricks.
 

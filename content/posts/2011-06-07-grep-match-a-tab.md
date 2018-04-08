@@ -12,6 +12,6 @@ Ever wanted to match a tab while using grep for some reason? The trick (under ba
 
 <pre>$ cat file_to_grep.txt | grep "^log    "</pre>
 
-I was trying to match a file for the exact match of log and then a tab. Without the tab I ended up getting back a bunch of junk results like &#8220;logger&#8221; &#8220;logging&#8221; &#8220;login&#8221; etc&#8230;
+I was trying to match a file for the exact match of log and then a tab. Without the tab I ended up getting back a bunch of junk results like "logger" "logging" "login" etc&#8230;
 
 The above gives me what I want although I suspect there is a better way to do this. I did look into using [[:space:]] but it matches spaces as well which ended up in my case not being accurate enough.

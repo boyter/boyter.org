@@ -18,9 +18,10 @@ categories:
   - Tip
 
 ---
-Another one of those things I need to look up every now and then. Below is a snippet of how to encrypt and decrypt a string using Python and KMS in AWS. The interesting thing is that you don&#8217;t need to supply the KMS key alias in the decryption portion. So long as whatever role or key you are using can access the key it should work. For the encryption you can either supply the full ARN of the key or the alias so long as you prefix it with alias/
+Another one of those things I need to look up every now and then. Below is a snippet of how to encrypt and decrypt a string using Python and KMS in AWS. The interesting thing is that you don't need to supply the KMS key alias in the decryption portion. So long as whatever role or key you are using can access the key it should work. For the encryption you can either supply the full ARN of the key or the alias so long as you prefix it with alias/
 
-<pre>import base64
+{{<highlight python>}}
+import base64
 import boto3
 
 
@@ -44,4 +45,4 @@ def decrypt(session, secret):
 session = boto3.session.Session()
 print encrypt(session, 'something', 'alias/MyKeyAlias')
 print decrypt(session, 'AQECAINdoimaasydoasidDASD5asd45')
-</pre>
+{{</highlight>}}

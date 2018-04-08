@@ -8,7 +8,7 @@ categories:
   - CAPTCHA
 
 ---
-I was looking for this on Google the other day and unable to find it. Essentially what I needed was a collection of images which are all the same size, but of different fonts so that I use them for training Neural Networks and test other OCR techniques. Since I couldn&#8217;t find any I thought I would upload my own collection.
+I was looking for this on Google the other day and unable to find it. Essentially what I needed was a collection of images which are all the same size, but of different fonts so that I use them for training Neural Networks and test other OCR techniques. Since I couldn't find any I thought I would upload my own collection.
 
 I used the below images when working on my thesis. From memory over 20 different fonts and sizes were used to create about 200 examples of each letter. The full data set proved to be pretty accurate when it came to recognizing most examples of text I found on the web.
 

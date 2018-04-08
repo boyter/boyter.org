@@ -10,7 +10,7 @@ categories:
 ---
 As a fan of unit tests for bug checking and development (where applicable) I always have a doubt that even though my tests pass they might not be written correctly. This is especially true where you write the tests after development rather then following TDD.
 
-Regardless you can still stress your code by doing some mutation testing. It&#8217;s essentially a way of testing your tests. Quite a few mutation testing frameworks are out there such as Heckle, Insure++, Nester etc.. but I was looking for one for my Python and PHP code that goes into making searchco.de
+Regardless you can still stress your code by doing some mutation testing. It's essentially a way of testing your tests. Quite a few mutation testing frameworks are out there such as Heckle, Insure++, Nester etc.. but I was looking for one for my Python and PHP code that goes into making searchco.de
 
 Unable to find one that met my requirements (or worked at all) I wrote the below github version in 10 mins or so. Rather then fiddling with opcode (like the previously mentioned versions) it applies the changes to the source files themselves. Because of this you should sure what you have has a backup somewhere before running it. I have tested it against a few languages (PHP, C#, JavaScript) and the results show my tests failing as expected so I am pretty happy with the outcome.
 

@@ -36,7 +36,7 @@ Conclusions
 
 It really depends on your environment and how much you are using the agents. I think the following guidelines apply fairly well though.
 
-* For any test agents running Windows you want the minimum of a t2.medium on AWS or the equivalent with 2 CPU&#8217;s and 4 gig of RAM.
+* For any test agents running Windows you want the minimum of a t2.medium on AWS or the equivalent with 2 CPU's and 4 gig of RAM.
   
 * Test agents running Linux want to be the minimum of a t2.small on AWS or the equivalent with a single CPU and 2 gig of RAM.
   

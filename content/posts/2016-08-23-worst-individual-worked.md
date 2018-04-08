@@ -23,7 +23,7 @@ Not actually a programmer. The guy was hired to be a project manager.
 
 After joining things were as expected but after a few weeks we noticed that he was rarely around after lunch and never around after lunch on a Friday.
 
-We would email him at those times deliberately to catch him out and I recall starting to put sticky notes on his laptop &#8220;Came to see you a X time&#8221;. He would come back and just dump all the notes in the rubbish and claim he never got them. He would often claim to be working from home, despite his laptop being on his desk and usually closed. He would also never responding during those times to email or IM.
+We would email him at those times deliberately to catch him out and I recall starting to put sticky notes on his laptop "Came to see you a X time". He would come back and just dump all the notes in the rubbish and claim he never got them. He would often claim to be working from home, despite his laptop being on his desk and usually closed. He would also never responding during those times to email or IM.
 
 A classic seagull manager he would appear when something went wrong, making a lot of noise, writing a lot of emails and then vanishing. He would also be sure to be seen when something was delivered often staying back late on those times.
 

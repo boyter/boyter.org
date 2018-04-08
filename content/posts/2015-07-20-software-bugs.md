@@ -17,7 +17,7 @@ categories:
   - Unit Testing
 
 ---
-&#8220;Why does all software contain bugs?&#8221; this was a question recently asked of me. My response at the time was because all software is not perfect, but is this true?
+"Why does all software contain bugs?" this was a question recently asked of me. My response at the time was because all software is not perfect, but is this true?
 
 Lets take a very simple example.
 
@@ -29,9 +29,9 @@ Lets take a very simple example.
         }
     
 
-The above example is arguably the simplest program that can be written using Java. It also happens to be the first program usually written by any Java programmer. It simply print outs the text &#8220;Hello World!&#8221; when it is run. Surely this program is so simple that it is perfect and therefore bug free?
+The above example is arguably the simplest program that can be written using Java. It also happens to be the first program usually written by any Java programmer. It simply print outs the text "Hello World!" when it is run. Surely this program is so simple that it is perfect and therefore bug free?
 
-Ignoring the obvious that this program does nothing useful, lets assume for the moment that we have been tasked to write a &#8220;Hello World!&#8221; program in Java. Surely the above is 100% bug free.
+Ignoring the obvious that this program does nothing useful, lets assume for the moment that we have been tasked to write a "Hello World!" program in Java. Surely the above is 100% bug free.
 
 Yes. The application is 100% bug free. But thats not the whole story. What happens when this application run?
 
@@ -41,7 +41,7 @@ The Java Virtual Machine or JVM is itself a compiled program running on a device
 
 However underneath the JVM is usually the Operating System. This hands out resources to the programs that are running. So the JVM runs inside the operating system and the operating system talks to the physical hardware.
 
-Actually while the operating system does talk to the hardware directly there is usually software inside the hardware itself which controls the actual hardware these days. Not only does the hardware contain software the hardware itself such as a CPU is literally software turned into hardware. This means CPU&#8217;s and the like can also contain bugs.
+Actually while the operating system does talk to the hardware directly there is usually software inside the hardware itself which controls the actual hardware these days. Not only does the hardware contain software the hardware itself such as a CPU is literally software turned into hardware. This means CPU's and the like can also contain bugs.
 
 This means in order for your perfect application to run perfectly the following pieces of software also need to run perfectly,
 
@@ -49,8 +49,8 @@ This means in order for your perfect application to run perfectly the following 
         Your Program -> Java Compiler -> JVM -> JVM Compiler -> Operating System -> Operating System Compiler -> Hardware Software -> Hardware Software Compiler -> Hardware Itself
     
 
-As you can see it really is an iceberg with your perfect program at the top and lot of things going on underneath. Any bug in any level can result in &#8220;perfect&#8221; software not working as expected making it flawed.
+As you can see it really is an iceberg with your perfect program at the top and lot of things going on underneath. Any bug in any level can result in "perfect" software not working as expected making it flawed.
 
-This is why perfect software does not currently exist. The only way to do so would to be by writing perfect software at every level which is a monumental undertaking. There are estimates around that suggest that the cost to rewrite the Linux kernel as being around 500 billion dollars, and thats not really accounting for making it &#8220;perfect&#8221;, and as shown is literally one small piece of the puzzle.
+This is why perfect software does not currently exist. The only way to do so would to be by writing perfect software at every level which is a monumental undertaking. There are estimates around that suggest that the cost to rewrite the Linux kernel as being around 500 billion dollars, and thats not really accounting for making it "perfect", and as shown is literally one small piece of the puzzle.
 
 So should we just give in? Well no. At every level there are thousands of testers and processes designed to make the software as bug free as possible. Just because we cannot reach perfection does not mean it is not at least worth trying.

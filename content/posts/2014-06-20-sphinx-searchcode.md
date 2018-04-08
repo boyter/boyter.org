@@ -13,9 +13,9 @@ There is a rather nice blog post on the Sphinx Search blog about how searchcode 
 
 I make it no secret that the indexer that powers _searchcode_ is [Sphinx Search][2] which for those who do not know is a stand alone indexing and searching engine similar to Solr.
 
-Since _searchcode&#8217;s_ inception in 2010, Sphinx has powered the search functionality and provides the raw searching and faceting functionality across 19 billion lines of source code. Each document has over 6 facets and there are over 40 million documents in the index at any time. Sphinx serves over 500,000 queries a month from this with the average query returning in less than a second.
+Since _searchcode's_ inception in 2010, Sphinx has powered the search functionality and provides the raw searching and faceting functionality across 19 billion lines of source code. Each document has over 6 facets and there are over 40 million documents in the index at any time. Sphinx serves over 500,000 queries a month from this with the average query returning in less than a second.
 
-_searchcode_ is an unusual beast in that while it doesn&#8217;t index as many documents as other large installations, it indexes a lot more data. This is due to the average document size being larger and the way source code is delimited. The result of these requirements is that the index when built is approximately 3 to 4 times larger than the data being indexed. The special transformation&#8217;s required are accomplished with a thin wrapper on top of Sphinx which modifies the text processing pipeline. This is applied when Sphinx is indexing and running queries. The resulting index is over 800 gigabytes in size on disk and when preloaded consumes over 25 gigabytes of RAM.
+_searchcode_ is an unusual beast in that while it doesn't index as many documents as other large installations, it indexes a lot more data. This is due to the average document size being larger and the way source code is delimited. The result of these requirements is that the index when built is approximately 3 to 4 times larger than the data being indexed. The special transformation's required are accomplished with a thin wrapper on top of Sphinx which modifies the text processing pipeline. This is applied when Sphinx is indexing and running queries. The resulting index is over 800 gigabytes in size on disk and when preloaded consumes over 25 gigabytes of RAM.
 
 This is all served by a single i7 Quad Core server with 32 gigabytes of RAM. The index is distributed and split into 4 parts allowing all queries to run over network agents and scale out seamlessly. Because of the size of the index and how long this takes each part is only indexed every week and a small delta index is used to provide recent updates.
 
@@ -25,7 +25,7 @@ _searchcode_ updates to the latest stable version of Sphinx for every release. T
 
 The only issues encountered with Sphinx to date where some limits on the number of facets which has been resolved with the latest versions. Any other issue has been due to configuration issues which were quickly resolved.
 
-In short Sphinx is an awesome project. It has seamless backwards compatibility, scales up to massive loads and still returns results quickly and accurately. Having since worked with Solr and Xapian, I would still choose Sphinx as searchcode&#8217;s indexing solution. I consider Sphinx as Nginx of the indexing world. It may not have every feature possible but its extremely fast and capable and the features it does have work for 99% of solutions.
+In short Sphinx is an awesome project. It has seamless backwards compatibility, scales up to massive loads and still returns results quickly and accurately. Having since worked with Solr and Xapian, I would still choose Sphinx as searchcode's indexing solution. I consider Sphinx as Nginx of the indexing world. It may not have every feature possible but its extremely fast and capable and the features it does have work for 99% of solutions.
 
  [1]: http://sphinxsearch.com/blog/2014/06/19/sphinx-searches-code-at-searchcode-com/
  [2]: http://sphinxsearch.com/

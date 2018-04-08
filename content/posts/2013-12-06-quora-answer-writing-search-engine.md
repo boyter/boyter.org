@@ -9,7 +9,7 @@ categories:
   - Tip
 
 ---
-The following I posted on Quora in response to the question [&#8220;I am planning to make a small scale search engine on my local system, but I don&#8217;t know from where to start?&#8221;][1]. It&#8217;s a reasonable answer so like my [Mahalo][2] one I thought I would make a copy for myself.
+The following I posted on Quora in response to the question ["I am planning to make a small scale search engine on my local system, but I don't know from where to start?"][1]. It's a reasonable answer so like my [Mahalo][2] one I thought I would make a copy for myself.
 
 I agree with Wolf Garbe and that you are better off in your case starting with existing technologies, have a look at <a class="external_link" href="http://yacy.net/" target="_blank" rel="nofollow">http://yacy.net/</a> and SphinxSearch as well. However if you are doing this to learn and not just deliver a product I can provide a few links for you.
 
@@ -21,9 +21,9 @@ You are talking about having an inverted index I suspect. Have a look at the art
 
 <a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;stackexchange.com&quot;)" href="http://programmers.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed" target="_blank" rel="nofollow">Which hashing algorithm is best for uniqueness and speed?</a>
 
-Be careful when using hashes with URL’s. While the square root of the number
+Be careful when using hashes with URL's. While the square root of the number
   
-<a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;skrenta.com&quot;)" href="http://www.skrenta.com/2007/08/md5_tutorial.html" target="_blank" rel="nofollow">We Worship MD5, the GOD of HASH</a> of URL’s is still a lot bigger then the current
+<a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;skrenta.com&quot;)" href="http://www.skrenta.com/2007/08/md5_tutorial.html" target="_blank" rel="nofollow">We Worship MD5, the GOD of HASH</a> of URL's is still a lot bigger then the current
   
 web size if you do get a collision you are going to get pages about Britney Spears
   
@@ -41,7 +41,7 @@ This is up-to you as well. You are the one in control here. Assuming you want to
 
 Write a simple crawler and start crawling. (for url; get url; find urls;) is about
   
-all you need. For seeding use wikipedia&#8217;s data dump, the alexa top lists or dmoz
+all you need. For seeding use wikipedia's data dump, the alexa top lists or dmoz
   
 data.
 
@@ -95,7 +95,7 @@ appears to have been on hold for years but some of the content is worth reading.
 
 <a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;blekko.com&quot;)" href="http://blog.blekko.com/" target="_blank" rel="nofollow">blekko | spam free search</a>
 
-Blekko’s engineering blog is usually interesting and covers all sorts of
+Blekko's engineering blog is usually interesting and covers all sorts of
   
 material applicable to search engines.
 
@@ -113,11 +113,11 @@ Gigablast mentioned above has since become an Open source project hosted on Gith
 
 <a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;highscalability.com&quot;)" href="http://highscalability.com/blog/2013/1/28/duckduckgo-architecture-1-million-deep-searches-a-day-and-gr.html" target="_blank" rel="nofollow" data-tooltip="attached">High Scalability &#8211; High Scalability &#8211; DuckDuckGo Architecture &#8211; 1 Million Deep Searches a Day and Growing</a>
   
-<a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;highscalability.com&quot;)" href="http://highscalability.com/blog/2012/4/25/the-anatomy-of-search-technology-blekkos-nosql-database.html" target="_blank" rel="nofollow" data-tooltip="attached">High Scalability &#8211; High Scalability &#8211; The Anatomy of Search Technology: blekko’s NoSQL database</a>
+<a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;highscalability.com&quot;)" href="http://highscalability.com/blog/2012/4/25/the-anatomy-of-search-technology-blekkos-nosql-database.html" target="_blank" rel="nofollow" data-tooltip="attached">High Scalability &#8211; High Scalability &#8211; The Anatomy of Search Technology: blekko's NoSQL database</a>
   
 <a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;highscalability.com&quot;)" href="http://highscalability.com/blog/2008/10/13/challenges-from-large-scale-computing-at-google.html" target="_blank" rel="nofollow" data-tooltip="attached">High Scalability &#8211; High Scalability &#8211; Challenges from large scale computing at Google</a>
   
-<a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;highscalability.com&quot;)" href="http://highscalability.com/blog/2010/9/11/googles-colossus-makes-search-real-time-by-dumping-mapreduce.html" target="_blank" rel="nofollow" data-tooltip="attached">High Scalability &#8211; High Scalability &#8211; Google&#8217;s Colossus Makes Search Real-time by Dumping MapReduce</a>
+<a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;highscalability.com&quot;)" href="http://highscalability.com/blog/2010/9/11/googles-colossus-makes-search-real-time-by-dumping-mapreduce.html" target="_blank" rel="nofollow" data-tooltip="attached">High Scalability &#8211; High Scalability &#8211; Google's Colossus Makes Search Real-time by Dumping MapReduce</a>
   
 <a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;highscalability.com&quot;)" href="http://highscalability.com/blog/2011/8/29/the-three-ages-of-google-batch-warehouse-instant.html" target="_blank" rel="nofollow" data-tooltip="attached">High Scalability &#8211; High Scalability &#8211; The Three Ages of Google &#8211; Batch, Warehouse, Instant</a>
 
@@ -149,7 +149,7 @@ For snippet extraction I have another article here,
 
 For crawling here is another one,
 
-<a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;boyter.org&quot;)" href="http://www.boyter.org/2010/08/why-writing-a-web-crawler-isnt-easy/" target="_blank" rel="nofollow">Why Writing a Web Crawler isn’t Easy</a>
+<a class="external_link" onmouseover="return require(&quot;qtext&quot;).tooltip(this, &quot;boyter.org&quot;)" href="http://www.boyter.org/2010/08/why-writing-a-web-crawler-isnt-easy/" target="_blank" rel="nofollow">Why Writing a Web Crawler isn't Easy</a>
 
 Lastly if you do go about and write your own search engine please write blog posts or articles about it. Its quite hard to find this sort of information, especially from the big boys (Google, Bing, Yandex, Yahoo) and I would love to see more articles about it.
 

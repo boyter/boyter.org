@@ -43,7 +43,7 @@ A fairly interesting interview with Matt Wells (Gigablast and Procog) which goes
 
 <del><a href="http://blog.procog.com/">http://blog.procog.com/</a></del>
 
-Sadly it appears that this has been shut down and the content is gone. <del>This is a new blog written by Matt Wells (Gigablast) and while there isn&#8217;t much content there I have hopes for it. Matt really does know his stuff and is promoting an open algorithm to ranking so it stands to reason there will be more decent content here soon.</del>
+Sadly it appears that this has been shut down and the content is gone. <del>This is a new blog written by Matt Wells (Gigablast) and while there isn't much content there I have hopes for it. Matt really does know his stuff and is promoting an open algorithm to ranking so it stands to reason there will be more decent content here soon.</del>
 
 <http://www.thebananatree.org/>
 
@@ -51,7 +51,7 @@ This has a few articles written about creating a search engine from scratch. It 
 
 <http://blog.blekko.com/>
 
-Blekko&#8217;s engineering blog is usually interesting and covers all sorts of material applicable to search engines.
+Blekko's engineering blog is usually interesting and covers all sorts of material applicable to search engines.
 
 <http://www.boyter.org/2013/01/code-for-a-search-engine-in-php-part-1/>
 

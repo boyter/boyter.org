@@ -20,7 +20,7 @@ categories:
 ---
 I have been working on real time indexes with Sphinx recently for the next version of searchcode.com and ran into a few things that were either difficult to search for or just not covered anywhere.
 
-The first is how to implement a distributed search using real time indexes. It&#8217;s actually done the same way you would normally create an index. Say you had a single server with 4 index shards on it and you wanted to run queries against it. You could use the following,
+The first is how to implement a distributed search using real time indexes. It's actually done the same way you would normally create an index. Say you had a single server with 4 index shards on it and you wanted to run queries against it. You could use the following,
 
 <pre>index rt
 {
@@ -51,9 +51,9 @@ Using the above you would be able to search across all of the shards. The trick 
          FROM table limit 1
 </pre>
 
-Where the 4 is the number of shards and the multiplier splits the shards out. It&#8217;s performant due to index use. However for RT I suggest a simple modulas operator % against the ID column for each shard as it allows you to continue to scale out to each shard equally.
+Where the 4 is the number of shards and the multiplier splits the shards out. It's performant due to index use. However for RT I suggest a simple modulas operator % against the ID column for each shard as it allows you to continue to scale out to each shard equally.
 
-The second issue I ran into was that when defining the attributes and fields you must define all the fields before the uints. The above examples work fine but the below is incorrect. I couldn&#8217;t find this mentioned in the documentation.
+The second issue I ran into was that when defining the attributes and fields you must define all the fields before the uints. The above examples work fine but the below is incorrect. I couldn't find this mentioned in the documentation.
 
 <pre>index rt
 {

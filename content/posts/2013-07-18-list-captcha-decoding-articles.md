@@ -9,11 +9,11 @@ categories:
   - Links
 
 ---
-This website ranks quite high in most search engines for the search term &#8220;captcha decoding&#8221; or some permutation of it. As such here are a collection of useful links if you are looking into doing such a thing. If any more come up I will be sure to update this post.
+This website ranks quite high in most search engines for the search term "captcha decoding" or some permutation of it. As such here are a collection of useful links if you are looking into doing such a thing. If any more come up I will be sure to update this post.
 
 <http://www.boyter.org/decoding-captchas/>
 
-Shameless self promotion but this link is why this page ranks so highly. Its an article I wrote some time ago about how to go about decoding a simple CAPTCHA. There is full source code and the principles can be applied to 90% of CAPTCHA&#8217;s out there. For the record it only came about because a colleague bet me that I couldn&#8217;t decode his websites CAPTCHA which was the one used in the article. Of course I waited till he changed it before publishing.
+Shameless self promotion but this link is why this page ranks so highly. Its an article I wrote some time ago about how to go about decoding a simple CAPTCHA. There is full source code and the principles can be applied to 90% of CAPTCHA's out there. For the record it only came about because a colleague bet me that I couldn't decode his websites CAPTCHA which was the one used in the article. Of course I waited till he changed it before publishing.
 
 <http://bokobok.fr/bypassing-a-captcha-with-python/>
 
@@ -21,7 +21,7 @@ Interesting post on how to bypass a CAPTCHA using python. The CAPTCHA broken in 
 
 <http://www.debasish.in/2012/01/bypass-captcha-using-python-and.html?m=1>
 
-Another Python post about breaking CAPTCHA&#8217;s. I think that might be due to how powerful the PIL is. Has full source code. This one is worth looking at because unlike the two previous one it uses an existing OCR engine Tesseract to perform the recogniton.
+Another Python post about breaking CAPTCHA's. I think that might be due to how powerful the PIL is. Has full source code. This one is worth looking at because unlike the two previous one it uses an existing OCR engine Tesseract to perform the recogniton.
 
 <http://www.mperfect.net/aiCaptcha/>
 
@@ -33,7 +33,7 @@ A slightly different approach. Rather then try to code around the problem here i
 
 <http://caca.zoy.org/wiki/PWNtcha>
 
-A PHP project that has been around since 2004 for defeating CAPTCHA&#8217;s. Code is available so its work taking a look at.
+A PHP project that has been around since 2004 for defeating CAPTCHA's. Code is available so its work taking a look at.
 
 <http://tech.slashdot.org/story/11/01/11/1411254/google-recaptcha-cracked>
   
@@ -43,11 +43,11 @@ It seems the original content that went with the above posting on slashdot has d
 
 <http://bhiv.com/defeating-diggs-captcha/>
 
-This article about defeating Digg 2.0&#8217;s CAPTCHA is hopelessly out of date however it shows how easily a simple CAPTCHA can be defeated if the person creating it has little knowledge of what they are doing. I believe it ties in well with this post http://www.boyter.org/2010/08/why-you-shouldnt-roll-your-own-captcha/
+This article about defeating Digg 2.0's CAPTCHA is hopelessly out of date however it shows how easily a simple CAPTCHA can be defeated if the person creating it has little knowledge of what they are doing. I believe it ties in well with this post http://www.boyter.org/2010/08/why-you-shouldnt-roll-your-own-captcha/
 
 <http://www.cs.sfu.ca/~mori/research/gimpy/>
 
-This is the grandaddy of all the above posts, papers and articles. The full paper is linked in there and has far more detail. It is one of the main sources I used when I started learning about decoding CAPTCHA&#8217;s.
+This is the grandaddy of all the above posts, papers and articles. The full paper is linked in there and has far more detail. It is one of the main sources I used when I started learning about decoding CAPTCHA's.
 
 <https://medium.com/p/e8f2a748f95f>
 
@@ -59,7 +59,7 @@ How to defeat SnapChats CAPTCHA. Fairly light on on details but provides the [so
 
 <https://github.com/mieko/sr-captcha/blob/gh-pages/index.md>
 
-Breaking the SilkRoad&#8217;s CAPTCHA. Its follow up about breaking the new SilkRoad&#8217;s CAPTCHA is worth reading as well. <https://github.com/mieko/sr-captcha/blob/gh-pages/silk-road-2.md>
+Breaking the SilkRoad's CAPTCHA. Its follow up about breaking the new SilkRoad's CAPTCHA is worth reading as well. <https://github.com/mieko/sr-captcha/blob/gh-pages/silk-road-2.md>
 
 &nbsp;
 

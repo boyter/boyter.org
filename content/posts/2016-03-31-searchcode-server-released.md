@@ -23,7 +23,7 @@ searchcode server the [downloadable self hosted version of searchcode.com][1] is
 searchcode server has a number of advantages over searchcode.com that will eventually be back-ported in. The full list of things to check out is included below,
 
   * New Single Page Application UI for smooth search experience
-  * Ability to split on terms so a search for &#8220;url signer&#8221; will match &#8220;UrlSigner&#8221;
+  * Ability to split on terms so a search for "url signer" will match "UrlSigner"
   * Massively improved performance 3x in the worst case and 20x in the best
   * Configurable through UI and configuration
   * Spelling suggestion that learns from your code

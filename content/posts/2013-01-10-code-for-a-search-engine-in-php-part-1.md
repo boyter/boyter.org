@@ -25,9 +25,9 @@ This is part 1 of a 5 part series.
 
 I imagine that if you have landed on this page you probably have an interest in search and search engines. Not only that, you have probably read the following [Why Writing Your Own Search Engine is Hard by Anna Patterson (of Cuil fame) http://queue.acm.org/detail.cfm?id=988407][8] If not, go read it and come back here. I have always had an interest in search and indexing I thought I would take the time to write a simple indexer as a way of testing if I had actually learnt anything.
 
-Ok let&#8217;s do it. Let&#8217;s write a small search engine. By small I mean let&#8217;s make it so we can index about a million documents and search on them. I say only a million because you can pretty easily download this number of documents and store them on a single machine these days.
+Ok let's do it. Let's write a small search engine. By small I mean let's make it so we can index about a million documents and search on them. I say only a million because you can pretty easily download this number of documents and store them on a single machine these days.
 
-First things first let&#8217;s state our goals so we know what we are aiming for.
+First things first let's state our goals so we know what we are aiming for.
 
 1. WebCrawler, indexer and document storage capable of handling 1 million or so documents.
   
@@ -37,15 +37,15 @@ First things first let&#8217;s state our goals so we know what we are aiming for
   
 4. Have something I am willing to show off in terms of code.
 
-To start what we need is some thought and design. I suspect that pretty much any search engine you name started with some simple ideas which were then executed on. First thing I am going to choose is what language I&#8217;m going to write things in. I considered doing this in Java, C# or Python, but in the end decided to go with PHP for a few reasons. The first being that there isn&#8217;t really an existing implementation out there for PHP and more importantly I want to use this as a way of proving I have some PHP skills.
+To start what we need is some thought and design. I suspect that pretty much any search engine you name started with some simple ideas which were then executed on. First thing I am going to choose is what language I'm going to write things in. I considered doing this in Java, C# or Python, but in the end decided to go with PHP for a few reasons. The first being that there isn't really an existing implementation out there for PHP and more importantly I want to use this as a way of proving I have some PHP skills.
 
 A search engine really only has a few parts. A crawler to pull external documents down ready to be indexed, an index which is where the documents are stored in an inverted tree and a documentstore for keeping the documents.
 
 For the WebCrawler I am just going to use a very simple FOR(X) GET X; simple PHP script. This should be more than enough to get us started indexing. There are other crawlers out there writing in PHP such as Sphider, but really we only need something simple.
   
-For the actual implementation of the index and documentstore I&#8217;m going to build the following parts with each designed to be independent of others.
+For the actual implementation of the index and documentstore I'm going to build the following parts with each designed to be independent of others.
 
-index &#8211; This is going to handle creating and reading the &#8220;fast&#8221; lookups.
+index &#8211; This is going to handle creating and reading the "fast" lookups.
   
 documentstore &#8211; This is going to handle the management of documents.
   
@@ -59,7 +59,7 @@ That should be pretty much all we need to download a portion of the web, start i
 
 ### THE CRAWLER
 
-In order to crawl you need to come up with a list of URL&#8217;s. There are a few common ways to do this. The first is to seed your crawler with a few links which contain lots of other links (eg Yahoo, Digg, Slashdot, HackerNews) crawl them and harvest as you go. Another is to download a list of millions of URL&#8217;s and use that. Off the top of my head I can think of two, the first being DMOZ.org. You can download their human created list of URL&#8217;s for free. The other is to download [this list from Quantcast of the top 1 million websites][9]. For this im going to go with the Quantcast option simply because for basic searches such as “Youtube” “Yahoo Finance” it should have the results we need.
+In order to crawl you need to come up with a list of URL's. There are a few common ways to do this. The first is to seed your crawler with a few links which contain lots of other links (eg Yahoo, Digg, Slashdot, HackerNews) crawl them and harvest as you go. Another is to download a list of millions of URL's and use that. Off the top of my head I can think of two, the first being DMOZ.org. You can download their human created list of URL's for free. The other is to download [this list from Quantcast of the top 1 million websites][9]. For this im going to go with the Quantcast option simply because for basic searches such as “Youtube” “Yahoo Finance” it should have the results we need.
 
 Downloading the file shows it to be in the following format,
 
@@ -111,7 +111,7 @@ It takes a few minutes to run but at the end we have our seed crawl list, which 
 
 So there are 995941 lines in the file, and there are 995941 unique lines in there as well so a unique URL for each line. Perfect.
 
-The other option using the DMOZ data can be parsed using the following steps. Go download the content (about 300meg) unpack it and you can begin collecting the links. I did look into using grep&#8217;s -o functionality but couldn&#8217;t get it to accept a regex allowing me to pull out just the links I wanted. I was then going to write a parser in PHP but since Python just eats these sort ot jobs, in end I used a small Python script,
+The other option using the DMOZ data can be parsed using the following steps. Go download the content (about 300meg) unpack it and you can begin collecting the links. I did look into using grep's -o functionality but couldn't get it to accept a regex allowing me to pull out just the links I wanted. I was then going to write a parser in PHP but since Python just eats these sort ot jobs, in end I used a small Python script,
 
 <pre>grep "http" content.rdf.u8 | python parse.py | sort | uniq &gt; urllist.txt</pre>
 
@@ -127,7 +127,7 @@ Where parse.py is just the following,
 		if len(t) != 0:
 			print t[0].replace('"','')</pre>
 
-The above DMOZ data gives about 4 million unique urls to crawl and use. Sadly a lot of the stuff in there is no longer current or points to sites people aren&#8217;t interested in so I will stick with the quantcast list.
+The above DMOZ data gives about 4 million unique urls to crawl and use. Sadly a lot of the stuff in there is no longer current or points to sites people aren't interested in so I will stick with the quantcast list.
 
 ### DOWNLOADING
 
@@ -150,7 +150,7 @@ The above essentially is a stupid singlethreaded crawler. It just loops over eac
 
 At this point I quickly found is that the crawler is going to take forever to download even a small portion of the web. The reason being it is single threaded. We can fix this pretty easily with some xargs and command line fu. Another issue is that dropping about a million files into a single directory as I mentioned before is probably a bad plan. So I am going to use the hash of the file to spread it out over directories. This would also make it easier to shard in the future should the need arise.
 
-**\*NB\*** Be careful when using hashes with URL&#8217;s. While the square root of the number <http://www.skrenta.com/2007/08/md5_tutorial.html> of URL&#8217;s is still a lot bigger then the current web size if you do get a collision you are going to get pages about Britney Spears when you were expecting pages about Bugzilla. Its probably a non issue in our case, but for billions of pages I would opt for a much larger hashing algorithm such as SHA 256 or avoid it altogether.
+**\*NB\*** Be careful when using hashes with URL's. While the square root of the number <http://www.skrenta.com/2007/08/md5_tutorial.html> of URL's is still a lot bigger then the current web size if you do get a collision you are going to get pages about Britney Spears when you were expecting pages about Bugzilla. Its probably a non issue in our case, but for billions of pages I would opt for a much larger hashing algorithm such as SHA 256 or avoid it altogether.
 
 First we change the crawler to be the below.
 
@@ -172,21 +172,21 @@ First we change the crawler to be the below.
 		fclose($fp);
 	}</pre>
 
-This simply checks for the arguments its supplied and expects the first argument (the one following the filename itself) to be the URL its going to download. It then hashes the URL so we know the filename and which directories need to be created. We then check if the file and save location exists, and if it dosn&#8217;t we then crawl the site, create the directories and save the content to disk.
+This simply checks for the arguments its supplied and expects the first argument (the one following the filename itself) to be the URL its going to download. It then hashes the URL so we know the filename and which directories need to be created. We then check if the file and save location exists, and if it dosn't we then crawl the site, create the directories and save the content to disk.
 
 Then with the following,
 
 <pre>cat urllist.txt | xargs -L1 -P32 php crawler.php</pre>
 
-We have a 32 process crawler. You can spawn more process&#8217;s if you wish, just increase the -P32 to whatever number you prefer. Because a crawler spends most of its time making external connections waiting on network you can bump the number quite high, certainly 100 or so on a single core machine should be fine, however that may crash your router (like it did to mine) so be careful and keep an eye on it. After crashing my router a few times I ran the process on a proper server and let it run over a day or so.
+We have a 32 process crawler. You can spawn more process's if you wish, just increase the -P32 to whatever number you prefer. Because a crawler spends most of its time making external connections waiting on network you can bump the number quite high, certainly 100 or so on a single core machine should be fine, however that may crash your router (like it did to mine) so be careful and keep an eye on it. After crashing my router a few times I ran the process on a proper server and let it run over a day or so.
 
 Run it for a few days or however long it takes and you will have a large chunk of web data sitting on your disk ready for indexing.
 
-You may want to split the urllist using &#8220;split -l 10000&#8221; or some other line size and pull down each one separately. This might also be an idea if you are sharing your internet connection and don&#8217;t want to saturate it totally for days on end.
+You may want to split the urllist using "split -l 10000" or some other line size and pull down each one separately. This might also be an idea if you are sharing your internet connection and don't want to saturate it totally for days on end.
 
 One thing to keep in mind with this is that dumping a million documents all over the disk is terribly inefficient. You should be laying down the documents in large files and keeping the locations of said documents. This makes processing much faster as you can access the disk in a long seek (although for a SSD this is probably a moot point). For a real search engine IE billions of documents do not do the above. However for something small scale this is perfectly fine.
 
-With that done I think we can cross off the crawler. Real world crawling of course isn&#8217;t quite that simple. Eventually you need to consider refreshing your content, finding new links, avoiding overtaxing servers (which might have multiple domains on it), avoiding crawling admin pages which have delete links, improving performance (caching DNS lookups) etc&#8230; but for our purposes to refresh the index you can just re-crawl things the same way, and for a small portion of the web it should be fine.
+With that done I think we can cross off the crawler. Real world crawling of course isn't quite that simple. Eventually you need to consider refreshing your content, finding new links, avoiding overtaxing servers (which might have multiple domains on it), avoiding crawling admin pages which have delete links, improving performance (caching DNS lookups) etc&#8230; but for our purposes to refresh the index you can just re-crawl things the same way, and for a small portion of the web it should be fine.
 
 ### THE INDEX
 
@@ -211,7 +211,7 @@ This gives us enough space to store a document id for lookups, and another two s
 
 <pre>((12 x 1,000,000 x 500) / 1024) / 1024 = 5722 Megabytes</pre>
 
-almost 6 gigabytes which isn&#8217;t an outlandish size, and certainly easily stored on a single machine. Even if we double the index and even the assumed number of unique keywords we are still looking at less than 30 gigabytes which is easily done. Keep in mind however that we are writing a very slow index solution at this point and its unlikely that it will scale to this size. We will adjust it later to cope with this size.
+almost 6 gigabytes which isn't an outlandish size, and certainly easily stored on a single machine. Even if we double the index and even the assumed number of unique keywords we are still looking at less than 30 gigabytes which is easily done. Keep in mind however that we are writing a very slow index solution at this point and its unlikely that it will scale to this size. We will adjust it later to cope with this size.
 
 So having defined the interface and how the documents look on disk lets look into implementing this. Im not going to refer to the tests here, but suffice to say the whole thing was developed using them in your standard TDD approach. The first method I think we needed to tackle is validatedocument.
 
@@ -265,7 +265,7 @@ The above is what I came up with. It takes in an name (the word we are storing) 
 		return INDEXLOCATION.$name.SINGLEINDEX_DOCUMENTFILEEXTENTION;
 	}</pre>
 
-Where INDEXLOCATION needs to be defined somewhere (enforced in the constructor) and the file extention is in the index file. The reason for the INDEXLOCATION to be defined outside this file is that we don&#8217;t want to work it out ourselves but have the developer using this code define where the index should live.
+Where INDEXLOCATION needs to be defined somewhere (enforced in the constructor) and the file extention is in the index file. The reason for the INDEXLOCATION to be defined outside this file is that we don't want to work it out ourselves but have the developer using this code define where the index should live.
 
 The next method we need is to get a document list, getDocuments.
 
@@ -294,7 +294,7 @@ The next method we need is to get a document list, getDocuments.
 		return $ret;
 	}</pre>
 
-Its actually more complex then the write function because we need to know the number of bytes to get. An integer on a 32 bit x86 system in PHP is 4 bytes. So a document consists of 12 bytes since we said it would have 3 integers. We then just suck it all into a large array and return the whole thing. I did add a simple naive corrupt index check here just to make sure that we don&#8217;t have any unexpected issues caused by bad writes. Of course this just means it will throw corrupt errors which isn&#8217;t much better.
+Its actually more complex then the write function because we need to know the number of bytes to get. An integer on a 32 bit x86 system in PHP is 4 bytes. So a document consists of 12 bytes since we said it would have 3 integers. We then just suck it all into a large array and return the whole thing. I did add a simple naive corrupt index check here just to make sure that we don't have any unexpected issues caused by bad writes. Of course this just means it will throw corrupt errors which isn't much better.
 
 The last method defined is the clear index. This is the simplest function to write in this case and looks like the below,
 
@@ -425,7 +425,7 @@ Searching requires a relatively simple implementation. So simple in fact we only
 	  public function dosearch($searchterms);
 	}</pre>
 
-Of course the actual implementation can get pretty hairy. The reason for this is that a search is actually more complex then it first appears. Take for example the following search term &#8220;cool stuff&#8221;. When someone searches for &#8220;cool stuff&#8221; they are expecting that a list of documents containing the words cool and stuff will appear in a list. What is actually happening under the hood however is a lot more work. The search term firstly needs to be parsed into a query. In the case of a default AND engine you need to find all documents containing the word &#8220;cool&#8221;, and then all documents containing the word &#8220;stuff&#8221;, get the intersection of those documents, rank them in order of relevance and return them to the user.
+Of course the actual implementation can get pretty hairy. The reason for this is that a search is actually more complex then it first appears. Take for example the following search term "cool stuff". When someone searches for "cool stuff" they are expecting that a list of documents containing the words cool and stuff will appear in a list. What is actually happening under the hood however is a lot more work. The search term firstly needs to be parsed into a query. In the case of a default AND engine you need to find all documents containing the word "cool", and then all documents containing the word "stuff", get the intersection of those documents, rank them in order of relevance and return them to the user.
 
 Sticking to keeping it very simple we are going to do the following. Clean up the search term (removing characters that have no meaning), break it into individual works separated by spaces and then for each term just return all the documents that match. No ranking, or AND logic which makes things much simpler to work with. So we will effectively end up with an OR logic search engine.
 
@@ -472,15 +472,15 @@ With the ability to search lets plug it into a simple PHP page and actually disp
 	}
 	echo '&lt;/ul&gt;';</pre>
 
-Nothing fancy here, just set everything up, then do a search through our new function and loop over the results. A sample search for &#8220;AuthzUserAuthoritative&#8221; gives back the correct result, whereas searching for &#8220;user&#8221; gives back the 3 expected results.
+Nothing fancy here, just set everything up, then do a search through our new function and loop over the results. A sample search for "AuthzUserAuthoritative" gives back the correct result, whereas searching for "user" gives back the 3 expected results.
 
 Hurray! At this point we have done it. We have a minimalist implementation of a search engine. I did some further tests and discovered that this actually holds together to about 50,000 documents. Searches are still reasonably quick at this level however indexing a single document took minutes which is hardly optimal. For the moment however we can index 1,000 or so documents while we work on getting the search to have some additional functionality such as ranking.
 
 ### RANKER
 
-The ranking of search results is the core of search engines secret sauce. Nobody with the knowledge how how it works really discusses how Google and Bing rank things. **\*NB\*** ProCog has an open algorithm, see here <http://procog.com/help/rank_details> We know they use many signals such as page speed, keywords links, title etc&#8230; but the details are still a mystery. Thankfully there are many published methods of ranking which we can explore. Any sort of search on this and you will turn up papers on things like BM25 and Vector Spaces. Once again we are going to take the simplest approach and just use the number of words in the document. So if you search for &#8220;cat&#8221; a document with two &#8220;cat&#8221; words in it will be ranked higher then one with a single instance of &#8220;cat&#8221;. We are already storing this information in the index so it should be fairly simple the implement. Later we will look some more complex ways of ranking.
+The ranking of search results is the core of search engines secret sauce. Nobody with the knowledge how how it works really discusses how Google and Bing rank things. **\*NB\*** ProCog has an open algorithm, see here <http://procog.com/help/rank_details> We know they use many signals such as page speed, keywords links, title etc&#8230; but the details are still a mystery. Thankfully there are many published methods of ranking which we can explore. Any sort of search on this and you will turn up papers on things like BM25 and Vector Spaces. Once again we are going to take the simplest approach and just use the number of words in the document. So if you search for "cat" a document with two "cat" words in it will be ranked higher then one with a single instance of "cat". We are already storing this information in the index so it should be fairly simple the implement. Later we will look some more complex ways of ranking.
 
-Essentially the ranker can be very simple as it only needs to provide a function which we can plug into PHP&#8217;s usort function.
+Essentially the ranker can be very simple as it only needs to provide a function which we can plug into PHP's usort function.
 
 <pre>interface iranker {
 		public function rankDocuments($document,$document2);
@@ -512,15 +512,15 @@ Which sorts the $results in place. With that we can add it to our naievesearch i
 
 <pre>usort($ind, array($this-&gt;ranker, 'rankDocuments'));</pre>
 
-We can now go to our search page and see how things look. A sample search for the word &#8220;order&#8221; returns two documents with the first containing two instances of the word order and the second only one. Trying again with the word &#8220;the&#8221; has the same result with the first result having the word &#8220;the&#8221; 7 times compared to the last result with 4 instances of the word &#8220;the&#8221;.
+We can now go to our search page and see how things look. A sample search for the word "order" returns two documents with the first containing two instances of the word order and the second only one. Trying again with the word "the" has the same result with the first result having the word "the" 7 times compared to the last result with 4 instances of the word "the".
 
 ### INITIAL RESULTS
 
-The nice thing at this point is we actually have a fully functioning search index written in pure PHP. In theory this should be good to integrate at this point with any small website. In its present form the search should hold up to less then 10,000 documents without too many issues. My thinking is that read/write time of each of the index shards during the indexing process would be the main bottleneck in its present form. If you indexed as you add things however IE don&#8217;t do it in batch this indexer might serve to a much larger size. Other problems are that the ranking algorithm is fairly crude and that duplicate results are returned where two keywords match the same document. So while you could use this on a live site you wouldn&#8217;t want to.
+The nice thing at this point is we actually have a fully functioning search index written in pure PHP. In theory this should be good to integrate at this point with any small website. In its present form the search should hold up to less then 10,000 documents without too many issues. My thinking is that read/write time of each of the index shards during the indexing process would be the main bottleneck in its present form. If you indexed as you add things however IE don't do it in batch this indexer might serve to a much larger size. Other problems are that the ranking algorithm is fairly crude and that duplicate results are returned where two keywords match the same document. So while you could use this on a live site you wouldn't want to.
 
 I did a quick test of this implementation using 5000 posts from various RSS feeds to see how things fared. While searches remain reasonably quick the index time became slower and slower as it progressed. Chucking it through a profiler showed my previous assumption to be correct and that a lot of time is spent reading/writing shards. This makes the implementation totally unpractical for indexing more then say 10,000 documents, its just too slow.
 
-Of course this isn&#8217;t what we set out to do. The goal was to index one million documents and search on them.
+Of course this isn't what we set out to do. The goal was to index one million documents and search on them.
 
 Over the next few steps we will profile the application, work out where the performance issues lie and then work on improving our implementation so that we can index and serve queries on a million documents. To start we will run things through a profiler and see what can be improved.
 

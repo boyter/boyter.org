@@ -7,7 +7,7 @@ draft: true
 url: /?p=440
 
 ---
-When I first saw Google Instant my first thought was &#8220;woah cool&#8221;. I then complained about the killing off of long tail keywords. Later I was thinking about how I could implement it myself. I am no jQuery ninja (or pirate or robot) but to quote Top Gear &#8220;How hard could it be?&#8221;
+When I first saw Google Instant my first thought was "woah cool". I then complained about the killing off of long tail keywords. Later I was thinking about how I could implement it myself. I am no jQuery ninja (or pirate or robot) but to quote Top Gear "How hard could it be?"
 
 The resulting code looks similar to the below,
 
@@ -91,7 +91,7 @@ var runningRequest = false;
   
 var request;
 
-$(&#8220;#search_input&#8221;).keyup($.debounce(200, doit));
+$("#search_input").keyup($.debounce(200, doit));
 
 function doit(e) {
   
@@ -105,7 +105,7 @@ var search_input = $(this).val();
 
 if (search_input.length == 0) {
   
-$(&#8216;#results&#8217;).html(&#8221;);
+$(&#8216;#results').html(");
   
 return;
   
@@ -113,21 +113,21 @@ return;
   
 if (e.keyCode == 13 || search_input.length >= 1 && (e.keyCode != 37 && e.keyCode != 38 && e.keyCode != 39 && e.keyCode != 40)) {
   
-$(&#8216;#results&#8217;).fadeTo(&#8216;fast&#8217;, 0.2);
+$(&#8216;#results').fadeTo(&#8216;fast', 0.2);
   
 runningRequest = true;
   
 var keyword = encodeURIComponent(search_input);
   
-var url = &#8216;./ajaxsearch/?s=&#8217; + keyword;
+var url = &#8216;./ajaxsearch/?s=' + keyword;
   
 request = $.get(url, function (data, status) {
   
 runningRequest1 = false;
   
-if (status == &#8220;success&#8221;) {
+if (status == "success") {
   
-$(&#8216;#article&#8217;).html(data).stop().fadeTo(&#8216;fast&#8217;, 1);
+$(&#8216;#article').html(data).stop().fadeTo(&#8216;fast', 1);
   
 }
   

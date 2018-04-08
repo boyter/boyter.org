@@ -7,7 +7,7 @@ draft: true
 url: /?p=419
 
 ---
-I&#8217;m still new to consulting but here are a few things that spring to mind which you should look at carefully.
+I'm still new to consulting but here are a few things that spring to mind which you should look at carefully.
 
   1. Make sure you have the required access to do the job initially.
   2. Find out the exact requirements, how are they doing it, what do they want, what are they looking to get out of it?

@@ -17,7 +17,7 @@ categories:
   - Unit Testing
 
 ---
-Software sanity tests are closely associated with smoke tests. They attempt to determine if is reasonable to continue with testing a given piece of software. The objective is not to test all functionality, but to determine if there is value in doing so. You can consider it a &#8220;Should I continue to test this?&#8221; check. Sanity tests differ from smoke tests as they exist to check if new functionality has been met and existing bugs have been resolved.
+Software sanity tests are closely associated with smoke tests. They attempt to determine if is reasonable to continue with testing a given piece of software. The objective is not to test all functionality, but to determine if there is value in doing so. You can consider it a "Should I continue to test this?" check. Sanity tests differ from smoke tests as they exist to check if new functionality has been met and existing bugs have been resolved.
 
 * Sanity tests are a way to avoid wasting time testing obviously flawed software IE is this software sane?
   
@@ -33,7 +33,7 @@ Software sanity tests are closely associated with smoke tests. They attempt to d
 
 The following examples are considered sanity tests.
 
-* Compiling and running a &#8220;Hello world!&#8221; program for a new developer environment
+* Compiling and running a "Hello world!" program for a new developer environment
   
 * Checking that a calculator when given 2 + 2 produces 4 as the result
   

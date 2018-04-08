@@ -11,12 +11,12 @@ url: /?p=335
   
 Boolean Search
 
-Boolean search is the search implementation of set logic. Essentially for each search term you enter you get a pile or results. For example, a search for &#8220;cat dog&#8221; would return all the results containing either cat or dog and results which contain both. In other words the combined results of both sets. With boolean logic however you can choose to remove sets. For example &#8220;cat -dog&#8221; would only return the results which contain the word cat, but not those which also included dog.
+Boolean search is the search implementation of set logic. Essentially for each search term you enter you get a pile or results. For example, a search for "cat dog" would return all the results containing either cat or dog and results which contain both. In other words the combined results of both sets. With boolean logic however you can choose to remove sets. For example "cat -dog" would only return the results which contain the word cat, but not those which also included dog.
 
 ### Faceted Search
 
 <p style="text-align: left;">
-  Faceted search can most easily be described with the image on the right. This shows a simple search on eBay. On the left of the image you can see the facets (faces) of the search. By selecting each of the criteria such as &#8220;New&#8221; or &#8220;Used&#8221; you can refine your search to characteristics that are shared across the search results. This allows users to really drill down to their specific requirements.
+  Faceted search can most easily be described with the image on the right. This shows a simple search on eBay. On the left of the image you can see the facets (faces) of the search. By selecting each of the criteria such as "New" or "Used" you can refine your search to characteristics that are shared across the search results. This allows users to really drill down to their specific requirements.
 </p>
 
 <p style="text-align: left;">

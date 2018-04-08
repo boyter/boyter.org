@@ -8,7 +8,7 @@ categories:
   - Uncategorized
 
 ---
-I was looking through the logs of what people are searching for and noticed there is a large amount of &#8220;Hello World&#8221; searches such as &#8220;hello world java&#8221; which actually came up with no results. I couldn&#8217;t have that continue so I quickly integrated the [Hello World Collection][1]
+I was looking through the logs of what people are searching for and noticed there is a large amount of "Hello World" searches such as "hello world java" which actually came up with no results. I couldn't have that continue so I quickly integrated the [Hello World Collection][1]
 
 You can now search for hello world in 400+ languages (although curiously no in Clojure). Just type hello world and the language you are searching for EG,
 

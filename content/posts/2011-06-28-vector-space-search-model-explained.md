@@ -8,17 +8,17 @@ categories:
   - Article
 
 ---
-A mate of mine was looking at a previous article I wrote about [Decoding CAPTCHA&#8217;s][1] where I pointed people to the following article (PDF) [http://la2600.org/talks/files/20040102/Vector\_Space\_Search\_Engine\_Theory.pdf][2]
+A mate of mine was looking at a previous article I wrote about [Decoding CAPTCHA's][1] where I pointed people to the following article (PDF) [http://la2600.org/talks/files/20040102/Vector\_Space\_Search\_Engine\_Theory.pdf][2]
 
-He was having some difficulty understanding it so I thought I would write up a very simple explanation of what&#8217;s actually happening in the vector space.
+He was having some difficulty understanding it so I thought I would write up a very simple explanation of what's actually happening in the vector space.
 
-The vector space isn&#8217;t actually that complicated, but getting your head around how it works takes a few steps. Let&#8217;s imagine for the moment that we are going to search over a collection of documents which only contain one word &#8220;boffin&#8221;. Each document has a different count of our word but only contain those words. We can represent this visually using a simple graph.
+The vector space isn't actually that complicated, but getting your head around how it works takes a few steps. Let's imagine for the moment that we are going to search over a collection of documents which only contain one word "boffin". Each document has a different count of our word but only contain those words. We can represent this visually using a simple graph.
 
 <pre>1 2 3  4
             +---------+                                                                 
              012345678</pre>
 
-The above is trying to show along the X axis the count of our word &#8220;boffin&#8221; that appears in the document whose id appears above the line. You can see that document 1 has 1 &#8220;boffin&#8221; words in it and document 4 has 8. You can also see that document 1 is closer to document 2 then it is to document 4. Let&#8217;s say we decide to search for boffin twice IE our search term is &#8220;boffin boffin&#8221;.
+The above is trying to show along the X axis the count of our word "boffin" that appears in the document whose id appears above the line. You can see that document 1 has 1 "boffin" words in it and document 4 has 8. You can also see that document 1 is closer to document 2 then it is to document 4. Let's say we decide to search for boffin twice IE our search term is "boffin boffin".
 
 <pre>+------+ "boffin boffin"
                |
@@ -27,7 +27,7 @@ The above is trying to show along the X axis the count of our word &#8220;boffin
             +---------+                                                                 
              012345678</pre>
 
-What you can see quite clearly is that the closest document to our search (labelled in X) is document 1 and 2 followed by document 3 and 4. Let&#8217;s try searching for &#8220;boffin boffin boffin boffin&#8221;
+What you can see quite clearly is that the closest document to our search (labelled in X) is document 1 and 2 followed by document 3 and 4. Let's try searching for "boffin boffin boffin boffin"
 
 <pre>+------+ "boffin boffin boffin boffin"
                  |
@@ -38,7 +38,7 @@ What you can see quite clearly is that the closest document to our search (label
 
 You can now see that documents 2 and 3 are equally close to our search document, followed by document 1 and document 4.
 
-So far so good. We can work out how close any two &#8220;boffin&#8221; documents are and thus work out how relevent they are to a search. Let&#8217;s add another word to our index. Our new documents are going to contain the words &#8220;boffin&#8221; and &#8220;head&#8221;
+So far so good. We can work out how close any two "boffin" documents are and thus work out how relevent they are to a search. Let's add another word to our index. Our new documents are going to contain the words "boffin" and "head"
 
 <pre>+                                                            
            8|     3                                                      
@@ -53,11 +53,11 @@ So far so good. We can work out how close any two &#8220;boffin&#8221; documents
             +---------+                                                  
              012345678</pre>
 
-Along the X axis we still have the count for the word boffin. However we also have a Y axis which represents the count of the term &#8220;head&#8221;. Thus document 1 has 1 &#8220;boffin&#8221; word in it and 2 &#8220;head&#8221; words. You can also see that document 1 is closer to document 2 then document 3. Those of you who remember high school should remember this fellow.
+Along the X axis we still have the count for the word boffin. However we also have a Y axis which represents the count of the term "head". Thus document 1 has 1 "boffin" word in it and 2 "head" words. You can also see that document 1 is closer to document 2 then document 3. Those of you who remember high school should remember this fellow.
 
 ![Bust of Pythagoras][3]
 
-Yes Pythagoras, a philosopher and mathematician came up with a [theorem][4] (although I suspect it should be a law now) that you could use to work out the length of a triangle&#8217;s side assuming the triangle is right angled and you know the length of the other two sides. We can do that now to work out the distance between document 1 and every other document in our collection.
+Yes Pythagoras, a philosopher and mathematician came up with a [theorem][4] (although I suspect it should be a law now) that you could use to work out the length of a triangle's side assuming the triangle is right angled and you know the length of the other two sides. We can do that now to work out the distance between document 1 and every other document in our collection.
 
 <pre>Document 1 Distances
 
@@ -65,11 +65,11 @@ Yes Pythagoras, a philosopher and mathematician came up with a [theorem][4] (alt
 1 to 3 = 7.28
 1 to 4 = 7.21</pre>
 
-Assuming now that we had a search which had the terms &#8220;boffin head head&#8221; we can work out that the next most relevant documents would be 1 (exact match) followed by 2, 4 and 3, simply by calculating out the distances and ordering by them.
+Assuming now that we had a search which had the terms "boffin head head" we can work out that the next most relevant documents would be 1 (exact match) followed by 2, 4 and 3, simply by calculating out the distances and ordering by them.
 
-So far so good. Now to the next step, adding a third dimension which would represent a third word. It follows the same basic idea as before, just we need to do a few extra calculations&#8217; to work out which documents are closest to each other. I am not going to do this here but im sure you can see how its a natural progression of the idea.
+So far so good. Now to the next step, adding a third dimension which would represent a third word. It follows the same basic idea as before, just we need to do a few extra calculations' to work out which documents are closest to each other. I am not going to do this here but im sure you can see how its a natural progression of the idea.
 
-Now the &#8220;magic&#8221; of the vector space is realising that if you can work out the distance between two documents when cast in 1d (first example) 2d (second example) and 3d space, you can continue to do so in 4d, 5d, 6d etc&#8230; You can&#8217;t represent it in the physical world, but in the mathematical world it works perfectly. This is the trick behind the vector space model and how it calculates how close any documents are.
+Now the "magic" of the vector space is realising that if you can work out the distance between two documents when cast in 1d (first example) 2d (second example) and 3d space, you can continue to do so in 4d, 5d, 6d etc&#8230; You can't represent it in the physical world, but in the mathematical world it works perfectly. This is the trick behind the vector space model and how it calculates how close any documents are.
 
 Additional reading over the topic can be found here,
 

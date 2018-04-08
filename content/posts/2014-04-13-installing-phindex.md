@@ -36,7 +36,7 @@ boyter@ubuntu:/var/www/phindex/Phindex-master/crawler$ ls
 crawler.php  documents  documents10000.tar.gz  parse_quantcast.php
 boyter@ubuntu:/var/www/phindex/Phindex-master/crawler$</pre>
 
-The next step is to create two folders. The first is called &#8220;document&#8221; and the second &#8220;index&#8221;. These are where the processed documents will be stored and where the index will be stored. Once these are created we can run the indexer. The folders need to be created in the root folder like so.
+The next step is to create two folders. The first is called "document" and the second "index". These are where the processed documents will be stored and where the index will be stored. Once these are created we can run the indexer. The folders need to be created in the root folder like so.
 
 <pre>boyter@ubuntu:/var/www/phindex/Phindex-master$ ls
 add.php  crawler    index       README.md   tests

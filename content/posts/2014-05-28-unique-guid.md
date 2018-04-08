@@ -9,9 +9,9 @@ categories:
   - searchcode
 
 ---
-I have been doing a lot of work with the Sitecore CMS recently. Once of the things you quickly learn is how it relies on GUID&#8217;s for pretty much everything. This means of course when you start testing and need to supply GUID&#8217;s into your tests that you end up with lots of GUIDs that look like the following sprinkled through your code {11111111-1111-1111-1111-111111111111}
+I have been doing a lot of work with the Sitecore CMS recently. Once of the things you quickly learn is how it relies on GUID's for pretty much everything. This means of course when you start testing and need to supply GUID's into your tests that you end up with lots of GUIDs that look like the following sprinkled through your code {11111111-1111-1111-1111-111111111111}
 
-Today I remarked that we should be using things like &#8220;deadbeef&#8221; for the first part of the GUID with a colleague. He suggested that we should try and actually write something. With a little bit of 1337 speak this is actually possible. Naturally we got back to work, but with a little free time I quickly coded up a simple Python application to generate &#8220;phrased&#8221; GUID&#8217;s. Some examples follow,
+Today I remarked that we should be using things like "deadbeef" for the first part of the GUID with a colleague. He suggested that we should try and actually write something. With a little bit of 1337 speak this is actually possible. Naturally we got back to work, but with a little free time I quickly coded up a simple Python application to generate "phrased" GUID's. Some examples follow,
 
 <pre>silicles-oafs-blob-tael-declassified -&gt; {5111c1e5-0af5-b10b-7ae1-dec1a551f1ed}
 deedless-gait-soft-goes-eisteddfodic -&gt; {deed1e55-9a17-50f7-90e5-e157eddf0d1c}
@@ -25,6 +25,6 @@ None of the above are make much sense, but by looking at the outputs you can att
 {ca55e77e-50f7-901d-d1ce-c011ec71b1e5}
 </pre>
 
-Very zen. Some rough back of napkin calculations gives my program something like 10,000,000,000,000 combinations of GUID&#8217;s based on the word list I supplied. I may just turn it into a online GUID generator like this one http://www.guidgenerator.com/
+Very zen. Some rough back of napkin calculations gives my program something like 10,000,000,000,000 combinations of GUID's based on the word list I supplied. I may just turn it into a online GUID generator like this one http://www.guidgenerator.com/
 
 EDIT &#8211; You can now get these guids at <https://searchcode.com/guid/>

@@ -12,7 +12,7 @@ Every few years I have a habit of starting a new project. The goal always being 
 
 [You can view it at portfold.com][1]
 
-Recently I have been taking an interest in various topics such as &#8220;[Oil Gas Pipeline Failure Rates][2]&#8221; and &#8220;[Hydroelectric Dam Environmental Impacts][3]&#8221; (both generated using Portfold). My standard workflow was enter a search term into my favorite search engine and then click through the results looking for the interesting information. Extremely time consuming I was looking to find a better way to do it.
+Recently I have been taking an interest in various topics such as "[Oil Gas Pipeline Failure Rates][2]" and "[Hydroelectric Dam Environmental Impacts][3]" (both generated using Portfold). My standard workflow was enter a search term into my favorite search engine and then click through the results looking for the interesting information. Extremely time consuming I was looking to find a better way to do it.
 
 The problem as such is that searching for information presents a collection of related blue links. What do you do then?
 

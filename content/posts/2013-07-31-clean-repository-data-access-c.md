@@ -83,6 +83,6 @@ var result =  from user in users
               join location in locations on user.locationid equals location.id && location.name = "Parramatta"
               select user;</pre>
 
-The best thing is that its all lazy evaluation so you don&#8217;t end up pulling back the full data set into memory. Of course at a large enough scale you will probably hit some sort of leaky abstraction issue and end up rewriting to use pure SQL at some point, but for getting started this method of data access is incredibly powerful with few chances of errors.
+The best thing is that its all lazy evaluation so you don't end up pulling back the full data set into memory. Of course at a large enough scale you will probably hit some sort of leaky abstraction issue and end up rewriting to use pure SQL at some point, but for getting started this method of data access is incredibly powerful with few chances of errors.
 
-Finally you get the advantage that you can provide pure unit tests over your joins. Because you can mock the response from your repository easily you don&#8217;t have to create a seed database and provide a connection. This is fantastic for TDD especially when running offline or on your local machine.
+Finally you get the advantage that you can provide pure unit tests over your joins. Because you can mock the response from your repository easily you don't have to create a seed database and provide a connection. This is fantastic for TDD especially when running offline or on your local machine.

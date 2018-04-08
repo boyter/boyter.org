@@ -20,4 +20,4 @@ lack rights to use them when using LOCK TABLES</pre>
 
 The above appeared anytime I tried to dump the database to a SQL file using mysqldump. Its actually one of the better errors I have seen come out of MySQL (which has pretty terrible error reporting most of the time) and tells you exactly what is going wrong. **Essentially there is a old view in the the database that should be removed since its no longer valid and is throwing a compile exception.**
 
-Of course this isn&#8217;t useful most of the time and the **workaround is to add the force command -f into the mysqldump command.** This forces the database to dump everything anyway which is perfect for automated backups.
+Of course this isn't useful most of the time and the **workaround is to add the force command -f into the mysqldump command.** This forces the database to dump everything anyway which is perfect for automated backups.

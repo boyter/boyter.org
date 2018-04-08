@@ -10,4 +10,4 @@ categories:
 ---
 Just found this while testing http://www.bing.com/ and thought I should preserve it here to be dammed sure I can find if when I want it.
 
-If the relationship is clearly &#8220;is-a&#8221;, I use inheritance. If it is more like &#8220;can-be&#8221;, I use interfaces. Eg, TextBox &#8220;is-a&#8221; Control, ArrayList &#8220;can-be&#8221; enumerated (so it implements IEnumerable).
+If the relationship is clearly "is-a", I use inheritance. If it is more like "can-be", I use interfaces. Eg, TextBox "is-a" Control, ArrayList "can-be" enumerated (so it implements IEnumerable).

@@ -8,7 +8,7 @@ categories:
   - Uncategorized
 
 ---
-So a quick update. I spent 2 hours or so yesterday working on the netflix data mining. I basically just tidied it up and started testing. I was almost finished and was about to post a blog with results, but decided I wasn&#8217;t happy with the results. It turned out there was&#8230; not a bug but that my code which worked out how related users are wasn&#8217;t as effective as I thought it would be. See I used the vector space index to calculate how similar users are. The catch being is that it found the users almost 100% similar in almost all cases. I was wondering about this and then realised it was working correctly, and my assumption on how it would work was wrong.
+So a quick update. I spent 2 hours or so yesterday working on the netflix data mining. I basically just tidied it up and started testing. I was almost finished and was about to post a blog with results, but decided I wasn't happy with the results. It turned out there was&#8230; not a bug but that my code which worked out how related users are wasn't as effective as I thought it would be. See I used the vector space index to calculate how similar users are. The catch being is that it found the users almost 100% similar in almost all cases. I was wondering about this and then realised it was working correctly, and my assumption on how it would work was wrong.
 
 What ended up happening was this,
 
@@ -28,7 +28,7 @@ Now because the ratings are so different the users should have almost a 0% relat
 
 I decided that I would do the second since it means no matter the amount of movies plugged in it should give better results. And the results are&#8230;.
 
-Im not sure. I haven&#8217;t put the code in to do this. I will do it tonight (its a 30 job) and post the results for a few queries. Essentially the way the queries work is I put in some movies and how I rated them. The program then goes and finds movies which I might like based on that information.
+Im not sure. I haven't put the code in to do this. I will do it tonight (its a 30 job) and post the results for a few queries. Essentially the way the queries work is I put in some movies and how I rated them. The program then goes and finds movies which I might like based on that information.
 
 **EDIT** I ended up implementing the above and then trying it out on a few queries.
 
@@ -112,7 +112,7 @@ The Best of Friends: Season 3 2.23488217277
   
 Always 2.14127558439
   
-Bridget Jones&#8217;s Diary 2.09806999838
+Bridget Jones's Diary 2.09806999838
   
 My Fair Lady: Special Edition: Bonus Material 2.09561711275
   
