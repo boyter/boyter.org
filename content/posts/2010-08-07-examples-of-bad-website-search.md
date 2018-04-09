@@ -9,13 +9,7 @@ url: /2010/08/examples-of-bad-website-search/
 ---
 I thought I would post some examples of websites with bad website search. Rather then pick on some small blogs lets go after the big boys. Starting with eBay.
 
-<div id="attachment_30" style="width: 310px" class="wp-caption alignleft">
-  <a href="http://www.wausita.com/wp-content/uploads/2010/08/Screenshot-ipad-Computers-Phones-Electronics-items-at-low-prices-on-eBay.com_.au-Google-Chrome.png"><img class="size-medium wp-image-30" title="Screenshot-ipad, Computers, Phones, Electronics items at low prices on eBay.com.au - Google Chrome" src="http://www.wausita.com/wp-content/uploads/2010/08/Screenshot-ipad-Computers-Phones-Electronics-items-at-low-prices-on-eBay.com_.au-Google-Chrome-300x237.png" alt="Screenshot of website search on eBay" width="300" height="237" /></a>
-  
-  <p class="wp-caption-text">
-    Screenshot of website search on eBay.
-  </p>
-</div>
+"There was a screenshot of ebay here at one point but now it is lost for all time.."
 
 The link to the left is an example of a simple search I performed on eBay for an iPad. The search comes back pretty quickly which is good but has a few issues I will go through now.
 
@@ -25,4 +19,4 @@ Secondly, there are the suggested related searches which consists of the followi
 
 Now I thought perhaps I was being a little too difficult on eBay. So I went with their suggestion of searching for "apple ipad". Guess what? Same results, same relations, same lack of what I actually want. In short website search fail.
 
-<span style="font-size: 13.3333px;">If I was running the search team at eBay I would be grilling my team for these results. Now eBay may know something I don't about how these results translate to sales but from an end user perspective this is just a big fail.</span>
+If I was running the search team at eBay I would be grilling my team for these results. Now eBay may know something I don't about how these results translate to sales but from an end user perspective this is just a big fail.

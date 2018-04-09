@@ -23,14 +23,6 @@ The feeling of productivity because you are writing lots of code.
 
 Think about that for a moment. Ask any developer who wants to develop why they became a developer. One of the first things that comes up is "I enjoy writing code". This is one of the things that I personally enjoy doing. Writing code, any code especially when its solving my current problem makes me feel productive. It makes me feel like I'm getting somewhere. Its empowering.
 
-<div id="attachment_116" style="width: 160px" class="wp-caption alignright">
-  <a href="http://www.wausita.com/wp-content/uploads/2010/08/PythonUnit.jpg"><img class="size-thumbnail wp-image-116" title="PythonUnit" src="http://www.wausita.com/wp-content/uploads/2010/08/PythonUnit-150x150.jpg" alt="Python IDLE Screenshot" width="150" height="150" /></a>
-  
-  <p class="wp-caption-text">
-    I love writing unit tests and watching them run.
-  </p>
-</div>
-
 Now think about how test driven development fits into this. You write a test, you write a method to pass the test. You write another test, you modify the method. You write another test, you modify the method. Lather rinse repeat. After you have met all your requirements you have quite a bit of code.
 
 Now why is this important? Well firstly you feel like you have done a lot because you have a lot of code. Secondly it plugs straight into the part of the brain that likes rewards. Its the same way that any game becomes addictive. You begin with a specific goal. To reach it you take small steps and each one rewards you as you get there. When you finally make the last hurdle you can look at each of the steps you took, and you feel a great deal of accomplishment.
