@@ -14,56 +14,64 @@ He was having some difficulty understanding it so I thought I would write up a v
 
 The vector space isn't actually that complicated, but getting your head around how it works takes a few steps. Let's imagine for the moment that we are going to search over a collection of documents which only contain one word "boffin". Each document has a different count of our word but only contain those words. We can represent this visually using a simple graph.
 
-<pre>1 2 3  4
-            +---------+                                                                 
-             012345678</pre>
+<pre>
+  1 2 3  4
++---------+                                                                 
+ 012345678
+</pre>
 
 The above is trying to show along the X axis the count of our word "boffin" that appears in the document whose id appears above the line. You can see that document 1 has 1 "boffin" words in it and document 4 has 8. You can also see that document 1 is closer to document 2 then it is to document 4. Let's say we decide to search for boffin twice IE our search term is "boffin boffin".
 
-<pre>+------+ "boffin boffin"
-               |
-               +
-              1X2 3  4
-            +---------+                                                                 
-             012345678</pre>
+<pre>
+   +------+ "boffin boffin"
+   |
+   +
+  1X2 3  4
++---------+                                                                 
+ 012345678</pre>
 
 What you can see quite clearly is that the closest document to our search (labelled in X) is document 1 and 2 followed by document 3 and 4. Let's try searching for "boffin boffin boffin boffin"
 
-<pre>+------+ "boffin boffin boffin boffin"
-                 |
-                 +
-              1 2X3  4
-            +---------+                                                                 
-             012345678</pre>
+<pre>
+     +------+ "boffin boffin boffin boffin"
+     |
+     +
+  1 2X3  4
++---------+                                                                 
+ 012345678</pre>
 
 You can now see that documents 2 and 3 are equally close to our search document, followed by document 1 and document 4.
 
 So far so good. We can work out how close any two "boffin" documents are and thus work out how relevent they are to a search. Let's add another word to our index. Our new documents are going to contain the words "boffin" and "head"
 
-<pre>+                                                            
-           8|     3                                                      
-           7|                                                            
-           6|                                                            
-           5|                                                            
-           4|        4                                                   
-           3|                                                            
-           2| 1                                                          
-           1|                                                            
-           0|   2                                                        
-            +---------+                                                  
-             012345678</pre>
+<pre>
+ +                                                            
+8|     3                                                      
+7|                                                            
+6|                                                            
+5|                                                            
+4|        4                                                   
+3|                                                            
+2| 1                                                          
+1|                                                            
+0|   2                                                        
+ +---------+                                                  
+  012345678
+</pre>
 
 Along the X axis we still have the count for the word boffin. However we also have a Y axis which represents the count of the term "head". Thus document 1 has 1 "boffin" word in it and 2 "head" words. You can also see that document 1 is closer to document 2 then document 3. Those of you who remember high school should remember this fellow.
 
-![Bust of Pythagoras][3]
+![Bust of Pythagoras](/static/440px-Kapitolinischer_Pythagoras_adjusted.jpg)
 
 Yes Pythagoras, a philosopher and mathematician came up with a [theorem][4] (although I suspect it should be a law now) that you could use to work out the length of a triangle's side assuming the triangle is right angled and you know the length of the other two sides. We can do that now to work out the distance between document 1 and every other document in our collection.
 
-<pre>Document 1 Distances
+<pre>
+Document 1 Distances
 
 1 to 2 = 2.83
 1 to 3 = 7.28
-1 to 4 = 7.21</pre>
+1 to 4 = 7.21
+</pre>
 
 Assuming now that we had a search which had the terms "boffin head head" we can work out that the next most relevant documents would be 1 (exact match) followed by 2, 4 and 3, simply by calculating out the distances and ordering by them.
 

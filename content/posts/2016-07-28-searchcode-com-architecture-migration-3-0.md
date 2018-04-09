@@ -20,7 +20,7 @@ categories:
 
 The previous searchcode stack consisted of two dedicated servers hosted by Hetzner. I have previously discussed this about [two years ago when discussing searchcode next][1]. The first server was a reasonably powerful machine running pretty much all of code required to deliver searchcode.com itself with the exception of the actual index. searchcode is a Django application and was using nginx to serve results directly out of memcached where possible to avoid consuming a running Gunicorn process. The move to have another server for the index came pretty quickly after searchcode was released as it was just not performant enough with everything on a single box which was the situation for a short time.
 
-[<img class="alignnone size-large wp-image-1225" src="http://www.boyter.org/wp-content/uploads/2016/07/Screen-Shot-2016-07-28-at-8.24.05-am-1024x424.png" alt="searchcode before" width="525" height="217" srcset="http://localhost/boyter.org/wp-content/uploads/2016/07/Screen-Shot-2016-07-28-at-8.24.05-am-1024x424.png 1024w, http://localhost/boyter.org/wp-content/uploads/2016/07/Screen-Shot-2016-07-28-at-8.24.05-am-300x124.png 300w, http://localhost/boyter.org/wp-content/uploads/2016/07/Screen-Shot-2016-07-28-at-8.24.05-am-768x318.png 768w, http://localhost/boyter.org/wp-content/uploads/2016/07/Screen-Shot-2016-07-28-at-8.24.05-am.png 1178w" sizes="(max-width: 525px) 100vw, 525px" />][2]
+![Searchcode Before](/static/Screen-Shot-2016-07-28-at-8.24.05-am.png)
 
 This structure worked well for the last 2 years or so but I had noticed that the load average on the frontend was starting to average out at about 3.0+ and would quite often rise to 7.0+ Considering the machine had only 4 real CPU cores this was an issue. Interestingly it also caused the number of requests that searchcode could respond to to max out. In addition the MySQL database had some corruption somewhere in the middle which made to app increasingly unstable. The application was going down where nothing short of a reboot would save it at least once a month. Finally I had grown as a developer over the last two years and it was time to move to something more stable and better performing.
 
@@ -30,7 +30,7 @@ The first thing in this modern cloud world was start looking at moving to someth
 
 **Backend server**. Would run the application itself. Scales horizontally. Requires a fast CPU to process the code results.
 
-**Indexer server**. Would host the Sphinx indexer. Scales horizontally. Requires a fast CPU, reasonably amounts of RAM and about 25 GB of amount of disk space per CPU core, preferably SSD.
+**Indexer server**. Would host the Sphinx indexer. Scales horizontally. Requires a fast CPU, reasonable amounts of RAM and about 25 GB of amount of disk space per CPU core, preferably SSD.
 
 **Database server**. Would host the MySQL database. Does not scale horizontally. Requires lots of RAM (more than 4 GB) and 2 TB of disk space.
 
@@ -48,7 +48,7 @@ I realised that the only real option for something like searchcode (which is ful
 
 Thankfully Hetzer has a very nice server auction house. You can browse through and pick up used servers for a considerable discount over a new order. In addition you don't have to pay the setup fee. To avoid the database corruption issue I experienced previously I went shopping for a ECC RAM server for the database and quickly found a tidy machine with 32 GB RAM and enough disk space. For the frontend I just picked up the cheapest 32 GB machine I could find which interestingly was similar to my previous frontend machine but with 32 GB of RAM. Lastly I went looking for something to server as the backend and the indexer. I quickly realized that I could combine both the machines into one and save a few dollars. With this saving I was able to overlook the initial setup fee and went for two machines with 32 GB of RAM and 500 GB SSD's. Since Hetzner cannot spin servers up and down like a cloud provider I hard-coded the details into my fab file for building the stack but otherwise everything deploys as though I was using a cloud provider. Only it costs considerably less and should be much much faster.
 
-[<img class="alignnone size-large wp-image-1226" src="http://www.boyter.org/wp-content/uploads/2016/07/Screen-Shot-2016-07-28-at-8.28.05-am-1024x790.png" alt="searchcode current" width="525" height="405" srcset="http://localhost/boyter.org/wp-content/uploads/2016/07/Screen-Shot-2016-07-28-at-8.28.05-am-1024x790.png 1024w, http://localhost/boyter.org/wp-content/uploads/2016/07/Screen-Shot-2016-07-28-at-8.28.05-am-300x232.png 300w, http://localhost/boyter.org/wp-content/uploads/2016/07/Screen-Shot-2016-07-28-at-8.28.05-am-768x593.png 768w, http://localhost/boyter.org/wp-content/uploads/2016/07/Screen-Shot-2016-07-28-at-8.28.05-am.png 1526w" sizes="(max-width: 525px) 100vw, 525px" />][3]
+![Searchcode After](/static/Screen-Shot-2016-07-28-at-8.28.05-am.png)
 
 The results?
 

@@ -24,7 +24,8 @@ The moment that the bustable instances were released several agents were relaunc
 
 The outcome was that no only were they saving money since they cost lest per month, they were able to run tests and build faster then the previous agents. This was a surprise at first until we observed that with very few exceptions every test was CPU bound. This included browser tests which we had expected to be more network bound. The performance increase as such was mostly down to them accumulating credits over time faster then they could be spent. See the below image which was taken from a live instance where you can clearly see how this works.
 
-[<img class="alignnone size-full wp-image-1319" src="http://www.boyter.org/wp-content/uploads/2016/08/t2_credit_usage.png" alt="t2_credit_usage" width="549" height="179" srcset="http://localhost/boyter.org/wp-content/uploads/2016/08/t2_credit_usage.png 549w, http://localhost/boyter.org/wp-content/uploads/2016/08/t2_credit_usage-300x98.png 300w" sizes="(max-width: 549px) 100vw, 549px" />][1]
+![T2 Instance Credit Usage](/static/t2_credit_usage.png)
+
 
 For the record this agent runs 24/7 running builds and tests over dozens of different projects including a lot of selenium tests for multiple browsers.
 

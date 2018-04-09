@@ -33,7 +33,8 @@ That said here is a short Python script which can be used to rebuild the folders
 
 Keep in mind this is a fairly ugly script abusing global variables and such. It is also not incredibly efficient, but did manage to extract 20GB of files in my case in a little under 10 minutes.
 
-<pre>import MySQLdb
+{{<highlight python>}}
+import MySQLdb
 import os
 import shutil
 
@@ -74,5 +75,4 @@ def create_folder_tree(parent_id, path):
         create_folder_tree(parent_id=directory[0], path='%s/%s' % (path, directory[2]))
 
 create_folder_tree(parent_id=1, path='')
-
-</pre>
+{{</highlight>}}

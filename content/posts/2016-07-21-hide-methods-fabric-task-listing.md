@@ -20,11 +20,11 @@ Occasionally you may want to hide a method from appearing inside the fabric list
 
 For example,
 
-    
-    def _apt_get(packages):
-        '''Makes installing packages easier'''
-        sudo('apt-get update')
-        sudo('apt-get -y --force-yes install %s' % packages)
-    
+{{<highlight python>}}
+def _apt_get(packages):
+    '''Makes installing packages easier'''
+    sudo('apt-get update')
+    sudo('apt-get -y --force-yes install %s' % packages)
+{{</highlight>}}
 
 When listing the fabric tasks this method will no longer appear in the results.

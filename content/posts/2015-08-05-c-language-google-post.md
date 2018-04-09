@@ -27,7 +27,9 @@ Unlike Java it has the var keyword (saves time and improves readability) and so 
 
 Then you get to the really good stuff. LINQ is awesome. The lazy loading allows you to implement a repository pattern over your database which is just awesome. Set up the basic select * from then add extension methods allowing you to chain whatever you need, EG
 
+{{<highlight java>}}
 from person in _dbContext.GetPerson().ByUserName(username).ByPassword(password);
+{{</highlight>}}
 
 100% elegant, easy to test, easy to write, easy to read and understand and generally works exactly as you would expect without any hidden gotchas. And because its lazy it doesn't chew resources sucking back everything from the database.
 
