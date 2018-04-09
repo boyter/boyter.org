@@ -94,16 +94,19 @@ So as I mentioned essentially what I attempted to do was take standard images on
     
     The following code will open an image, convert it to a GIF (makes things easier since it has 255 colours), and print its colour histogram.
     
-    <pre>from PIL import Image
+{{<highlight python>}}
+from PIL import Image
 
 im = Image.open("captcha.gif")
 im = im.convert("P")
 
-print im.histogram()</pre>
-    
-    The output from this is the following.
-    
-    <pre>[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+print im.histogram()
+{{</highlight>}}
+
+The output from this is the following.
+
+{{<highlight python>}}
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
 1, 0, 0, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
  0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 1, 0, 0, 0, 2, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0
@@ -112,11 +115,14 @@ print im.histogram()</pre>
  0, 0, 0, 0, 0, 1, 0, 3, 2, 132, 1, 1, 0, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 15, 0
 , 1, 0, 1, 0, 0, 8, 1, 0, 0, 0, 0, 1, 6, 0, 2, 0, 0, 0, 0, 18, 1, 1, 1, 1, 1, 2,
  365, 115, 0, 1, 0, 0, 0, 135, 186, 0, 0, 1, 0, 0, 0, 116, 3, 0, 0, 0, 0, 0, 21,
- 1, 1, 0, 0, 0, 2, 10, 2, 0, 0, 0, 0, 2, 10, 0, 0, 0, 0, 1, 0, 625]</pre>
-    
-    This represents the pixel count of each of the 255 colours in the image. You can see that white is probably at the end (255) since it has the biggest pixel count. Red (the text) is probably somewhere around number 200. To confirm you can just do this,
-    
-    <pre>from PIL import Image
+ 1, 1, 0, 0, 0, 2, 10, 2, 0, 0, 0, 0, 2, 10, 0, 0, 0, 0, 1, 0, 625]
+{{</highlight>}}
+
+This represents the pixel count of each of the 255 colours in the image. You can see that white is probably at the end (255) since it has the biggest pixel count. Red (the text) is probably somewhere around number 200. To confirm you can just do this,
+
+
+{{<highlight python>}}
+from PIL import Image
 from operator import itemgetter
 
 im = Image.open("captcha.gif")
@@ -129,11 +135,13 @@ for i in range(256):
   values[i] = his[i]
 
 for j,k in sorted(values.items(), key=itemgetter(1), reverse=True)[:10]:
-  print j,k</pre>
-    
-    The output is,
-    
-    <pre>255 625
+  print j,k
+{{</highlight>}}
+
+The output is,
+
+{{<highlight python>}}
+255 625
 212 365
 220 186
 219 135
@@ -142,14 +150,15 @@ for j,k in sorted(values.items(), key=itemgetter(1), reverse=True)[:10]:
 213 115
 234 21
 205 18
-184 15</pre>
+184 15
+{{</highlight>}}
     
-    The first column is the colour&#8217;s id. The second is the number of pixels in the image of that colour. This is the list of the 10 most common colours in the image. White as expected is the most common colour. Followed by what is probably gray and then red. Once we have this information we create some new images based on these colour groups. For each of the most common colours we create a new binary image (only 2 colours) which has the group colour as black and everything else as white. 
+The first column is the colour&#8217;s id. The second is the number of pixels in the image of that colour. This is the list of the 10 most common colours in the image. White as expected is the most common colour. Followed by what is probably gray and then red. Once we have this information we create some new images based on these colour groups. For each of the most common colours we create a new binary image (only 2 colours) which has the group colour as black and everything else as white. 
     
-    <div class="example">
-      I am just going to hardcode the values for our CAPTCHA for this example. I guessed red was the third most common colour which means we want to keep pixel group 220. When I experimented I found that I also needed pixel group 227 which is pretty close to 220 so I am going to keep that as well. The code below opens the CAPTCHA, converts it to gif, makes a new image the same size as the original with a white background, then runs through the first image looking for pixels of the colour we want. If it finds them it marks the same pixel in the second image as black. We then save the new image.</p> 
+I am just going to hardcode the values for our CAPTCHA for this example. I guessed red was the third most common colour which means we want to keep pixel group 220. When I experimented I found that I also needed pixel group 227 which is pretty close to 220 so I am going to keep that as well. The code below opens the CAPTCHA, converts it to gif, makes a new image the same size as the original with a white background, then runs through the first image looking for pixels of the colour we want. If it finds them it marks the same pixel in the second image as black. We then save the new image.
       
-      <pre>from PIL import Image
+{{<highlight python>}}
+from PIL import Image
 
 im = Image.open("captcha.gif")
 im = im.convert("P")
@@ -166,49 +175,52 @@ for x in range(im.size[1]):
     if pix == 220 or pix == 227: # these are the numbers to get
       im2.putpixel((y,x),0)
 
-im2.save("output.gif")</pre>
-    </div>
+im2.save("output.gif")
+{{</highlight>}}
+
+Running the above snippet against our example CAPTCHA input gives the following output. 
     
-    Running the above snippet against our example CAPTCHA input gives the following output. 
+<div class="example">
+  Output  <a href="http://www.boyter.org/wp-content/uploads/2013/07/output.gif"><img src="http://www.boyter.org/wp-content/uploads/2013/07/output.gif" alt="output" width="84" height="22" /></a><br />  </p> 
+  
+  <table border="0">
+    <tr>
+      <td>
+        Input
+      </td>
+    </tr>
     
-    <div class="example">
-      Output  <a href="http://www.boyter.org/wp-content/uploads/2013/07/output.gif"><img src="http://www.boyter.org/wp-content/uploads/2013/07/output.gif" alt="output" width="84" height="22" /></a><br />  </p> 
-      
-      <table border="0">
-        <tr>
-          <td>
-            Input
-          </td>
-        </tr>
-        
-        <tr>
-          <td>
-            <a href="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif"><img class="alignnone size-full wp-image-499" src="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif" alt="captcha" width="84" height="22" /></a>
-          </td>
-        </tr>
-      </table>
-    </div>
+    <tr>
+      <td>
+        <a href="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif"><img class="alignnone size-full wp-image-499" src="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif" alt="captcha" width="84" height="22" /></a>
+      </td>
+    </tr>
+  </table>
+</div>
     
-    You can see from the above image we have successfully extracted the text from the background. I’m sure you can see that you could automate this, by taking the pixel groups and extracting into multiple images which you then use as your next input. What about images which have text in multiple colours I hear you say? Well this technique can still work. You just assume that the most common colour is the background and keep the rest. Multi coloured text on a multi coloured background can still be broken using this technique as well. You just do the above and then combine multiple images together if you know they have text in them. Different multicoloured backgrounds for each letter which is multi coloured would beat this technique, but also be totally illegible to users as well! So at this point we have successfully extracted the text in the image. The next step is to identify if the image contains any textual data. I am not going to post code on this since it will make things needlessly complicated but the technique is pretty simple. Here is the algorithm, 
-    
-    <div class="example">
-      Building Disjoint Sets of Pixels algorithm
-    </div>
-    
-    <pre>for each binary image:
+You can see from the above image we have successfully extracted the text from the background. I’m sure you can see that you could automate this, by taking the pixel groups and extracting into multiple images which you then use as your next input. What about images which have text in multiple colours I hear you say? Well this technique can still work. You just assume that the most common colour is the background and keep the rest. Multi coloured text on a multi coloured background can still be broken using this technique as well. You just do the above and then combine multiple images together if you know they have text in them. Different multicoloured backgrounds for each letter which is multi coloured would beat this technique, but also be totally illegible to users as well! So at this point we have successfully extracted the text in the image. The next step is to identify if the image contains any textual data. I am not going to post code on this since it will make things needlessly complicated but the technique is pretty simple. Here is the algorithm, 
+
+<div class="example">
+  Building Disjoint Sets of Pixels algorithm
+</div>
+
+<pre>
+for each binary image:
   for each pixel in the binary image:
     if the pixel is on:
       if any pixel we have seen before is next to it:
         add to the same set
       else:
-        add to a new set</pre>
+        add to a new set
+</pre>
     
-    At the end of this algorithm you will have a collection of sets which can be considered a letter. Then all you need do is compare the bounds of each one of the sets, in comparison to other sets and see if they line up. If so, then jackpot because it looks like you have identified some letters next to each other. You can also check the size and dimensions, or just run this separate image through your recognition algorithm and see if you can identify which a high level of certainty if it is pixel text. For our simple example I am going to take another route. Notice that each letter is separate to the next one? None of them are joined. By taking horizontal slices of the image we can test where each image starts and finishes, and extract them into separate images. By doing this we now have a collection of letters ready to recognise. 
+At the end of this algorithm you will have a collection of sets which can be considered a letter. Then all you need do is compare the bounds of each one of the sets, in comparison to other sets and see if they line up. If so, then jackpot because it looks like you have identified some letters next to each other. You can also check the size and dimensions, or just run this separate image through your recognition algorithm and see if you can identify which a high level of certainty if it is pixel text. For our simple example I am going to take another route. Notice that each letter is separate to the next one? None of them are joined. By taking horizontal slices of the image we can test where each image starts and finishes, and extract them into separate images. By doing this we now have a collection of letters ready to recognise. 
     
-    <div class="example">
-      I’m not going to walk through this code. Its pretty much all of the above snippets, but it also slices through the new image looking for letters and storing where each one is kept.</p> 
-      
-      <pre>from PIL import Image
+<div class="example">
+I’m not going to walk through this code. Its pretty much all of the above snippets, but it also slices through the new image looking for letters and storing where each one is kept.</p> 
+
+{{<highlight python>}}
+from PIL import Image
 
 im = Image.open("captcha.gif")
 im = im.convert("P")
@@ -249,36 +261,33 @@ for y in range(im2.size[0]): # slice across
     letters.append((start,end))
 
   inletter=False
-print letters</pre>
+print letters
+{{</highlight>}}
       
-      <p>
-        Using our input image the output of the above is,
-      </p>
-      
-      <pre>[(6, 14), (15, 25), (27, 35), (37, 46), (48, 56), (57, 67)]</pre>
-      
-      <p>
-        These are the positions horizontally along the image where each letter starts and stops.
-      </p>
-    </div>
+Using our input image the output of the above is,
+
+<pre>[(6, 14), (15, 25), (27, 35), (37, 46), (48, 56), (57, 67)]</pre>
+
+These are the positions horizontally along the image where each letter starts and stops.
+</div>
     
-    ## AI and Vector Space Image Recognition {#recognition}
+## AI and Vector Space Image Recognition {#recognition}
+
+Image recognition can be considered pretty much the biggest success of modern AI and has even made it into all sorts of commercial applications. An excellent example of this is post/zip codes. They are actually read automatically in many countries because teaching a computer to recognise numbers is a fairly easy problem to solve. It may not seem like it now but, image recognition is considered an AI problem, albeit one that is highly specialised. Pretty much the first thing anyone who studies AI comes across is using a Neural Network as a method of reading characters. Personally I never had any success with a neural network for identifying characters. I could usually get it to learn 3-4 characters but after that its accuracy dropped so low it may as well have been guessing randomly. Initially this caused a mild panic as it was the last missing piece in my thesis! Thankfully some time before I had read a paper about Vector Space Search Engines and turned to it as an alternative method of classifying data. In the end it turned out to be a better choice because,
+
+  1. They don’t require extensive training iterations.
+  2. They can’t become overtrained.
+  3. You can add/remove incorrect data on the fly and see the effects
+  4. They are easier to understand and program
+  5. They provide graded results, so you can see the top X matches
+  6. Can’t recognise something? Add it in and you can recognise instantly, even if it is totally different to something seen before
     
-    Image recognition can be considered pretty much the biggest success of modern AI and has even made it into all sorts of commercial applications. An excellent example of this is post/zip codes. They are actually read automatically in many countries because teaching a computer to recognise numbers is a fairly easy problem to solve. It may not seem like it now but, image recognition is considered an AI problem, albeit one that is highly specialised. Pretty much the first thing anyone who studies AI comes across is using a Neural Network as a method of reading characters. Personally I never had any success with a neural network for identifying characters. I could usually get it to learn 3-4 characters but after that its accuracy dropped so low it may as well have been guessing randomly. Initially this caused a mild panic as it was the last missing piece in my thesis! Thankfully some time before I had read a paper about Vector Space Search Engines and turned to it as an alternative method of classifying data. In the end it turned out to be a better choice because,
-    
-      1. They don’t require extensive training iterations.
-      2. They can’t become overtrained.
-      3. You can add/remove incorrect data on the fly and see the effects
-      4. They are easier to understand and program
-      5. They provide graded results, so you can see the top X matches
-      6. Can’t recognise something? Add it in and you can recognise instantly, even if it is totally different to something seen before
-    
-        Of course its not all a free lunch. They can be much slower then a neural network when classifying, and since we know how they work they dont find their own way of solving the problem. This means that the nerual network can be more flexible when it comes to identifying things since it makes up its own method. I still feel that the benefits outweigh these issues however. Rather then explain how a vector space works I will point you in the direction of this PDF [http://la2600.org/talks/files/20040102/Vector\_Space\_Search\_Engine\_Theory.pdf][10] which is the best introduction to the subject that I have found. I built my vector space image recogniser based on the above paper, and they are usually the first thing I try to code in whatever language I am learning at the time. Go read it them come back here once you have the gist of it. Back already? Good. Now we need to code our vector space. Thankfully as I said before its not hard to write. Here it is, 
-    
-    <div class="example">
-      Vector Space implementation class.</p> 
-      
-      <pre>import math
+Of course its not all a free lunch. They can be much slower then a neural network when classifying, and since we know how they work they dont find their own way of solving the problem. This means that the nerual network can be more flexible when it comes to identifying things since it makes up its own method. I still feel that the benefits outweigh these issues however. Rather then explain how a vector space works I will point you in the direction of this PDF [http://la2600.org/talks/files/20040102/Vector\_Space\_Search\_Engine\_Theory.pdf][10] which is the best introduction to the subject that I have found. I built my vector space image recogniser based on the above paper, and they are usually the first thing I try to code in whatever language I am learning at the time. Go read it them come back here once you have the gist of it. Back already? Good. Now we need to code our vector space. Thankfully as I said before its not hard to write. Here it is, 
+
+Vector Space implementation class.
+
+{{<highlight python>}}
+import math
 
 class VectorCompare:
   def magnitude(self,concordance):
@@ -293,19 +302,19 @@ class VectorCompare:
     for word, count in concordance1.iteritems():
       if concordance2.has_key(word):
         topvalue += count * concordance2[word]
-    return topvalue / (self.magnitude(concordance1) * self.magnitude(concordance2))</pre>
-    </div>
-    
-    There is a vector space implementation in less then 15 lines of Python code. Essentially it takes in two inputs which are python dictionaries and spits out a number from 0 to 1 indicating how related they are. 0 means no relation and 1 indicates they are the same. 
-    
-    ## Building a training set {#training}
-    
-    So the next thing we need is a collection of images to compare our unknown images too. We need a training set. This set could be used to train any sort of AI technique we are going to use (neural network etc&#8230;). Using appropriate data for training can make or break your results. The better the dataset the more likely you are to succeed. Since we are targeting a specific CAPTCHA, and since we already can extract the images from the CAPTCHA itself why not use those images as our training set? That’s what I did. I downloaded many of the generated CAPTCHA images and had my program break them up into letters. I then organised my images into a collection (corpus). After a few iterations I had at least one example of every letter and number that the CAPTCHA produced. Adding more examples to my corpus would increase accuracy but what I had was enough for proof of concept. The code to produce the images is below. 
-    
-    <div class="example">
-      Again I am not going to walk through this since it is essentially what we had before but is saving each of the letters to disk at the end.</p> 
-      
-      <pre>from PIL import Image
+    return topvalue / (self.magnitude(concordance1) * self.magnitude(concordance2))
+{{</highlight>}}
+
+There is a vector space implementation in less then 15 lines of Python code. Essentially it takes in two inputs which are python dictionaries and spits out a number from 0 to 1 indicating how related they are. 0 means no relation and 1 indicates they are the same. 
+
+## Building a training set {#training}
+
+So the next thing we need is a collection of images to compare our unknown images too. We need a training set. This set could be used to train any sort of AI technique we are going to use (neural network etc&#8230;). Using appropriate data for training can make or break your results. The better the dataset the more likely you are to succeed. Since we are targeting a specific CAPTCHA, and since we already can extract the images from the CAPTCHA itself why not use those images as our training set? That’s what I did. I downloaded many of the generated CAPTCHA images and had my program break them up into letters. I then organised my images into a collection (corpus). After a few iterations I had at least one example of every letter and number that the CAPTCHA produced. Adding more examples to my corpus would increase accuracy but what I had was enough for proof of concept. The code to produce the images is below. 
+
+Again I am not going to walk through this since it is essentially what we had before but is saving each of the letters to disk at the end.
+
+{{<highlight python>}}
+from PIL import Image
 import hashlib
 import time
 
@@ -356,35 +365,24 @@ for letter in letters:
   im3 = im2.crop(( letter[0] , 0, letter[1],im2.size[1] ))
   m.update("%s%s"%(time.time(),count))
   im3.save("./%s.gif"%(m.hexdigest()))
-  count += 1</pre>
-    </div>
+  count += 1
+{{</highlight>}}
+
+The result of this code is a collection of images in the same directory. Each one is given a unique hash so we don’t accidentally blow away other images if you are going run over many CAPTCHAS to build your training set. Here is the output from the above code when run against our example CAPTCHA image. [<img src="http://www.boyter.org/wp-content/uploads/2013/07/1a09aeb0d13b9ed9b6c8c0b9c4f3a2db.gif" alt="1a09aeb0d13b9ed9b6c8c0b9c4f3a2db" width="8" height="22" />][11] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/4cb958a1b03e7507ba261ef8d7e58035.gif" alt="4cb958a1b03e7507ba261ef8d7e58035" width="10" height="22" />][12] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/18b261cc6d909f8f684278eccc5c830e.gif" alt="18b261cc6d909f8f684278eccc5c830e" width="9" height="22" />][13] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/71bd7c51130b7455fb6651800315951e.gif" alt="71bd7c51130b7455fb6651800315951e" width="10" height="22" />][14] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/910c9cd8ecf1799cd5f2c8bd01fa7f1a.gif" alt="910c9cd8ecf1799cd5f2c8bd01fa7f1a" width="8" height="22" />][15] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/b1042720c0fa596218c4832d544d349f.gif" alt="b1042720c0fa596218c4832d544d349f" width="8" height="22" />][16] 
+
+How you store these images is up to you, but I just stuck each unique letter or number in a subfolder with the same name as the letter or number it was holding. 
     
-    The result of this code is a collection of images in the same directory. Each one is given a unique hash so we don’t accidentally blow away other images if you are going run over many CAPTCHAS to build your training set. Here is the output from the above code when run against our example CAPTCHA image. [<img src="http://www.boyter.org/wp-content/uploads/2013/07/1a09aeb0d13b9ed9b6c8c0b9c4f3a2db.gif" alt="1a09aeb0d13b9ed9b6c8c0b9c4f3a2db" width="8" height="22" />][11] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/4cb958a1b03e7507ba261ef8d7e58035.gif" alt="4cb958a1b03e7507ba261ef8d7e58035" width="10" height="22" />][12] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/18b261cc6d909f8f684278eccc5c830e.gif" alt="18b261cc6d909f8f684278eccc5c830e" width="9" height="22" />][13] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/71bd7c51130b7455fb6651800315951e.gif" alt="71bd7c51130b7455fb6651800315951e" width="10" height="22" />][14] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/910c9cd8ecf1799cd5f2c8bd01fa7f1a.gif" alt="910c9cd8ecf1799cd5f2c8bd01fa7f1a" width="8" height="22" />][15] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/b1042720c0fa596218c4832d544d349f.gif" alt="b1042720c0fa596218c4832d544d349f" width="8" height="22" />][16] How you store these images is up to you, but I just stuck each unique letter or number in a subfolder with the same name as the letter or number it was holding. 
-    
-    ## Putting it all together {#together}
-    
-    The final step. We have the text extractor, letter extractor, recognition technique and a training set. We pull in the new CAPTCHA image, extract the text, extract the letters and then compare them to our training set to work out what letter it is, then print what we think the letter is. You can get the final program with training data and some CAPTCHA’s to attempt to break below. 
-    
-    <div class="example">
-      You can download the code/trainingset/images using this link,
-    </div>
-    
-    <div class="example">
-    </div>
-    
-    <div class="example">
-      <a href="http://www.boyter.org/wp-content/uploads/2013/07/captcha.zip">captcha.zip</a>
-    </div>
-    
-    <div class="example">
-    </div>
-    
-    The only new code added follows. 
-    
-    <div class="example">
-      This just loads the training set so we can compare it.</p> 
-      
-      <pre>def buildvector(im):
+## Putting it all together {#together}
+
+The final step. We have the text extractor, letter extractor, recognition technique and a training set. We pull in the new CAPTCHA image, extract the text, extract the letters and then compare them to our training set to work out what letter it is, then print what we think the letter is. You can get the final program with training data and some CAPTCHA’s to attempt to break below. 
+
+You can download the code/trainingset/images using this link,
+<a href="http://www.boyter.org/wp-content/uploads/2013/07/captcha.zip">captcha.zip</a>
+
+The only new code added follows. 
+
+{{<highlight python>}}
+def buildvector(im):
   d1 = {}
   count = 0
   for i in im.getdata():
@@ -404,13 +402,13 @@ for letter in iconset:
     temp = []
     if img != "Thumbs.db":
       temp.append(buildvector(Image.open("./iconset/%s/%s"%(letter,img))))
-    imageset.append({letter:temp})</pre>
-      
-      <p>
-        The below is where the magic happens. Right after we identify where each letter is we jump straight into checking using our vector space and training set. We then sort the results and print them
-      </p>
-      
-      <pre>count = 0
+    imageset.append({letter:temp})
+{{</highlight>}}
+
+The below is where the magic happens. Right after we identify where each letter is we jump straight into checking using our vector space and training set. We then sort the results and print them
+
+{{<highlight python>}}
+count = 0
 for letter in letters:
   m = hashlib.md5()
   im3 = im2.crop(( letter[0] , 0, letter[1],im2.size[1] ))
@@ -424,82 +422,52 @@ for letter in letters:
 
   guess.sort(reverse=True)
   print "",guess[0]
-  count += 1</pre>
-    </div>
+  count += 1
+{{</highlight>}}
     
-    ## Results and Conclusion {#results}
-    
-    Now we have everything put together lets run it, 
-    
-    <div class="example">
-      Input file, &#8220;captcha.gif&#8221; Expected output 7s9t9j</p> 
+## Results and Conclusion {#results}
+
+Now we have everything put together lets run it, 
+
+Input file, &#8220;captcha.gif&#8221; Expected output 7s9t9j
       
-      <pre>python crack.py
+<pre>
+python crack.py
  (0.96376811594202894, '7')
  (0.96234028545977002, 's')
  (0.9286884286888929, '9')
  (0.98350370609844473, 't')
  (0.96751165072506273, '9')
- (0.96989711688772628, 'j')</pre>
+ (0.96989711688772628, 'j')
+</pre>
+
+The first number is the degree of certainty we have when identifying the letter. This is on a scale of 0 (no confidence) to 1 (very high confidence). The second part is what letter we believe the image to contain.
+
+Looks like we have the correct output, with a high degree of certainty on each of the letters/numbers. In fact running it against the sample CAPTCHA images we find that we can successfully recognise about 22% of the sample CAPTCHA’s. 
+
+
+This is just the above crack.py script modified to run over each of the files in the examples directory which contains example CAPTCHA&#8217;s</p> 
       
-      <p>
-        The first number is the degree of certainty we have when identifying the letter. This is on a scale of 0 (no confidence) to 1 (very high confidence). The second part is what letter we believe the image to contain.
-      </p>
-    </div>
-    
-    Looks like we have the correct output, with a high degree of certainty on each of the letters/numbers. In fact running it against the sample CAPTCHA images we find that we can successfully recognise about 22% of the sample CAPTCHA’s. 
-    
-    <div class="example">
-      This is just the above crack.py script modified to run over each of the files in the examples directory which contains example CAPTCHA&#8217;s</p> 
-      
-      <pre>python crack_test.py
+<pre>
+python crack_test.py
   Correct Guesses -  11.0
   Wrong Guesses -  37.0
   Percentage Correct -  22.9166666667
-  Percentage Wrong -  77.0833333333</pre>
-    </div>
-    
-    Most of the bad results come from the letter O and number 0 being confused, and other instances of similar looking letters and numbers. Considering this is also an issue for humans its not totally unexpected. We also have some issues where letters in the CAPTCHA are joined and our technique is unable to split them correctly. This again is pretty easy to fix as we could just look at the size of each image to compare and break it up. However even with these issues we can break this CAPTCHA about 22% of the time. This can then be considered cracked since the computer can just churn through the CAPTCHA’s solving many hundreds before a human can solve even one. 
-    
-    <div class="example">
-      Running this code on a Core 2 Duo E6550 gives the following run time.</p> 
+  Percentage Wrong -  77.0833333333
+</pre>
+
+Most of the bad results come from the letter O and number 0 being confused, and other instances of similar looking letters and numbers. Considering this is also an issue for humans its not totally unexpected. We also have some issues where letters in the CAPTCHA are joined and our technique is unable to split them correctly. This again is pretty easy to fix as we could just look at the size of each image to compare and break it up. However even with these issues we can break this CAPTCHA about 22% of the time. This can then be considered cracked since the computer can just churn through the CAPTCHA’s solving many hundreds before a human can solve even one. 
+
+Running this code on a Core 2 Duo E6550 gives the following run time.
       
-      <pre>real    0m5.750s
+<pre>
+real    0m5.750s
 user    0m0.015s
 sys     0m0.000s</pre>
       
-      <p>
-        Since there are 48 examples CAPTCHA&#8217;s in the directory we can work out it takes on average about 0.12 seconds to crack each CAPTCHA. With 5 successful cracks per second we can perform about 432,000 cracks per day, with 95,040 sucessful attempts. Simply running another instance of the program will double these numbers.
-      </p>
-    </div>
-    
-    So there it is. A full guide to breaking CATPCHA&#8217;s which hopefully will be used for more good then evil. I honestly believe that while someone could come along and do some damage using this code, to really do anything dangerous you need to understand it and modify it quite a lot. To those who are getting ready to flame me on this remember that these techniques are not difficult to learn and anyone with the intent of breaking your CAPTCHA will do it, either programmatically or by tricking or paying people to do it for them. Perhaps by seeing how easy it is you will consider alternate methods of protecting your webforms. Still have questions? Need more detail? Buy the book. 
-    
-    <div style="margin-bottom: 10px; border: none;">
-      <table>
-        <tr>
-          <td colspan="2">
-            <center>
-              <br /> <img style="max-width: 130px;" src="http://www.boyter.org/wp-content/uploads/2015/07/booksmall.jpeg" alt="Decoding CAPTCHA's Book" width="130" height="100" border="0" /></a><br /> Want more informaiton about how to Decode a CAPTCHA? All About CAPTCHA&#8217;s. This eBook will teach you how to identify weaknesses and exploit CAPTCHA&#8217;s from beginning to end.</a><br />
-            </center>
-          </td>
-        </tr>
-        
-        <tr>
-          <td>
-            <center>
-              <br /> <a style="font-weight:bold;" href="https://leanpub.com/decodingcaptchas/" target="_blank">Buy now using LeanPub</a><br />
-            </center>
-          </td>
-          
-          <td>
-            <center>
-              <br /> <a style="font-weight:bold;" href="https://gumroad.com/l/fJpHj" target="_blank">Buy now using Gumroad</a><br />
-            </center>
-          </td>
-        </tr>
-      </table>
-    </div>
+Since there are 48 examples CAPTCHA&#8217;s in the directory we can work out it takes on average about 0.12 seconds to crack each CAPTCHA. With 5 successful cracks per second we can perform about 432,000 cracks per day, with 95,040 sucessful attempts. Simply running another instance of the program will double these numbers.
+
+So there it is. A full guide to breaking CATPCHA&#8217;s which hopefully will be used for more good then evil. I honestly believe that while someone could come along and do some damage using this code, to really do anything dangerous you need to understand it and modify it quite a lot. To those who are getting ready to flame me on this remember that these techniques are not difficult to learn and anyone with the intent of breaking your CAPTCHA will do it, either programmatically or by tricking or paying people to do it for them. Perhaps by seeing how easy it is you will consider alternate methods of protecting your webforms. Still have questions? Need more detail? Buy the book. 
 
  [1]: http://csusap.csu.edu.au/~jbgao/
  [2]: #technologyused
