@@ -10,7 +10,7 @@ categories:
 ---
 Ever wanted to match a tab while using grep for some reason? The trick (under bash anyway) is to Ctrl+V and then press the tab key so you get whatever you are looking for.
 
-<pre>$ cat file_to_grep.txt | grep "^log    "</pre>
+    $ cat file_to_grep.txt | grep "^log    "
 
 I was trying to match a file for the exact match of log and then a tab. Without the tab I ended up getting back a bunch of junk results like "logger" "logging" "login" etc&#8230;
 

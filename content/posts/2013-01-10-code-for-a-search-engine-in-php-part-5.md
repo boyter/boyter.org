@@ -113,67 +113,42 @@ Turned up bitbucket as the main result. Something else like "microsoft windows" 
 
 In fact here are a few queries I tried that I found interesting to play around with, most of which produce fairly decent results.
 
-digital asset management
-  
-ebay ireland
-  
-antivirus
-  
-celebrity gossip
-  
-weight loss
-  
-microsoft
-  
-microsoft windows
-  
-youtube converter mp3
-  
-domain registration
-  
-news for nerds
-  
-spam free search
-  
-dictionary urban
-  
-online tv free
-  
-photography review
-  
-compare hotel prices
-  
-apple mac
-  
-the white house
-  
-free ebooks for kindle
-  
-computer parts shipping
-  
-os x
-  
-kardashian
-  
-radio social network
-  
-homes for rent
-  
-iron man
-  
-wine making
-  
-apple picking
-  
-php error
-  
-rent a car
+ - digital asset management
+ - ebay ireland
+ - antivirus
+ - celebrity gossip
+ - weight loss
+ - microsoft
+ - microsoft windows
+ - youtube converter mp3
+ - domain registration
+ - news for nerds
+ - spam free search
+ - dictionary urban
+ - online tv free
+ - photography review
+ - compare hotel prices
+ - apple mac
+ - the white house
+ - free ebooks for kindle
+ - computer parts shipping
+ - os x
+ - kardashian
+ - radio social network
+ - homes for rent
+ - iron man
+ - wine making
+ - apple picking
+ - php error
+ - rent a car
 
 ### SAMPLE AND SCREENSHOT
 
 I was going to include a link to a working sample of the site, but have currently run out of time to set it up etc&#8230; Setting it up yourself isnt too difficult however, see the instructions below in the downloads section. Here is a screenshot which shows how the whole thing running on my virtual machine.
 
-[<img class="alignnone size-medium wp-image-755" src="http://www.boyter.org/wp-content/uploads/2013/01/searchscreenshot-300x153.png" alt="searchscreenshot" width="300" height="153" srcset="http://localhost/boyter.org/wp-content/uploads/2013/01/searchscreenshot-300x153.png 300w, http://localhost/boyter.org/wp-content/uploads/2013/01/searchscreenshot-1024x523.png 1024w, http://localhost/boyter.org/wp-content/uploads/2013/01/searchscreenshot-624x319.png 624w, http://localhost/boyter.org/wp-content/uploads/2013/01/searchscreenshot.png 1067w" sizes="(max-width: 300px) 100vw, 300px" />][8]
+
+![Phindex Screenshot](/static/Screen-Shot-2014-04-13-at-7.02.17-pm.png)
+
 
 ### CONCLUSION
 

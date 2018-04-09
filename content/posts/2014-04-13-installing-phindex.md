@@ -58,7 +58,7 @@ This step is going to take a while depending on how fast the computer you are us
 
 At this point everything is good. You should be able to perform a search by going to the like so,
 
-[<img class="alignnone size-large wp-image-929" src="http://www.boyter.org/wp-content/uploads/2014/04/Screen-Shot-2014-04-13-at-7.02.17-pm-1024x635.png" alt="Phindex Screenshot" width="525" height="325" srcset="http://localhost/boyter.org/wp-content/uploads/2014/04/Screen-Shot-2014-04-13-at-7.02.17-pm-1024x635.png 1024w, http://localhost/boyter.org/wp-content/uploads/2014/04/Screen-Shot-2014-04-13-at-7.02.17-pm-300x186.png 300w" sizes="(max-width: 525px) 100vw, 525px" />][1]
+![Phindex Screenshot](/static/Screen-Shot-2014-04-13-at-7.02.17-pm.png)
 
 At this point everything is working. I would suggest at this point you start looking at the code under the hood to see how it all works together. Start with add.php which gives a reasonable idea how to look at the crawled documents and how to index them. Then look at search.php to get an idea on how to use the created index. I will be expanding on this guide over time based on feedback but there should be enough here at this point for you to get started.
 

@@ -33,25 +33,25 @@ Lets go through a concrete example using a test designed to check if a file has 
 
 Here we have a function which writes a heartbeat file to the temp directory with the current date and time. Its a commonly used pattern for daemons and other background tasks to confirm they are still running.
 
-    
-        def writeheartbeat():
-            file = open('/tmp/website_heartbeat.txt','w+')
-            file.writelines(str(datetime.now()))
-            f.close()
-    
+{{<highlight python>}}
+def writeheartbeat():
+    file = open('/tmp/website_heartbeat.txt','w+')
+    file.writelines(str(datetime.now()))
+    f.close()
+{{</highlight>}}
 
 Here are some tests which verify that the file is missing and that when the function is called now exists.
 
-    
-        def testheatbeatmissing():
-            exists = os.path.isfile('/tmp/website_heartbeat.txt')
-            assertFalse(exists)
-        
-        def testheatbeatexists():
-            writeheartbeat()
-            exists = os.path.isfile('/tmp/website_heartbeat.txt')
-            assertTrue(exists)
-    
+{{<highlight python>}}
+def testheatbeatmissing():
+    exists = os.path.isfile('/tmp/website_heartbeat.txt')
+    assertFalse(exists)
+
+def testheatbeatexists():
+    writeheartbeat()
+    exists = os.path.isfile('/tmp/website_heartbeat.txt')
+    assertTrue(exists)
+{{</highlight>}}
 
 The problem with the above is simple. Assuming the tests run in order everything should be fine for the first test run. However on the second run the first test will assume that the heartbeat file will be missing, however as it would have been created from the previous run this test will now begin to fail! Worse still, if the tests run out of order or someone reorganises them such that the second becomes the first it will start to fail every time.
 
@@ -59,23 +59,23 @@ You could fix the above problems so that the file is cleaned up at the end of th
 
 A better way to test this function would be to rewrite it such that it writes to a unique file for every test run and that file is cleaned up by the test. Such a function could be written like so.
 
-    
-        def writeheartbeat(filelocation = '/tmp/website_heartbeat.txt'):
-            file = open(filelocation,'w+')
-            file.writelines(str(datetime.now()))
-            f.close()
-    
+{{<highlight python>}}
+def writeheartbeat(filelocation = '/tmp/website_heartbeat.txt'):
+    file = open(filelocation,'w+')
+    file.writelines(str(datetime.now()))
+    f.close()
+{{</highlight>}}
 
 By default the test still writes to the same location when called without an argument but now we can write out heartbeat check test to work correctly every time.
 
-    
-        def testheatbeatexists():
-            tempfilelocation = '/tmp/testheartbeatexits.tmp'
-            writeheartbeat(tempfilelocation)
-            exists = os.path.isfile(tempfilelocation)
-            assertTrue(exists)
-            os.remove(tempfilelocation)
-    
+{{<highlight python>}}
+def testheatbeatexists():
+    tempfilelocation = '/tmp/testheartbeatexits.tmp'
+    writeheartbeat(tempfilelocation)
+    exists = os.path.isfile(tempfilelocation)
+    assertTrue(exists)
+    os.remove(tempfilelocation)
+{{</highlight>}}
 
 Perfect. Now the test sets itself up correctly, performs the test and cleans up after itself. It should now be able to run concurrently with our other test without issue. As mentioned however for these situations you may want to look into mocking away the filesystem itself as a way to avoid the above issues.
 

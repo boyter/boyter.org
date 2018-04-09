@@ -9,9 +9,6 @@ categories:
   - searchcode
 
 ---
-*** Just realised a slight bug in the parser I wrote when I modified it for this article. Will update with the correct counts ASAP**
-
-**** Correct counts updated. Should be alright now.**
 
 One of the things about ranking in Search is that you need to consider all sorts of methods of working out what is relevent. Google broke new ground (although the idea had already existed) with its PageRank algorithm which supplied better search results then all the other search engines. For what I am doing however I need to consider what programmers are looking for. One thing that I considered some time ago was working out which are the most common functions in a language and adding this as an additional signal to ranking.
 
@@ -38,7 +35,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array">array</a>
+      <a href="https://searchcode.com/?q=php%20array">array</a>
     </td>
   </tr>
   
@@ -48,7 +45,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20isset">isset</a>
+      <a href="https://searchcode.com/?q=php%20isset">isset</a>
     </td>
   </tr>
   
@@ -58,7 +55,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20define">define</a>
+      <a href="https://searchcode.com/?q=php%20define">define</a>
     </td>
   </tr>
   
@@ -68,7 +65,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20empty">empty</a>
+      <a href="https://searchcode.com/?q=php%20empty">empty</a>
     </td>
   </tr>
   
@@ -78,7 +75,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20assert">assert</a>
+      <a href="https://searchcode.com/?q=php%20assert">assert</a>
     </td>
   </tr>
   
@@ -88,7 +85,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20file">file</a>
+      <a href="https://searchcode.com/?q=php%20file">file</a>
     </td>
   </tr>
   
@@ -98,7 +95,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20end">end</a>
+      <a href="https://searchcode.com/?q=php%20end">end</a>
     </td>
   </tr>
   
@@ -108,7 +105,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20count">count</a>
+      <a href="https://searchcode.com/?q=php%20count">count</a>
     </td>
   </tr>
   
@@ -118,7 +115,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20date">date</a>
+      <a href="https://searchcode.com/?q=php%20date">date</a>
     </td>
   </tr>
   
@@ -128,7 +125,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20ord">ord</a>
+      <a href="https://searchcode.com/?q=php%20ord">ord</a>
     </td>
   </tr>
   
@@ -138,7 +135,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20print">print</a>
+      <a href="https://searchcode.com/?q=php%20print">print</a>
     </td>
   </tr>
   
@@ -148,7 +145,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20substr">substr</a>
+      <a href="https://searchcode.com/?q=php%20substr">substr</a>
     </td>
   </tr>
   
@@ -158,7 +155,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20dir">dir</a>
+      <a href="https://searchcode.com/?q=php%20dir">dir</a>
     </td>
   </tr>
   
@@ -168,7 +165,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20pos">pos</a>
+      <a href="https://searchcode.com/?q=php%20pos">pos</a>
     </td>
   </tr>
   
@@ -178,7 +175,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20time">time</a>
+      <a href="https://searchcode.com/?q=php%20time">time</a>
     </td>
   </tr>
   
@@ -188,7 +185,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20exp">exp</a>
+      <a href="https://searchcode.com/?q=php%20exp">exp</a>
     </td>
   </tr>
   
@@ -198,7 +195,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20key">key</a>
+      <a href="https://searchcode.com/?q=php%20key">key</a>
     </td>
   </tr>
   
@@ -208,7 +205,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20list">list</a>
+      <a href="https://searchcode.com/?q=php%20list">list</a>
     </td>
   </tr>
   
@@ -218,7 +215,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20log">log</a>
+      <a href="https://searchcode.com/?q=php%20log">log</a>
     </td>
   </tr>
   
@@ -228,7 +225,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20com">com</a>
+      <a href="https://searchcode.com/?q=php%20com">com</a>
     </td>
   </tr>
   
@@ -238,7 +235,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20each">each</a>
+      <a href="https://searchcode.com/?q=php%20each">each</a>
     </td>
   </tr>
   
@@ -248,7 +245,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20header">header</a>
+      <a href="https://searchcode.com/?q=php%20header">header</a>
     </td>
   </tr>
   
@@ -258,7 +255,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_a">is_a</a>
+      <a href="https://searchcode.com/?q=php%20is_a">is_a</a>
     </td>
   </tr>
   
@@ -268,7 +265,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20chr">chr</a>
+      <a href="https://searchcode.com/?q=php%20chr">chr</a>
     </td>
   </tr>
   
@@ -278,7 +275,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20defined">defined</a>
+      <a href="https://searchcode.com/?q=php%20defined">defined</a>
     </td>
   </tr>
   
@@ -288,7 +285,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20unset">unset</a>
+      <a href="https://searchcode.com/?q=php%20unset">unset</a>
     </td>
   </tr>
   
@@ -298,7 +295,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20dl">dl</a>
+      <a href="https://searchcode.com/?q=php%20dl">dl</a>
     </td>
   </tr>
   
@@ -308,7 +305,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_array">is_array</a>
+      <a href="https://searchcode.com/?q=php%20is_array">is_array</a>
     </td>
   </tr>
   
@@ -318,7 +315,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strlen">strlen</a>
+      <a href="https://searchcode.com/?q=php%20strlen">strlen</a>
     </td>
   </tr>
   
@@ -328,7 +325,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20tan">tan</a>
+      <a href="https://searchcode.com/?q=php%20tan">tan</a>
     </td>
   </tr>
   
@@ -338,7 +335,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20link">link</a>
+      <a href="https://searchcode.com/?q=php%20link">link</a>
     </td>
   </tr>
   
@@ -348,7 +345,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20str_replace">str_replace</a>
+      <a href="https://searchcode.com/?q=php%20str_replace">str_replace</a>
     </td>
   </tr>
   
@@ -358,7 +355,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20printf">printf</a>
+      <a href="https://searchcode.com/?q=php%20printf">printf</a>
     </td>
   </tr>
   
@@ -368,7 +365,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20in_array">in_array</a>
+      <a href="https://searchcode.com/?q=php%20in_array">in_array</a>
     </td>
   </tr>
   
@@ -378,7 +375,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20trim">trim</a>
+      <a href="https://searchcode.com/?q=php%20trim">trim</a>
     </td>
   </tr>
   
@@ -388,7 +385,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20die">die</a>
+      <a href="https://searchcode.com/?q=php%20die">die</a>
     </td>
   </tr>
   
@@ -398,7 +395,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20sprintf">sprintf</a>
+      <a href="https://searchcode.com/?q=php%20sprintf">sprintf</a>
     </td>
   </tr>
   
@@ -408,7 +405,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strpos">strpos</a>
+      <a href="https://searchcode.com/?q=php%20strpos">strpos</a>
     </td>
   </tr>
   
@@ -418,7 +415,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20preg_match">preg_match</a>
+      <a href="https://searchcode.com/?q=php%20preg_match">preg_match</a>
     </td>
   </tr>
   
@@ -428,7 +425,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20pi">pi</a>
+      <a href="https://searchcode.com/?q=php%20pi">pi</a>
     </td>
   </tr>
   
@@ -438,7 +435,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20delete">delete</a>
+      <a href="https://searchcode.com/?q=php%20delete">delete</a>
     </td>
   </tr>
   
@@ -448,7 +445,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20explode">explode</a>
+      <a href="https://searchcode.com/?q=php%20explode">explode</a>
     </td>
   </tr>
   
@@ -458,7 +455,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20min">min</a>
+      <a href="https://searchcode.com/?q=php%20min">min</a>
     </td>
   </tr>
   
@@ -468,7 +465,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20implode">implode</a>
+      <a href="https://searchcode.com/?q=php%20implode">implode</a>
     </td>
   </tr>
   
@@ -478,7 +475,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strtolower">strtolower</a>
+      <a href="https://searchcode.com/?q=php%20strtolower">strtolower</a>
     </td>
   </tr>
   
@@ -488,7 +485,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20preg_replace">preg_replace</a>
+      <a href="https://searchcode.com/?q=php%20preg_replace">preg_replace</a>
     </td>
   </tr>
   
@@ -498,7 +495,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20exec">exec</a>
+      <a href="https://searchcode.com/?q=php%20exec">exec</a>
     </td>
   </tr>
   
@@ -508,7 +505,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20intval">intval</a>
+      <a href="https://searchcode.com/?q=php%20intval">intval</a>
     </td>
   </tr>
   
@@ -518,7 +515,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20file_exists">file_exists</a>
+      <a href="https://searchcode.com/?q=php%20file_exists">file_exists</a>
     </td>
   </tr>
   
@@ -528,7 +525,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20dirname">dirname</a>
+      <a href="https://searchcode.com/?q=php%20dirname">dirname</a>
     </td>
   </tr>
   
@@ -538,7 +535,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20htmlspecialchars">htmlspecialchars</a>
+      <a href="https://searchcode.com/?q=php%20htmlspecialchars">htmlspecialchars</a>
     </td>
   </tr>
   
@@ -548,7 +545,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20stat">stat</a>
+      <a href="https://searchcode.com/?q=php%20stat">stat</a>
     </td>
   </tr>
   
@@ -558,7 +555,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20sin">sin</a>
+      <a href="https://searchcode.com/?q=php%20sin">sin</a>
     </td>
   </tr>
   
@@ -568,7 +565,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20current">current</a>
+      <a href="https://searchcode.com/?q=php%20current">current</a>
     </td>
   </tr>
   
@@ -578,7 +575,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20mail">mail</a>
+      <a href="https://searchcode.com/?q=php%20mail">mail</a>
     </td>
   </tr>
   
@@ -588,7 +585,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_null">is_null</a>
+      <a href="https://searchcode.com/?q=php%20is_null">is_null</a>
     </td>
   </tr>
   
@@ -598,7 +595,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_merge">array_merge</a>
+      <a href="https://searchcode.com/?q=php%20array_merge">array_merge</a>
     </td>
   </tr>
   
@@ -608,7 +605,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20trigger_error">trigger_error</a>
+      <a href="https://searchcode.com/?q=php%20trigger_error">trigger_error</a>
     </td>
   </tr>
   
@@ -618,7 +615,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20pack">pack</a>
+      <a href="https://searchcode.com/?q=php%20pack">pack</a>
     </td>
   </tr>
   
@@ -628,7 +625,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20eval">eval</a>
+      <a href="https://searchcode.com/?q=php%20eval">eval</a>
     </td>
   </tr>
   
@@ -638,7 +635,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20function_exists">function_exists</a>
+      <a href="https://searchcode.com/?q=php%20function_exists">function_exists</a>
     </td>
   </tr>
   
@@ -648,7 +645,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strtoupper">strtoupper</a>
+      <a href="https://searchcode.com/?q=php%20strtoupper">strtoupper</a>
     </td>
   </tr>
   
@@ -658,7 +655,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20sizeof">sizeof</a>
+      <a href="https://searchcode.com/?q=php%20sizeof">sizeof</a>
     </td>
   </tr>
   
@@ -668,7 +665,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_keys">array_keys</a>
+      <a href="https://searchcode.com/?q=php%20array_keys">array_keys</a>
     </td>
   </tr>
   
@@ -678,7 +675,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_object">is_object</a>
+      <a href="https://searchcode.com/?q=php%20is_object">is_object</a>
     </td>
   </tr>
   
@@ -688,7 +685,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20idate">idate</a>
+      <a href="https://searchcode.com/?q=php%20idate">idate</a>
     </td>
   </tr>
   
@@ -698,7 +695,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20serialize">serialize</a>
+      <a href="https://searchcode.com/?q=php%20serialize">serialize</a>
     </td>
   </tr>
   
@@ -708,7 +705,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20sort">sort</a>
+      <a href="https://searchcode.com/?q=php%20sort">sort</a>
     </td>
   </tr>
   
@@ -718,7 +715,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20reset">reset</a>
+      <a href="https://searchcode.com/?q=php%20reset">reset</a>
     </td>
   </tr>
   
@@ -728,7 +725,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_key_exists">array_key_exists</a>
+      <a href="https://searchcode.com/?q=php%20array_key_exists">array_key_exists</a>
     </td>
   </tr>
   
@@ -738,7 +735,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_numeric">is_numeric</a>
+      <a href="https://searchcode.com/?q=php%20is_numeric">is_numeric</a>
     </td>
   </tr>
   
@@ -748,7 +745,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20abs">abs</a>
+      <a href="https://searchcode.com/?q=php%20abs">abs</a>
     </td>
   </tr>
   
@@ -758,7 +755,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20exit">exit</a>
+      <a href="https://searchcode.com/?q=php%20exit">exit</a>
     </td>
   </tr>
   
@@ -768,7 +765,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20extract">extract</a>
+      <a href="https://searchcode.com/?q=php%20extract">extract</a>
     </td>
   </tr>
   
@@ -778,7 +775,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_string">is_string</a>
+      <a href="https://searchcode.com/?q=php%20is_string">is_string</a>
     </td>
   </tr>
   
@@ -788,7 +785,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20next">next</a>
+      <a href="https://searchcode.com/?q=php%20next">next</a>
     </td>
   </tr>
   
@@ -798,7 +795,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20max">max</a>
+      <a href="https://searchcode.com/?q=php%20max">max</a>
     </td>
   </tr>
   
@@ -808,7 +805,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20rand">rand</a>
+      <a href="https://searchcode.com/?q=php%20rand">rand</a>
     </td>
   </tr>
   
@@ -818,7 +815,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20main">main</a>
+      <a href="https://searchcode.com/?q=php%20main">main</a>
     </td>
   </tr>
   
@@ -828,7 +825,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20settype">settype</a>
+      <a href="https://searchcode.com/?q=php%20settype">settype</a>
     </td>
   </tr>
   
@@ -838,7 +835,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20fclose">fclose</a>
+      <a href="https://searchcode.com/?q=php%20fclose">fclose</a>
     </td>
   </tr>
   
@@ -848,7 +845,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20round">round</a>
+      <a href="https://searchcode.com/?q=php%20round">round</a>
     </td>
   </tr>
   
@@ -858,7 +855,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20fopen">fopen</a>
+      <a href="https://searchcode.com/?q=php%20fopen">fopen</a>
     </td>
   </tr>
   
@@ -868,7 +865,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_dir">is_dir</a>
+      <a href="https://searchcode.com/?q=php%20is_dir">is_dir</a>
     </td>
   </tr>
   
@@ -878,7 +875,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20getopt">getopt</a>
+      <a href="https://searchcode.com/?q=php%20getopt">getopt</a>
     </td>
   </tr>
   
@@ -888,7 +885,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20addslashes">addslashes</a>
+      <a href="https://searchcode.com/?q=php%20addslashes">addslashes</a>
     </td>
   </tr>
   
@@ -898,7 +895,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20urlencode">urlencode</a>
+      <a href="https://searchcode.com/?q=php%20urlencode">urlencode</a>
     </td>
   </tr>
   
@@ -908,7 +905,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20fread">fread</a>
+      <a href="https://searchcode.com/?q=php%20fread">fread</a>
     </td>
   </tr>
   
@@ -918,7 +915,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20md5">md5</a>
+      <a href="https://searchcode.com/?q=php%20md5">md5</a>
     </td>
   </tr>
   
@@ -928,7 +925,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20unlink">unlink</a>
+      <a href="https://searchcode.com/?q=php%20unlink">unlink</a>
     </td>
   </tr>
   
@@ -938,7 +935,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20fwrite">fwrite</a>
+      <a href="https://searchcode.com/?q=php%20fwrite">fwrite</a>
     </td>
   </tr>
   
@@ -948,7 +945,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20copy">copy</a>
+      <a href="https://searchcode.com/?q=php%20copy">copy</a>
     </td>
   </tr>
   
@@ -958,7 +955,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20get_class">get_class</a>
+      <a href="https://searchcode.com/?q=php%20get_class">get_class</a>
     </td>
   </tr>
   
@@ -968,7 +965,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20hash">hash</a>
+      <a href="https://searchcode.com/?q=php%20hash">hash</a>
     </td>
   </tr>
   
@@ -978,7 +975,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20split">split</a>
+      <a href="https://searchcode.com/?q=php%20split">split</a>
     </td>
   </tr>
   
@@ -988,7 +985,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_shift">array_shift</a>
+      <a href="https://searchcode.com/?q=php%20array_shift">array_shift</a>
     </td>
   </tr>
   
@@ -998,7 +995,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20class_exists">class_exists</a>
+      <a href="https://searchcode.com/?q=php%20class_exists">class_exists</a>
     </td>
   </tr>
   
@@ -1008,7 +1005,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20call_user_func">call_user_func</a>
+      <a href="https://searchcode.com/?q=php%20call_user_func">call_user_func</a>
     </td>
   </tr>
   
@@ -1018,7 +1015,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20basename">basename</a>
+      <a href="https://searchcode.com/?q=php%20basename">basename</a>
     </td>
   </tr>
   
@@ -1028,7 +1025,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_push">array_push</a>
+      <a href="https://searchcode.com/?q=php%20array_push">array_push</a>
     </td>
   </tr>
   
@@ -1038,7 +1035,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20prev">prev</a>
+      <a href="https://searchcode.com/?q=php%20prev">prev</a>
     </td>
   </tr>
   
@@ -1048,7 +1045,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20glob">glob</a>
+      <a href="https://searchcode.com/?q=php%20glob">glob</a>
     </td>
   </tr>
   
@@ -1058,7 +1055,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_pop">array_pop</a>
+      <a href="https://searchcode.com/?q=php%20array_pop">array_pop</a>
     </td>
   </tr>
   
@@ -1068,7 +1065,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strstr">strstr</a>
+      <a href="https://searchcode.com/?q=php%20strstr">strstr</a>
     </td>
   </tr>
   
@@ -1078,7 +1075,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20gettext">gettext</a>
+      <a href="https://searchcode.com/?q=php%20gettext">gettext</a>
     </td>
   </tr>
   
@@ -1088,7 +1085,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20gettype">gettype</a>
+      <a href="https://searchcode.com/?q=php%20gettype">gettype</a>
     </td>
   </tr>
   
@@ -1098,7 +1095,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_file">is_file</a>
+      <a href="https://searchcode.com/?q=php%20is_file">is_file</a>
     </td>
   </tr>
   
@@ -1108,7 +1105,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20mktime">mktime</a>
+      <a href="https://searchcode.com/?q=php%20mktime">mktime</a>
     </td>
   </tr>
   
@@ -1118,7 +1115,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20join">join</a>
+      <a href="https://searchcode.com/?q=php%20join">join</a>
     </td>
   </tr>
   
@@ -1128,7 +1125,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20stripslashes">stripslashes</a>
+      <a href="https://searchcode.com/?q=php%20stripslashes">stripslashes</a>
     </td>
   </tr>
   
@@ -1138,7 +1135,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20floor">floor</a>
+      <a href="https://searchcode.com/?q=php%20floor">floor</a>
     </td>
   </tr>
   
@@ -1148,7 +1145,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20ini_get">ini_get</a>
+      <a href="https://searchcode.com/?q=php%20ini_get">ini_get</a>
     </td>
   </tr>
   
@@ -1158,7 +1155,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20ob_start">ob_start</a>
+      <a href="https://searchcode.com/?q=php%20ob_start">ob_start</a>
     </td>
   </tr>
   
@@ -1168,7 +1165,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20flush">flush</a>
+      <a href="https://searchcode.com/?q=php%20flush">flush</a>
     </td>
   </tr>
   
@@ -1178,7 +1175,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20unserialize">unserialize</a>
+      <a href="https://searchcode.com/?q=php%20unserialize">unserialize</a>
     </td>
   </tr>
   
@@ -1188,7 +1185,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_values">array_values</a>
+      <a href="https://searchcode.com/?q=php%20array_values">array_values</a>
     </td>
   </tr>
   
@@ -1198,7 +1195,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20file_get_contents">file_get_contents</a>
+      <a href="https://searchcode.com/?q=php%20file_get_contents">file_get_contents</a>
     </td>
   </tr>
   
@@ -1208,7 +1205,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20preg_match_all">preg_match_all</a>
+      <a href="https://searchcode.com/?q=php%20preg_match_all">preg_match_all</a>
     </td>
   </tr>
   
@@ -1218,7 +1215,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20constant">constant</a>
+      <a href="https://searchcode.com/?q=php%20constant">constant</a>
     </td>
   </tr>
   
@@ -1228,7 +1225,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20gmdate">gmdate</a>
+      <a href="https://searchcode.com/?q=php%20gmdate">gmdate</a>
     </td>
   </tr>
   
@@ -1238,7 +1235,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20chmod">chmod</a>
+      <a href="https://searchcode.com/?q=php%20chmod">chmod</a>
     </td>
   </tr>
   
@@ -1248,7 +1245,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_map">array_map</a>
+      <a href="https://searchcode.com/?q=php%20array_map">array_map</a>
     </td>
   </tr>
   
@@ -1258,7 +1255,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strrpos">strrpos</a>
+      <a href="https://searchcode.com/?q=php%20strrpos">strrpos</a>
     </td>
   </tr>
   
@@ -1268,7 +1265,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20print_r">print_r</a>
+      <a href="https://searchcode.com/?q=php%20print_r">print_r</a>
     </td>
   </tr>
   
@@ -1278,7 +1275,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strtotime">strtotime</a>
+      <a href="https://searchcode.com/?q=php%20strtotime">strtotime</a>
     </td>
   </tr>
   
@@ -1288,7 +1285,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20method_exists">method_exists</a>
+      <a href="https://searchcode.com/?q=php%20method_exists">method_exists</a>
     </td>
   </tr>
   
@@ -1298,7 +1295,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_readable">is_readable</a>
+      <a href="https://searchcode.com/?q=php%20is_readable">is_readable</a>
     </td>
   </tr>
   
@@ -1308,7 +1305,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20filesize">filesize</a>
+      <a href="https://searchcode.com/?q=php%20filesize">filesize</a>
     </td>
   </tr>
   
@@ -1318,7 +1315,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20microtime">microtime</a>
+      <a href="https://searchcode.com/?q=php%20microtime">microtime</a>
     </td>
   </tr>
   
@@ -1328,7 +1325,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_unique">array_unique</a>
+      <a href="https://searchcode.com/?q=php%20array_unique">array_unique</a>
     </td>
   </tr>
   
@@ -1338,7 +1335,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20system">system</a>
+      <a href="https://searchcode.com/?q=php%20system">system</a>
     </td>
   </tr>
   
@@ -1348,7 +1345,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_int">is_int</a>
+      <a href="https://searchcode.com/?q=php%20is_int">is_int</a>
     </td>
   </tr>
   
@@ -1358,7 +1355,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20mysql_query">mysql_query</a>
+      <a href="https://searchcode.com/?q=php%20mysql_query">mysql_query</a>
     </td>
   </tr>
   
@@ -1368,7 +1365,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20str_repeat">str_repeat</a>
+      <a href="https://searchcode.com/?q=php%20str_repeat">str_repeat</a>
     </td>
   </tr>
   
@@ -1378,7 +1375,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20func_get_arg">func_get_arg</a>
+      <a href="https://searchcode.com/?q=php%20func_get_arg">func_get_arg</a>
     </td>
   </tr>
   
@@ -1388,7 +1385,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strip_tags">strip_tags</a>
+      <a href="https://searchcode.com/?q=php%20strip_tags">strip_tags</a>
     </td>
   </tr>
   
@@ -1398,7 +1395,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20call_user_func_array">call_user_func_array</a>
+      <a href="https://searchcode.com/?q=php%20call_user_func_array">call_user_func_array</a>
     </td>
   </tr>
   
@@ -1408,7 +1405,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20ini_set">ini_set</a>
+      <a href="https://searchcode.com/?q=php%20ini_set">ini_set</a>
     </td>
   </tr>
   
@@ -1418,7 +1415,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_slice">array_slice</a>
+      <a href="https://searchcode.com/?q=php%20array_slice">array_slice</a>
     </td>
   </tr>
   
@@ -1428,7 +1425,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20range">range</a>
+      <a href="https://searchcode.com/?q=php%20range">range</a>
     </td>
   </tr>
   
@@ -1438,7 +1435,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20fputs">fputs</a>
+      <a href="https://searchcode.com/?q=php%20fputs">fputs</a>
     </td>
   </tr>
   
@@ -1448,7 +1445,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20preg_quote">preg_quote</a>
+      <a href="https://searchcode.com/?q=php%20preg_quote">preg_quote</a>
     </td>
   </tr>
   
@@ -1458,7 +1455,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20getdate">getdate</a>
+      <a href="https://searchcode.com/?q=php%20getdate">getdate</a>
     </td>
   </tr>
   
@@ -1468,7 +1465,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20mkdir">mkdir</a>
+      <a href="https://searchcode.com/?q=php%20mkdir">mkdir</a>
     </td>
   </tr>
   
@@ -1478,7 +1475,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20func_get_args">func_get_args</a>
+      <a href="https://searchcode.com/?q=php%20func_get_args">func_get_args</a>
     </td>
   </tr>
   
@@ -1488,7 +1485,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20ucfirst">ucfirst</a>
+      <a href="https://searchcode.com/?q=php%20ucfirst">ucfirst</a>
     </td>
   </tr>
   
@@ -1498,7 +1495,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20xml_parse">xml_parse</a>
+      <a href="https://searchcode.com/?q=php%20xml_parse">xml_parse</a>
     </td>
   </tr>
   
@@ -1508,7 +1505,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20rename">rename</a>
+      <a href="https://searchcode.com/?q=php%20rename">rename</a>
     </td>
   </tr>
   
@@ -1518,7 +1515,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strtr">strtr</a>
+      <a href="https://searchcode.com/?q=php%20strtr">strtr</a>
     </td>
   </tr>
   
@@ -1528,7 +1525,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20preg_split">preg_split</a>
+      <a href="https://searchcode.com/?q=php%20preg_split">preg_split</a>
     </td>
   </tr>
   
@@ -1538,7 +1535,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20mt_rand">mt_rand</a>
+      <a href="https://searchcode.com/?q=php%20mt_rand">mt_rand</a>
     </td>
   </tr>
   
@@ -1548,7 +1545,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20ceil">ceil</a>
+      <a href="https://searchcode.com/?q=php%20ceil">ceil</a>
     </td>
   </tr>
   
@@ -1558,7 +1555,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20version_compare">version_compare</a>
+      <a href="https://searchcode.com/?q=php%20version_compare">version_compare</a>
     </td>
   </tr>
   
@@ -1568,7 +1565,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_diff">array_diff</a>
+      <a href="https://searchcode.com/?q=php%20array_diff">array_diff</a>
     </td>
   </tr>
   
@@ -1578,7 +1575,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20rtrim">rtrim</a>
+      <a href="https://searchcode.com/?q=php%20rtrim">rtrim</a>
     </td>
   </tr>
   
@@ -1588,7 +1585,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20curl_setopt">curl_setopt</a>
+      <a href="https://searchcode.com/?q=php%20curl_setopt">curl_setopt</a>
     </td>
   </tr>
   
@@ -1598,7 +1595,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20ob_end_clean">ob_end_clean</a>
+      <a href="https://searchcode.com/?q=php%20ob_end_clean">ob_end_clean</a>
     </td>
   </tr>
   
@@ -1608,7 +1605,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strftime">strftime</a>
+      <a href="https://searchcode.com/?q=php%20strftime">strftime</a>
     </td>
   </tr>
   
@@ -1618,7 +1615,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_writable">is_writable</a>
+      <a href="https://searchcode.com/?q=php%20is_writable">is_writable</a>
     </td>
   </tr>
   
@@ -1628,7 +1625,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20base64_encode">base64_encode</a>
+      <a href="https://searchcode.com/?q=php%20base64_encode">base64_encode</a>
     </td>
   </tr>
   
@@ -1638,7 +1635,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20urldecode">urldecode</a>
+      <a href="https://searchcode.com/?q=php%20urldecode">urldecode</a>
     </td>
   </tr>
   
@@ -1648,7 +1645,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20extension_loaded">extension_loaded</a>
+      <a href="https://searchcode.com/?q=php%20extension_loaded">extension_loaded</a>
     </td>
   </tr>
   
@@ -1658,7 +1655,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20ksort">ksort</a>
+      <a href="https://searchcode.com/?q=php%20ksort">ksort</a>
     </td>
   </tr>
   
@@ -1668,7 +1665,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20stristr">stristr</a>
+      <a href="https://searchcode.com/?q=php%20stristr">stristr</a>
     </td>
   </tr>
   
@@ -1678,7 +1675,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20error_log">error_log</a>
+      <a href="https://searchcode.com/?q=php%20error_log">error_log</a>
     </td>
   </tr>
   
@@ -1688,7 +1685,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20realpath">realpath</a>
+      <a href="https://searchcode.com/?q=php%20realpath">realpath</a>
     </td>
   </tr>
   
@@ -1698,7 +1695,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_search">array_search</a>
+      <a href="https://searchcode.com/?q=php%20array_search">array_search</a>
     </td>
   </tr>
   
@@ -1708,7 +1705,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20crypt">crypt</a>
+      <a href="https://searchcode.com/?q=php%20crypt">crypt</a>
     </td>
   </tr>
   
@@ -1718,7 +1715,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20substr_count">substr_count</a>
+      <a href="https://searchcode.com/?q=php%20substr_count">substr_count</a>
     </td>
   </tr>
   
@@ -1728,7 +1725,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_bool">is_bool</a>
+      <a href="https://searchcode.com/?q=php%20is_bool">is_bool</a>
     </td>
   </tr>
   
@@ -1738,7 +1735,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20configuration">configuration</a>
+      <a href="https://searchcode.com/?q=php%20configuration">configuration</a>
     </td>
   </tr>
   
@@ -1748,7 +1745,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20ftell">ftell</a>
+      <a href="https://searchcode.com/?q=php%20ftell">ftell</a>
     </td>
   </tr>
   
@@ -1758,7 +1755,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20readdir">readdir</a>
+      <a href="https://searchcode.com/?q=php%20readdir">readdir</a>
     </td>
   </tr>
   
@@ -1768,7 +1765,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20var_export">var_export</a>
+      <a href="https://searchcode.com/?q=php%20var_export">var_export</a>
     </td>
   </tr>
   
@@ -1778,7 +1775,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20cos">cos</a>
+      <a href="https://searchcode.com/?q=php%20cos">cos</a>
     </td>
   </tr>
   
@@ -1788,7 +1785,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20usage">usage</a>
+      <a href="https://searchcode.com/?q=php%20usage">usage</a>
     </td>
   </tr>
   
@@ -1798,7 +1795,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20htmlentities">htmlentities</a>
+      <a href="https://searchcode.com/?q=php%20htmlentities">htmlentities</a>
     </td>
   </tr>
   
@@ -1808,7 +1805,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20preg_replace_callback">preg_replace_callback</a>
+      <a href="https://searchcode.com/?q=php%20preg_replace_callback">preg_replace_callback</a>
     </td>
   </tr>
   
@@ -1818,7 +1815,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20feof">feof</a>
+      <a href="https://searchcode.com/?q=php%20feof">feof</a>
     </td>
   </tr>
   
@@ -1828,7 +1825,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20error_reporting">error_reporting</a>
+      <a href="https://searchcode.com/?q=php%20error_reporting">error_reporting</a>
     </td>
   </tr>
   
@@ -1838,7 +1835,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20pow">pow</a>
+      <a href="https://searchcode.com/?q=php%20pow">pow</a>
     </td>
   </tr>
   
@@ -1848,7 +1845,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20setcookie">setcookie</a>
+      <a href="https://searchcode.com/?q=php%20setcookie">setcookie</a>
     </td>
   </tr>
   
@@ -1858,7 +1855,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_reverse">array_reverse</a>
+      <a href="https://searchcode.com/?q=php%20array_reverse">array_reverse</a>
     </td>
   </tr>
   
@@ -1868,7 +1865,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20ob_get_contents">ob_get_contents</a>
+      <a href="https://searchcode.com/?q=php%20ob_get_contents">ob_get_contents</a>
     </td>
   </tr>
   
@@ -1878,7 +1875,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20get_object_vars">get_object_vars</a>
+      <a href="https://searchcode.com/?q=php%20get_object_vars">get_object_vars</a>
     </td>
   </tr>
   
@@ -1888,7 +1885,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20opendir">opendir</a>
+      <a href="https://searchcode.com/?q=php%20opendir">opendir</a>
     </td>
   </tr>
   
@@ -1898,7 +1895,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20number_format">number_format</a>
+      <a href="https://searchcode.com/?q=php%20number_format">number_format</a>
     </td>
   </tr>
   
@@ -1908,7 +1905,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20stripos">stripos</a>
+      <a href="https://searchcode.com/?q=php%20stripos">stripos</a>
     </td>
   </tr>
   
@@ -1918,7 +1915,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20fgets">fgets</a>
+      <a href="https://searchcode.com/?q=php%20fgets">fgets</a>
     </td>
   </tr>
   
@@ -1928,7 +1925,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20hexdec">hexdec</a>
+      <a href="https://searchcode.com/?q=php%20hexdec">hexdec</a>
     </td>
   </tr>
   
@@ -1938,7 +1935,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20getenv">getenv</a>
+      <a href="https://searchcode.com/?q=php%20getenv">getenv</a>
     </td>
   </tr>
   
@@ -1948,7 +1945,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20parse_url">parse_url</a>
+      <a href="https://searchcode.com/?q=php%20parse_url">parse_url</a>
     </td>
   </tr>
   
@@ -1958,7 +1955,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20is_resource">is_resource</a>
+      <a href="https://searchcode.com/?q=php%20is_resource">is_resource</a>
     </td>
   </tr>
   
@@ -1968,7 +1965,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20compact">compact</a>
+      <a href="https://searchcode.com/?q=php%20compact">compact</a>
     </td>
   </tr>
   
@@ -1978,7 +1975,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strcmp">strcmp</a>
+      <a href="https://searchcode.com/?q=php%20strcmp">strcmp</a>
     </td>
   </tr>
   
@@ -1988,7 +1985,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20filemtime">filemtime</a>
+      <a href="https://searchcode.com/?q=php%20filemtime">filemtime</a>
     </td>
   </tr>
   
@@ -1998,7 +1995,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20sha1">sha1</a>
+      <a href="https://searchcode.com/?q=php%20sha1">sha1</a>
     </td>
   </tr>
   
@@ -2008,7 +2005,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20array_unshift">array_unshift</a>
+      <a href="https://searchcode.com/?q=php%20array_unshift">array_unshift</a>
     </td>
   </tr>
   
@@ -2018,7 +2015,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20get_current_user">get_current_user</a>
+      <a href="https://searchcode.com/?q=php%20get_current_user">get_current_user</a>
     </td>
   </tr>
   
@@ -2028,7 +2025,7 @@ The results of this can be found below.
     </td>
     
     <td>
-      <a href="http://searchco.de/?q=php%20strrchr">strrchr</a>
+      <a href="https://searchcode.com/?q=php%20strrchr">strrchr</a>
     </td>
   </tr>
   

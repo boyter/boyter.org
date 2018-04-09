@@ -10,15 +10,11 @@ Well it appears that [Cuil][1] the troubled search engine that didn't [is dead][
 
 While I am not that surprised by this considering its lackluster results, I do feel that this is bad for the web in general. With the Yahoo/Bing deal we now have very few independent indexes that power search on the web. The big players are down to the following it would seem,
 
-[Google][3]
-  
-[Bing][4]
-  
-[Ask][5]
-  
-[Gigablast][6]
-  
-[Blekko][7]
+ - [Google][3]
+ - [Bing][4]
+ - [Ask][5]
+ - [Gigablast][6]
+ - [Blekko][7]
 
 What did suprise me about this though was the question people were asking about how the founders of Cuil ever managed to secure $33 million in funding. The answer is actually pretty simple.
 

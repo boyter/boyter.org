@@ -23,7 +23,8 @@ Mostly as a self reference here is an extremely clean data access pattern possib
 
 Essentially you define a very simple class which provides a single method for getting data (although you may want a save data method too) and make sure you add an interface to make unit testing/mocking easier.
 
-<pre>public interface IUrlRepository
+{{<highlight java>}}
+public interface IUrlRepository
 {
 	IQueryable GetUrl();
 	void Save(Url url);
@@ -49,11 +50,13 @@ public class UrlRepository : IUrlRepository
 		_context.Urls.AddObject(url);
 		_context.SaveChanges();
 	}
-}</pre>
+}
+{{</highlight>}}
 
 As you can see rather then returning a list you return an IQueryable. Because entity framework is lazy you can then add extension methods over the return like so.
 
-<pre>public static class UrlRepositoryExtention
+{{<highlight java>}}
+public static class UrlRepositoryExtention
 {
 	public static IQueryable ByCreatedBy(this IQueryable url, string User)
 	{
@@ -64,24 +67,31 @@ As you can see rather then returning a list you return an IQueryable. Because en
 	{
 		return url.OrderByDescending(x =&gt; x.Create_Date);
 	}
-}</pre>
+}
+{{</highlight>}}
 
 With this you end up with a very nice method of running queries over your data.
 
-<pre>var url = _urlRepo.GetUrl().OrderByCreateDate();</pre>
+{{<highlight java>}}
+var url = _urlRepo.GetUrl().OrderByCreateDate();
+{{</highlight>}}	
 
 Since it can all be chained you can just add more filters easily as well.
 
-<pre>var url = _urlRepo.GetUrl().OrderByCreateDate().ByCreatedBy("Ben Boyter");</pre>
+{{<highlight java>}}
+var url = _urlRepo.GetUrl().OrderByCreateDate().ByCreatedBy("Ben Boyter");
+{{</highlight>}}	
 
 What about joins I hear you ask? Well thankfully you this pattern takes care of this too. Just have two repositories, pull the full data set for each and do the following.
 
-<pre>var users = _userRepo.GetUser();
+{{<highlight java>}}
+var users = _userRepo.GetUser();
 var locations = _locationRepo.GetLocation();
 
 var result =  from user in users
               join location in locations on user.locationid equals location.id && location.name = "Parramatta"
-              select user;</pre>
+              select user;
+{{</highlight>}}
 
 The best thing is that its all lazy evaluation so you don't end up pulling back the full data set into memory. Of course at a large enough scale you will probably hit some sort of leaky abstraction issue and end up rewriting to use pure SQL at some point, but for getting started this method of data access is incredibly powerful with few chances of errors.
 

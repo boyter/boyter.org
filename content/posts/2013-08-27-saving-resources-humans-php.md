@@ -13,7 +13,8 @@ One of the issues I have run into running searchcode.com is that a huge amount o
 
 Another solution is to slow them down. Of course you don't want to go too crazy with this as I do want my site indexed but not at the expense of real users. Thankfully with PHP this can be accomplished using the sleep and usleep functions.
 
-<pre>if(isHuman() == false) {
+<pre>
+if(isHuman() == false) {
   usleep(500000); // 1,000,000 is 1 second
 }</pre>
 

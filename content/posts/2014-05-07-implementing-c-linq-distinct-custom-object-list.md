@@ -21,7 +21,8 @@ Ever wanted to implement a distinct over a custom object list in C# before? You 
 
 Thankfully its not as difficult as you would image. Assuming you have a simple custom object which contains an Id, and you want to use that Id to get a distinct list all you need to do is add the following to the object.
 
-<pre>public override bool Equals(object obj)
+{{<highlight java>}}
+public override bool Equals(object obj)
 {
 	return this.Id == ((CustomObject)obj).Id;
 }
@@ -29,6 +30,7 @@ Thankfully its not as difficult as you would image. Assuming you have a simple c
 public override int GetHashCode()
 {
 	return this.Id.GetHashCode();
-}</pre>
+}
+{{</highlight>}}
 
 You need both due to the way that Linq works. I suspect under the hood its using a hash to work out whats the same hence GetHashCode.

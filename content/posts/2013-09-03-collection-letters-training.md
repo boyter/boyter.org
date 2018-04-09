@@ -18,7 +18,8 @@ The attached collection of images were generated using a script. It essentially 
 
 The PHP program for generating the images is included below. All you need do is add some fonts into the referenced fonts directory and it should generate images for you.
 
-<pre>set_time_limit(0);
+{{<highlight php>}}
+set_time_limit(0);
 $files1 = scandir("./fonts/");
 array_splice($files1,0, 1);
 array_splice($files1,0, 1);
@@ -30,7 +31,7 @@ $array = explode(" ",$letters);
 $number = 200;
 
 foreach($array as $letter) {
- for($i=0;$i&lt;$number;$i++) {
+ for($i=0;$i<$number;$i++) {
   $im = imagecreatetruecolor(500, 300);
   // Create some colors
   $white = imagecolorallocate($im, 255, 255, 255);
@@ -45,6 +46,7 @@ foreach($array as $letter) {
    imagegif($im,"./".$letter."/$i.gif");
    imagedestroy($im);
   }
-}</pre>
+}
+{{</highlight>}}
 
  [1]: http://www.boyter.org/wp-content/uploads/2013/07/training.zip

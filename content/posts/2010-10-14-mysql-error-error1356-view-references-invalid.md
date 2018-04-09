@@ -8,15 +8,13 @@ categories:
   - Uncategorized
 
 ---
-<div id="_mcePaste">
-  I managed to get the following error the other day while helping migrate and upgrade some MySQL databases for a client.
-</div>
 
-<div>
-  <pre>mysqldump: Got error: 1356: View 'database.table' references
-invalid table(s) or column(s) or function(s) or definer/invoker of view
-lack rights to use them when using LOCK TABLES</pre>
-</div>
+I managed to get the following error the other day while helping migrate and upgrade some MySQL databases for a client.
+
+    mysqldump: Got error: 1356: View 'database.table' references
+    invalid table(s) or column(s) or function(s) or definer/invoker of view
+    lack rights to use them when using LOCK TABLES
+
 
 The above appeared anytime I tried to dump the database to a SQL file using mysqldump. Its actually one of the better errors I have seen come out of MySQL (which has pretty terrible error reporting most of the time) and tells you exactly what is going wrong. **Essentially there is a old view in the the database that should be removed since its no longer valid and is throwing a compile exception.**
 
