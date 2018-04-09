@@ -121,27 +121,19 @@ And the results. All were run in the WSL for Linux on a Surface Book 2 against a
 
 <pre>$ hyperfine './cwalk' && hyperfine './godirwalk' && hyperfine './nativewalk' && hyperfine './walk'
 Benchmark #1: ./cwalk
-
   Time (mean ± σ):      1.812 s ±  0.059 s    [User: 368.4 ms, System: 6545.8 ms]
-
   Range (min … max):    1.753 s …  1.934 s
 
 Benchmark #1: ./godirwalk
-
   Time (mean ± σ):     695.9 ms ±  16.7 ms    [User: 73.0 ms, System: 619.2 ms]
-
   Range (min … max):   671.2 ms … 725.6 ms
 
 Benchmark #1: ./nativewalk
-
   Time (mean ± σ):      3.896 s ±  0.489 s    [User: 153.0 ms, System: 3757.4 ms]
-
   Range (min … max):    3.560 s …  5.034 s
 
 Benchmark #1: ./walk
-
   Time (mean ± σ):      1.674 s ±  0.071 s    [User: 399.7 ms, System: 6383.3 ms]
-
   Range (min … max):    1.571 s …  1.769 s
 </pre>
 

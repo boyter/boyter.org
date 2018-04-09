@@ -55,6 +55,8 @@ Only one person managed to find an answer, lets call him Josh (because that's hi
 
 I took a copy of his code <https://gist.github.com/walesey/e2427c28a859c4f7bc920c9af2858492> (since modified to be much faster) with a runtime of 1 minute 40 seconds (on my laptop) started work.
 
+This sort of problem can be pretty easily solved with a brute force solution, which is what Josh has done. They quite often can be more than fast enough and for tight CPU loops modern CPU's have a great deal of force.
+
 Looking at the problem itself we have a few pieces of information we can use. One is that we don't ever need to calculate the 12th turn. If the game makes the 11th turn and still continues then it made 12 so that saves us some calculations. Another is that if any money amounts are the same we can stop the game instantlty, and more importantly not even add those to the loop.
 
 Given that the existing solution was written in Go it seemed insane to some that I started writing my solution at least initally in Python. This however is not as crazy as it seems. Python being higly malleable allow some rapid iteration, trying out a few things before moving over to another language.
@@ -128,7 +130,9 @@ def turn(p1, p2):
 
 The next thing I did was generate all the permutations of money amounts to play games with into a single list. The last thing I did was switch from using Python to PyPy which with its JIT should speed up the loops considerably. The result of all this can be found here <https://gist.github.com/boyter/cab749f4713201f5b409c5b1353fc36c> and its runtime using PyPy dropped to ~8 minutes.
 
-8 minutes was about 5 times slower then the GoLang program at this point, which is pretty good for a dynamic language like Python, and consider that my implementation was single threaded where as the Go was using as many cores as it could get. My next step was to implement the same program in a faster language. The only other faster languages I know that I have any experience in are C# and Java. Since I already had Java setup I went with that. I will also admit it was about proving a point. Go may be fast, but at writing Java should be able to equal it for most tasks.
+8 minutes was about 5 times slower then the GoLang program at this point, which is pretty good for a dynamic language like Python, and consider that my implementation was single threaded where as the Go was using as many cores as it could get. In fact thinking about that, I was running Josh's code on a 4 core machine which means that the PyPy solution was almost as fast per core. This really tells volumes about the PyPy project.
+
+My next step was to implement the same program in a faster language. The only other faster languages I know that I have any experience in are C# and Java. Since I already had Java setup I went with that. I will also admit it was about proving a point. Go may be fast, but at time of writing Java should be able to equal it for most tasks.
 
 However I mentioned to Josh that his Go program had some inefficiencies. The big one being that he was calculating the 12th game needlessly. I then modified his program and with some other changed reduced the Go program runtime down to ~40 seconds. I was starting to get worried at this point, as I was aiming to beat the Go program's performance by 5%. No idea why I picked this number but it seemed reasonable if I was smart with the implementation.
 
@@ -136,15 +140,15 @@ At first I ported the Python program in its original readable reusable form to J
 
 After doing a few things such as inlining where possible, changing to enum and some other small tweaks I had a runtime of ~60 seconds. The big breakthrough I had was after looking at the hot function I realised that storing the game events in a List of Arrays meant that we had a loop in a loop. It was however possible to flatten this into a single array of integers and reset the game every 11 turns with a simple if check.
 
-This was the breakthrough I needed. Suddently the runtime dropped from ~60 seconds to about 23 seconds. I happily posted my success in the Slack channel with a link to the code and sat back.
+This was the breakthrough I needed. Suddently the runtime dropped from ~60 seconds to ~23 seconds. I happily posted my success in the Slack channel with a link to the code and sat back.
 
 The smile was soon turned to a frown. Josh implemented the same logic into his Go program and it now ran in ~6 seconds. It was suddently 5x times faster. At this point I had a mild panic and started playing with bitwise operations and other micro optimisations before realising that no matter what I did he could simply implement the same change and get the same performance benefit as we were both using roughtly the same algorithm.
 
 Something was clearly wrong. Either Go was suddently 5x faster at a basic for loop and integer math then Java OR I had a bug in my code somewhere which was making it worse. I looked. Josh looked. A few other people looked. Nobody could work out what the issue was. At this point I didn't care about the runtime, I just wanted to know WHY did it appear to be running slower. I was so desperate for an answer I did what all programmers do at this point and outsourced to the collective brain known as Stack Overflow <http://stackoverflow.com/questions/43082115/why-is-this-golang-solution-faster-then-the-equivalent-java-solution>
 
-A few un-constructive comments came back such as Java is slow (seriously its not 1995 anymore guys, Java is fast) etc&#8230; Thankfully one brilliant person managed to point out what I had missed. It was not the loop itself, but the input. Remember how I said that the generation of the events being big-endian was important? Turns out the Go program had done the reverse and implemented it little-endian.
+A few un-constructive comments came back such as Java is slow (seriously it is not 1999 anymore guys, Java is fast) etc&#8230; Thankfully one brilliant person managed to point out what I had missed. It was not the loop itself, but the input. Remember how I said that the generation of the events being big-endian was important? Turns out the Go program had done the reverse and implemented it little-endian.
 
-The thing about the core loop is that it has a bail-out condition. If two players have the same money amount we end the game and don't process any further. The worst possible situation for the loop is to process almost every condition only to find out just at the end that it ended. Its a lot of processing work. Ideally you want to find the failing conditions as soon as possible. By changing the games from the end I was forcing the Java program to process about 5x times as many combinations as the Go program.
+The thing about the core loop is that it has a bail-out condition. If two players have the same money amount we end the game and don't process any further. The worst possible situation for the loop is to process almost every condition only to find out just at the end that it ended. It is a lot of wasted processing work. Ideally you want to find the failing conditions as soon as possible. By changing the games from the end I was forcing the Java program to process about 5x times as many combinations as the Go program.
 
 It just happended to be that Josh has picked a more optimal path through the games.
 
@@ -154,7 +158,7 @@ For fun I tried running it on a 16 core VPS and it ran in about ~2 seconds and m
 
 ![VPS Core Usage](/static/Screen-Shot-2017-03-29-at-8.40.04-am.png)
 
-Interestingly while Josh's starting positions was more optimal then mine, its probably still not the optimal path for this problem. There is bound to be a way to generate the game such that you hit the failing conditions as soon as possible saving needless processing. There is probably a Thesis for a PhD in there somewhere.
+Interestingly while Josh's starting positions was more optimal then mine, its probably still not the optimal path for this problem. There is bound to be a way to generate the games such that you hit the failing conditions as soon as possible saving needless processing. There is probably a Thesis for a PhD in there somewhere.
 
 I figure this is probably as far as I want to take this. I did play around with bitwise operations and loop un-rolling but the time didn't change that much.
 
