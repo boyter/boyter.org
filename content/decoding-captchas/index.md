@@ -56,44 +56,35 @@ So as I mentioned essentially what I attempted to do was take standard images on
   * [Technology Used][2]
   * [CAPTCHA’s, what are they anyway][3]
   * [How to identify text in images/How to extract text in images][4] 
-      * [Image Recognition using AI. Neural Networks, Vector Space.][5]
-      * [Building a training set][6]
-      * [Putting it all together][7]
-      * [Results and conclusion][8]</ul> 
-    ## Technology used {#technologyused}
+  * [Image Recognition using AI. Neural Networks, Vector Space.][5]
+  * [Building a training set][6]
+  * [Putting it all together][7]
+  * [Results and conclusion][8]
+
+## Technology used {#technologyused}
     
-    All of the sample code is written in Python 2.5 using the Python Image Library. It will probably work in Python 2.6 but 2.5 is what I had installed. To get started just install Python then install the Python Image Library. <http://www.python.org/>  <http://www.pythonware.com/products/pil/>    
+All of the sample code is written in Python 2.5 using the Python Image Library. It will probably work in Python 2.6 but 2.5 is what I had installed. To get started just install Python then install the Python Image Library. <http://www.python.org/>  <http://www.pythonware.com/products/pil/>    
     
-    ## Prefix
+## Prefix
     
-    I am going to hardcode a lot of the values in this example. I am not trying to create a general CAPTCHA solver, but one specific to the examples given. This is just to keep the examples short and concise. 
+I am going to hardcode a lot of the values in this example. I am not trying to create a general CAPTCHA solver, but one specific to the examples given. This is just to keep the examples short and concise. 
     
-    ## CAPTCHA’s, What are they Anyway? {#captcha}
+## CAPTCHA’s, What are they Anyway? {#captcha}
     
-    A CAPTCHA is basically just an implementation of a one way function. This is a function where it is easy to take input and compute the result, but difficult to take the result and compute the input. What is different about them though is that while they are difficult for a computer to take the result and output the inputs, it should be easy for a human to do it. A CAPTCHA can be thought of in simple terms as a &#8220;Are you a human?&#8221; test. Essentially they are implemented by showing an image which has some word or letters embedded in it. They are used for preventing automated spam on many online websites. An example can be found on the Windows Live ID signup page [https://signup.live.com/signup.aspx?ru=http%3a%2f%2fmail.live.com%2f%3frru%3dinbox&wa=wsignin1.0&rpsnv=10&ct=1242258428&rver=5 .5.4177.0&wp=MBI&wreply=http:%2F%2Fmail.live.com%2Fdefault.aspx&lc=2057&id=64855&mkt=en-GB&bk=1242258418&rollrs=12&lic=1][9] You display the image, the human decodes the text in it and enters it into the form. A simple idea which seems like a good solution to the problem of a computer coming along signing up for thousands of spam email accounts or posting thousands of threads in your forum trying to sell viagra. The problem is that AI, in particular image recognition techniques have evolved and become very effective in certain areas. OCR (Optical Character Recognition) is pretty accurate these days and can easily read printed text. The solution was to add lines and colours and generally mess up the text in the image you are asking the human to decode to try and confuse the program. Basically what you have here is an arms race, and like every other arms race arms generally beat armour. Defeating a CAPTCHA which has been obscured is a little more difficult but still not impossible. Plus the image being generated cannot be too crazy or the human will not be able to read them. 
-    
-    <div class="example">
-      <a href="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif"><img src="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif" alt="captcha" width="84" height="22" /></a>
-    </div>
-    
-    <div class="example">
-    </div>
-    
-    The above image is an example of the CAPTCHA we are going to decode. This is a live CAPTCHA posted on an actual website and not just a test image I have created. It is a very simple CAPTCHA, consisting of text which is a uniform size and colour against a white background with some noise (pixels, colours, lines) thrown in. You might think that such a CAPTCHA is difficult to decode because of this noise, however I will show that it can easily be removed. This CAPTCHA while not very strong is a good example of home coded CAPTCHA&#8217;s which exist on the web. 
-    
-    ## How to identify text in images/How to extract text in images {#identify}
-    
-    Many methods exist for identifying where text lives in an image and extracting it. A simple Google search will list thousands of articles which have new techniques and algorithms for identifying text. Examples include using image filters which blur the image horizontally and look for darker areas (because the blur causes the text to be highlighted). Edge detection filters which just leave the outline of text, pattern detection, colour extraction etc&#8230; For the purposes of this example I am going to use colour extraction. The reason for this is that it is a simple technique which I have had a lot of success in. It&#8217;s the technique I used for my thesis which produced quite good results. The algorithm I am going to use against our example CAPTCHA is known as multivalued image decomposition. Essentially it is means is that we first build a histogram of colours in the image. This is done by taking all of the pixels, grouping them by colour and counting each group. Looking at our example you can see that means there will be about three main colours which will be quite common, either the background (white) the noise lines (grey) or the text (red). 
-    
-    <div class="example">
-      Doing this in Python is very easy.
-    </div>
-    
-    <div class="example">
-    </div>
-    
-    The following code will open an image, convert it to a GIF (makes things easier since it has 255 colours), and print its colour histogram.
-    
+A CAPTCHA is basically just an implementation of a one way function. This is a function where it is easy to take input and compute the result, but difficult to take the result and compute the input. What is different about them though is that while they are difficult for a computer to take the result and output the inputs, it should be easy for a human to do it. A CAPTCHA can be thought of in simple terms as a &#8220;Are you a human?&#8221; test. Essentially they are implemented by showing an image which has some word or letters embedded in it. They are used for preventing automated spam on many online websites. An example can be found on the Windows Live ID signup page [https://signup.live.com/signup.aspx?ru=http%3a%2f%2fmail.live.com%2f%3frru%3dinbox&wa=wsignin1.0&rpsnv=10&ct=1242258428&rver=5 .5.4177.0&wp=MBI&wreply=http:%2F%2Fmail.live.com%2Fdefault.aspx&lc=2057&id=64855&mkt=en-GB&bk=1242258418&rollrs=12&lic=1][9] You display the image, the human decodes the text in it and enters it into the form. A simple idea which seems like a good solution to the problem of a computer coming along signing up for thousands of spam email accounts or posting thousands of threads in your forum trying to sell viagra. The problem is that AI, in particular image recognition techniques have evolved and become very effective in certain areas. OCR (Optical Character Recognition) is pretty accurate these days and can easily read printed text. The solution was to add lines and colours and generally mess up the text in the image you are asking the human to decode to try and confuse the program. Basically what you have here is an arms race, and like every other arms race arms generally beat armour. Defeating a CAPTCHA which has been obscured is a little more difficult but still not impossible. Plus the image being generated cannot be too crazy or the human will not be able to read them. 
+
+<a href="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif"><img src="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif" alt="captcha" width="84" height="22" /></a>
+
+The above image is an example of the CAPTCHA we are going to decode. This is a live CAPTCHA posted on an actual website and not just a test image I have created. It is a very simple CAPTCHA, consisting of text which is a uniform size and colour against a white background with some noise (pixels, colours, lines) thrown in. You might think that such a CAPTCHA is difficult to decode because of this noise, however I will show that it can easily be removed. This CAPTCHA while not very strong is a good example of home coded CAPTCHA&#8217;s which exist on the web. 
+
+## How to identify text in images/How to extract text in images {#identify}
+
+Many methods exist for identifying where text lives in an image and extracting it. A simple Google search will list thousands of articles which have new techniques and algorithms for identifying text. Examples include using image filters which blur the image horizontally and look for darker areas (because the blur causes the text to be highlighted). Edge detection filters which just leave the outline of text, pattern detection, colour extraction etc&#8230; For the purposes of this example I am going to use colour extraction. The reason for this is that it is a simple technique which I have had a lot of success in. It&#8217;s the technique I used for my thesis which produced quite good results. The algorithm I am going to use against our example CAPTCHA is known as multivalued image decomposition. Essentially it is means is that we first build a histogram of colours in the image. This is done by taking all of the pixels, grouping them by colour and counting each group. Looking at our example you can see that means there will be about three main colours which will be quite common, either the background (white) the noise lines (grey) or the text (red). 
+
+Doing this in Python is very easy.
+
+The following code will open an image, convert it to a GIF (makes things easier since it has 255 colours), and print its colour histogram.
+
 {{<highlight python>}}
 from PIL import Image
 
@@ -200,9 +191,8 @@ Running the above snippet against our example CAPTCHA input gives the following 
     
 You can see from the above image we have successfully extracted the text from the background. I’m sure you can see that you could automate this, by taking the pixel groups and extracting into multiple images which you then use as your next input. What about images which have text in multiple colours I hear you say? Well this technique can still work. You just assume that the most common colour is the background and keep the rest. Multi coloured text on a multi coloured background can still be broken using this technique as well. You just do the above and then combine multiple images together if you know they have text in them. Different multicoloured backgrounds for each letter which is multi coloured would beat this technique, but also be totally illegible to users as well! So at this point we have successfully extracted the text in the image. The next step is to identify if the image contains any textual data. I am not going to post code on this since it will make things needlessly complicated but the technique is pretty simple. Here is the algorithm, 
 
-<div class="example">
-  Building Disjoint Sets of Pixels algorithm
-</div>
+
+Building Disjoint Sets of Pixels algorithm
 
 <pre>
 for each binary image:
