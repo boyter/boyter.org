@@ -453,7 +453,8 @@ Running this code on a Core 2 Duo E6550 gives the following run time.
 <pre>
 real    0m5.750s
 user    0m0.015s
-sys     0m0.000s</pre>
+sys     0m0.000s
+</pre>
       
 Since there are 48 examples CAPTCHA&#8217;s in the directory we can work out it takes on average about 0.12 seconds to crack each CAPTCHA. With 5 successful cracks per second we can perform about 432,000 cracks per day, with 95,040 sucessful attempts. Simply running another instance of the program will double these numbers.
 
@@ -467,7 +468,7 @@ So there it is. A full guide to breaking CATPCHA&#8217;s which hopefully will be
  [6]: #training
  [7]: #together
  [8]: #results
- [9]: https://signup.live.com/signup.aspx?ru=http%3a%2f%2fmail.live.com%2f%3frru%3dinbox&wa=wsignin1.0&rpsnv=10&ct=1242258428&rver=5  .5.4177.0&wp=MBI&wreply=http:%2F%2Fmail.live.com%2Fdefault.aspx&lc=2057&id=64855&mkt=en-GB&bk=1242258418&rollrs=12&lic=1
+ [9]: https://signup.live.com/signup.aspx?ru=http%3a%2f%2fmail.live.com%2f%3frru%3dinbox&wa=wsignin1.0&rpsnv=10&ct=1242258428&rver=5.5.4177.0&wp=MBI&wreply=http:%2F%2Fmail.live.com%2Fdefault.aspx&lc=2057&id=64855&mkt=en-GB&bk=1242258418&rollrs=12&lic=1
  [10]: http://la2600.org/talks/files/20040102/Vector_Space_Search_Engine_Theory.pdf
  [11]: http://www.boyter.org/wp-content/uploads/2013/07/1a09aeb0d13b9ed9b6c8c0b9c4f3a2db.gif
  [12]: http://www.boyter.org/wp-content/uploads/2013/07/4cb958a1b03e7507ba261ef8d7e58035.gif
