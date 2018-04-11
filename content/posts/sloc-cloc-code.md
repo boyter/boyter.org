@@ -822,6 +822,9 @@ There was one thing nagging me. What happens if someone runs scc on a older styl
 
 Turns out there was no appreciable difference as far as I can tell. I used the Django project as a test bed (which took ~20 seconds to process) and with or without a setting to reduce the number of processes it ran in roughly the same amount of time. This included runs where I dropped the disk file caches as well. Very cool.
 
+The last thing I wanted was to add the ability to filter out duplicate files. To do so I needed to build a hash of the file contents and then check if anything matches. I had a look into adding murmur3 hash which is one of the faster hashing methods, but decided against it and used MD5. The main reason being that its in the standard library. It is slower than murmur3 but not by enough to bring in another dependancy.
+
+Another thing that factored into the decison was which hash algorithm allowed streaming bytes. Because the core loop of the application loops bytes we can feed that byte into the hash directly and get the result at the end rather than passing all the bytes and save another loop. Checking for duplicates slows the count down by about 20% for most of the tests I tried.
 
 ## Optimisations
 
@@ -829,26 +832,38 @@ So with the application running well producing decent output and being fast I de
 
 A quick check on 1, 2, 4, 16 and 32 core machines showed that all of a sudden scc went from faster than tokei and loc to slower by about 2x. That is for every second tokei took to count code scc took two.
 
-The reason is thatfor any byte I was looking at while in the code state meant there was ~8 byte checks to determine if there was something to increase the complexity. This ended up in a large block of if statements that ate all of the performance I had put into the application. Suddenly I was very CPU bound and gaining that performance lost back is a big ask.
+The reason is that for any byte I was looking at while in the code state meant there were an addtional ~8 byte checks to determine if there any code that would require an increase to the complexity count. This ended up producing a large block of if statements and some addtional loops that ate all of the performance I had put into the application. Suddenly I was very CPU bound and gaining that performance lost back is a big ask.
 
-I resorted to salami tactics. That is slice by slice whittle down every possible wasted CPU cycle.
+I resorted to salami tactics, that is slice by slice whittle down every possible wasted CPU cycle.
 
 Time to start profiling.
+
+The Go profiling tools are pretty easy to use. I found the easiest way to enable them was to import runtime/pprof and then just after the main function add lines to set it up.
+
+```
+import "runtime/pprof"
+
+func main() {
+
+	f, _ := os.Create("profile.pprof")
+	pprof.StartCPUProfile(f)
+	defer pprof.StopCPUProfile()
+```
+
+You then just compile and run, and it will produce a profile.pprof file you can then analyse.
+
+One issue I did run into was running the above using the WSL for Windows. No matter what I did when run in the WSL I would never get any profile output. The solution was the compile on Windows run the application to capture the output and then for the web view use WSL for that and for inspection use Windows.
 
 go tool pprof -http=localhost:8090 scc.pprof
 go tool pprof scc.pprof
 
 list github.com/boyter/scc/processor.countStats
 
-C:\Users\bboyter\Documents\Go\src\github.com\boyter\scc>scc.exe C:\users\bboyter\Documents\Projects\linux
-https://blog.golang.org/profiling-go-programs
-http://localhost:8090/
-https://stackoverflow.com/questions/45786687/runtime-duffcopy-is-called-a-lot
+Checking profile output showed that rather unsuprisingly the core loop had suddenly become the bottle neck. In the below the core loop is the large box on the left side named countStats.
 
+![Profile](/static/sloc-cloc-code/profile1.png)
 
-Checking profile output showed that rather unsuprisingly the core loop had suddenly become the bottle neck.
-
-Having a look at what I had in the core loop,
+Having a look at what I had in the core loop at the time,
 
 {{<highlight go>}}
 if currentState == S_BLANK && checkForMatch(currentByte, index, endPoint, singleLineCommentChecks, fileJob) {
@@ -885,14 +900,14 @@ if (currentState == S_BLANK || currentState == S_CODE) && checkComplexity(curren
 }
 {{</highlight>}}
 
-It is reasonably complex. However thinking about it there is one quick obvious win here. If we have moved state, then we don't need to check the other conditions. Having a simple boolean to indicate that the state has changed and then skip over a lot of the checks will speed this up considerably. So I added that in and cut the runtime in half. 
+It is reasonably complex with a lot of if checks which are probably causing the slowdown. However thinking about it there is one quick obvious win here. If we have moved state I.E. switched from S_BLANK to S_CODE, then we don't need to check the other conditions. Having a simple boolean to indicate that the state has changed and then skip over a lot of the checks will speed this up considerably. So I added that in and cut the runtime in half. 
 
 This was a good start but there is a lot more that can be done, not only to improve performance but to make the code far more readable.
 
- - Change the logic so that we use a switch to jump to our current state and check what to do from there. This gives us the previous optimisation for free and should make things easier to read.
- - Count the frequency of each of the above ifs. We want to order them such that we hit the change state condition as frequently as possible and bail out. In other words the order of the checks matters a great deal.
+ - The first would be to change the logic so that we use a switch to jump to our current state and check what to do from there. This gives us the previous optimisation for free and should make things easier to read.
+ - The other would be count the frequency of each of the above ifs. We want to order them such that we hit the change state condition as frequently as possible and bail out. In other words the order of the checks matters a great deal as you can use it to avoid hitting multiple if conditions.
 
-I implemented the first which yielded some gains, but then realised I could convert the whole thing over to a large switch statement and save the addtional accounting overhead of checking the state.
+I implemented the first which yielded some gains, but then realised I could convert the whole thing over to a large switch statement and save the addtional accounting overhead of checking the state, and get both of the above fixes.
 
 I changed over to the the switch statement, verified it works as well as the skip checks from before and went back to profiling. Here is the the output looking at a run of the linux kernel once it has been warmed into disk cache.
 
@@ -914,13 +929,13 @@ Showing top 10 nodes out of 80
      0.12s  0.38% 90.17%      0.32s  1.02%  path/filepath.Match
 ```
 
-Looking at the above you can seethat countStats, checkForMatchMultiOpen, checkForMatchMultiClose and checkComplexity are methods that I wrote that would be the best ones to investigate. A good sign is that cgocall is at the top as it means we are getting close to be bottlenecked by disk access and not the CPU.
+Looking at the above you can see that the core loop function countStats is still at the top, but that checkForMatchMultiOpen, checkForMatchMultiClose and checkComplexity are methods that I wrote that would be worth investigating. A good sign is that cgocall is called almost as much as countStats so we are getting close to be bottlenecked by disk access and not the CPU.
 
-The methods at first looked pretty tight. They all work by taking in a slice/list of things to check and then loop over the bytes inside them. 
+The methods at first looked pretty tight. They all work by taking in a slice/list of things to check and then loop over the bytes inside them.
 
-However there is the fact that they had a nested loop inside them which is usually a bad plan. Most of the time the checks don't find anything. As such we could just check if the first character doesnt match any of the first characters in the matches and if so bail out. This makes the best case of no matches faster at the expense of a few extra lookups for the worst case of a partical match. 
+However there is the fact that they had a nested loop inside usually is a bad sign. Thinking about the methods they usually find nothing, as it is unlikely that every byte is the start of a while loop. As such we are more likely to hit a negative condition than positive. As such we could just check if the first character doesnt match any of the first characters in the matches and if so bail out. This makes the best case of no matches faster at the expense of a few extra lookups for the worst case of a partial match.
 
-Sounds good in theory. So I tried it out. I added in the first bytes we want to look for like the below.
+Sounds good in theory. So I tried it out. I quickly added in the first bytes we want to look for to the code complexity calculation as below.
 
 {{<highlight go>}}
 complexityBytes := []byte{
@@ -970,7 +985,7 @@ Showing top 10 nodes out of 83
 
 A nice optimisation. The method checkComplexity is down in terms of cumulative call time.
 
-So looking further into the code I tried to identify what else is causing problems. Turns out that allocations are expensive when run in a tight loop. Look at the last line where I return 0 with []byte{}
+So looking further into the code I tried to identify what else is causing problems. Turns out that allocations are expensive when run in a tight loop. Look at the last line in the below where I return 0 with a new empty byte allocation.
 
 ```
 (pprof) list github.com/boyter/scc/processor.checkForMatchMultiOpen
@@ -980,7 +995,7 @@ ROUTINE ======================== github.com/boyter/scc/processor.checkForMatchMu
      3.08s     11.05s     78:           return 0, []byte{}
 ```
 
-The second param is not actually required in this case. So by changing it to a nil return we get the following profile which improves the performance considerably.
+The second param is not actually required in this case. So by changing it to a nil return we get the following profile which improves the performance.
 
 ```
          .          .     77:   if !hasMatch {
@@ -1022,11 +1037,9 @@ BenchmarkCheckByteEqualityLoop-8                                        50000000
 
 As you can see reflection is right out. However by using our own loop with the 1 byte offset we can get an addtional saving. Extreme? Yes. But remember this happens in the core hot loop so these savings all add up. If you have very constrained requirements it can be worth checking to see if you can do better than the standard libaries.
 
+Another thing I ran into was an odd method being called in the profile "duffcopy". Did you know that range queries cause addtional allocations? It appears when you profile as "duffcopy" https://stackoverflow.com/questions/45786687/runtime-duffcopy-is-called-a-lot switching from range to index lookups can buy you a lot of performance if you are running very tight loops.
 
-Another thing I ran into was an odd method 
-Did you know that range queries cause addtional allocations? It appears when you profile as "duffcopy" https://stackoverflow.com/questions/45786687/runtime-duffcopy-is-called-a-lot switching from range to index lookups can buy you a lot of performance.
-
-Another thing that appeared in the profile was calls to Sprintf. This was caused by my trace and debug logic. Wrapping it with an if statement looks ugly but solves the issue as it is extremently friendly to the branch predictor and saves some string allocations.
+Also in the profile were many calls to Sprintf. This was caused by my trace and debug logic. Wrapping it with an if statement looks ugly but solves the issue as it is extremently friendly to the branch predictor and saves some string allocations.
 
 ```
 if Trace {
@@ -1034,16 +1047,16 @@ if Trace {
 }
 ```
 
-Another place to save some speed was with caches for certain actions. An example would be getting the extension of a file. Its pretty common to have multiple files with the same name. As such a simple Map to save the processing can dramaticly speed things up at the expense of some memory. A simple benchmark shows that the gains are not insignificant.
+Another place to save some time was to add caches for certain actions. An example would be getting the extension of a file. Its pretty common to have multiple files with the same name. As such a cache to save the processing can dramaticly speed things up at the expense of some memory. A simple benchmark shows that the gains are not insignificant.
 
 ```
 BenchmarkGetExtensionDifferent-8                                          200000              6077 ns/op
 BenchmarkGetExtensionSame-8                                             10000000               138 ns/op
 ```
 
-This one is pretty obvious but its nice to see what the actual impact can be which is a nice strength of the go test -bench option
+The final thing I looked to optimise was the printing code. While generally it was not an issue I noticed that if the files option was used it would take a considerable amount of time processing the lists. I was using https://github.com/ryanuber/columnize/ for this and while it worked well the additional overhead was a problem. I poked through the code and the slowdown was because it takes in any length and organises the values into a column it needs to loop the input a few times in order to know output sizes.
 
-The final thing to optimise is the printing code. This is rather boring so I am not going to go too indepth into it. While generally it was not an issue I noticed that if the files option was used it would take a considerable amount of time processing the lists. I was using https://github.com/ryanuber/columnize/ for this and while it worked well the additional overhead was not what I was looking for. As such I rolled my own. Since the core of it is string conaternation a quick search showed that https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go there are quite a few ways to do this. Thankfully someone included a benchmark,
+However I could work out the sizes in advance, or just define them and avoid those addtional loops. As such I rolled my own formatter. Well aware that string concaternation is usually very slow, a quick search showed that https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go there are quite a few ways to do it in Go. Thankfully someone included a benchmark of the common ways to do it.
 
 ```
 BenchmarkConcat-8                1000000             64850 ns/op
@@ -1052,9 +1065,9 @@ BenchmarkCopy-8                 1000000000               3.06 ns/op
 BenchmarkStringBuilder-8        200000000                7.74 ns/op
 ```
 
-Based on the above I decided to go with the Go 1.10 specific method and use string builder. Its almost as fast as buffer and copy but much easier to understand, and since the formatting happens at the very end with only a few iterations for the summary and with what can be done as results come in for the files options there is no real need to overcomplicate things. It also ensures that scc can only be built with a modern compiler so we get at least a decent level of baseline performance.
+Based on the above I decided to go with the Go 1.10 specific method and use string builder. Its almost as fast as buffer and copy but much easier to understand. Since the formatting happens at the very end with only a few iterations for the summary and with what can be done as results come in for the files options there is no real need to overcomplicate things. It also ensures that scc can only be built with a modern Go compiler so we get at least a decent level of baseline performance.
 
-I wrote my own little benchmark over the formatters method to ensure I didn't make it slower and converted it over. 
+I wrote my own little benchmark over the formatters method to ensure I didn't make things slower and converted it over. 
 
 ```
 // When using columise  ~28726 ns/op
@@ -1063,8 +1076,11 @@ I wrote my own little benchmark over the formatters method to ensure I didn't ma
 
 Switching out to a custom formatter method was about half the amount of operations. It also allowed me to add line breaks to the output which was something missing in columize.
 
+So after all of the above the final profile ended up looking like the below. The countStats box is now pretty close to the cgocall and the times are fairly close. The application is still CPU bound with a warm disk cache, but it is much closer now. Most of the time is now in the complexityCheck method which is probably about as efficient as I can write it.
 
-Benchmarks
+![VPS Core Usage](/static/sloc-cloc-code/profile2.png)
+
+## Benchmarks
 
 What follows is going to be a highly biased (I wrote one of the tools remember) collection of benchmarks which definitively prove that scc is the fastest code counter that I am aware of. Its not only faster than cloc by a huge amount it either equals tokei or is considerably faster and leaves loc trailing as well. This is either on Windows Native or through WSL or Linux. I would try OSX but I cannot spin up a VM of one to test it out.
 
@@ -1075,6 +1091,8 @@ I am using the excellent Rust tool hyperfine for benchmarking with 3 warmup runs
 
 BENCHMARKS HERE
 
+
+## Results
 
 Of course whats likely to happen now is that either the excellent authors of Tokei or Loc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats even faster than scc. I have no problem with this. It was more about seeing how fast I could make it, and besides I don't think of tools that do similar things as being in competition. Andy Lester of ack fame puts this far better than I ever could http://blog.petdance.com/2018/01/02/the-best-open-source-project-for-someone-might-not-be-yours-and-thats-ok/
 
