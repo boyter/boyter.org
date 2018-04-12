@@ -843,15 +843,15 @@ You then just compile and run, and it will produce a profile.pprof file you can 
 
 One issue I did run into was running the above using the WSL for Windows. No matter what I did when run in the WSL I would never get any profile output. The solution was the compile on Windows run the application to capture the output and then for the web view use WSL for that and for inspection use Windows.
 
-So to get the nice web output
+So to get the nice web output (inside WSL)
 
 	go tool pprof -http=localhost:8090 profile.pprof
 
-and to inspect the lines themselves 
+and to inspect the lines themselves using cmd
 
 	go tool pprof profile.pprof
 
-and to get the line by line counts
+and to get the line by line counts when inside the profiler in cmd
 
 	list github.com/boyter/scc/processor.countStats
 
