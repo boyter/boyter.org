@@ -11,62 +11,51 @@ https://gobyexample.com/sha1-hashes
 TL/DR
 
  - scc is a very fast and accuracte code counter with complexity caluclations and cocomo estimates
- - tokei could be equally fast if it copied the file walk from ripgrep
  - unless you really really really need speed a lot of the below below is probably not applicable
- - for most of these tools the bottleneck appears to be how quickly you can walk the file tree
- - mmaps for reading files is useful if the file you are opening is >= 6 MB in size
+ - surpisingly walking the file tree can be the bottleneck in your application
+ - mmaps for reading files is useful if the file you are opening is >= 6 MB in size (at least in WSL)
  - don't forgot the golden rule of performance which is to profile/measure, profile/measure and profile/measure again
- - best case vs worst case performance for parallel file tree walking is quite large
+ - the best case vs worst case performance for parallel file tree walking is quite large
  - the default file walker in Go is slower due to calling os.Stat on every node and not running in parallel
 
-So it started by wanting to write a code counter that would be faster than cloc. An elegant weapon for a more civilized age.
+It started by wanting to write a code counter that would be faster than cloc.
 
 For those who have never encountered cloc https://github.com/AlDanial/cloc it is what appears to be simple command line tool (it is not simple and has a LOT of functionality!) that iterates through a given directory checking files against a known list of programming languages and then counting the number of code, comment and blank lines. For getting an overview of how large a project is and what languages are being used it is incredibly useful. I remember first using it early in my career to estimate project sizes.
 
-Cloc is written in perl and is probably not known for its performance (I don't know of anyone who claimed it to be fast). Running it on a small directory with 6 files on my development machine takes ~1.7 seconds. I gave up running it against a larger codebase like the linux kernel but lets just say it takes long enough to brew a pot of coffee.
+Cloc is written in perl and is probably not known for its performance (I don't know of anyone who claimed it to be a shining example of a fast application). Running it on a small directory with 6 files on my development machine takes ~1.7 seconds. I gave up running it against a larger codebase like the linux kernel but in my case it took long enough to brew a pot of coffee before I hit CTRL+C.
 
 It got me thinking, what is fast enough? What sort of performance should I aim for? I want it to be faster than cloc, but how much faster?
 
 I would generally argue that performance, like money, isn't everything unless you have none. Get it working, make it right, make it fast. In that order.
 
-For user driven tools performance can be everything. When I ask a program to do something I want it done now dammit. Some users may be prepared to wait a while for a result if they percieve value in it such as calculating your tax figures. Programming tools tend to fall into the I want it now. You may only run it once every few days, but if its so slow as to produce finger tapping it quickly becomes frustrating, causes the mind to wander and produtivity to go down. 
+For some user driven tools performance can be everything. Personally ehen I ask a program to do something I want it done now dammit. Some users may be prepared to wait a while for a result if they percieve value in it such as calculating your tax, you at least want the illusion that a lot is happening to ensure it is correct. Programming tools tend to fall into the I want it now category. You may only run it once every few days, but if its so slow as to produce finger tapping it quickly becomes frustrating, causes the mind to wander and produtivity to go down. 
 
 It also causes the devloper to start thinking that they could make it run faster if they wanted and they start opening a repository and implementing a new version while waiting. Apparently waiting for C to compile is why Go became a programming language. Performance is also one of the reasons Google became so popular so quickly.
 
 The other reason Google became popular was accuracy. The flip side to performance is that it usually comes at the expense of accuracy. Usually it is about trade offs. Are you willing to trade speed for accuracy? If you don't require any accuracy I promise to make the fastest program you have ever seen.
 
-So having established through some flimsy "I am a programmer and my tools are special" hand waving I decided I needed to make the fastest possible code counter. I want it to push the boundries of the hardare (unlikey) or my own abilities (much more likely). Oh and I don't want to trade speed for accuracy. I want both.
+So having established through some flimsy "I am a programmer and my tools are special" hand waving I decided I needed to make the fastest possible code counter. I want it to push the boundries of the hardare (unlikely) or my own abilities (much more likely). Oh and I don't want to trade speed for accuracy. I want both.
 
-To make things easier I decided to implement only the basic count that cloc provides and not the fancy SQLite output it provides. CSV and JSON output is about as far as I am going to go. This scope expanded as I progressed however.
-
-Next I had a look over at the steam hardware survey to see how many CPU cores the average developer is likely to have these days http://store.steampowered.com/hwsurvey which turned out to be 4.
-
-As such I set the task that I want to optimise for 4 or more 64 bit cores with 8 GB of RAM and a SSD drive. Even if this means that those with less powerful hardware suffer a slight performance penalty.
+To make things easier I decided to implement only the basic count that cloc provides and not the fancy SQLite output it provides. CSV and JSON output is about as far as I am going to go. This scope expanded as I progressed however, as is the habit with personal projects.
 
 Beating cloc or its plugin sloccount (another code counter application which improves performance and provides COCOMO cost estimations) did not seem like such a high bar.
 
-However I am not creative enough to be the only person to have had this idea. A quick search around and I quickly identified two other projects which have the same goals. Great! Now I have addtional tools to compare my results against! Oh no! Both are written in Rust and BOTH claim to have excellent performance.
+However I am not creative enough to be the only person to have had this idea. A quick search around and I quickly identified two other projects which have the same goals. Great! Now I have addtional tools to compare my results against! However a quick check and ALAS! Both are written in Rust and BOTH claim to have excellent performance.
 
  - Tokei (a great name) https://github.com/Aaronepower/tokei in its own words is a program that allows you to count your code, quickly.
  - Loc https://github.com/cgag/loc claims to count lines of code quickly. It also claims to be 100x faster than cloc and ~2-10x faster than tokei, depending on how many files are being counted. 
 
-Also there was another,
+Also as I progressed with coding I discovered there was another implementation.
 
  - Gocloc https://github.com/hhatto/gocloc which claims to be inspired by Tokei.
 
 This might be a problem. 
 
-I have experimented with Rust before and I was blown away with the performance you can wring out of it. So should I implement yet ANOTHER code counter in Rust? No. I like a challange though http://www.boyter.org/2017/03/golang-solution-faster-equivalent-java-solution/ and I was looking to expand my knowledge of Go and learn how to write multi CPU core aware code in it. So I chose Go, ignoring the fact that Gocloc already exists.
+I have experimented with Rust before and I was blown away with the performance you can wring out of it. So should I implement yet ANOTHER code counter in Rust? I decided against that. I do like a challange though http://www.boyter.org/2017/03/golang-solution-faster-equivalent-java-solution/ and I was looking to expand my knowledge of Go and learn how to write multi CPU aware code in it. So I chose Go. At the time I did not know that Gocloc already existed so I thought I was being original in the choice of language.
 
-I started thinking about what sort of projects should I optimise for? After all at some point we may need to make a trade off in performance in calculating for larger vs smaller repositories. If only I could get an average of the number of files in a repository?
+I started thinking about what sort of projects should I optimise for? After all at some point we may need to make a trade off in performance in calculating for larger vs smaller repositories. However after some more pondering I discarded this idea. I said I wanted absolute performance. This means I wanted it to work quickly on small and large projects. If I can optimise for one it should be possible to optimise for both.
 
-After thinking for a while I discarded this idea. I said I wanted absolute performance. This means I wanted it to work quickly on small and large directories. If I can optimise for one it should be possible to optimise for both.
-
-Given that tokei and loc exist it means I want to beat both of them when it comes to processing. Its good to have lofty goals. However to set the difficulty as hard mode I want to be as close to the performance of ripgrep as possible. 
-
-Ripgrep if given the right search term should scan every byte of every file. It gives an excellent idea of just how quickly you can pull a directory full of files into memory and inspect every byte. Will I be able to beat ripgrep's performance? Realisticly probably not, as I suspect its getting as close to as much performance you can get out of the machine as you can, and I am going to be working in a slightly higher level language. Besides they aren't the same tool so I can only use it to guesstimate what numbers I should be getting. 
-
-Remember that any comparisons to ripgrep is very much comparing apples to oranges. It does not whitelist files and is generally doing more work per file than anthing I am building.
+Given that tokei, loc and gocloc exist it means I also want to beat them when it comes to processing. Its good to have lofty goals.
 
 Regarding performance, specificly CPU performance. Back on the old days of single cores and real programmers http://www.cs.utah.edu/~elb/folklore/mel.html https://en.wikipedia.org/wiki/The_Story_of_Mel there was only one way to make code faster. Have it do less http://asserttrue.blogspot.com.au/2009/03/how-to-write-fast-code.html  The less it did the faster the program finished based on wall clock time. To quote one of the maintainers of grep "The key to making programs fast is to make them do practically nothing" https://lists.freebsd.org/pipermail/freebsd-current/2010-August/019310.html 
 
@@ -103,62 +92,72 @@ I then started building out the calculation process. For the first attempt I wro
 
 One thing I noticed early on is that directory walking using the native Go file walker is slow. How slow you ask? See http://www.boyter.org/2018/03/quick-comparison-go-file-walk-implementations/ where I posted some quick stats on it. As such I swapped out for the fastest implementation I could find which was godirwalk.
 
-I then tried thigs out on a Digital Ocean compute optimized virtual machine with 32 GB of RAM and 16 vCPUs. I picked this class type because my assumption is that most of tools I was comparing against would be either Disk or CPU bound. 
+I then tried thigs out on a Digital Ocean compute optimized virtual machine with 32 GB of RAM and 16 vCPUs. I picked this class type because my assumption is that most of tools I was comparing against would be either Disk or CPU bound.
 
-I installed all the applications I was testing against, uploaded the latest version of scc, cloned the linux kernel and started some basic benchmarking.
+In order to establish how fast these disk operations should be able to run I also tested using ripgrep.
+
+Ripgrep if given the right search term should scan every byte of every file. It gives an excellent idea of just how quickly you can pull a directory full of files into memory and inspect every byte. Will I be able to beat ripgrep's performance? Realisticly probably not, as I suspect its getting as close to as much performance you can get out of the machine as you can, and I am going to be working in a slightly higher level language.
+
+Remember that any comparisons to ripgrep is very much comparing apples to oranges. It does not whitelist files and is generally doing more work per file than anthing I am building.
+
+I installed all the applications I was testing against, uploaded the latest version of scc, cloned a copy of the linux kernel and started some basic benchmarking.
+
+| Program | Runtime |
+|---|---|
+| ripgrep | 332.4 ms ±  19.5 ms |
+| scc (early version) | 1.650 s ±  0.133 s |
+| tokei | 1.828 s ±  0.148 s |
+| loc | 3.773 s ±  0.494 s |
 
 ```
 root@ubuntu-c-16-sgp1-01:~# hyperfine 'rg . -c linux' && hyperfine './scc linux' && hyperfine 'tokei linux' && hyperfine 'loc linux'
 Benchmark #1: rg . -c linux
-
   Time (mean ± σ):     332.4 ms ±  19.5 ms    [User: 2.419 s, System: 0.804 s]
   Range (min … max):   307.2 ms … 363.6 ms
 
 Benchmark #1: ./scc linux
-
   Time (mean ± σ):      1.650 s ±  0.133 s    [User: 14.231 s, System: 1.059 s]
   Range (min … max):    1.502 s …  1.929 s
 
 Benchmark #1: tokei linux
-
   Time (mean ± σ):      1.828 s ±  0.148 s    [User: 18.832 s, System: 1.032 s]
   Range (min … max):    1.542 s …  2.020 s
 
 Benchmark #1: loc linux
-
   Time (mean ± σ):      3.773 s ±  0.494 s    [User: 7.126 s, System: 6.065 s]
   Range (min … max):    3.064 s …  4.463 s
-
 ```
 
-Not a bad place to start. Compared to tokei we are slighly slightly faster and loc despite its claims is much slower. Ripgrep however leaves everyone in the dust.
+Not a bad place to start. Compared to tokei scc is slighly slightly faster and loc despite its claims is much slower. Ripgrep however leaves everyone in the dust.
 
-Of course the question I am asking now, is why is ripgrep so much faster? On average with a warm cache it runs 4-5x faster than anything else.
+The question I started asking at this point, is why is ripgrep so much faster? On average with a warm cache it runs 4-5x faster than anything else.
 
 Just to see if this problem scaled linaraly I make 14 copies of the linux kernel and dumped them all in a single directory. I then ran the same benchmark over that.
+
+| Program | Runtime |
+|---|---|
+| ripgrep |  3.999 s ±  0.095 s |
+| scc (early version) | 12.552 s ±  4.321 s |
+| tokei | 21.274 s ±  0.450 s |
+| loc | 51.652 s ± 10.148 s |
 
 ```
 root@ubuntu-c-16-sgp1-01:~# hyperfine 'rg . -c linuxes' && hyperfine './scc linuxes' && hyperfine 'tokei linuxes' && hyperfine -m1 'loc linuxes'
 Benchmark #1: rg . -c linuxes
-
   Time (mean ± σ):      3.999 s ±  0.095 s    [User: 34.636 s, System: 11.260 s]
   Range (min … max):    3.857 s …  4.169 s
 
 Benchmark #1: ./scc linuxes
-
   Time (mean ± σ):     12.552 s ±  4.321 s    [User: 165.385 s, System: 13.575 s]
   Range (min … max):    0.719 s … 14.903 s
 
 Benchmark #1: tokei linuxes
-
   Time (mean ± σ):     21.274 s ±  0.450 s    [User: 255.999 s, System: 13.573 s]
   Range (min … max):   20.693 s … 21.962 s
 
 Benchmark #1: loc linuxes
-
   Time (mean ± σ):     51.652 s ± 10.148 s    [User: 98.514 s, System: 86.296 s]
   Range (min … max):   44.476 s … 58.828 s
-
 ```
 
 Yep looks like the times scale linerarly. Note that because loc was taking so long to run I set it to run just once after its warm up. Its possible it would have been a little faster on the average had I let it continue but I was impatient. Its nice to see that this test still make scc still look good as it is still the fastest code counter here assuming we have multiple cores.
@@ -172,15 +171,18 @@ func countStats(fileJob *FileJob) {
 
 Of course this is a useless program with no useful output but it should establish if the bottle neck is in the CPU.
 
+| Program | Runtime |
+|---|---|
+| ripgrep |  338.1 ms ±   7.2 ms |
+| scc (early version) | 1.080 s ±  0.059 s |
+
 ```
 root@ubuntu-c-16-sgp1-01:~# hyperfine 'rg . -c linux' && hyperfine './scc linux'
 Benchmark #1: rg . -c linux
-
   Time (mean ± σ):     338.1 ms ±   7.2 ms    [User: 2.544 s, System: 0.760 s]
   Range (min … max):   321.4 ms … 346.0 ms
 
 Benchmark #1: ./scc linux
-
   Time (mean ± σ):      1.080 s ±  0.059 s    [User: 3.115 s, System: 0.932 s]
   Range (min … max):    1.018 s …  1.207 s
 ```
@@ -270,20 +272,23 @@ This still begs the question, what is causing scc to be so much slower than ripg
 
 I decided to try ripgrep on a file thats just large enough to be at the meeting point between the mmap and non-mmap performance size to avoid any gains from using one file read over another. I also thought I would limit the number of threads ripgrep could use as I had a feeling it might be using parallel reads to speed things up.
 
+| Program | Runtime |
+|---|---|
+| ripgrep -j1 |  89.5 ms ±   6.4 ms |
+| ripgrep |  55.9 ms ±   6.2 ms |
+| scc (early version) | 82.4 ms ±   5.3 ms |
+
 ```
 $ hyperfine 'rg -j1 .* 6mb' && hyperfine 'rg .* 6mb' && hyperfine 'scc 6mb'
 Benchmark #1: rg -j1 .* 6mb
-
   Time (mean ± σ):      89.5 ms ±   6.4 ms    [User: 9.2 ms, System: 54.1 ms]
   Range (min … max):    73.0 ms …  98.8 ms
 
 Benchmark #1: rg .* 6mb
-
   Time (mean ± σ):      55.9 ms ±   6.2 ms    [User: 23.5 ms, System: 55.3 ms]
   Range (min … max):    49.7 ms …  80.8 ms
 
 Benchmark #1: scc 6mb
-
   Time (mean ± σ):      82.4 ms ±   5.3 ms    [User: 61.2 ms, System: 17.2 ms]
   Range (min … max):    76.6 ms … 105.2 ms
 ```
@@ -292,24 +297,28 @@ Ah ha! Looks like ripgrep spawns mutliple threads to read a file. In this case a
 
 Trying against a fresh checkout of redis which has far fewer files in it than the linux kernal.
 
+| Program | Runtime |
+|---|---|
+| ripgrep | 82.9 ms ±   8.6 ms |
+| scc (early version) | 65.6 ms ±   2.2 ms |
+
+
 ```
 $ find . | wc -l
 712
 
 $ hyperfine 'rg .' && hyperfine 'scc .'
 Benchmark #1: rg .
-
   Time (mean ± σ):      82.9 ms ±   8.6 ms    [User: 138.2 ms, System: 193.8 ms]
   Range (min … max):    74.5 ms … 104.6 ms
 
 Benchmark #1: scc .
-
   Time (mean ± σ):      65.6 ms ±   2.2 ms    [User: 183.7 ms, System: 178.7 ms]
   Range (min … max):    62.5 ms …  72.9 ms
 
 ```
 
-Yep. Ok so for smaller repositories we are processing about as fast as ripgrep. For larger ones though it is leaving us sucking dust.
+Yep. So for smaller repositories we are processing about as fast as ripgrep. For larger ones though it is leaving us sucking dust.
 
 However it still begs the question. Why is scc so much slower?
 
@@ -596,20 +605,23 @@ I decided early on that while I wanted accuracy I want it for 99.999% of cases. 
 
 With the above implemented producing accurate results coupled with the work I put into disk performance I thought I would try out a quick benchmark on the most powerful Digital Ocean machine I can spin up which happens to be a 32 core monster.
 
-```
-root@ubuntu-c-32-64gib-sgp1-01:~# hyperfine 'rg . linux' && hyperfine './scc linux' && hyperfine 'tokei linux' && hyperfine 'loc linux'
-Benchmark #1: rg . linux
+| Program | Runtime |
+|---|---|
+| ripgrep | 567.9 ms ±  24.7 ms |
+| scc (unoptimised) | 959.5 ms ±  80.3 ms |
+| tokei | 877.0 ms ±  43.1 ms |
 
+```
+root@ubuntu-c-32-64gib-sgp1-01:~# hyperfine 'rg . linux' && hyperfine './scc linux' && hyperfine 'tokei linux'
+Benchmark #1: rg . linux
   Time (mean ± σ):     567.9 ms ±  24.7 ms    [User: 5.183 s, System: 0.610 s]
   Range (min … max):   534.6 ms … 618.1 ms
 
 Benchmark #1: ./scc linux
-
   Time (mean ± σ):     959.5 ms ±  80.3 ms    [User: 6.182 s, System: 3.362 s]
   Range (min … max):   802.4 ms … 1098.5 ms
 
 Benchmark #1: tokei linux
-
   Time (mean ± σ):     877.0 ms ±  43.1 ms    [User: 12.753 s, System: 0.841 s]
   Range (min … max):   798.8 ms … 929.3 ms
 ```
@@ -618,22 +630,22 @@ Well thats interesting. Tokei is now the fastest running counter. I suspect that
 
 Let's try it out on ten copies of the linux kernel dumped into a single directory.
 
+| Program | Runtime |
+|---|---|
+| ripgrep | 4.815 s ±  0.206 s |
+| scc (unoptimised) | 3.629 s ±  0.262 s |
+| tokei | 6.543 s ±  0.075 s |
+
 ```
-root@ubuntu-c-32-64gib-sgp1-01:~# cp -R linux linuxes/linux1/ && cp -R linux linuxes/linux2/ && cp -R linux linuxes/linux3/ && cp -R linux linuxes/linux4/ && cp -R linux linuxes/linux5/ && cp -R linux linuxes/linux6/ && cp -R linux linuxes/linux7/ && cp -R linux linuxes/linux8/ && cp -R linux linuxes/linux9/ && cp -R linux linuxes/linux10/
-
-root@ubuntu-c-32-64gib-sgp1-01:~# hyperfine 'rg . linuxes' && hyperfine './scc linuxes' && hyperfine 'tokei linuxes'
 Benchmark #1: rg . linuxes
-
   Time (mean ± σ):      4.815 s ±  0.206 s    [User: 50.862 s, System: 5.572 s]
   Range (min … max):    4.604 s …  5.043 s
 
 Benchmark #1: ./scc linuxes
-
   Time (mean ± σ):      3.629 s ±  0.262 s    [User: 57.305 s, System: 16.077 s]
   Range (min … max):    3.257 s …  4.127 s
 
 Benchmark #1: tokei linuxes
-
   Time (mean ± σ):      6.543 s ±  0.075 s    [User: 135.301 s, System: 7.722 s]
   Range (min … max):    6.433 s …  6.638 s
 ```
@@ -662,129 +674,105 @@ With those created I did some benchmarks using scc, ripgrep and tokei.
 ```
 $ hyperfine 'scc 0' && hyperfine 'rg . 0' && hyperfine 'tokei 0'
 Benchmark #1: scc 0
-
   Time (mean ± σ):     603.4 ms ±  20.1 ms    [User: 494.9 ms, System: 3531.6 ms]
   Range (min … max):   565.7 ms … 629.8 ms
 
 Benchmark #1: rg . 0
-
   Time (mean ± σ):     591.0 ms ±  26.7 ms    [User: 202.9 ms, System: 3283.8 ms]
   Range (min … max):   540.0 ms … 627.3 ms
 
 Benchmark #1: tokei 0
-
   Time (mean ± σ):     802.6 ms ±  31.2 ms    [User: 82.6 ms, System: 3302.4 ms]
   Range (min … max):   762.4 ms … 844.0 ms
 
 $ hyperfine 'scc 1' && hyperfine 'rg . 1' && hyperfine 'tokei 1'
 Benchmark #1: scc 1
-
   Time (mean ± σ):     122.4 ms ±   5.9 ms    [User: 84.8 ms, System: 684.5 ms]
   Range (min … max):   112.4 ms … 136.0 ms
 
 Benchmark #1: rg . 1
-
   Time (mean ± σ):     150.7 ms ±  10.8 ms    [User: 79.5 ms, System: 638.3 ms]
   Range (min … max):   137.4 ms … 171.6 ms
 
 Benchmark #1: tokei 1
-
   Time (mean ± σ):     176.1 ms ±  13.1 ms    [User: 31.1 ms, System: 663.1 ms]
   Range (min … max):   160.8 ms … 210.6 ms
 
 $ hyperfine 'scc 2' && hyperfine 'rg . 2' && hyperfine 'tokei 2'
 Benchmark #1: scc 2
-
   Time (mean ± σ):     597.5 ms ±  21.6 ms    [User: 434.1 ms, System: 2798.3 ms]
   Range (min … max):   571.1 ms … 634.8 ms
 
 Benchmark #1: rg . 2
-
   Time (mean ± σ):     471.0 ms ±  27.0 ms    [User: 163.8 ms, System: 2576.2 ms]
   Range (min … max):   427.7 ms … 515.0 ms
 
 Benchmark #1: tokei 2
-
   Time (mean ± σ):     546.9 ms ±  24.8 ms    [User: 119.9 ms, System: 2552.1 ms]
   Range (min … max):   484.4 ms … 573.5 ms
 
 $ hyperfine 'scc 3' && hyperfine 'rg . 3' && hyperfine 'tokei 3'
 Benchmark #1: scc 3
-
   Time (mean ± σ):      1.478 s ±  0.125 s    [User: 1.001 s, System: 7.956 s]
   Range (min … max):    1.299 s …  1.774 s
 
 Benchmark #1: rg . 3
-
   Time (mean ± σ):      1.141 s ±  0.022 s    [User: 591.9 ms, System: 6699.6 ms]
   Range (min … max):    1.107 s …  1.170 s
 
 Benchmark #1: tokei 3
-
   Time (mean ± σ):      1.921 s ±  0.229 s    [User: 329.4 ms, System: 5250.5 ms]
   Range (min … max):    1.728 s …  2.301 s
 
 $ hyperfine 'scc 4' && hyperfine 'rg . 4' && hyperfine 'tokei 4'
 Benchmark #1: scc 4
-
   Time (mean ± σ):     627.6 ms ± 131.1 ms    [User: 479.2 ms, System: 4004.3 ms]
   Range (min … max):   445.2 ms … 807.5 ms
 
 Benchmark #1: rg . 4
-
   Time (mean ± σ):     647.3 ms ±  52.9 ms    [User: 302.9 ms, System: 3684.4 ms]
   Range (min … max):   530.2 ms … 705.0 ms
 
 Benchmark #1: tokei 4
-
   Time (mean ± σ):     742.8 ms ±  59.1 ms    [User: 126.5 ms, System: 3525.1 ms]
   Range (min … max):   596.1 ms … 806.0 ms
 
 $ hyperfine 'scc 5' && hyperfine 'rg . 5' && hyperfine 'tokei 5'
 Benchmark #1: scc 5
-
   Time (mean ± σ):     503.2 ms ±  30.0 ms    [User: 390.5 ms, System: 3139.8 ms]
   Range (min … max):   461.1 ms … 547.0 ms
 
 Benchmark #1: rg . 5
-
   Time (mean ± σ):     523.7 ms ±  50.8 ms    [User: 196.3 ms, System: 2989.5 ms]
   Range (min … max):   413.1 ms … 580.4 ms
 
 Benchmark #1: tokei 5
-
   Time (mean ± σ):     599.9 ms ±  32.8 ms    [User: 96.5 ms, System: 3052.9 ms]
   Range (min … max):   519.3 ms … 632.0 ms
 
 $ hyperfine 'scc 6' && hyperfine 'rg . 6' && hyperfine 'tokei 6'
 Benchmark #1: scc 6
-
   Time (mean ± σ):     470.9 ms ±  25.0 ms    [User: 435.5 ms, System: 2934.5 ms]
   Range (min … max):   417.8 ms … 518.1 ms
 
 Benchmark #1: rg . 6
-
   Time (mean ± σ):     457.6 ms ±  21.2 ms    [User: 162.2 ms, System: 2548.0 ms]
   Range (min … max):   412.2 ms … 487.0 ms
 
 Benchmark #1: tokei 6
-
   Time (mean ± σ):     525.0 ms ±  18.8 ms    [User: 80.8 ms, System: 2715.5 ms]
   Range (min … max):   501.2 ms … 552.7 ms
 
 $ hyperfine 'scc 7' && hyperfine 'rg . 7' && hyperfine 'tokei 7'
 Benchmark #1: scc 7
-
   Time (mean ± σ):     679.0 ms ±  48.1 ms    [User: 568.4 ms, System: 4111.4 ms]
   Range (min … max):   560.4 ms … 752.9 ms
 
 Benchmark #1: rg . 7
-
   Time (mean ± σ):     635.4 ms ±  44.0 ms    [User: 247.8 ms, System: 3623.4 ms]
   Range (min … max):   534.4 ms … 690.6 ms
 
 Benchmark #1: tokei 7
-
   Time (mean ± σ):     734.1 ms ±  42.7 ms    [User: 154.5 ms, System: 3588.6 ms]
   Range (min … max):   626.3 ms … 775.0 ms
 
@@ -794,20 +782,22 @@ What was interesting is that the tests for #4 and #5 actually got slower each ti
 
 What bothered me was that for the deep directory case #1 ripgrep was still on average slightly faster. I had a feeling that this was down to the garbage collector kicking in. So I tried again with it disabled.
 
+| Program | Runtime |
+|---|---|
+| ripgrep | 549.5 ms ±  26.8 ms |
+| scc (no gc) | 510.7 ms ±  17.1 ms |
+| tokei | 940.0 ms ± 232.2 ms |
+
 ```
-$ hyperfine 'scc 0' && hyperfine 'rg . 0' && hyperfine 'tokei 0'
-Benchmark #1: scc 0
-
-  Time (mean ± σ):     510.7 ms ±  17.1 ms    [User: 360.8 ms, System: 3177.7 ms]
-  Range (min … max):   472.8 ms … 532.3 ms
-
 Benchmark #1: rg . 0
-
   Time (mean ± σ):     549.5 ms ±  26.8 ms    [User: 187.0 ms, System: 3168.3 ms]
   Range (min … max):   495.0 ms … 592.0 ms
 
-Benchmark #1: tokei 0
+Benchmark #1: scc 0
+  Time (mean ± σ):     510.7 ms ±  17.1 ms    [User: 360.8 ms, System: 3177.7 ms]
+  Range (min … max):   472.8 ms … 532.3 ms
 
+Benchmark #1: tokei 0
   Time (mean ± σ):     940.0 ms ± 232.2 ms    [User: 113.7 ms, System: 3329.5 ms]
   Range (min … max):   736.8 ms … 1424.7 ms
 ```
@@ -844,7 +834,6 @@ The Go profiling tools are pretty easy to use. I found the easiest way to enable
 import "runtime/pprof"
 
 func main() {
-
 	f, _ := os.Create("profile.pprof")
 	pprof.StartCPUProfile(f)
 	defer pprof.StopCPUProfile()
@@ -854,16 +843,23 @@ You then just compile and run, and it will produce a profile.pprof file you can 
 
 One issue I did run into was running the above using the WSL for Windows. No matter what I did when run in the WSL I would never get any profile output. The solution was the compile on Windows run the application to capture the output and then for the web view use WSL for that and for inspection use Windows.
 
-go tool pprof -http=localhost:8090 scc.pprof
-go tool pprof scc.pprof
+So to get the nice web output
 
-list github.com/boyter/scc/processor.countStats
+	go tool pprof -http=localhost:8090 profile.pprof
 
-Checking profile output showed that rather unsuprisingly the core loop had suddenly become the bottle neck. In the below the core loop is the large box on the left side named countStats.
+and to inspect the lines themselves 
+
+	go tool pprof profile.pprof
+
+and to get the line by line counts
+
+	list github.com/boyter/scc/processor.countStats
+
+Checking profile output showed that rather unsuprisingly the core loop takes a lot of the time. In the below the core loop is the large box on the left side named countStats.
 
 ![Profile](/static/sloc-cloc-code/profile1.png)
 
-Having a look at what I had in the core loop at the time,
+Having a look at what I had in the core loop before any optimisations it was written as below.
 
 {{<highlight go>}}
 if currentState == S_BLANK && checkForMatch(currentByte, index, endPoint, singleLineCommentChecks, fileJob) {
@@ -900,14 +896,14 @@ if (currentState == S_BLANK || currentState == S_CODE) && checkComplexity(curren
 }
 {{</highlight>}}
 
-It is reasonably complex with a lot of if checks which are probably causing the slowdown. However thinking about it there is one quick obvious win here. If we have moved state I.E. switched from S_BLANK to S_CODE, then we don't need to check the other conditions. Having a simple boolean to indicate that the state has changed and then skip over a lot of the checks will speed this up considerably. So I added that in and cut the runtime in half. 
+A lot of if checks which are probably causing the slowdown, especially as many of them run even if not required. However thinking about that there is one quick obvious win. If we have moved state I.E. switched from S_BLANK to S_CODE, then we don't need to check the other conditions. Having a simple boolean to indicate that the state has changed and then skip over a lot of the checks will speed this up considerably. So I added that in and cut the runtime in half. 
 
 This was a good start but there is a lot more that can be done, not only to improve performance but to make the code far more readable.
 
  - The first would be to change the logic so that we use a switch to jump to our current state and check what to do from there. This gives us the previous optimisation for free and should make things easier to read.
  - The other would be count the frequency of each of the above ifs. We want to order them such that we hit the change state condition as frequently as possible and bail out. In other words the order of the checks matters a great deal as you can use it to avoid hitting multiple if conditions.
 
-I implemented the first which yielded some gains, but then realised I could convert the whole thing over to a large switch statement and save the addtional accounting overhead of checking the state, and get both of the above fixes.
+I implemented the first which yielded some gains, but then realised I could convert the whole thing over to a large switch statement, which would jump to the current state and then do the checks just for that state. This would incorperate both of the above changes.
 
 I changed over to the the switch statement, verified it works as well as the skip checks from before and went back to profiling. Here is the the output looking at a run of the linux kernel once it has been warmed into disk cache.
 
@@ -985,7 +981,9 @@ Showing top 10 nodes out of 83
 
 A nice optimisation. The method checkComplexity is down in terms of cumulative call time.
 
-So looking further into the code I tried to identify what else is causing problems. Turns out that allocations are expensive when run in a tight loop. Look at the last line in the below where I return 0 with a new empty byte allocation.
+Another change I added was that if there is a match in checkComplexity, checkForMatchMultiOpen or checkForMatchMultiClose was to return the number of bytes that the method had looked ahead. This allows us to jump ahead by that many bytes as we have already inspected them and consequently save a few checks. This did however cause a new problem.
+
+Turns out that allocations can be expensive when run in a tight loop. Look at the last line in the below where I return 0 with a new empty byte allocation used to indicate how long the match, and to know what to look for on the next loop.
 
 ```
 (pprof) list github.com/boyter/scc/processor.checkForMatchMultiOpen
@@ -995,7 +993,7 @@ ROUTINE ======================== github.com/boyter/scc/processor.checkForMatchMu
      3.08s     11.05s     78:           return 0, []byte{}
 ```
 
-The second param is not actually required in this case. So by changing it to a nil return we get the following profile which improves the performance.
+The second param is not actually required in this case because we have no match. By changing it to a nil return we get the following profile, which is a massive improvement due to not having an allocation and by taking pressure off the garbage collector.
 
 ```
          .          .     77:   if !hasMatch {
@@ -1078,23 +1076,223 @@ Switching out to a custom formatter method was about half the amount of operatio
 
 So after all of the above the final profile ended up looking like the below. The countStats box is now pretty close to the cgocall and the times are fairly close. The application is still CPU bound with a warm disk cache, but it is much closer now. Most of the time is now in the complexityCheck method which is probably about as efficient as I can write it.
 
-![VPS Core Usage](/static/sloc-cloc-code/profile2.png)
+![Profile Result](/static/sloc-cloc-code/profile2.png)
+
+## Output
+
+Of course everything is about the output and what you actually get with it. With everything working the output looks like the below of a basic calculation of the redis source code.
+
+```
+$ scc redis
+-------------------------------------------------------------------------------
+Language                 Files     Lines     Code  Comments   Blanks Complexity
+-------------------------------------------------------------------------------
+C                          215    114488    85341     15175    13972      21921
+C Header                   144     20042    13308      4091     2643       1073
+TCL                         93     15702    12933       922     1847       1482
+Lua                         20       524      384        71       69         66
+Autoconf                    18     10713     8164      1476     1073        986
+Shell                       18       810      513       196      101        102
+Makefile                     9      1021      716       100      205         50
+Ruby                         8      2416     1798       376      242        365
+Markdown                     6      1312      964         0      348          0
+HTML                         6     11472     8288         5     3179          0
+YAML                         2        75       60         4       11          4
+CSS                          2       107       91         0       16          0
+C++ Header                   1         9        5         3        1          0
+Batch                        1        28       26         0        2          3
+Plain Text                   1       499      499         0        0          0
+C++                          1        46       30         0       16          5
+-------------------------------------------------------------------------------
+Total                      545    179264   133120     22419    23725      26057
+-------------------------------------------------------------------------------
+Estimated Cost to Develop $4,592,517
+Estimated Schedule Effort 27.382310 months
+Estimated People Required 19.867141
+-------------------------------------------------------------------------------
+```
+
+In order to evaulate how well the complexity calculation works I tried it against my personal project searchcode server http://github.com/boyter/searchcode-server where I would expect that the files SearchCodeLib, IndexService and CodeMatcher to be the most complex based on personal experience.
+
+```
+$ scc --wl java --files -s complexity searchcode-server
+-------------------------------------------------------------------------------
+Language                 Files     Lines     Code  Comments   Blanks Complexity
+-------------------------------------------------------------------------------
+Java                       131     19445    13913      1716     3816       1107
+-------------------------------------------------------------------------------
+~e/app/util/SearchCodeLib.java       616      418        90      108        108
+~app/service/IndexService.java      1097      798        91      208         96
+~/app/service/CodeMatcher.java       325      234        41       50         66
+~service/TimeCodeSearcher.java       582      429        49      104         65
+~ce/route/ApiRouteService.java       394      293        12       89         63
+~de/app/service/Singleton.java       335      245        20       70         53
+~rchcode/app/util/Helpers.java       396      299        38       59         52
+~e/route/CodeRouteService.java       453      348         9       96         50
+```
+
+Indeed that is exactly what I would have expected from the results. So it looks as though
 
 ## Benchmarks
 
-What follows is going to be a highly biased (I wrote one of the tools remember) collection of benchmarks which definitively prove that scc is the fastest code counter that I am aware of. Its not only faster than cloc by a huge amount it either equals tokei or is considerably faster and leaves loc trailing as well. This is either on Windows Native or through WSL or Linux. I would try OSX but I cannot spin up a VM of one to test it out.
+What follows is going to be a highly biased (I wrote one of the tools remember) collection of benchmarks which definitively prove that scc is either the fastest code counter or close to being the fastest that I am aware of. Its not only faster than cloc by a huge amount it either equals tokei and leaves loc trailing as well. For running on Windows it is always faster either command line or through the WSL.
 
 With that outragous claim out of the way lets see if I prove it.
 
-I am using the excellent Rust tool hyperfine for benchmarking with 3 warmup runs and 20 timed runs to produce the results. In order to see how fast you can actually process files on the filesystem I am going to compare to ripgrep which at the moment is the absolute last word in speed for something that hits the same sort of file types. Keep in mind that the comparison to ripgrep is an apples to oranges comparison and only there to show how fast you can process files on the disk.
+All tests were run on Digital Ocean 16 vCPU Compute optimized droplets with 32 GB of RAM and a 200 GB SSD. The machine used was doing nothing else at the time and was created with the sole purpose of running the tests to ensure no interference from other processes. The OS used is Ubuntu 16.04 and the rust programs were installed using cargo install.
+
+I set scc to run first in order to ensure that it warms up everything and take any handicap that might incur from this process. To do the benchmark itself I used the excellent Rust tool hyperfine with 3 warmup runs and 10 timed runs total to produce the results. These are the defaults for hyperfine but are set explicitly via the command line.
+
+Due to how long sloccount and cloc took I have only run benchmarks of them for redis as it took far too long to get the results for the larger projects.
+
+### Linux Kernel Source Benchmarks
+
+The Linux Kernel  benchmark was run using a fresh checkout of the linux kernel commit #HERE
 
 
-BENCHMARKS HERE
+	hyperfine -w3 -m10 './scc linux' && hyperfine -w3 -m10 'tokei linux' && hyperfine -w3 -m10 'loc linux' && hyperfine -w3 -m10 './gocloc linux'
+
+| Program | Runtime |
+|---|---|
+| scc | 1.615 s ±  0.044 s |
+| tokei | 1.304 s ±  0.077 s |
+| loc | 3.508 s ±  0.423 s |
+| gocloc | 11.994 s ±  0.059 s |
+
+![Profile Result](/static/sloc-cloc-code/benchmark_linux_linuxkernel.png)
+
+```
+Benchmark #1: ./scc linux
+
+  Time (mean ± σ):      1.615 s ±  0.044 s    [User: 19.156 s, System: 0.846 s]
+  Range (min … max):    1.540 s …  1.725 s
+
+Benchmark #1: tokei linux
+
+  Time (mean ± σ):      1.304 s ±  0.077 s    [User: 12.034 s, System: 1.068 s]
+  Range (min … max):    1.139 s …  1.485 s
+
+Benchmark #1: loc linux
+
+  Time (mean ± σ):      3.508 s ±  0.423 s    [User: 5.604 s, System: 5.105 s]
+  Range (min … max):    2.899 s …  4.513 s
+
+Benchmark #1: ./gocloc linux
+
+  Time (mean ± σ):     11.994 s ±  0.059 s    [User: 12.012 s, System: 1.172 s]
+  Range (min … max):   11.868 s … 12.113 s
+```
 
 
-## Results
 
-Of course whats likely to happen now is that either the excellent authors of Tokei or Loc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats even faster than scc. I have no problem with this. It was more about seeing how fast I could make it, and besides I don't think of tools that do similar things as being in competition. Andy Lester of ack fame puts this far better than I ever could http://blog.petdance.com/2018/01/02/the-best-open-source-project-for-someone-might-not-be-yours-and-thats-ok/
+10 copies of linux
 
-Enjoy? Hate? Let me know via twitter or email directly. If like like what you read be sure to talk to the company im working at. They have far smarter and more exprienced Go developers that I am and will be happy to help. Of course if you need some help with Java or C# I can probably do something there.
+	cp -R linux linuxes/linux1/ && cp -R linux linuxes/linux2/ && cp -R linux linuxes/linux3/ && cp -R linux linuxes/linux4/ && cp -R linux linuxes/linux5/ && cp -R linux linuxes/linux6/ && cp -R linux linuxes/linux7/ && cp -R linux linuxes/linux8/ && cp -R linux linuxes/linux9/ && cp -R linux linuxes/linux10/
 
+	hyperfine -w3 -m10 './scc linuxes' &&  hyperfine -w3 -m10 'tokei linuxes' && hyperfine -w3 -m10 'loc linuxes' && hyperfine -w3 -m10 './gocloc linuxes'
+
+
+### Redis Source Benchmarks
+
+
+    hyperfine -w3 -m10 'scc redis' && hyperfine -w3 -m10 'scc -c redis' && hyperfine -w3 -m10 'scc -d redis' && hyperfine -w3 -m10 'tokei redis' && hyperfine -w3 -m10 'loc redis' && hyperfine -w3 -m10 -i 'gocloc redis' && hyperfine -w3 -m10 -i 'cloc redis' && hyperfine -w3 -m10 'sloccount redis'
+
+
+| Program | Runtime |
+|---|---|
+| scc | 133.4 ms ±  24.7 ms |
+| scc (no complexity) | 128.2 ms ±  22.5 ms |
+| scc (duplicates check) | 153.6 ms ±  28.4 ms |
+| tokei | 285.3 ms ±  63.0 ms |
+| loc |  570.0 ms ±  22.0 ms |
+| gocloc | 879.2 ms ± 190.7 ms |
+| sloccount | 75.470 s ± 125.3 ms |
+
+```
+Benchmark #1: scc redis
+
+  Time (mean ± σ):     133.4 ms ±  24.7 ms    [User: 547.4 ms, System: 392.4 ms]
+  Range (min … max):   100.8 ms … 190.8 ms
+
+Benchmark #1: scc -c redis
+
+  Time (mean ± σ):     128.2 ms ±  22.5 ms    [User: 429.6 ms, System: 405.8 ms]
+  Range (min … max):    85.1 ms … 193.2 ms
+
+Benchmark #1: scc -d redis
+
+  Time (mean ± σ):     153.6 ms ±  28.4 ms    [User: 831.4 ms, System: 291.3 ms]
+  Range (min … max):   109.9 ms … 200.8 ms
+
+Benchmark #1: tokei redis
+
+  Time (mean ± σ):     285.3 ms ±  63.0 ms    [User: 558.0 ms, System: 578.8 ms]
+  Range (min … max):   186.7 ms … 350.4 ms
+
+Benchmark #1: loc redis
+
+  Time (mean ± σ):     570.0 ms ±  22.0 ms    [User: 280.2 ms, System: 422.6 ms]
+  Range (min … max):   522.0 ms … 602.6 ms
+
+Benchmark #1: gocloc redis
+
+  Time (mean ± σ):     879.2 ms ± 190.7 ms    [User: 265.1 ms, System: 624.5 ms]
+  Range (min … max):   694.9 ms … 1360.4 ms
+```
+
+
+```
+root@ubuntu-c-16-sgp1-01:~# hyperfine -w3 -m10 './scc redis' && hyperfine -w3 -m10 'tokei redis' && hyperfine -w3 -m10 'loc redis' && hyperfine -w3 -m10 './gocloc redis'
+Benchmark #1: ./scc redis
+
+  Time (mean ± σ):      44.6 ms ±  21.4 ms    [User: 147.2 ms, System: 22.6 ms]
+  Range (min … max):    21.9 ms …  98.1 ms
+
+Benchmark #1: tokei redis
+
+  Time (mean ± σ):      32.4 ms ±   5.1 ms    [User: 101.5 ms, System: 29.5 ms]
+  Range (min … max):    23.9 ms …  55.3 ms
+
+Benchmark #1: loc redis
+
+  Time (mean ± σ):     146.0 ms ±  36.6 ms    [User: 624.6 ms, System: 51.8 ms]
+  Range (min … max):    89.1 ms … 228.7 ms
+
+Benchmark #1: ./gocloc redis
+
+  Time (mean ± σ):     131.8 ms ±   1.6 ms    [User: 114.0 ms, System: 30.9 ms]
+  Range (min … max):   129.1 ms … 135.7 ms
+
+```
+
+```
+root@ubuntu-c-16-sgp1-01:~# hyperfine -w3 -m10 './scc django' && hyperfine -w3 -m10 'tokei django' && hyperfine -w3 -m10 'loc django' && hyperfine -w3 -m10 './gocloc django'
+Benchmark #1: ./scc django
+
+  Time (mean ± σ):     152.8 ms ±  35.0 ms    [User: 532.2 ms, System: 94.4 ms]
+  Range (min … max):   100.5 ms … 212.6 ms
+
+Benchmark #1: tokei django
+
+  Time (mean ± σ):     118.2 ms ±  10.0 ms    [User: 286.0 ms, System: 120.9 ms]
+  Range (min … max):   101.3 ms … 140.6 ms
+
+Benchmark #1: loc django
+
+  Time (mean ± σ):     293.4 ms ±  73.1 ms    [User: 555.0 ms, System: 277.0 ms]
+  Range (min … max):   199.1 ms … 437.5 ms
+
+Benchmark #1: ./gocloc django
+
+  Time (mean ± σ):     377.9 ms ±   3.2 ms    [User: 327.6 ms, System: 106.0 ms]
+  Range (min … max):   374.3 ms … 385.4 ms
+
+```
+
+
+
+## Conclusion
+
+Of course whats likely to happen now is that either the excellent authors of Tokei or Loc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats even faster than scc or indeed anyhing I could ever produce. I have no problem with this. It was more about seeing how fast I could make it, and besides I don't think of tools that do similar things as being in competition. Andy Lester of ack fame puts this far better than I ever could http://blog.petdance.com/2018/01/02/the-best-open-source-project-for-someone-might-not-be-yours-and-thats-ok/
+
+Enjoy? Hate? Let me know via twitter or email directly.
