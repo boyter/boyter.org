@@ -3,20 +3,17 @@ title: Sloc Cloc and Code
 date: 2018-04-06
 ---
 
-
-https://github.com/Aaronepower/tokei/issues/175
-https://github.com/gnewton/hashstream
-https://gobyexample.com/sha1-hashes
-
 TL/DR
 
- - scc is a very fast and accuracte code counter with complexity caluclations and cocomo estimates
+ - scc is a very fast accurate code counter with complexity calculations and cocomo estimates
  - unless you really really really need speed a lot of the below below is probably not applicable
  - surpisingly walking the file tree can be the bottleneck in your application
  - mmaps for reading files is useful if the file you are opening is >= 6 MB in size (at least in WSL)
  - don't forgot the golden rule of performance which is to profile/measure, profile/measure and profile/measure again
  - the best case vs worst case performance for parallel file tree walking is quite large
  - the default file walker in Go is slower due to calling os.Stat on every node and not running in parallel
+
+*Note that where command line output is included below I have often cut out empty lines to reduce the size*
 
 It started by wanting to write a code counter that would be faster than cloc.
 
@@ -67,20 +64,11 @@ Architecture. Since this was my second attempt at a Go project I was able to use
 
 The other thing you need to do is let your prejudices go and embrace goroutines. The idea of spinning up thousands of threads in something like Java is going to land you in a world of pain. However the same cannot be said of Go. Not going to dive into this too much but suffice to say so long as you limit the CPU bound GoRoutines to the number of CPU's you can get away with many thousands performing other tasks.
 
-Given the above this is the design I came up with.
+Given the above this is the design I came up with, based on the idea that you use streams similar to unix pipes.
 
     Walk Process -> File Reader -> File Processor -> Summeriser
 
-With each process talking to each over using a channel with a buffer set to the number of CPU cores.
-
-http://webgraphviz.com/
-digraph G {
-  "Walk Process" -> "File Reader"
-  "File Reader" -> "File Processor"
-  "File Processor" -> "Summeriser"
-}
-
-![Architecture](/static/sloc-cloc-code/Sketch1.png)
+With each process handing work from one to the other using a buffered channel set to the number of CPU cores.
 
 I did at one point put channels as buffers between each of the work processes however as the application turned out to be CPU bound this was pointless. The reason for this is that by setting the size of each buffer I can control the parallelism of the code. Getting back to making things fast I only want there to be as many file processors as there are CPU's. We want to avoid CPU context switches there if at all possible. By having buffers between I can control the the number of workers without blocking any other task. Just because the File Reader or File Processer is slow there is no reason to block the Walk Process. 
 
@@ -92,15 +80,13 @@ I then started building out the calculation process. For the first attempt I wro
 
 One thing I noticed early on is that directory walking using the native Go file walker is slow. How slow you ask? See http://www.boyter.org/2018/03/quick-comparison-go-file-walk-implementations/ where I posted some quick stats on it. As such I swapped out for the fastest implementation I could find which was godirwalk.
 
-I then tried thigs out on a Digital Ocean compute optimized virtual machine with 32 GB of RAM and 16 vCPUs. I picked this class type because my assumption is that most of tools I was comparing against would be either Disk or CPU bound.
-
 In order to establish how fast these disk operations should be able to run I also tested using ripgrep.
 
-Ripgrep if given the right search term should scan every byte of every file. It gives an excellent idea of just how quickly you can pull a directory full of files into memory and inspect every byte. Will I be able to beat ripgrep's performance? Realisticly probably not, as I suspect its getting as close to as much performance you can get out of the machine as you can, and I am going to be working in a slightly higher level language.
+Ripgrep if given the right search term should scan every byte of every file. It gives an excellent idea of just how quickly you can pull a directory full of files into memory and inspect every byte. I suspect its getting as close to as much performance you can get out of the machine as you can. Will I be able to beat ripgrep's performance for these cases? Realisticly probably not, as and I am going to be working in a slightly higher level language.
 
-Remember that any comparisons to ripgrep is very much comparing apples to oranges. It does not whitelist files and is generally doing more work per file than anthing I am building.
+Remember that any comparisons to ripgrep is very much comparing apples to oranges. It does not whitelist files and is generally doing more work per file than anthing I am building. It also solves a totally different problem.
 
-I installed all the applications I was testing against, uploaded the latest version of scc, cloned a copy of the linux kernel and started some basic benchmarking.
+I installed all the applications I was testing against, uploaded the latest version of scc, cloned a copy of the linux kernel and started some basic benchmarking using hyperfine which calculationed the runtime over 10 runs.
 
 | Program | Runtime |
 |---|---|
@@ -109,26 +95,7 @@ I installed all the applications I was testing against, uploaded the latest vers
 | tokei | 1.828 s ±  0.148 s |
 | loc | 3.773 s ±  0.494 s |
 
-```
-root@ubuntu-c-16-sgp1-01:~# hyperfine 'rg . -c linux' && hyperfine './scc linux' && hyperfine 'tokei linux' && hyperfine 'loc linux'
-Benchmark #1: rg . -c linux
-  Time (mean ± σ):     332.4 ms ±  19.5 ms    [User: 2.419 s, System: 0.804 s]
-  Range (min … max):   307.2 ms … 363.6 ms
-
-Benchmark #1: ./scc linux
-  Time (mean ± σ):      1.650 s ±  0.133 s    [User: 14.231 s, System: 1.059 s]
-  Range (min … max):    1.502 s …  1.929 s
-
-Benchmark #1: tokei linux
-  Time (mean ± σ):      1.828 s ±  0.148 s    [User: 18.832 s, System: 1.032 s]
-  Range (min … max):    1.542 s …  2.020 s
-
-Benchmark #1: loc linux
-  Time (mean ± σ):      3.773 s ±  0.494 s    [User: 7.126 s, System: 6.065 s]
-  Range (min … max):    3.064 s …  4.463 s
-```
-
-Not a bad place to start. Compared to tokei scc is slighly slightly faster and loc despite its claims is much slower. Ripgrep however leaves everyone in the dust.
+Not a bad place to start. Compared to tokei scc is slighly slightly faster and loc despite its claims is much slower. Ripgrep however leaves everything for dead.
 
 The question I started asking at this point, is why is ripgrep so much faster? On average with a warm cache it runs 4-5x faster than anything else.
 
@@ -141,28 +108,10 @@ Just to see if this problem scaled linaraly I make 14 copies of the linux kernel
 | tokei | 21.274 s ±  0.450 s |
 | loc | 51.652 s ± 10.148 s |
 
-```
-root@ubuntu-c-16-sgp1-01:~# hyperfine 'rg . -c linuxes' && hyperfine './scc linuxes' && hyperfine 'tokei linuxes' && hyperfine -m1 'loc linuxes'
-Benchmark #1: rg . -c linuxes
-  Time (mean ± σ):      3.999 s ±  0.095 s    [User: 34.636 s, System: 11.260 s]
-  Range (min … max):    3.857 s …  4.169 s
 
-Benchmark #1: ./scc linuxes
-  Time (mean ± σ):     12.552 s ±  4.321 s    [User: 165.385 s, System: 13.575 s]
-  Range (min … max):    0.719 s … 14.903 s
+Yep looks like the times scale linerarly. Its nice to see that this test still make scc still look good as it is still the fastest code counter here.
 
-Benchmark #1: tokei linuxes
-  Time (mean ± σ):     21.274 s ±  0.450 s    [User: 255.999 s, System: 13.573 s]
-  Range (min … max):   20.693 s … 21.962 s
-
-Benchmark #1: loc linuxes
-  Time (mean ± σ):     51.652 s ± 10.148 s    [User: 98.514 s, System: 86.296 s]
-  Range (min … max):   44.476 s … 58.828 s
-```
-
-Yep looks like the times scale linerarly. Note that because loc was taking so long to run I set it to run just once after its warm up. Its possible it would have been a little faster on the average had I let it continue but I was impatient. Its nice to see that this test still make scc still look good as it is still the fastest code counter here assuming we have multiple cores.
-
-So back to the question, why is scc slower than ripgrep? I had a feeling that at this point the issue is not the processing, but the pulling of the files from disk into memory. To verify I build a version of scc with no hot loop. No checking of the bytes. Rather than do anything in the countStats hot loop it just returns.
+So back to the question, why is scc slower than ripgrep? I had a feeling that at this point the issue is not the processing, but the pulling of the files from disk into memory. To verify I build a version of scc with no hot loop. No checking of the bytes. Rather than do anything in the countStats method which is the hot loop I had it just return.
 
 {{<highlight go>}}
 func countStats(fileJob *FileJob) {
@@ -176,28 +125,17 @@ Of course this is a useless program with no useful output but it should establis
 | ripgrep |  338.1 ms ±   7.2 ms |
 | scc (early version) | 1.080 s ±  0.059 s |
 
-```
-root@ubuntu-c-16-sgp1-01:~# hyperfine 'rg . -c linux' && hyperfine './scc linux'
-Benchmark #1: rg . -c linux
-  Time (mean ± σ):     338.1 ms ±   7.2 ms    [User: 2.544 s, System: 0.760 s]
-  Range (min … max):   321.4 ms … 346.0 ms
-
-Benchmark #1: ./scc linux
-  Time (mean ± σ):      1.080 s ±  0.059 s    [User: 3.115 s, System: 0.932 s]
-  Range (min … max):    1.018 s …  1.207 s
-```
-
 While the hot loop does add some overhead when enabled (it is iterating through all the bytes) it looks like the issue is with the reading of the files into memory. If disk were not an issue I would expect this loop to run in a similar time otherwise. So whats the difference? 
 
-Thankfully the author of Ripgrep provided an excellent discussion and analysis of how ripgrep works https://blog.burntsushi.net/ripgrep/ pouring over this gives a reasonable idea on how ripgrep works without having to actually read code.
+Thankfully the author of Ripgrep provided an excellent discussion and analysis of how ripgrep works https://blog.burntsushi.net/ripgrep/ Reading this carefully over this gives a reasonable idea on how ripgrep works without having to actually read its source code (which I am not smart enough to understand).
 
-One of the interesting findings is that ripgrep sometimes uses memory maps, specificly for large files. By contrast scc was written to be as simple as possible and just loads the file into memory. It seems like memory maps are worth considering, or that file access in Go is just much slower, or more likely I am doing something stupid.
+One of the interesting findings is that ripgrep sometimes uses memory maps, specificly for large files. By contrast scc was written to be as simple as possible and just loads the file into memory. It seems like memory maps are worth considering, that file access in Go is slower than Rust, or more likely that I am doing something wrong.
 
 **Pause here.**
 
 It's at this point I made a classic newbie mistake with performance. I didn't measure. I made an assumption and spent of lot of time digging a dry hole. This despite being a developer for over 10 years and telling everyone else "Always profile and measure. What you think will be slow probably won't be.".
 
-If you want to skip the next section feel free. I did debate rewriting history to make myself look better but decided against it. After all there are some useful tidbits in the below.
+I did debate rewriting this post to clean the history and make myself look smarter but decided against it. There are some useful tidbits in the below, and I wanted this post to be about what I actually did, warts and all.
 
 Time to experiment with memory maps and file reading in Go.
 
@@ -205,9 +143,9 @@ Memory maps are something I started and finished knowing very little about. Wiki
 
 It was also around this time I started tweeting my results. 
 
-Comparisons to ripgrep brought out some discussion with its author Andrew Gallant probably better known as BurntSushi. He was mostly interested in the lackuster speed I was getting from ripgrep. This was pretty quickly established to be due to me using WSL on Windows which is known to have disk performance issues. If you read the ripgrep announcement you can see he comprehensively proves that mmaps are not as fast as you would belive. This also came out in our brief twitter conversation. Not that I don't belive him but I would like some independent confirmation, and to find out at what point are memory maps worth it.
+Comparisons to ripgrep brought out some discussion with Andrew Gallant probably better known as BurntSushi and the author of ripgrep. He was mostly interested in the lackuster speed I was getting from ripgrep. This was pretty quickly established to be due to me using WSL on Windows which is known to have disk performance issues. If you read the ripgrep announcement you can see he comprehensively proves that mmaps are not as fast as you would belive. This also came out in our brief twitter conversation. Not that I don't belive him but I would like some independent confirmation, and I wanted to find out at what point are memory maps worth using.
 
-The first question I had was what is the average file size for the Linux Kernel. With this we can test on a file of the same length and know if reading such a file using memory maps is faster.
+The first question I had was what is the average file size for the Linux Kernel. With this we can test on a file of a similar length and know if reading such a file using memory maps is faster.
 
 ```
 $ find . -name "*.c" | xargs ls -l | gawk '{sum += $5; n++;} END {print sum/n;}'
@@ -216,14 +154,14 @@ $ find . -name "*.c" | xargs ls -l | gawk '{sum += $5; n++;} END {print sum/n;}'
 
 The above should find all the C files in a directory and then average their length in bytes. I think. My bash-fu is lacking.
 
-Given this lets try our benchmark on a file of that length.
+Given the above lets try a benchmark on a file of that length.
 
 ```
 $ dd if=/dev/urandom of=linuxaverage bs=18554 count=1
 18554 bytes (19 kB, 18 KiB) copied, 0.003102 s, 6.0 MB/s
 ```
 
-The above is used to make the file using random bytes from urandom. Then using an implementation that opens the file using both what scc was using IoUtil and another using memory maps.
+The above is used to make the file using random bytes from urandom which should avoid any disk tweaks to speed things up. Then using an implementation that opens the file using IoUtil and another using memory maps.
 
 ```
 $ go test -bench .
@@ -232,7 +170,7 @@ BenchmarkIoUtilOpen-8              20000            111981 ns/op
 BenchmarkMmapUtilOpen-8              500           2614086 ns/op
 ``` 
 
-Not brilliant. Memory maps appear to be ~26x slower. So what size file does make a difference then? A bit of experimentation and I managed to get the results to converge at about 6 MB. 
+Not brilliant. Memory maps appear to be ~26x slower. So what size file does make a difference then? A bit of experimentation and I managed to get the results to converge at about 6 MB on my development machine which is a Surface Book 2 running in the WSL.
 
 ```
 $ dd if=/dev/urandom of=linuxaverage bs=6000000 count=1 && go test -bench .
@@ -244,7 +182,7 @@ BenchmarkMmapUtilOpen-8              500           2530480 ns/op
 
 Considering the average size of a file we are searching is under 20 KB there is no point in using memory maps based on the above. 
 
-However scc is still slower than ripgrep. Maybe its something to do with the way I am reading the file? In the above I just read the whole file at once. Perhaps mmap wants me to read chunks, process and then finish at the end. The other issue could be that because the access isn't random across the disk. Checking the latter is easier so I tried that.
+However scc is still slower than ripgrep and the above does not explain it. Maybe its something to do with the way I am reading the file? In the above I just read the whole file at once. Perhaps mmap wants me to read chunks, process and then finish at the end. The other issue could be that because the access isn't random across the disk. Checking the latter is easier so I tried that.
 
 I modified the test so that it walks loops over a copy of redis calculating as we go.
 
@@ -264,7 +202,7 @@ BenchmarkIoUtilOpen-8                  1        15183734000 ns/op
 BenchmarkMmapUtilOpen-8                1        15455014000 ns/op
 ```
 
-Pretty much a dead heat. So it seems that using mmaps in the real world has no performance gains unless you hit a really huge file. I was getting suspicious at this point that my development machine using WSL was influincing the results. I created a virtual machine on Digital Ocean running Ubuntu to see how that fared. The results turned out to be very similar.
+Pretty much a dead heat. So it seems that using mmaps in the real world has no performance gains unless you hit a large file. I was getting suspicious at this point that my development machine using WSL was influencing the results. I created a virtual machine on Digital Ocean running Ubuntu to see how that fared. The results turned out to be very similar.
 
 All I have managed to do was establish that mmaps are not the answer to my current performance woes.
 
@@ -278,51 +216,20 @@ I decided to try ripgrep on a file thats just large enough to be at the meeting 
 | ripgrep |  55.9 ms ±   6.2 ms |
 | scc (early version) | 82.4 ms ±   5.3 ms |
 
-```
-$ hyperfine 'rg -j1 .* 6mb' && hyperfine 'rg .* 6mb' && hyperfine 'scc 6mb'
-Benchmark #1: rg -j1 .* 6mb
-  Time (mean ± σ):      89.5 ms ±   6.4 ms    [User: 9.2 ms, System: 54.1 ms]
-  Range (min … max):    73.0 ms …  98.8 ms
-
-Benchmark #1: rg .* 6mb
-  Time (mean ± σ):      55.9 ms ±   6.2 ms    [User: 23.5 ms, System: 55.3 ms]
-  Range (min … max):    49.7 ms …  80.8 ms
-
-Benchmark #1: scc 6mb
-  Time (mean ± σ):      82.4 ms ±   5.3 ms    [User: 61.2 ms, System: 17.2 ms]
-  Range (min … max):    76.6 ms … 105.2 ms
-```
-
 Ah ha! Looks like ripgrep spawns mutliple threads to read a file. In this case at least two as it is almost twice as fast. So if the code base has many larger files this is likely to be faster (or if its a single file) but slower for small ones unless it calculates the size in advance. Lets find out.
 
-Trying against a fresh checkout of redis which has far fewer files in it than the linux kernal.
+Trying against a fresh checkout of redis which with ~700 files has far fewer files in it than the linux kernal.
 
 | Program | Runtime |
 |---|---|
 | ripgrep | 82.9 ms ±   8.6 ms |
 | scc (early version) | 65.6 ms ±   2.2 ms |
 
+So for smaller repositories we are processing about as fast as ripgrep. For larger ones though it is leaving us sucking dust.
 
-```
-$ find . | wc -l
-712
+Again this still begs the question. Why is scc so much slower?
 
-$ hyperfine 'rg .' && hyperfine 'scc .'
-Benchmark #1: rg .
-  Time (mean ± σ):      82.9 ms ±   8.6 ms    [User: 138.2 ms, System: 193.8 ms]
-  Range (min … max):    74.5 ms … 104.6 ms
-
-Benchmark #1: scc .
-  Time (mean ± σ):      65.6 ms ±   2.2 ms    [User: 183.7 ms, System: 178.7 ms]
-  Range (min … max):    62.5 ms …  72.9 ms
-
-```
-
-Yep. So for smaller repositories we are processing about as fast as ripgrep. For larger ones though it is leaving us sucking dust.
-
-However it still begs the question. Why is scc so much slower?
-
-The really nice thing about Go is that since you can view the source and than since its written in Go you can peal back the layers and have a look at how things are implemented. The thing that appears to be causing us the most grief is this line.
+One excellent thing about Go is that you can view view the source of Go itself and than since its written in Go you can probably understand a lot of it and hence look at how things are implemented. The thing that appears to be causing us the most grief is this line.
 
 {{<highlight go>}}
 content, err := ioutil.ReadFile(res.Location)
@@ -380,7 +287,7 @@ BenchmarkBuffIoReadText32768-8                     10000            113819 ns/op
 
 The implementation at least as I have implemented it makes no difference with different buffer sizes or is worse most of the time.
 
-At this point I started looking at running parallel reads of the same file. However this seemed insane as its probably faster to read continuous bytes from most small files.
+At this point I started looking at running parallel reads of the same file. However this seemed insane as its probably faster to read continuous bytes for small files.
 
 So all I managed to establish in the above was that the way I used memory maps makes no difference for small files and that I cannot write better code than the Go maintainers (not a big suprise there). I did so pretty comprehensively though so I have that going for me.
 
@@ -399,11 +306,11 @@ It would appear that the bottleneck is actually walking the file system and not 
 
 If we can make the walk process faster we should be able to improve the above results.
 
-If you remember back at the start one of then first things I did was investigate ways to speed up walking the file tree. One of the candidates were implementations of parallel tree walkers. In the end it turned out that gogodirwalk was the fastest implementation even without running in parallel. Naturally my evil plan to make it run even faster was to make it run in parallel.
+If you remember back at the start one of then first things I did was investigate ways to speed up walking the file tree. Two of the candidates I looked at were implementations of parallel tree walkers. In the end it turned out that gogodirwalk was the fastest implementation even without running in parallel. Naturally my evil plan to make it run even faster, was to make it run in parallel.
 
 I modified the code to inspect the inital directory passed in and spawn a goroutine for child directory to walk that child. Then the remaining files were pumped into the processing pipeline channel. 
 
-This approach has the problem that it makes performance unpredictable between directories. If there are many directories we spawn more goroutines and if there is only one folder we only spawn one. In short the best vs worst case performance profiles are wildly different, which is probably why the offical Go implementation does not do this.
+This approach has the problem that it makes performance unpredictable between different directories. If there are many directories we spawn more goroutines and if there is only one folder we only spawn one. The best vs worst case performance profiles of this are wildly different, which is probably why the offical Go implementation does not do this.
 
 So with the above simple process in place.
 
@@ -414,11 +321,13 @@ DEBUG 2018-03-27T21:48:56Z: milliseconds to walk directory: 3648
 scc linux  9.36s user 17.06s system 711% cpu 3.715 total
 ```
 
-Excellent. The last time to process was ~7 seconds. It appears that we have resolved the disk bottlenecks that are my fault.
+Excellent. The last time to process was ~7 seconds. It appears that we have resolved the disk bottlenecks by a considerable amount.
 
 ## The Quest for Accuracy
 
-The obvious and wrong way (IMHO) to count lines and code inside a file is to use strings and regular expressions. For example cloc in its limitations section mentions that it works like this and as such cannot count some things correctly see https://github.com/AlDanial/cloc#Limitations for context but I have included the relevant portion below.
+The obvious and wrong way (IMHO) to count lines and code inside a file is to use strings and regular expressions. For example cloc in its limitations section mentions that this is how it operates and as such cannot count some things correctly https://github.com/AlDanial/cloc#Limitations 
+
+I have included the relevant portion below.
 
 {{<highlight c>}}
 printf(" /* ");
@@ -441,20 +350,14 @@ xxxxxxx     ");
 Cloc counts it as 1 line of code and 4 of comments. However it should be counted as 5 lines of code. Of the sample programs I am comparing against, tokei, loc, gocloc, cloc and sloccount, only tokei and sloccount get the counts correct.
 
 ```
-$ cloc examples/complexity
-       1 text file.
-       1 unique file.
-       0 files ignored.
-
-http://cloc.sourceforge.net v 1.60  T=0.10 s (10.1 files/s, 50.4 lines/s)
+$ cloc samplefile
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
 Java                             1              0              4              1
 -------------------------------------------------------------------------------
 
-# bboyter @ SurfaceBook2 in ~/Go/src/github.com/boyter/scc on git:master x [8:23:18]
-$ tokei examples/complexity
+$ tokei samplefile
 -------------------------------------------------------------------------------
  Language            Files        Lines         Code     Comments       Blanks
 -------------------------------------------------------------------------------
@@ -463,8 +366,7 @@ $ tokei examples/complexity
  Total                   1            5            5            0            0
 -------------------------------------------------------------------------------
 
-# bboyter @ SurfaceBook2 in ~/Go/src/github.com/boyter/scc on git:master x [8:23:39]
-$ loc examples/complexity
+$ loc samplefile
 --------------------------------------------------------------------------------
  Language             Files        Lines        Blank      Comment         Code
 --------------------------------------------------------------------------------
@@ -473,8 +375,7 @@ $ loc examples/complexity
  Total                    1            5            0            3            2
 --------------------------------------------------------------------------------
 
-# bboyter @ SurfaceBook2 in ~/Go/src/github.com/boyter/scc on git:master x [8:23:45]
-$ gocloc examples/complexity
+$ gocloc samplefile
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
@@ -483,21 +384,20 @@ Java                             1              0              5              0
 TOTAL                            1              0              5              0
 -------------------------------------------------------------------------------
 
-# bboyter @ SurfaceBook2 in ~/Go/src/github.com/boyter/scc on git:master x [8:23:56]
-$ sloccount examples/complexity
+$ sloccount samplefile
 
 SLOC    Directory       SLOC-by-Language (Sorted)
 5       complexity      java=5
 
 ```
 
-Not only does it make mistakes it is also a slower way to process. I am not going to bother testing this with any benchmarks but it is considerably slower.
+Not only does cloc get the counts wrong doing this by regular expression is a far slower way to process a file.
 
-So I decided that I would scan byte by byte, look through every byte of every file and using a very simple state machine determines if a line is empty, a comment, code or a string containing one of the others. Turns out this is how tokei works as well https://github.com/Aaronepower/tokei/issues/175
+So I decided that if I was not using regular expressions I would scan byte by byte. That is look through every byte of every file and using a very simple state machine determines if a line is empty, a comment, code or a string containing one of the others. Turns out this is how tokei works as well https://github.com/Aaronepower/tokei/issues/175
 
-The other option would be to build an AST which would be much slower than byte counting and possibly slower than the regular expression parser depending on how you build it out.
+Another option would be to build an AST which would probably be much slower than byte counting and possibly slower than the regular expression parser.
 
-Why look at every byte? This is pretty easy to answer actually. Because it has to. We need to know where strings start and end, where comments begin etc... Since a comment can be a single byte we need to check every byte to know where they are. It is unlikely to be the slowest part of the application. It's more likely that reading from disk is going to slow things down than the CPU. Not that ripgrep uses a far fancier technique https://blog.burntsushi.net/ripgrep/#linux-literal-default 
+Why look at every byte? This is pretty easy to answer actually. Because it has to. We need to know where strings start and end, where comments begin etc... Since a comment can be a single byte we need to check every byte to know where they are. It is unlikely to be the slowest part of the application. It's more likely that reading from disk is going to slow things down than the CPU. Not that ripgrep uses a far fancier technique https://blog.burntsushi.net/ripgrep/#linux-literal-default as written by BurntSushi
 
 ```
 Counting lines can be quite expensive. A naive solution—a loop over every byte and comparing it to a \n—will 
@@ -508,11 +408,11 @@ spent counting lines tends to not be so significant. Especially since every tool
 search to some degree. When we get to the single-file benchmarks, this variable will become much more pertinent.
 ```
 
-Note that scc falls into the cateogry of counting lots of small files. My benchmarks show that as Andrew claims it is not a significant portion of the runtime. So while it may be "slow" its not a factor at all in the way the application performs.
+Note that scc falls very much into the cateogry of counting lots of small files. My benchmarks show that as BurntSushi claims it is not a significant portion of the runtime. Also because scc does not need to check line boundries there is no need to worry about newlines beyond resetting the current state we are in. So while it may be "slow" its not a factor at all in the way the application performs.
 
-Operating on single bytes also makes it much easier to move in the state engine. However it does mean you have to check each byte potentially multiple times, so while it should be faster than reading from the disk its something to keep in the back of your mind.
+Operating on single bytes also makes it much easier to move in the state engine. However it does mean you have to check each byte potentially multiple times. While it should be faster than the reading of files from the disk its something to keep in the back of your mind that its very possible to become CPU bound if not careful.
 
-However while it seems simple its not quite as easy as it would appear. Not so much from an implementation point of view but from how you actually count things. Take the following examples.
+However while it sounds simple its not quite as easy as it would appear. Take the following examples.
 
 {{<highlight c>}}
 i++; /*
@@ -538,16 +438,17 @@ string.Format(" /* comment " +
 
 How many lines of code is the above? I would say 3. How about with multiple line strings
 
+{{<highlight go>}}
 fmt.Println(`
-  /* I am followed by empty line
+  /* I am followed by empty line // Woah!
 
   something! */
-`)
-
+`) /* something */
+{{</highlight>}}
 
 All of the above is code but easily fools many parsers that rely on regular expressions. 
 
-So looking at the above we need to code in a simple state machine that works for the above. It looks something like the below and is hideous.
+So looking at the above we need to code in a simple state machine that works for the above. It looks something like the below and once I created this I realised how hideous it is.
 
 http://webgraphviz.com/
 
@@ -569,66 +470,13 @@ digraph G {
 
 ![State Machine](/static/sloc-cloc-code/Sketch2.png)
 
-A particullary incidious thing you can put that will confuse most code counters is the following
-
-{{<highlight c>}}
-/* /* */ 
-{{</highlight>}}
-
-Thankfully most languages treat anything between the first multiline comment and the first close of the comment as being valid. As such
-
-{{<highlight c>}}
-/* /* */ */
-{{</highlight>}}
-
-Is not actually valid and will be a compile error.
-
-What about
-
-{{<highlight c>}}
-int i = 0; /* 
-/**//**/
-/**//**//**//**/
-{{</highlight>}}
-
-Or
-{{<highlight c>}}
-"``/* i++"
-{{</highlight>}}
-
-These sort of cases thankfully are rare. Given enough creative evil you can fool any of the code counters I am comparing against using things like the above including Tokei which appears to be the most accurate of them all. 
-
-I decided early on that while I wanted accuracy I want it for 99.999% of cases. Someone trying to confuse the counter is not in that group and so I am not going to spend a great deal of time working on cases like the above.
-
+Thankfully the sort of cases I mentione above are rare. Given enough creative evil you can probably fool any of the code counters I am comparing against, including Tokei which appears to be the most accurate.  I decided early on that while I wanted accuracy I want it for 99.999% of cases. Someone trying to confuse the counter is not a case I am going to spend a great deal of time working on.
 
 ## Trying Things Out
 
 With the above implemented producing accurate results coupled with the work I put into disk performance I thought I would try out a quick benchmark on the most powerful Digital Ocean machine I can spin up which happens to be a 32 core monster.
 
-| Program | Runtime |
-|---|---|
-| ripgrep | 567.9 ms ±  24.7 ms |
-| scc (unoptimised) | 959.5 ms ±  80.3 ms |
-| tokei | 877.0 ms ±  43.1 ms |
-
-```
-root@ubuntu-c-32-64gib-sgp1-01:~# hyperfine 'rg . linux' && hyperfine './scc linux' && hyperfine 'tokei linux'
-Benchmark #1: rg . linux
-  Time (mean ± σ):     567.9 ms ±  24.7 ms    [User: 5.183 s, System: 0.610 s]
-  Range (min … max):   534.6 ms … 618.1 ms
-
-Benchmark #1: ./scc linux
-  Time (mean ± σ):     959.5 ms ±  80.3 ms    [User: 6.182 s, System: 3.362 s]
-  Range (min … max):   802.4 ms … 1098.5 ms
-
-Benchmark #1: tokei linux
-  Time (mean ± σ):     877.0 ms ±  43.1 ms    [User: 12.753 s, System: 0.841 s]
-  Range (min … max):   798.8 ms … 929.3 ms
-```
-
-Well thats interesting. Tokei is now the fastest running counter. I suspect that its due to how its walking though the file tree. It also suggests that Tokei could always be the fastest code counter if it changed the algorithm it uses for walking the file tree.
-
-Let's try it out on ten copies of the linux kernel dumped into a single directory.
+I tried things out on 10 copies of the linux kernel dumped into a single directory.
 
 | Program | Runtime |
 |---|---|
@@ -636,27 +484,13 @@ Let's try it out on ten copies of the linux kernel dumped into a single director
 | scc (unoptimised) | 3.629 s ±  0.262 s |
 | tokei | 6.543 s ±  0.075 s |
 
-```
-Benchmark #1: rg . linuxes
-  Time (mean ± σ):      4.815 s ±  0.206 s    [User: 50.862 s, System: 5.572 s]
-  Range (min … max):    4.604 s …  5.043 s
-
-Benchmark #1: ./scc linuxes
-  Time (mean ± σ):      3.629 s ±  0.262 s    [User: 57.305 s, System: 16.077 s]
-  Range (min … max):    3.257 s …  4.127 s
-
-Benchmark #1: tokei linuxes
-  Time (mean ± σ):      6.543 s ±  0.075 s    [User: 135.301 s, System: 7.722 s]
-  Range (min … max):    6.433 s …  6.638 s
-```
-
 In this case it seems scc picked a more optimal number of parallel threads to walk the file tree. There is no other reason for tokei or ripgrep to be slower in this case based on the previous result.
 
 That being the case I wanted to find out in what situations for disk layouts they work well and for which they do not. There are a few situations at test here. 
 
-The first is a very deep directory with a few files in each sub directory. This is not friendly to parallel algorithms. Each next step requires the previous steps operation to finish and as such there isnt much you can do to offload the work. Another case of this would be a single directory with hundreds to thousands of files of files in it. Again you need to look into the directory to get the files, and there is no way to run that in parallel. In effect both look like an unbalanced tree.
+The first I considered was a very deep directory with a few files in each sub directory. This is not friendly to parallel algorithms. Each next step requires the previous steps operation to finish and as such there isnt much you can do to offload the work. Another case of this would be a single directory with hundreds to thousands of files of files in it. Again you need to look into the directory to get the files, and there is no way to run that in parallel.
 
-So there is no point optimising for either of the above cases. Lets think about what is the optimal case. That would be a directory with subdirectories that looks like a balanced tree. The trick would be having the root having as many subfolders as is optimal to spawn threads for.
+So there is little point optimising for either of the above cases. What is the optimal case. That would be a directory with subdirectories that looks like a balanced tree. The trick would be having the root having as many subfolders as is optimal to spawn threads for, which of course depends on how fast your disk is and how many CPU's you have.
 
 I decided to write a simple python script which would generate some directories to try out the above and see how each tool performs. The tool with the very imaginative name "create_folders_with_files.py" creates a series of directories designed to test the best/worst case situation for each of the tools. Example output of what it creates using tree is included below.
 
@@ -1131,30 +965,87 @@ Java                       131     19445    13913      1716     3816       1107
 ~e/route/CodeRouteService.java       453      348         9       96         50
 ```
 
-Indeed that is exactly what I would have expected from the results. So it looks as though
+Indeed that is exactly what I would have expected from the results. So it looks for at least for my use case that the complexity calculations work pretty well. Of course if you don't want them,
+
+```
+$ scc -c --co redis
+-------------------------------------------------------------------------------
+Language                     Files       Lines      Code    Comments     Blanks
+-------------------------------------------------------------------------------
+C                              215      114480     85333       15175      13972
+C Header                       144       20042     13308        4091       2643
+TCL                             93       15702     12933         922       1847
+Lua                             20         524       384          71         69
+Autoconf                        18       10713      8164        1476       1073
+Shell                           18         810       513         196        101
+Makefile                         9        1021       716         100        205
+Ruby                             8        2422      1804         376        242
+Markdown                         6        1312       964           0        348
+HTML                             6       11472      8288           5       3179
+YAML                             2          75        60           4         11
+CSS                              2         107        91           0         16
+Batch                            1          28        26           0          2
+C++ Header                       1           9         5           3          1
+C++                              1          46        30           0         16
+Plain Text                       1         499       499           0          0
+-------------------------------------------------------------------------------
+Total                          545      179262    133118       22419      23725
+-------------------------------------------------------------------------------
+```
+
+Not only can you turn off the complexity calculations you can turn off the COCOMO calcualtion as well. Turning off the complexity calculations also improves the performance to be similar to tokei.
+
+Note that the calculations will not be 100% the same as tokei for a few reasons.
+
+ - scc picks up addtional languages and file types
+ - scc will always count blank lines in a file even if it is not counting code or comments
+ - there are some differences in how they both behave with newlines with tokei counting \n similar to wc
+
+I coded scc to work with how I wanted it to work. Perhaps in the future a flag can be added to bring them into line if someone wants to put the work in.
 
 ## Benchmarks
 
-What follows is going to be a highly biased (I wrote one of the tools remember) collection of benchmarks which definitively prove that scc is either the fastest code counter or close to being the fastest that I am aware of. Its not only faster than cloc by a huge amount it either equals tokei and leaves loc trailing as well. For running on Windows it is always faster either command line or through the WSL.
+What follows is going to be a highly biased (I wrote one of the tools remember) collection of benchmarks which definitively prove that scc is either the fastest code counter or close to being the fastest that I am aware of. Not only faster than cloc, sloccount, loc and gocloc by a huge amount it either equals tokei or when running on Windows it is always faster using either the windows command line or through the WSL. 
+
+In addtion you can have the code complexity calculation running, duplicates detection or both and it will generally be almost as fast as tokei.
 
 With that outragous claim out of the way lets see if I prove it.
 
-All tests were run on Digital Ocean 16 vCPU Compute optimized droplets with 32 GB of RAM and a 200 GB SSD. The machine used was doing nothing else at the time and was created with the sole purpose of running the tests to ensure no interference from other processes. The OS used is Ubuntu 16.04 and the rust programs were installed using cargo install.
+### Methodology / Commands
+
+All GNU/Linux tests were run on Digital Ocean 16 vCPU Compute optimized droplet with 32 GB of RAM and a 200 GB SSD. The machine used was doing nothing else at the time and was created with the sole purpose of running the tests to ensure no interference from other processes. The OS used is Ubuntu 16.04 and the rust programs were installed using cargo install.
+
+Keep in mind that this is not a dedicated machine. As such it is subject to noisy neighbours and issues with the underlying hardware. It is likely you will be unable to replicate the results 100% even if you spin up the same instance.
+
+The Windows tests were run on a Surface Book 2 with the i7-8650U CPU. This is problematic as there is the possibility that CPU throttling will kick in influincing the benchmark, and as it is not a freshly formatted machine that there may be something else running on it during the benchmark. Take these tests with a massive grain of salt and treat them as more an indication of performance than a perfect benchmark. I did my best to stop all background services and ran benchmarks several times only taking the best result for each to try and keep it as fair as possible.
 
 I set scc to run first in order to ensure that it warms up everything and take any handicap that might incur from this process. To do the benchmark itself I used the excellent Rust tool hyperfine with 3 warmup runs and 10 timed runs total to produce the results. These are the defaults for hyperfine but are set explicitly via the command line.
 
 Due to how long sloccount and cloc took I have only run benchmarks of them for redis as it took far too long to get the results for the larger projects.
 
+Tools under test
+
+ - scc 1.0.0
+ - tokei 7.0.1
+ - loc 0.4.1
+ - gocloc (no version) commit #686bf36768b8d00e355be00c445df681a2a88125
+ - sloccount 2.26
+ - cloc 1.60
+
+To keep things fair I also ran scc three times for each benchmark. The first was in its default state, the second without code complexity calculation and the last with duplicates detection enabled. This is because none of the other tools under test have code complexity calculations and some of them do detect duplicates (tokei for example does not).
+
 ### Linux Kernel Source Benchmarks
 
-The Linux Kernel  benchmark was run using a fresh checkout of the linux kernel commit #HERE
+The Linux Kernel benchmark was run using a fresh checkout of the linux kernel commit #HERE
 
 
 	hyperfine -w3 -m10 './scc linux' && hyperfine -w3 -m10 'tokei linux' && hyperfine -w3 -m10 'loc linux' && hyperfine -w3 -m10 './gocloc linux'
 
 | Program | Runtime |
 |---|---|
-| scc | 1.615 s ±  0.044 s |
+| scc | 1.315 s ±  0.044 s |
+| scc (complexity calculation) | 1.615 s ±  0.044 s |
+| scc (duplicates detection) | 1.615 s ±  0.044 s |
 | tokei | 1.304 s ±  0.077 s |
 | loc | 3.508 s ±  0.423 s |
 | gocloc | 11.994 s ±  0.059 s |
@@ -1210,32 +1101,26 @@ Benchmark #1: ./gocloc linux
 
 ```
 Benchmark #1: scc redis
-
   Time (mean ± σ):     133.4 ms ±  24.7 ms    [User: 547.4 ms, System: 392.4 ms]
   Range (min … max):   100.8 ms … 190.8 ms
 
 Benchmark #1: scc -c redis
-
   Time (mean ± σ):     128.2 ms ±  22.5 ms    [User: 429.6 ms, System: 405.8 ms]
   Range (min … max):    85.1 ms … 193.2 ms
 
 Benchmark #1: scc -d redis
-
   Time (mean ± σ):     153.6 ms ±  28.4 ms    [User: 831.4 ms, System: 291.3 ms]
   Range (min … max):   109.9 ms … 200.8 ms
 
 Benchmark #1: tokei redis
-
   Time (mean ± σ):     285.3 ms ±  63.0 ms    [User: 558.0 ms, System: 578.8 ms]
   Range (min … max):   186.7 ms … 350.4 ms
 
 Benchmark #1: loc redis
-
   Time (mean ± σ):     570.0 ms ±  22.0 ms    [User: 280.2 ms, System: 422.6 ms]
   Range (min … max):   522.0 ms … 602.6 ms
 
 Benchmark #1: gocloc redis
-
   Time (mean ± σ):     879.2 ms ± 190.7 ms    [User: 265.1 ms, System: 624.5 ms]
   Range (min … max):   694.9 ms … 1360.4 ms
 ```
@@ -1244,22 +1129,18 @@ Benchmark #1: gocloc redis
 ```
 root@ubuntu-c-16-sgp1-01:~# hyperfine -w3 -m10 './scc redis' && hyperfine -w3 -m10 'tokei redis' && hyperfine -w3 -m10 'loc redis' && hyperfine -w3 -m10 './gocloc redis'
 Benchmark #1: ./scc redis
-
   Time (mean ± σ):      44.6 ms ±  21.4 ms    [User: 147.2 ms, System: 22.6 ms]
   Range (min … max):    21.9 ms …  98.1 ms
 
 Benchmark #1: tokei redis
-
   Time (mean ± σ):      32.4 ms ±   5.1 ms    [User: 101.5 ms, System: 29.5 ms]
   Range (min … max):    23.9 ms …  55.3 ms
 
 Benchmark #1: loc redis
-
   Time (mean ± σ):     146.0 ms ±  36.6 ms    [User: 624.6 ms, System: 51.8 ms]
   Range (min … max):    89.1 ms … 228.7 ms
 
 Benchmark #1: ./gocloc redis
-
   Time (mean ± σ):     131.8 ms ±   1.6 ms    [User: 114.0 ms, System: 30.9 ms]
   Range (min … max):   129.1 ms … 135.7 ms
 
@@ -1268,31 +1149,29 @@ Benchmark #1: ./gocloc redis
 ```
 root@ubuntu-c-16-sgp1-01:~# hyperfine -w3 -m10 './scc django' && hyperfine -w3 -m10 'tokei django' && hyperfine -w3 -m10 'loc django' && hyperfine -w3 -m10 './gocloc django'
 Benchmark #1: ./scc django
-
   Time (mean ± σ):     152.8 ms ±  35.0 ms    [User: 532.2 ms, System: 94.4 ms]
   Range (min … max):   100.5 ms … 212.6 ms
 
 Benchmark #1: tokei django
-
   Time (mean ± σ):     118.2 ms ±  10.0 ms    [User: 286.0 ms, System: 120.9 ms]
   Range (min … max):   101.3 ms … 140.6 ms
 
 Benchmark #1: loc django
-
   Time (mean ± σ):     293.4 ms ±  73.1 ms    [User: 555.0 ms, System: 277.0 ms]
   Range (min … max):   199.1 ms … 437.5 ms
 
 Benchmark #1: ./gocloc django
-
   Time (mean ± σ):     377.9 ms ±   3.2 ms    [User: 327.6 ms, System: 106.0 ms]
   Range (min … max):   374.3 ms … 385.4 ms
 
 ```
 
-
-
 ## Conclusion
 
-Of course whats likely to happen now is that either the excellent authors of Tokei or Loc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats even faster than scc or indeed anyhing I could ever produce. I have no problem with this. It was more about seeing how fast I could make it, and besides I don't think of tools that do similar things as being in competition. Andy Lester of ack fame puts this far better than I ever could http://blog.petdance.com/2018/01/02/the-best-open-source-project-for-someone-might-not-be-yours-and-thats-ok/
+Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats even faster than scc or indeed anyhing I could ever produce. 
+
+I have no problem with this. A lot of this post was about seeing how fast I could make things run while learning as much as possible. Besides I don't think of tools that do similar things as being in competition. Andy Lester of ack fame puts this far better than I ever could http://blog.petdance.com/2018/01/02/the-best-open-source-project-for-someone-might-not-be-yours-and-thats-ok/
+
+If you do like SCC though feel free to submit some pull requests. The language.json file could use some addtional submissions of languages and improvements to the languages that are already are in there. If you are able to find some addtional performance somewhere in the code that would also be a nice thing to implement so long as it does not make things too unreadable.
 
 Enjoy? Hate? Let me know via twitter or email directly.

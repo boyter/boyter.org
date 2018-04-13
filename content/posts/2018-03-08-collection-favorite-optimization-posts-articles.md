@@ -40,5 +40,6 @@ In no particular order.
  - How to write fast code <a href="http://asserttrue.blogspot.com.au/2009/03/how-to-write-fast-code.html">http://asserttrue.blogspot.com.au/2009/03/how-to-write-fast-code.html</a>
  - Regular Expression Matching Can Be Simple And Fast (but is slow in Java, Perl, PHP, Python, Ruby, &#8230;) <a href="https://swtch.com/%7Ersc/regexp/regexp1.html">https://swtch.com/%7Ersc/regexp/regexp1.html</a>
  - Why Writing Your Own Search Engine is Hard <a href="https://queue.acm.org/detail.cfm?id=988407">https://queue.acm.org/detail.cfm?id=988407</a>
+ - Effects of CPU caches https://medium.com/@minimarcel/effect-of-cpu-caches-57db81490a7f
 
 Will attempt to keep this list up to date as I find other content that really impresses me.
