@@ -3,40 +3,43 @@ title: Sloc Cloc and Code
 date: 2018-04-06
 ---
 
-TL/DR
+### It started by wanting to write a code counter that would be faster than cloc.
+
+**TL/DR**
 
  - scc is a very fast accurate code counter with complexity calculations and cocomo estimates written in Go
- - surpisingly walking the file tree can be the bottleneck in your application
+ - find the source for everything on github https://github.com/boyter/scc/
+ - surprisingly walking the file tree can be the bottleneck in your application
  - memory maps for reading files is useful if the file you are opening is >= 6 MB in size (at least in WSL)
+ - profiling Go code does not work in the WSL
  - the golden rule of performance tuning is to profile/measure, profile/measure and profile/measure again
  - the best case vs worst case performance for parallel file tree walking is large
  - the default file walker is slow due to calling os.Stat on every node and not running in parallel
-
-*Note that where command line output is included below I have often cut out empty lines to reduce the size*
-
-It started by wanting to write a code counter that would be faster than cloc.
+ - I have probably messed up the cocomo estimates calculation but I think it should be correct
+ - the name comes from joining sloccount, cloc and code complexity in a way that sounds like a Guy Ritchie film
+ - the whole thing below is written as I went along so its likely some parts are contradictory
 
 For those who have never encountered cloc https://github.com/AlDanial/cloc it is what appears to be simple command line tool (it is not simple and has a LOT of functionality!) that iterates through a given directory checking files against a known list of programming languages and then counting the number of code, comment and blank lines. For getting an overview of how large a project is and what languages are being used it is incredibly useful. I remember first using it early in my career to estimate project sizes.
 
-Cloc is written in perl and is probably not known for its performance (I don't know of anyone who claimed it to be a shining example of a fast application). Running it on a small directory with 6 files on my development machine takes ~1.7 seconds. I gave up running it against a larger codebase like the linux kernel but in my case it took long enough to brew a pot of coffee before I hit CTRL+C.
+Cloc is written in perl and is probably not known for its performance (I don't know of anyone who claimed it to be a shining example of a fast application). Running it on a small directory with 6 files on my development machine takes ~1.7 seconds. I gave up running it against a larger code-base like the linux kernel but in my case it took long enough to brew a pot of coffee before I hit CTRL+C.
 
 It got me thinking, what is fast enough? What sort of performance should I aim for? I want it to be faster than cloc, but how much faster?
 
 I would generally argue that performance, like money, isn't everything unless you have none. Get it working, make it right, make it fast. In that order.
 
-For some user driven tools performance can be everything. Personally ehen I ask a program to do something I want it done now dammit. Some users may be prepared to wait a while for a result if they percieve value in it such as calculating your tax, you at least want the illusion that a lot is happening to ensure it is correct. Programming tools tend to fall into the I want it now category. You may only run it once every few days, but if its so slow as to produce finger tapping it quickly becomes frustrating, causes the mind to wander and produtivity to go down. 
+For some user driven tools performance can be everything. Personally when I ask a program to do something I want it done now dammit. Some users may be prepared to wait a while for a result if they perceive value in it such as calculating your tax, you at least want the illusion that a lot is happening to ensure it is correct. Programming tools tend to fall into the I want it now category. You may only run it once every few days, but if its so slow as to produce finger tapping it quickly becomes frustrating, causes the mind to wander and productivity to go down. 
 
-It also causes the devloper to start thinking that they could make it run faster if they wanted and they start opening a repository and implementing a new version while waiting. Apparently waiting for C to compile is why Go became a programming language. Performance is also one of the reasons Google became so popular so quickly.
+It also causes the developer to start thinking that they could make it run faster if they wanted and they start opening a repository and implementing a new version while waiting. Apparently waiting for C to compile is why Go became a programming language. Performance is also one of the reasons Google became so popular so quickly.
 
 The other reason Google became popular was accuracy. The flip side to performance is that it usually comes at the expense of accuracy. Usually it is about trade offs. Are you willing to trade speed for accuracy? If you don't require any accuracy I promise to make the fastest program you have ever seen.
 
-So having established through some flimsy "I am a programmer and my tools are special" hand waving I decided I needed to make the fastest possible code counter. I want it to push the boundries of the hardare (unlikely) or my own abilities (much more likely). Oh and I don't want to trade speed for accuracy. I want both.
+So having established through some flimsy "I am a programmer and my tools are special" hand waving I decided I needed to make the fastest possible code counter. I want it to push the boundaries of the hardware (unlikely) or my own abilities (much more likely). Oh and I don't want to trade speed for accuracy. I want both.
 
 To make things easier I decided to implement only the basic count that cloc provides and not the fancy SQLite output it provides. CSV and JSON output is about as far as I am going to go. This scope expanded as I progressed however, as is the habit with personal projects.
 
-Beating cloc or its plugin sloccount (another code counter application which improves performance and provides COCOMO cost estimations) did not seem like such a high bar.
+Beating cloc or its plug-in sloccount (another code counter application which improves performance and provides COCOMO cost estimations) did not seem like such a high bar.
 
-However I am not creative enough to be the only person to have had this idea. A quick search around and I quickly identified two other projects which have the same goals. Great! Now I have addtional tools to compare my results against! However a quick check and ALAS! Both are written in Rust and BOTH claim to have excellent performance.
+However I am not creative enough to be the only person to have had this idea. A quick search around and I quickly identified two other projects which have the same goals. Great! Now I have additional tools to compare my results against! However a quick check and ALAS! Both are written in Rust and BOTH claim to have excellent performance.
 
  - Tokei (a great name) https://github.com/Aaronepower/tokei in its own words is a program that allows you to count your code, quickly.
  - Loc https://github.com/cgag/loc claims to count lines of code quickly. It also claims to be 100x faster than cloc and ~2-10x faster than tokei, depending on how many files are being counted. 
@@ -47,21 +50,27 @@ Also as I progressed with coding I discovered there was another implementation.
 
 This might be a problem. 
 
-I have experimented with Rust before and I was blown away with the performance you can wring out of it. So should I implement yet ANOTHER code counter in Rust? I decided against that. I do like a challange though http://www.boyter.org/2017/03/golang-solution-faster-equivalent-java-solution/ and I was looking to expand my knowledge of Go and learn how to write multi CPU aware code in it. So I chose Go. At the time I did not know that Gocloc already existed so I thought I was being original in the choice of language.
+I have experimented with Rust before and I was blown away with the performance you can wring out of it. So should I implement yet ANOTHER code counter in Rust? I decided against that. I do like a challenge though http://www.boyter.org/2017/03/golang-solution-faster-equivalent-java-solution/ and I was looking to expand my knowledge of Go and learn how to write multi CPU aware code in it. So I chose Go. At the time I did not know that Gocloc already existed so I thought I was being original in the choice of language.
 
-I started thinking about what sort of projects should I optimise for? After all at some point we may need to make a trade off in performance in calculating for larger vs smaller repositories. However after some more pondering I discarded this idea. I said I wanted absolute performance. This means I wanted it to work quickly on small and large projects. If I can optimise for one it should be possible to optimise for both.
+I started thinking about what sort of projects should I optimize for? After all at some point we may need to make a trade off in performance in calculating for larger vs smaller repositories. However after some more pondering I discarded this idea. I said I wanted absolute performance. This means I wanted it to work quickly on small and large projects. If I can optimize for one it should be possible to optimize for both.
 
 Given that tokei, loc and gocloc exist it means I also want to beat them when it comes to processing. Its good to have lofty goals.
 
-Regarding performance, specificly CPU performance. Back on the old days of single cores and real programmers http://www.cs.utah.edu/~elb/folklore/mel.html https://en.wikipedia.org/wiki/The_Story_of_Mel there was only one way to make code faster. Have it do less http://asserttrue.blogspot.com.au/2009/03/how-to-write-fast-code.html  The less it did the faster the program finished based on wall clock time. To quote one of the maintainers of grep "The key to making programs fast is to make them do practically nothing" https://lists.freebsd.org/pipermail/freebsd-current/2010-August/019310.html 
+Regarding performance, specifically CPU performance. Back on the old days of single cores and real programmers http://www.cs.utah.edu/~elb/folklore/mel.html https://en.wikipedia.org/wiki/The_Story_of_Mel there was only one way to make code faster. Have it do less http://asserttrue.blogspot.com.au/2009/03/how-to-write-fast-code.html  The less it did the faster the program finished based on wall clock time. To quote one of the maintainers of grep "The key to making programs fast is to make them do practically nothing" https://lists.freebsd.org/pipermail/freebsd-current/2010-August/019310.html 
 
 Those days and the "free performance lunch" ended a while ago and now the answer is a bit more complex.
 
-Nowday's you want your program to do as little as possible, on many cores, while making it easier for the cores to do the next thing. This means you need to run the program in parallel, while being friendly to the CPU caches and the branch predictor. Thankfully compilers and CPU designers understand that these things are hard for all but the most brilliant of developers (I am not in this category). As such you probably don't worry too much about anything except how to run things in parallel. That said if you run into one an issue that can be solved by changing a branching instuction to help the predictor (I have done this exactly one time) you will feel like a programming god for a while.
+Now-day's you want your program to do as little as possible, on many cores, while making it easier for the cores to do the next thing. This means you need to run the program in parallel, while being friendly to the CPU caches and the branch predictor. Thankfully compilers and CPU designers understand that these things are hard for all but the most brilliant of developers (I am not in this category). As such you probably don't worry too much about anything except how to run things in parallel. That said if you run into one an issue that can be solved by changing a branching instruction to help the predictor (I have done this exactly one time) you will feel like a programming god for a while.
 
-Architecture. Since this was my second attempt at a Go project I was able to use the benfits of hindsight to avoid making similar mistakes. The first one I made was dealing with lists. Coming from a C#/Java/Python background where the way to make code run in parallel is to build a list and then use parallel streams, parallel linq or multiprocessing to iterate over that list using all available CPU's. However in Go what you really want to do is build streams.
+Some things to keep in mind when reading
 
-The other thing you need to do is let your prejudices go and embrace goroutines. The idea of spinning up thousands of threads in something like Java is going to land you in a world of pain. However the same cannot be said of Go. Not going to dive into this too much but suffice to say so long as you limit the CPU bound GoRoutines to the number of CPU's you can get away with many thousands performing other tasks.
+ - where command line output is included below I have often cut out empty lines to reduce the size
+ - my development machine is a Surface Book 2 using Ubuntu WSL
+ - many of the benchmarks/results before the benchmarks section are run on a variety of machines and sizes
+
+Architecture. Since this was my second attempt at a Go project I was able to use the benefits of hindsight to avoid making similar mistakes. The first one I made was dealing with lists. Coming from a C#/Java/Python background where the way to make code run in parallel is to build a list and then use parallel streams, parallel linq or multiprocessing to iterate over that list using all available CPU's. However in Go what you really want to do is build streams.
+
+The other thing you need to do is let your prejudices go and embrace go-routines. The idea of spinning up thousands of threads in something like Java is going to land you in a world of pain. However the same cannot be said of Go. Not going to dive into this too much but suffice to say so long as you limit the CPU bound GoRoutines to the number of CPU's you can get away with many thousands performing other tasks.
 
 Given the above this is the design I came up with, based on the idea that you use streams similar to unix pipes.
 
@@ -69,11 +78,11 @@ Given the above this is the design I came up with, based on the idea that you us
 
 With each process handing work from one to the other using a buffered channel set to the number of CPU cores.
 
-I did at one point put channels as buffers between each of the work processes however as the application turned out to be CPU bound this was pointless. The reason for this is that by setting the size of each buffer I can control the parallelism of the code. Getting back to making things fast I only want there to be as many file processors as there are CPU's. We want to avoid CPU context switches there if at all possible. By having buffers between I can control the the number of workers without blocking any other task. Just because the File Reader or File Processer is slow there is no reason to block the Walk Process. 
+I did at one point put channels as buffers between each of the work processes however as the application turned out to be CPU bound this was pointless. The reason for this is that by setting the size of each buffer I can control the parallelism of the code. Getting back to making things fast I only want there to be as many file processors as there are CPU's. We want to avoid CPU context switches there if at all possible. By having buffers between I can control the the number of workers without blocking any other task. Just because the File Reader or File Processor is slow there is no reason to block the Walk Process. 
 
 It turned out that just making it as simple as possible worked equally as well for everything I tried, so I removed the intermediate buffers.
 
-I then started building out the calculation process. For the first attempt I wrote a simple state machine that produced reasonable outputs for the samples I had. Happy with the inital results I started to look at performance.
+I then started building out the calculation process. For the first attempt I wrote a simple state machine that produced reasonable outputs for the samples I had. Happy with the initial results I started to look at performance.
 
 ## The Quest for Disk Performance
 
@@ -81,11 +90,11 @@ One thing I noticed early on is that directory walking using the native Go file 
 
 In order to establish how fast these disk operations should be able to run I also tested using ripgrep.
 
-Ripgrep if given the right search term should scan every byte of every file. It gives an excellent idea of just how quickly you can pull a directory full of files into memory and inspect every byte. I suspect its getting as close to as much performance you can get out of the machine as you can. Will I be able to beat ripgrep's performance for these cases? Realisticly probably not, as and I am going to be working in a slightly higher level language.
+Ripgrep if given the right search term should scan every byte of every file. It gives an excellent idea of just how quickly you can pull a directory full of files into memory and inspect every byte. I suspect its getting as close to as much performance you can get out of the machine as you can. Will I be able to beat ripgrep's performance for these cases? Realistically probably not, as and I am going to be working in a slightly higher level language.
 
-Remember that any comparisons to ripgrep is very much comparing apples to oranges. It does not whitelist files and is generally doing more work per file than anthing I am building. It also solves a totally different problem.
+Remember that any comparisons to ripgrep is very much comparing apples to oranges. It does not white-list files and is generally doing more work per file than anything I am building. It also solves a totally different problem.
 
-I installed all the applications I was testing against, uploaded the latest version of scc, cloned a copy of the linux kernel and started some basic benchmarking using hyperfine which calculationed the runtime over 10 runs.
+I installed all the applications I was testing against, uploaded the latest version of scc, cloned a copy of the linux kernel and started some basic benchmarking using hyperfine which calculates the runtime over 10 runs.
 
 | Program | Runtime |
 |---|---|
@@ -94,11 +103,11 @@ I installed all the applications I was testing against, uploaded the latest vers
 | tokei | 1.828 s ±  0.148 s |
 | loc | 3.773 s ±  0.494 s |
 
-Not a bad place to start. Compared to tokei scc is slighly slightly faster and loc despite its claims is much slower. Ripgrep however leaves everything for dead.
+Not a bad place to start. Compared to tokei scc is slightly slightly faster and loc despite its claims is much slower. Ripgrep however leaves everything for dead.
 
 The question I started asking at this point, is why is ripgrep so much faster? On average with a warm cache it runs 4-5x faster than anything else.
 
-Just to see if this problem scaled linaraly I make 14 copies of the linux kernel and dumped them all in a single directory. I then ran the same benchmark over that.
+Just to see if this problem scaled linearly I make 14 copies of the linux kernel and dumped them all in a single directory. I then ran the same benchmark over that.
 
 | Program | Runtime |
 |---|---|
@@ -108,7 +117,7 @@ Just to see if this problem scaled linaraly I make 14 copies of the linux kernel
 | loc | 51.652 s ± 10.148 s |
 
 
-Yep looks like the times scale linerarly. Its nice to see that this test still make scc still look good as it is still the fastest code counter here.
+Yep looks like the times scale linearly. Its nice to see that this test still make scc still look good as it is still the fastest code counter here.
 
 So back to the question, why is scc slower than ripgrep? I had a feeling that at this point the issue is not the processing, but the pulling of the files from disk into memory. To verify I build a version of scc with no hot loop. No checking of the bytes. Rather than do anything in the countStats method which is the hot loop I had it just return.
 
@@ -128,7 +137,7 @@ While the hot loop does add some overhead when enabled (it is iterating through 
 
 Thankfully the author of Ripgrep provided an excellent discussion and analysis of how ripgrep works https://blog.burntsushi.net/ripgrep/ Reading this carefully over this gives a reasonable idea on how ripgrep works without having to actually read its source code (which I am not smart enough to understand).
 
-One of the interesting findings is that ripgrep sometimes uses memory maps, specificly for large files. By contrast scc was written to be as simple as possible and just loads the file into memory. It seems like memory maps are worth considering, that file access in Go is slower than Rust, or more likely that I am doing something wrong.
+One of the interesting findings is that ripgrep sometimes uses memory maps, specifically for large files. By contrast scc was written to be as simple as possible and just loads the file into memory. It seems like memory maps are worth considering, that file access in Go is slower than Rust, or more likely that I am doing something wrong.
 
 **Pause here.**
 
@@ -138,11 +147,11 @@ I did debate rewriting this post to clean the history and make myself look smart
 
 Time to experiment with memory maps and file reading in Go.
 
-Memory maps are something I started and finished knowing very little about. Wikipedia has a pretty good overview https://en.wikipedia.org/wiki/Memory-mapped_file but as far as I can tell in principle using them avoids the overhead of a syscall and you can use the kernels memory space to read files avoiding the memory copy. In short it can be much faster at the expense of potentially wasting some memory due to the way it organises bytes.
+Memory maps are something I started and finished knowing very little about. Wikipedia has a pretty good overview https://en.wikipedia.org/wiki/Memory-mapped_file but as far as I can tell in principle using them avoids the overhead of a sys-call and you can use the kernels memory space to read files avoiding the memory copy. In short it can be much faster at the expense of potentially wasting some memory due to the way it organizes bytes.
 
 It was also around this time I started tweeting my results. 
 
-Comparisons to ripgrep brought out some discussion with Andrew Gallant probably better known as BurntSushi and the author of ripgrep. He was mostly interested in the lackuster speed I was getting from ripgrep. This was pretty quickly established to be due to me using WSL on Windows which is known to have disk performance issues. If you read the ripgrep announcement you can see he comprehensively proves that mmaps are not as fast as you would belive. This also came out in our brief twitter conversation. Not that I don't belive him but I would like some independent confirmation, and I wanted to find out at what point are memory maps worth using.
+Comparisons to ripgrep brought out some discussion with Andrew Gallant probably better known as BurntSushi and the author of ripgrep. He was mostly interested in the lackluster speed I was getting from ripgrep. This was pretty quickly established to be due to me using WSL on Windows which is known to have disk performance issues. If you read the ripgrep announcement you can see he comprehensively proves that mmaps are not as fast as you would believe. This also came out in our brief twitter conversation. Not that I don't believe him but I would like some independent confirmation, and I wanted to find out at what point are memory maps worth using.
 
 The first question I had was what is the average file size for the Linux Kernel. With this we can test on a file of a similar length and know if reading such a file using memory maps is faster.
 
@@ -192,7 +201,7 @@ BenchmarkIoUtilOpen-8                 10         138882400 ns/op
 BenchmarkMmapUtilOpen-8               10         140421700 ns/op
 ```
 
-Interesting. It actually gets to be almost the same performance when doing it this way. The redis source isnt exactly huge, so I tried the same test out against the benchmark of the linux kernel.
+Interesting. It actually gets to be almost the same performance when doing it this way. The redis source isn't exactly huge, so I tried the same test out against the benchmark of the linux kernel.
 
 ```
 $ go test -bench .
@@ -288,9 +297,9 @@ The implementation at least as I have implemented it makes no difference with di
 
 At this point I started looking at running parallel reads of the same file. However this seemed insane as its probably faster to read continuous bytes for small files.
 
-So all I managed to establish in the above was that the way I used memory maps makes no difference for small files and that I cannot write better code than the Go maintainers (not a big suprise there). I did so pretty comprehensively though so I have that going for me.
+So all I managed to establish in the above was that the way I used memory maps makes no difference for small files and that I cannot write better code than the Go maintainers (not a big surprise there). I did so pretty comprehensively though so I have that going for me.
 
-Assuming that the reading from disk is about as efficent as it can be for the moment lets look at what else it could be. It was around here I started looking at profilers (which I should have done from the start) and adding more verbose output. One of the things I did was add a simple millisecond timer to determine how long it took to walk the file tree.
+Assuming that the reading from disk is about as efficient as it can be for the moment lets look at what else it could be. It was around here I started looking at profilers (which I should have done from the start) and adding more verbose output. One of the things I did was add a simple millisecond timer to determine how long it took to walk the file tree.
 
 ```
 $ time scc linux
@@ -307,9 +316,9 @@ If we can make the walk process faster we should be able to improve the above re
 
 If you remember back at the start one of then first things I did was investigate ways to speed up walking the file tree. Two of the candidates I looked at were implementations of parallel tree walkers. In the end it turned out that gogodirwalk was the fastest implementation even without running in parallel. Naturally my evil plan to make it run even faster, was to make it run in parallel.
 
-I modified the code to inspect the inital directory passed in and spawn a goroutine for child directory to walk that child. Then the remaining files were pumped into the processing pipeline channel. 
+I modified the code to inspect the initial directory passed in and spawn a go-routine for child directory to walk that child. Then the remaining files were pumped into the processing pipeline channel. 
 
-This approach has the problem that it makes performance unpredictable between different directories. If there are many directories we spawn more goroutines and if there is only one folder we only spawn one. The best vs worst case performance profiles of this are wildly different, which is probably why the offical Go implementation does not do this.
+This approach has the problem that it makes performance unpredictable between different directories. If there are many directories we spawn more go-routines and if there is only one folder we only spawn one. The best vs worst case performance profiles of this are wildly different, which is probably why the official Go implementation does not do this.
 
 So with the above simple process in place.
 
@@ -407,7 +416,7 @@ spent counting lines tends to not be so significant. Especially since every tool
 search to some degree. When we get to the single-file benchmarks, this variable will become much more pertinent.
 ```
 
-Note that scc falls very much into the cateogry of counting lots of small files. My benchmarks show that as BurntSushi claims it is not a significant portion of the runtime. Also because scc does not need to check line boundries there is no need to worry about newlines beyond resetting the current state we are in. So while it may be "slow" its not a factor at all in the way the application performs.
+Note that scc falls very much into the category of counting lots of small files. My benchmarks show that as BurntSushi claims it is not a significant portion of the runtime. Also because scc does not need to check line boundaries there is no need to worry about newlines beyond resetting the current state we are in. So while it may be "slow" its not a factor at all in the way the application performs.
 
 Operating on single bytes also makes it much easier to move in the state engine. However it does mean you have to check each byte potentially multiple times. While it should be faster than the reading of files from the disk its something to keep in the back of your mind that its very possible to become CPU bound if not careful.
 
@@ -447,29 +456,11 @@ fmt.Println(`
 
 All of the above is code but easily fools many parsers that rely on regular expressions. 
 
-So looking at the above we need to code in a simple state machine that works for the above. It looks something like the below and once I created this I realised how hideous it is.
-
-http://webgraphviz.com/
-
-digraph G {
-  "Blank" -> "Code"
-  "Blank" -> "Blank"
-  "Blank" -> "MultiLine Comment"
-  "Blank" -> "SingleLine Comment"
-  "Blank" -> "String"
-  "Code" -> "MultiLine Comment"
-  "Code" -> "SingleLine Comment"
-  "Code" -> "Blank"
-  "Code" -> "String"
-  "SingleLine Comment" -> "Blank"
-  "MultiLine Comment" -> "Blank"
-  "MultiLine Comment" -> "Code"
-  "String" -> "Code"
-}
+So looking at the above we need to code in a simple state machine that works for the above. It looks something like the below and once I created this I realized how hideous it is.
 
 ![State Machine](/static/sloc-cloc-code/Sketch2.png)
 
-Thankfully the sort of cases I mentione above are rare. Given enough creative evil you can probably fool any of the code counters I am comparing against, including Tokei which appears to be the most accurate.  I decided early on that while I wanted accuracy I want it for 99.999% of cases. Someone trying to confuse the counter is not a case I am going to spend a great deal of time working on.
+Thankfully the sort of cases I mention above are rare. Given enough creative evil you can probably fool any of the code counters I am comparing against, including Tokei which appears to be the most accurate.  I decided early on that while I wanted accuracy I want it for 99.999% of cases. Someone trying to confuse the counter is not a case I am going to spend a great deal of time working on.
 
 ## Trying Things Out
 
@@ -487,9 +478,9 @@ In this case it seems scc picked a more optimal number of parallel threads to wa
 
 That being the case I wanted to find out in what situations for disk layouts they work well and for which they do not. There are a few situations at test here. 
 
-The first I considered was a very deep directory with a few files in each sub directory. This is not friendly to parallel algorithms. Each next step requires the previous steps operation to finish and as such there isnt much you can do to offload the work. Another case of this would be a single directory with hundreds to thousands of files of files in it. Again you need to look into the directory to get the files, and there is no way to run that in parallel.
+The first I considered was a very deep directory with a few files in each sub directory. This is not friendly to parallel algorithms. Each next step requires the previous steps operation to finish and as such there isn't much you can do to offload the work. Another case of this would be a single directory with hundreds to thousands of files of files in it. Again you need to look into the directory to get the files, and there is no way to run that in parallel.
 
-So there is little point optimising for either of the above cases. What is the optimal case. That would be a directory with subdirectories that looks like a balanced tree. The trick would be having the root having as many subfolders as is optimal to spawn threads for, which of course depends on how fast your disk is and how many CPU's you have.
+So there is little point optimizing for either of the above cases. What is the optimal case. That would be a directory with subdirectories that looks like a balanced tree. The trick would be having the root having as many sub-folders as is optimal to spawn threads for, which of course depends on how fast your disk is and how many CPU's you have.
 
 I decided to write a simple python script which would generate some directories to try out the above and see how each tool performs. The tool with the very imaginative name "create_folders_with_files.py" creates a series of directories designed to test the best/worst case situation for each of the tools. Example output of what it creates using tree is included below.
 
@@ -542,27 +533,27 @@ What bothered me was that for the deep directory case #1 ripgrep was still on av
 
 Disabling GC for the walk claws back ~90 ms from the previous run and now the walk is faster than the one in riprep. In fact trying things out this improves performance considerably for all processing.
 
-I then tried it out on a small virtual machine and managed to get an out of memory error. Turning off the GC by default would not be a good idea. Yes it improves performance, but it forces the user to know if they have enough RAM and potentially turn it back on. Since you can turn off the GC via an envrionment variable its probably best to leave this to the user to decide.
+I then tried it out on a small virtual machine and managed to get an out of memory error. Turning off the GC by default would not be a good idea. Yes it improves performance, but it forces the user to know if they have enough RAM and potentially turn it back on. Since you can turn off the GC via an environment variable its probably best to leave this to the user to decide.
 
 > So if you want things to run as fast as possible using scc and you have lots of RAM you can set the environment variable GOGC to -1 for a nice speed boost https://golang.org/pkg/runtime/debug/#SetGCPercent 
 
-There was one thing nagging me. What happens if someone runs scc on a older style spinning rust hard disk. They are probably not very friendly to having random access all over the disk. It also caused me a first world issue in that I realised I don't have a spinning rust disk on any of the machines I use. Talk about progress. I had to dig up a very old netbook using an Atom processor in order to try things out.
+There was one thing nagging me. What happens if someone runs scc on a older style spinning rust hard disk. They are probably not very friendly to having random access all over the disk. It also caused me a first world issue in that I realized I don't have a spinning rust disk on any of the machines I use. Talk about progress. I had to dig up a very old net-book using an Atom processor in order to try things out.
 
 Turns out there was no appreciable difference as far as I can tell. I used the Django project as a test bed (which took ~20 seconds to process) and with or without a setting to reduce the number of processes it ran in roughly the same amount of time. This included runs where I dropped the disk file caches as well. Very cool.
 
-The last thing I wanted was to add the ability to filter out duplicate files. To do so I needed to build a hash of the file contents and then check if anything matches. I had a look into adding murmur3 hash which is one of the faster hashing methods, but decided against it and used MD5. The main reason being that its in the standard library. It is slower than murmur3 but not by enough to bring in another dependancy.
+The last thing I wanted was to add the ability to filter out duplicate files. To do so I needed to build a hash of the file contents and then check if anything matches. I had a look into adding murmur3 hash which is one of the faster hashing methods, but decided against it and used MD5. The main reason being that its in the standard library. It is slower than murmur3 but not by enough to bring in another dependency.
 
-Another thing that factored into the decison was which hash algorithm allowed streaming bytes. Because the core loop of the application loops bytes we can feed that byte into the hash directly and get the result at the end rather than passing all the bytes and save another loop. Checking for duplicates slows the count down by about 20% for most of the tests I tried.
+Another thing that factored into the decision was which hash algorithm allowed streaming bytes. Because the core loop of the application loops bytes we can feed that byte into the hash directly and get the result at the end rather than passing all the bytes and save another loop. Checking for duplicates slows the count down by about 20% for most of the tests I tried.
 
 ## Optimisations
 
-At this point I started to run though all of the edge case calculations for code counters. Dealing with mult-line strings and the like. This took a while to work out but after a fewy days I had what appeared to be accurate results.
+At this point I started to run though all of the edge case calculations for code counters. Dealing with multi-line strings and the like. This took a while to work out but after a few days I had what appeared to be accurate results.
 
 So with the application producing decent output and being fast I decided I wanted to add some crude complexity calculations to the output. After all yet another code counter is not that useful. Having one that could point out potentially problematic files would allow it to stand apart. Since I did that it blew away most of the performance I put in. 
 
 A quick check on 1, 2, 4, 16 and 32 core machines showed that all of a sudden scc went from faster than tokei and loc to slower by about 2x. That is for every second tokei took to count code scc took two.
 
-The reason is that for any byte I was looking at while in the code state meant there were an addtional ~8 byte checks to determine if there any code that would require an increase to the complexity count. This ended up producing a large block of if statements and some addtional loops that ate all of the performance I had put into the application. Suddenly I was very CPU bound and gaining that performance lost back is a big ask.
+The reason is that, firstly I was paying the price for accuracy and secondly that for any byte I was looking at while in the code state meant there were an additional ~8 byte checks to determine if there any code that would require an increase to the complexity count. This ended up producing a large chain of if statements and some additional loops that ate all of the performance I had originally put into the application. Suddenly I was very CPU bound and gaining that performance back was going to be a big ask.
 
 I resorted to salami tactics, that is slice by slice whittle down every possible wasted CPU cycle.
 
@@ -579,7 +570,7 @@ func main() {
 	defer pprof.StopCPUProfile()
 {{</highlight>}}
 
-You then just compile and run, and it will produce a profile.pprof file you can then analyse.
+You then just compile and run, and it will produce a profile.pprof file you can then analyze.
 
 One issue I did run into was running the above using the WSL for Windows. No matter what I did when run in the WSL I would never get any profile output. The solution was the compile on Windows run the application to capture the output and then for the web view use WSL for that and for inspection use Windows.
 
@@ -595,11 +586,11 @@ and to get the line by line counts when inside the profiler in cmd
 
 	list github.com/boyter/scc/processor.countStats
 
-Checking profile output showed that rather unsuprisingly since my addition of the complexity calculation the core loop takes most of the time. In the below the core loop is the large box on the top left side named countStats.
+Checking profile output showed that rather unsurprisingly since my addition of the complexity calculation the core loop takes most of the time. In the below the core loop is the large box on the top left side named countStats.
 
 ![Profile](/static/sloc-cloc-code/profile1.png)
 
-Having a look at what I had in the core loop before I added any optimisations looked as below.
+Having a look at what I had in the core loop before I modified anything.
 
 {{<highlight go>}}
 if currentState == S_BLANK && checkForMatch(currentByte, index, endPoint, singleLineCommentChecks, fileJob) {
@@ -636,16 +627,16 @@ if (currentState == S_BLANK || currentState == S_CODE) && checkComplexity(curren
 }
 {{</highlight>}}
 
-In addtion to being ugly there are a lot of if checks which are probably causing the slowdown, especially as many of them run even when not required. Thinking about the above there is one quick obvious win. If we have moved state I.E. switched from S_BLANK to S_CODE, then we don't need to check the other conditions. Having a simple boolean to indicate that the state has changed and then skip over a lot of the checks will speed this up considerably. So I added that in and cut the runtime in half. 
+In addition to being ugly there are a lot of if checks which are probably causing the slowdown, especially as many of them run even when not required. Thinking about the above there is one quick obvious win. If we have moved state I.E. switched from S_BLANK to S_CODE, then we don't need to check the other conditions. Having a simple boolean to indicate that the state has changed and then skip over a lot of the checks will speed this up considerably. So I added that in and cut the runtime in half. 
 
 This was a good start but there is a lot more that can be done, not only to improve performance but to make the code far more readable.
 
- - The first would be to change the logic so that we use a switch to jump to our current state and check what to do from there. This gives us the previous optimisation for free and should make things easier to read.
+ - The first would be to change the logic so that we use a switch to jump to our current state and check what to do from there. This gives us the previous optimization for free and should make things easier to read.
  - The other would be count the frequency of each of the above ifs. We want to order them such that we hit the change state condition as frequently as possible and bail out. In other words the order of the checks matters a great deal as you can use it to avoid hitting multiple if conditions.
 
-I implemented the first which yielded some gains, but then realised I could convert the whole thing over to a large switch statement, which would jump to the current state and then do the checks just for that state. This would incorperate both of the above changes.
+I implemented the first which yielded some gains, but then realized I could convert the whole thing over to a large switch statement, which would jump to the current state and then do the checks just for that state. This would incorporate both of the above changes.
 
-I changed over to the the switch statement, verified it works as well as the skip checks from before and went back to profiling. Here is the the output looking at a run of the linux kernel once it has been warmed into disk cache.
+I changed over to the the switch statement, verified it worked as well as the skip checks implemented before and went back to profiling. Here is the the output looking at a run of the linux kernel once it has been warmed into disk cache.
 
 ```
 (pprof) top10
@@ -665,11 +656,11 @@ Showing top 10 nodes out of 80
      0.12s  0.38% 90.17%      0.32s  1.02%  path/filepath.Match
 ```
 
-Looking at the above you can see that the core loop function countStats is still close to the top, but that checkForMatchMultiOpen, checkForMatchMultiClose and checkComplexity are methods that I wrote that would be worth investigating. A good sign is that cgocall is called almost as much as countStats so we are getting close to be bottlenecked by disk access and not the CPU.
+Looking at the above you can see that the core loop function countStats is still close to the top, but that checkForMatchMultiOpen, checkForMatchMultiClose and checkComplexity are methods called by it that I wrote that would be worth investigating. A good sign is that cgocall is called almost as much as countStats so we are getting close to be bottlenecked by disk access and not the CPU.
 
 The methods at first looked pretty tight. They all work by taking in a slice/list of things to check and then loop over the bytes inside them.
 
-However there is the fact that they had a nested loop inside which is usually a problem. The method countComplexity for example works by taking in a slice and checking the current byte and potentially bytes beyond it for a matching condition. However it usually finds nothing, as it is unlikely that every byte is the start of a while loop. As such we are more likely to hit a negative condition than positive. To poteentially speed things up we can check if the first character doesn't match any of the first characters in the matches and if so bail out. This makes the best case of no matches faster at the expense of a few extra lookups for the worst case of a partial match.
+However there is the fact that they had a nested loop inside which is usually a problem. The method countComplexity for example works by taking in a slice and checking the current byte and potentially bytes beyond it for a matching condition. However it usually finds nothing, as it is unlikely that every byte is the start of a while loop. As such we are more likely to hit a negative condition than positive. To potentially speed things up we can check if the first character doesn't match any of the first characters in the matches and if so bail out. This makes the best case of no matches faster at the expense of a few extra lookups for the worst case of a partial match.
 
 Sounds good in theory. So I tried it out. I quickly added in the first bytes we want to look for to the code complexity calculation as below.
 
@@ -699,7 +690,7 @@ complexityBytes := []byte{
   }
 {{</highlight>}}
 
-A quick benchmark I ran showed that having a loop over 8 elements was much faster than a map so I stuck with that.
+A quick benchmark I ran showed that having a loop over 8 elements was much faster than a map so left it as a loop rather than a map.
 
 And the results,
 
@@ -721,7 +712,7 @@ Showing top 10 nodes out of 83
      0.30s  0.54% 89.12%      0.60s  1.08%  runtime.greyobject
 ```
 
-A nice optimisation. The method checkComplexity is down in terms of cumulative call time.
+A nice optimization. The method checkComplexity is down in terms of cumulative call time.
 
 Another change I added was that if there is a match in checkComplexity, checkForMatchMultiOpen or checkForMatchMultiClose it would return the number of bytes that the method had looked ahead. This allows us to jump ahead by that many bytes as we have already inspected them. This did however cause a new problem.
 
@@ -735,14 +726,14 @@ ROUTINE ======================== github.com/boyter/scc/processor.checkForMatchMu
      3.08s     11.05s     78:           return 0, []byte{}
 ```
 
-The second param is not actually required in this case because we have no match. By changing it to a nil return we get the following profile, which is a massive improvement due to not having an allocation and by taking pressure off the garbage collector.
+The second value is not actually required in this case because we have no match. By changing it to a nil return we get the following profile, which is a massive improvement due to not having an allocation and by taking pressure off the garbage collector.
 
 ```
          .          .     77:   if !hasMatch {
      1.56s      1.56s     78:           return 0, nil
 ```
 
-The below is a serious micro-optimisation so be careful if you want to implement them yourself. Usually it means trading code reuse and readability for performance.
+The below is a serious micro-optimization so be careful if you want to implement them yourself. Usually it means trading code reuse and readability for performance.
 
 That said lets explore an interesting one. The following are 3 ways to compare if two byte slices are equal in Go.
 
@@ -766,7 +757,7 @@ for j := 0; j < len(one); j++ {
 
 Which one would you think was the slowest? Which one the fastest? As you probably expected the slowest uses reflect. Reflection is almost always slow. However oddly enough the fastest is the basic for loop. Usually the answer to what is the fastest is whatever is in the standard library. However in this case the loop is able to avoid the length check required to see if the slices are the same length. This makes sense as it cannot assume that the slices are of the same length.
 
-Also since in our case we already know that the first byte matches we can save some addtional time by starting the loop at 1. How much of a saving does this produce?
+Also since in our case we already know that the first byte matches we can save some additional time by starting the loop at 1. How much of a saving does this produce?
 
 ```
 BenchmarkCheckByteEqualityReflect-8                                      5000000               344 ns/op
@@ -775,11 +766,11 @@ BenchmarkCheckByteEqualityLoopWithAddtional-8                           50000000
 BenchmarkCheckByteEqualityLoop-8                                        500000000                3.41 ns/op
 ```
 
-As you can see reflection is right out. However by using our own loop with the 1 byte offset we can get an addtional saving. Extreme? Yes. But remember this happens in the core hot loop so these savings all add up. If you have very constrained requirements it can be worth checking to see if you can do better than the standard libaries.
+As you can see reflection is right out. However by using our own loop with the 1 byte offset we can get an additional saving. Extreme? Yes. But remember this happens in the core hot loop so these savings all add up. If you have very constrained requirements it can be worth checking to see if you can do better than the standard libraries.
 
-Another thing I ran into was an odd method being called in the profile "duffcopy". Did you know that range queries cause addtional allocations? It appears when you profile as "duffcopy" https://stackoverflow.com/questions/45786687/runtime-duffcopy-is-called-a-lot switching from range to index lookups can buy you a lot of performance if you are running very tight loops.
+Another thing I ran into was an odd method being called in the profile "duffcopy". Did you know that range queries cause additional allocations? It appears when you profile as "duffcopy" https://stackoverflow.com/questions/45786687/runtime-duffcopy-is-called-a-lot switching from range to index lookups can buy you a lot of performance if you are running very tight loops.
 
-Also in the profile were many calls to Sprintf. This was caused by my trace and debug logic. Wrapping it with an if statement looks ugly but solves the issue as it is extremently friendly to the branch predictor and saves some string allocations.
+Also in the profile were many calls to Sprintf. This was caused by my trace and debug logic. Wrapping it with an if statement looks ugly but solves the issue as it is extremely friendly to the branch predictor and saves some string allocations.
 
 {{<highlight go>}}
 if Trace {
@@ -787,16 +778,16 @@ if Trace {
 }
 {{</highlight>}}
 
-Another place to save some time was to add caches for certain actions. An example would be getting the extension of a file. Its pretty common to have multiple files with the same name. As such a cache to save the processing can dramaticly speed things up at the expense of some memory. A simple benchmark shows that the gains are not insignificant.
+Another place to save some time was to add caches for certain actions. An example would be getting the extension of a file. Its pretty common to have multiple files with the same name. As such a cache to save the processing can dramatically speed things up at the expense of some memory. A simple benchmark shows that the gains are not insignificant.
 
 ```
 BenchmarkGetExtensionDifferent-8                                          200000              6077 ns/op
 BenchmarkGetExtensionSame-8                                             10000000               138 ns/op
 ```
 
-The final thing I looked to optimise was the printing code. While generally it was not an issue I noticed that if the files option was used it would take a considerable amount of time processing the lists. I was using https://github.com/ryanuber/columnize/ for this and while it worked well the additional overhead was a problem. I poked through the code and the slowdown was because it takes in any length and organises the values into a column it needs to loop the input a few times in order to know output sizes.
+The final thing I looked to optimize was the printing code. While generally it was not an issue I noticed that if the files option was used it would take a considerable amount of time processing the lists. I was using https://github.com/ryanuber/columnize/ for this and while it worked well the additional overhead was a problem. I poked through the code and the slowdown was because it takes in any length and stuffs the values into a column it needs to loop the input a few times in order to know output sizes.
 
-However I could work out the sizes in advance, or just define them and avoid those addtional loops. As such I rolled my own formatter. Well aware that string concaternation is usually very slow, a quick search showed that https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go there are quite a few ways to do it in Go. Thankfully someone included a benchmark of the common ways to do it.
+However I could work out the sizes in advance, or just define them and avoid those additional loops. As such I rolled my own formatter. Well aware that string concatenation is usually very slow, a quick search showed that https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go there are quite a few ways to do it in Go. Thankfully someone included a benchmark of the common ways to do it.
 
 ```
 BenchmarkConcat-8                1000000             64850 ns/op
@@ -805,7 +796,7 @@ BenchmarkCopy-8                 1000000000               3.06 ns/op
 BenchmarkStringBuilder-8        200000000                7.74 ns/op
 ```
 
-Based on the above I decided to go with the Go 1.10 specific method and use string builder. Its almost as fast as buffer and copy but much easier to understand. Since the formatting happens at the very end with only a few iterations for the summary and with what can be done as results come in for the files options there is no real need to overcomplicate things. It also ensures that scc can only be built with a modern Go compiler so we get at least a decent level of baseline performance.
+Based on the above I decided to go with the Go 1.10 specific method and use string builder. Its almost as fast as buffer and copy but much easier to understand. Since the formatting happens at the very end with only a few iterations for the summary and with what can be done as results come in for the files options there is no real need to over complicate things. It also ensures that scc can only be built with a modern Go compiler so we get at least a decent level of baseline performance.
 
 I wrote my own little benchmark over the formatters method to ensure I didn't make things slower and converted it over. 
 
@@ -852,7 +843,7 @@ Estimated People Required 19.867141
 -------------------------------------------------------------------------------
 ```
 
-In order to evaulate how well the complexity calculation works I tried it against my personal project searchcode server http://github.com/boyter/searchcode-server where I would expect that the files SearchCodeLib, IndexService and CodeMatcher to be the most complex based on what I know about the codebase.
+In order to evaluate how well the complexity calculation works I tried it against my personal project searchcode server http://github.com/boyter/searchcode-server where I would expect that the files SearchCodeLib, IndexService and CodeMatcher to be the most complex based on what I know about the code-base.
 
 ```
 $ scc --wl java --files -s complexity searchcode-server
@@ -903,7 +894,7 @@ Not only can you turn off the complexity calculations you can turn off the COCOM
 
 Note that the calculations will not be 100% the same as tokei for a few reasons.
 
- - scc picks up addtional languages and file types
+ - scc picks up additional languages and file types
  - scc will always count blank lines in a file even if it is not counting code or comments
  - there are some differences in how they both behave with newlines with tokei counting \n similar to wc
 
@@ -913,19 +904,19 @@ I coded scc to work with how I wanted it to work. Perhaps in the future a flag c
 
 What follows is going to be a highly biased (I wrote one of the tools remember) collection of benchmarks that show while scc is not the fastest code counter on Linux (that honour is held by Tokei) it however the fastest on Windows. It is considerably faster than cloc, sloccount, loc and gocloc. It is however the only code counter that is very fast, supports removing duplicates and accurate. It is also the only code counter that performs complexity calculations for you. 
 
-In addtion you can have the code complexity calculation running, duplicates detection or both and it will generally be almost as fast as tokei.
+In addition you can have the code complexity calculation running, duplicates detection or both and it will generally be almost as fast as tokei.
 
-With those outragous claims out of the way lets see if I prove them.
+With those outrageous claims out of the way lets see if I prove them.
 
 ### Methodology / Commands
 
 All GNU/Linux tests were run on Digital Ocean 16 vCPU Compute optimized droplet with 32 GB of RAM and a 200 GB SSD. The machine used was doing nothing else at the time and was created with the sole purpose of running the tests to ensure no interference from other processes. The OS used is Ubuntu 16.04 and the rust programs were installed using cargo install.
 
-Keep in mind that this is not a dedicated machine. As such it is subject to noisy neighbours and issues with the underlying hardware. It is likely you will be unable to replicate the results 100% even if you spin up the same instance.
+Keep in mind that this is not a dedicated machine. As such it is subject to noisy neighbors and issues with the underlying hardware. It is likely you will be unable to replicate the results 100% even if you spin up the same instance.
 
-The Windows tests were run on a Surface Book 2 with the i7-8650U CPU. This is problematic as there is the possibility that CPU throttling will kick in influincing the benchmark, and as it is not a freshly formatted machine that there may be something else running on it during the benchmark. Take these tests with a massive grain of salt and treat them as more an indication of performance than a perfect benchmark. I did my best to stop all background services and ran benchmarks several times only taking the best result for each to try and keep it as fair as possible. I ran the tests inside the Ubuntu WSL which means I was running Linux binaries in Windows which probably causes odd results as well.
+The Windows tests were run on a Surface Book 2 with the i7-8650U CPU. This is problematic as there is the possibility that CPU throttling will kick in influencing the benchmark, and as it is not a freshly formatted machine that there may be something else running on it during the benchmark. Take these tests with a massive grain of salt and treat them as more an indication of performance than a perfect benchmark. I did my best to stop all background services and ran benchmarks several times only taking the best result for each to try and keep it as fair as possible. I ran the tests inside the Ubuntu WSL which means I was running Linux binaries in Windows which probably causes odd results as well.
 
-I set scc to run first in order to ensure that it warms up everything and take any handicap that might incur from this process. To do the benchmark itself I used the excellent Rust tool hyperfine with 3 warmup runs and 10 timed runs total to produce the results. These are the defaults for hyperfine but are set explicitly via the command line.
+I set scc to run first in order to ensure that it warms up everything and take any handicap that might incur from this process. To do the benchmark itself I used the excellent Rust tool hyperfine with 3 warm-up runs and 10 timed runs total to produce the results. These are the defaults for hyperfine but are set explicitly via the command line.
 
 Due to how long sloccount and cloc took I have only run benchmarks of them for redis as it took far too long to get the results for the larger projects.
 
@@ -934,7 +925,7 @@ Tools under test
  - scc 1.0.0
  - tokei 7.0.1
  - loc 0.4.1
- - gocloc (no version) commit #686bf36768b8d00e355be00c445df681a2a88125
+ - gocloc (no version) commit `#686bf36768b8d00e355be00c445df681a2a88125`
  - sloccount 2.26
  - cloc 1.60
 
@@ -942,33 +933,21 @@ To keep things fair I also ran scc three times for each benchmark. The first was
 
 ### Redis Source Benchmarks
 
-The first test was run against the redis code https://github.com/antirez/redis/ commit #7980d87c3c72740f4609fdcaae088221f8f8eb59 With ~180,000 lines of code in its codebase it represents a resonable sized project that someone may want to calculate code stats for.
+The first test was run against the redis code https://github.com/antirez/redis/ commit `#7980d87c3c72740f4609fdcaae088221f8f8eb59` With ~180,000 lines of code in its code-base it represents a reasonable sized project that someone may want to calculate code stats for.
 
-#### Linux
+| Program | Linux | Windows (WSL) |
+|---|---|---|
+| scc | 36.7 ms ±  16.7 ms | 79.2 ms ±   2.4 ms |
+| scc (no complexity) | 36.4 ms ±  13.6 ms | 74.0 ms ±   2.3 ms |
+| scc (duplicates check) | 56.5 ms ±  21.3 ms | 99.4 ms ±   3.2 ms |
+| tokei | 28.1 ms ±   5.4 ms | 118.8 ms ±   4.1 ms |
+| loc | 147.7 ms ±  40.4 ms | 549.8 ms ±  10.6 ms |
+| gocloc | 117.0 ms ±   1.9 ms | 383.5 ms ±  12.1 ms |
+| cloc | 1.485 s ±  0.033 s | 27.345 s ±  3.384 s |
+| sloccount | 854.8 ms ±  20.5 ms | 67.568 s ±  10.167 s |
 
-| Program | Runtime |
-|---|---|
-| scc | 36.7 ms ±  16.7 ms |
-| scc (no complexity) | 36.4 ms ±  13.6 ms |
-| scc (duplicates check) | 56.5 ms ±  21.3 ms |
-| tokei | 28.1 ms ±   5.4 ms |
-| loc | 147.7 ms ±  40.4 ms |
-| gocloc | 117.0 ms ±   1.9 ms |
-| cloc | 1.485 s ±  0.033 s |
-| sloccount | 854.8 ms ±  20.5 ms |
-
-#### Windows (WSL)
-
-| Program | Runtime |
-|---|---|
-| scc | 79.2 ms ±   2.4 ms |
-| scc (no complexity) | 74.0 ms ±   2.3 ms |
-| scc (duplicates check) | 99.4 ms ±   3.2 ms |
-| tokei | 118.8 ms ±   4.1 ms |
-| loc | 549.8 ms ±  10.6 ms |
-| gocloc | 383.5 ms ±  12.1 ms |
-| cloc | 27.345 s ±  3.384 s |
-| sloccount | 67.568 s ±  10.167 s |
+![Redis Benchmark](/static/sloc-cloc-code/benchmark_linux_redis.png)
+![Redis Benchmark](/static/sloc-cloc-code/benchmark_windows_redis.png)
 
 For GNU/Linux Tokei is the fastest code counter by ~10 ms. The removal of the code complexity check for scc brings almost no added performance. This is due to there not being enough code to to have an impact. The good news is that any of the newer projects are at least 8x faster than cloc or sloccount.
 
@@ -976,51 +955,42 @@ On Windows the story is rather different. Not only is scc faster than everything
 
 ### Django Source Benchmarks
 
-I chose to run the next benchmark using commit #9a56b4b13ed92d2d5bb00d6bdb905a73bc5f2f0a of the Django project. With ~500,000 lines it is about four times the size of Redis.
+I chose to run the next benchmark using commit `#9a56b4b13ed92d2d5bb00d6bdb905a73bc5f2f0a` of the Django project. With ~500,000 lines it is about four times the size of Redis.
 
-#### Linux
+| Program | Linux | Windows (WSL) |
+|---|---|---|
+| scc | 119.2 ms ±  32.7 ms | 637.8 ms ±  15.2 ms |
+| scc (no complexity) | 128.8 ms ±  30.4 ms | 652.3 ms ±  14.4 ms |
+| scc (duplicates check) | 171.1 ms ±  37.1 ms | 728.3 ms ±  35.3 ms |
+| tokei | 99.1 ms ±   6.1 ms | 914.7 ms ±  17.1 ms |
+| loc | 282.2 ms ±  42.9 ms | 20.058 s ±  1.731 s |
+| gocloc | 340.6 ms ±   3.0 ms | 3.201 s ±  0.595 s |
 
-| Program | Runtime |
-|---|---|
-| scc | 119.2 ms ±  32.7 ms |
-| scc (no complexity) | 128.8 ms ±  30.4 ms |
-| scc (duplicates check) | 171.1 ms ±  37.1 ms |
-| tokei | 99.1 ms ±   6.1 ms |
-| loc | 282.2 ms ±  42.9 ms |
-| gocloc | 340.6 ms ±   3.0 ms |
-
-#### Windows (WSL)
-
-| Program | Runtime |
-|---|---|
-| scc | 637.8 ms ±  15.2 ms |
-| scc (no complexity) | 652.3 ms ±  14.4 ms |
-| scc (duplicates check) | 728.3 ms ±  35.3 ms |
-| tokei | 914.7 ms ±  17.1 ms |
-| loc | 20.058 s ±  1.731 s |
-| gocloc | 3.201 s ±  0.595 s |
+![Redis Benchmark](/static/sloc-cloc-code/benchmark_linux_django.png)
+![Redis Benchmark](/static/sloc-cloc-code/benchmark_windows_django.png)
 
 
 ### Linux Kernel Source Benchmarks
 
-The Linux Kernel benchmark was run using a fresh checkout of the Linux kernel commit #48023102b7078a6674516b1fe0d639669336049d and with its ~23,000,000 lines of code is about 40x the size of Django. The linux kernel is by no means the largest software project around but it is still huge and should push each of the programs to their limits.
+The Linux Kernel benchmark was run using a fresh checkout of the Linux kernel commit `#48023102b7078a6674516b1fe0d639669336049d` and with its ~23,000,000 lines of code is about 40x the size of Django. The linux kernel is by no means the largest software project around but it is still huge and should push each of the programs to their limits.
 
-#### Linux
+I gave up running loc and gocloc on Windows as both were taking greater than 3 minutes to run.
 
-| Program | Runtime |
-|---|---|
-| scc | 1.489 s ±  0.055 s |
-| scc (no complexity) | 1.713 s ±  0.157 s  |
-| scc (duplicates detection) | 2.122 s ±  0.054 s |
-| tokei | 1.135 s ±  0.074 s |
-| loc | 3.368 s ±  0.452 s |
-| gocloc | 11.275 s ±  0.062 s |
+| Program | Linux | Windows |
+|---|---|---|
+| scc | 1.489 s ±  0.055 s | 7.811 s ±  0.307 s |
+| scc (no complexity) | 1.713 s ±  0.157 s | 7.069 s ±  0.854 s |
+| scc (duplicates detection) | 2.122 s ±  0.054 s | 13.587 s ±  1.647 s |
+| tokei | 1.135 s ±  0.074 s | 13.363 s ±  1.262 s |
+| loc | 3.368 s ±  0.452 s | DNF |
+| gocloc | 11.275 s ±  0.062 s | DNF |
 
 ![Profile Result](/static/sloc-cloc-code/benchmark_linux_linuxkernel.png)
+![Profile Result](/static/sloc-cloc-code/benchmark_windows_linuxkernel.png)
 
 However a single count of the kernel was not enough for me. Just to push them to work that much harder I made ten copies in a single directory and timed the tools counting that. I did not run this test under Windows as it was really just to see how the counters work with extremely large code bases.
 
-| Program | Runtime |
+| Program | Linux |
 |---|---|
 | scc | 11.665 s ±  0.200 s |
 | scc (no complexity) | 8.768 s ±  1.017 s  |
@@ -1029,14 +999,20 @@ However a single count of the kernel was not enough for me. Just to push them to
 | loc | 22.363 s ±  3.075 s |
 | gocloc | 32.664 s ±  0.140 s |
 
-That scc managed to beat tokei here makes me suspect that the differences in performance between tokei and scc are mostly down to how they walk through the file system. Given that it may be possible to modify scc to be faster or equal to tokei in all of the other tests on linux if I were to explore parallel walking of the file tree more.
+![Profile Result](/static/sloc-cloc-code/benchmark_linuxes_linuxkernel.png)
+
+That scc managed to beat tokei here makes me suspect that the differences in performance between tokei and scc are mostly down to how they walk through the file system. If true then it may be possible to modify scc to be faster or equal to tokei in all of the other tests if I were to explore parallel walking of the file tree more.
 
 ## Conclusion
+
+Alas I never managed to get scc to run as Tokei for the majority of tests on Linux. I suspect this may be down to the garbage collector from my experiments disabling it and if so its unlikely it will ever match it. I suspected this when I started coding but had hoped that the authors of it may have missed some simple optimizations. This turned out not to be the case.
+
+I have to wonder just how much the Windows WSL held me back here. It is an excellent piece of software and makes coding on Windows an absolute joy again. However I suspect that as I did all my profiling inside Windows and not Linux I may have missed out on optimizations that would work better there. If someone wants to do some work profiling in Linux and submit a PR to fix what I have probably missed for this I would really appreciate it. If I get time I may try this myself on my desktop machine.
 
 Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats much faster than scc with duplicate detection and maybe complexity calculations. I would expect it to also be much faster than anything I could ever produce. 
 
 I have no problem with this. A lot of this post was about seeing how fast I could make things run while learning as much as possible. Besides I don't think of tools that do similar things as being in competition. Andy Lester of ack fame puts this far better than I ever could http://blog.petdance.com/2018/01/02/the-best-open-source-project-for-someone-might-not-be-yours-and-thats-ok/
 
-If you do like SCC though feel free to submit some pull requests. The language.json file could use some addtional submissions of languages and improvements to the languages that are already are in there. If you are able to find some addtional performance somewhere in the code that would also be a nice thing to implement so long as it does not make things too unreadable.
+If you do like SCC though feel free to submit some pull requests. The language.json file could use some traditional submissions of languages and improvements to the languages that are already are in there. If you are able to find some additional performance somewhere in the code that would also be a nice thing to implement so long as it does not make things too unreadable.
 
 Enjoy? Hate? Let me know via twitter or email directly.
