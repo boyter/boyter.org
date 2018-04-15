@@ -7,6 +7,9 @@ draft: true
 private: true
 
 ---
+
+The below is taken from the rant's and raves by Matt Wells of Gigablast. I always enjoyed reading it so I have archived a copy here in case it ever goes away.
+
 <span style="font-size: small;"><b>Rants & Raves</b></span>
   
 _by [Matt Wells][1]_

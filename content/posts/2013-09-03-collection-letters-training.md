@@ -14,7 +14,7 @@ I used the below images when working on my thesis. From memory over 20 different
 
 The attached collection of images were generated using a script. It essentially just generated a number of images each which has a letter contained in it. Then another script which finds the location of the letter in the image, and crops to just that image and then resizes it to a specific size and are then saved in an appropriate directory. The full training set can be downloaded below
 
-[Collection of letters for CAPTCHA/OCR/Neural Network training.][1]
+[Collection of letters for CAPTCHA/OCR/Neural Network training](/static/training.zip)
 
 The PHP program for generating the images is included below. All you need do is add some fonts into the referenced fonts directory and it should generate images for you.
 
@@ -48,5 +48,3 @@ foreach($array as $letter) {
   }
 }
 {{</highlight>}}
-
- [1]: http://www.boyter.org/wp-content/uploads/2013/07/training.zip

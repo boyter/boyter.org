@@ -13,25 +13,19 @@ nkweb_Use_Custom:
   - 'false'
 
 ---
-I&#8217;m a software developer by trade who after years of leaving articles and blog posts all over the place has finally gotten around to consolidating them all into this single site.
+I'm a software developer by trade who after years of leaving articles and blog posts all over the place has finally gotten around to consolidating them all into this single site.
 
 I am a professional software engineer who has been working in development with a focus on testing for over 15 years. In that time I have played an integral part in developing and implementing testing methodologies for all sorts of projects including,
 
 * Internal web based applications supporting thousands of users
-  
 * Customer facing websites with 10&#8217;s of millions of uniques a day
-  
 * Large financial applications handling multi billion dollar projects
-  
 * HR applications for 10&#8217;s of thousands of employees dealing with sensitive information
-  
 * Internal desktop applications used across company groups connecting to centralised servers
-  
 * Highly performant web service endpoints supporting entire businesses
-  
 * ETL systems processing millions of records every hour
-
-[<img class="alignnone size-full wp-image-523" style="float: right;" src="http://www.boyter.org/wp-content/uploads/2013/07/headshot.jpg" alt="headshot" width="97" height="99" />][1]
+* Backend integration with SAP for large energy providers
+* Large scale deployment and management of AWS services and systems
 
 Some notable projects and blog posts of mine,
 
