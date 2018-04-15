@@ -13,43 +13,32 @@ nkweb_Use_Custom:
   - 'false'
 
 ---
-<div style="margin-bottom: 10px; border: none;">
-  <table>
-    <tr>
-      <td colspan="2">
-        <center>
-          <br /> <img style="max-width: 130px;" src="http://www.boyter.org/wp-content/uploads/2015/07/booksmall.jpeg" alt="Decoding CAPTCHA's Book" width="130" height="100" border="0" /></a><br /> Looking for a practical guide to CAPTCHA decoding? All About CAPTCHA&#8217;s. This eBook will teach you how to identify weaknesses and exploit CAPTCHA&#8217;s from beginning to end.</a><br />
-        </center>
-      </td>
-    </tr>
+
+![Decoding CAPTCHA's Book](/static/decoding-captchas/booksmall.jpeg)
+
+Looking for a practical guide to CAPTCHA decoding? All About CAPTCHA&#8217;s. This eBook will teach you how to identify weaknesses and exploit CAPTCHA&#8217;s from beginning to end.
+
+<table>
+  <tr>
+    <td>
+      <center>
+        <br /> <a style="font-weight:bold;" href="https://leanpub.com/decodingcaptchas/" target="_blank">Buy now using LeanPub</a><br />
+      </center>
+    </td>
     
-    <tr>
-      <td>
-        <center>
-          <br /> <a style="font-weight:bold;" href="https://leanpub.com/decodingcaptchas/" target="_blank">Buy now using LeanPub</a><br />
-        </center>
-      </td>
-      
-      <td>
-        <center>
-          <br /> <a style="font-weight:bold;" href="https://gumroad.com/l/fJpHj" target="_blank">Buy now using Gumroad</a><br />
-        </center>
-      </td>
-    </tr>
-  </table>
-</div>
+    <td>
+      <center>
+        <br /> <a style="font-weight:bold;" href="https://gumroad.com/l/fJpHj" target="_blank">Buy now using Gumroad</a><br />
+      </center>
+    </td>
+  </tr>
+</table>
 
 Most people don’t know this but my honors thesis was about using a computer program to read text out of web images. My theory was that if you could get a high level of successful extraction you could use it as another source of data which could be used to improve search engine results. I was even quite successful in doing it, but never really followed my experiments up. My honors adviser [Dr Junbin Gao http://csusap.csu.edu.au/~jbgao/][1] had suggested the following writing my thesis I should write some form of article on what I had learnt. Well I finally got around to doing it. While what follows is not exactly what I was studying it is something I wish had existed when I started looking around. 
 
-<div class="legal">
-  <blockquote>
-    <p>
-      Legal Stuff/Disclaimer.   I am posting this article solely for information and educational purposes. I do not condone the use or act of ethical or unethical &#8220;hacking&#8221; nor circumvention of copy protection etc&#8230; The use of this code for any unethical or illegal purposes is not condoned by myself nor any other person(s) mentioned in this article.
-    </p>
-  </blockquote>
-</div>
+ > Legal Stuff/Disclaimer.   I am posting this article solely for information and educational purposes. I do not condone the use or act of ethical or unethical &#8220;hacking&#8221; nor circumvention of copy protection etc&#8230; The use of this code for any unethical or illegal purposes is not condoned by myself nor any other person(s) mentioned in this article.
 
-> <a href="http://creativecommons.org/licenses/by-sa/2.5/au/" rel="license"><img style="border-width: 0;" src="http://creativecommons.org/images/public/somerights20.png" alt="Creative Commons License" /></a> This work is licenced under a <a href="http://creativecommons.org/licenses/by-sa/2.5/au/" rel="license">Creative Commons Licence</a>.
+ > <a href="http://creativecommons.org/licenses/by-sa/2.5/au/" rel="license"><img style="border-width: 0;" src="http://creativecommons.org/images/public/somerights20.png" alt="Creative Commons License" /></a> This work is licenced under a <a href="http://creativecommons.org/licenses/by-sa/2.5/au/" rel="license">Creative Commons Licence</a>.
 
 So as I mentioned essentially what I attempted to do was take standard images on the web, and extract the text out them as a way of improving search results. Interestingly I based most of my research/ideas by looking at methods of cracking CAPTCHA&#8217;s. A CAPTCHA as you may well know is one of those annoying &#8220;Type in the letters you see in the image above&#8221; things you see on many website signup pages or comment sections. A CAPTCHA image is designed so that a human can read it without difficulty while a computer is unable to. This in practice has never really worked with pretty much every CAPTCHA that is published on the web getting cracked within a matter of months. Knowing this my theory was that since people can get a computer to read something that it shouldn’t be able to, then normal images such as website logos should be much easier to break using the same methods. I was actually surprisingly successful in my goal with over 60% successful recognition rates for most of the images I used in my sample set. Rather high considering the variety of different images that are on the web. What I did find however while doing my research was a lack of sample code or applications which show you how to crack CAPTCHA&#8217;s. While there are some excellent tutorials and many published papers on it they are very light on algorithms or sample code. In fact I didn&#8217;t find any beyond some non working PHP scripts and some Perl fragments which strung together a few non related programs and gave some reasonable results when presented with very simple CAPTCHA’s. None of them helped me very much. I found that what I needed was some detailed code with examples I could run and tweak and see how it worked. I think I am just one of those people that can read the theory, and follow along, but without something to prod and poke I never really understand it. Most of the papers and articles said they would not publish code due the potential for miss-use. Personally I think it is a waste of time since in reality building a CAPTCHA breaker is quite easy once you know how. So because of the lack of examples, and the problems I had initially getting started, I thought I would put together this article with full detailed explanations working code showing how to go about breaking a CAPTCHA. Let’s get started. Here is a list in order of things I am going to discuss.
 
@@ -73,7 +62,7 @@ I am going to hardcode a lot of the values in this example. I am not trying to c
     
 A CAPTCHA is basically just an implementation of a one way function. This is a function where it is easy to take input and compute the result, but difficult to take the result and compute the input. What is different about them though is that while they are difficult for a computer to take the result and output the inputs, it should be easy for a human to do it. A CAPTCHA can be thought of in simple terms as a &#8220;Are you a human?&#8221; test. Essentially they are implemented by showing an image which has some word or letters embedded in it. They are used for preventing automated spam on many online websites. An example can be found on the Windows Live ID signup page [https://signup.live.com/signup.aspx?ru=http%3a%2f%2fmail.live.com%2f%3frru%3dinbox&wa=wsignin1.0&rpsnv=10&ct=1242258428&rver=5 .5.4177.0&wp=MBI&wreply=http:%2F%2Fmail.live.com%2Fdefault.aspx&lc=2057&id=64855&mkt=en-GB&bk=1242258418&rollrs=12&lic=1][9] You display the image, the human decodes the text in it and enters it into the form. A simple idea which seems like a good solution to the problem of a computer coming along signing up for thousands of spam email accounts or posting thousands of threads in your forum trying to sell viagra. The problem is that AI, in particular image recognition techniques have evolved and become very effective in certain areas. OCR (Optical Character Recognition) is pretty accurate these days and can easily read printed text. The solution was to add lines and colours and generally mess up the text in the image you are asking the human to decode to try and confuse the program. Basically what you have here is an arms race, and like every other arms race arms generally beat armour. Defeating a CAPTCHA which has been obscured is a little more difficult but still not impossible. Plus the image being generated cannot be too crazy or the human will not be able to read them. 
 
-<a href="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif"><img src="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif" alt="captcha" width="84" height="22" /></a>
+![CAPTCHA](/static/decoding-captchas/captcha.gif)
 
 The above image is an example of the CAPTCHA we are going to decode. This is a live CAPTCHA posted on an actual website and not just a test image I have created. It is a very simple CAPTCHA, consisting of text which is a uniform size and colour against a white background with some noise (pixels, colours, lines) thrown in. You might think that such a CAPTCHA is difficult to decode because of this noise, however I will show that it can easily be removed. This CAPTCHA while not very strong is a good example of home coded CAPTCHA&#8217;s which exist on the web. 
 
@@ -170,24 +159,8 @@ im2.save("output.gif")
 {{</highlight>}}
 
 Running the above snippet against our example CAPTCHA input gives the following output. 
-    
-<div class="example">
-  Output  <a href="http://www.boyter.org/wp-content/uploads/2013/07/output.gif"><img src="http://www.boyter.org/wp-content/uploads/2013/07/output.gif" alt="output" width="84" height="22" /></a><br />  </p> 
-  
-  <table border="0">
-    <tr>
-      <td>
-        Input
-      </td>
-    </tr>
-    
-    <tr>
-      <td>
-        <a href="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif"><img class="alignnone size-full wp-image-499" src="http://www.boyter.org/wp-content/uploads/2013/07/captcha.gif" alt="captcha" width="84" height="22" /></a>
-      </td>
-    </tr>
-  </table>
-</div>
+
+![CAPTCHA](/static/decoding-captchas/output.gif)
     
 You can see from the above image we have successfully extracted the text from the background. I’m sure you can see that you could automate this, by taking the pixel groups and extracting into multiple images which you then use as your next input. What about images which have text in multiple colours I hear you say? Well this technique can still work. You just assume that the most common colour is the background and keep the rest. Multi coloured text on a multi coloured background can still be broken using this technique as well. You just do the above and then combine multiple images together if you know they have text in them. Different multicoloured backgrounds for each letter which is multi coloured would beat this technique, but also be totally illegible to users as well! So at this point we have successfully extracted the text in the image. The next step is to identify if the image contains any textual data. I am not going to post code on this since it will make things needlessly complicated but the technique is pretty simple. Here is the algorithm, 
 
@@ -358,7 +331,14 @@ for letter in letters:
   count += 1
 {{</highlight>}}
 
-The result of this code is a collection of images in the same directory. Each one is given a unique hash so we don’t accidentally blow away other images if you are going run over many CAPTCHAS to build your training set. Here is the output from the above code when run against our example CAPTCHA image. [<img src="http://www.boyter.org/wp-content/uploads/2013/07/1a09aeb0d13b9ed9b6c8c0b9c4f3a2db.gif" alt="1a09aeb0d13b9ed9b6c8c0b9c4f3a2db" width="8" height="22" />][11] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/4cb958a1b03e7507ba261ef8d7e58035.gif" alt="4cb958a1b03e7507ba261ef8d7e58035" width="10" height="22" />][12] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/18b261cc6d909f8f684278eccc5c830e.gif" alt="18b261cc6d909f8f684278eccc5c830e" width="9" height="22" />][13] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/71bd7c51130b7455fb6651800315951e.gif" alt="71bd7c51130b7455fb6651800315951e" width="10" height="22" />][14] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/910c9cd8ecf1799cd5f2c8bd01fa7f1a.gif" alt="910c9cd8ecf1799cd5f2c8bd01fa7f1a" width="8" height="22" />][15] [<img src="http://www.boyter.org/wp-content/uploads/2013/07/b1042720c0fa596218c4832d544d349f.gif" alt="b1042720c0fa596218c4832d544d349f" width="8" height="22" />][16] 
+The result of this code is a collection of images in the same directory. Each one is given a unique hash so we don’t accidentally blow away other images if you are going run over many CAPTCHAS to build your training set. Here is the output from the above code when run against our example CAPTCHA image. 
+
+![Output](/static/decoding-captchas/1a09aeb0d13b9ed9b6c8c0b9c4f3a2db.gif)
+![Output](/static/decoding-captchas/4cb958a1b03e7507ba261ef8d7e58035.gif)
+![Output](/static/decoding-captchas/18b261cc6d909f8f684278eccc5c830e.gif)
+![Output](/static/decoding-captchas/71bd7c51130b7455fb6651800315951e.gif)
+![Output](/static/decoding-captchas/910c9cd8ecf1799cd5f2c8bd01fa7f1a.gif)
+![Output](/static/decoding-captchas/b1042720c0fa596218c4832d544d349f.gif)
 
 How you store these images is up to you, but I just stuck each unique letter or number in a subfolder with the same name as the letter or number it was holding. 
     
@@ -367,7 +347,8 @@ How you store these images is up to you, but I just stuck each unique letter or 
 The final step. We have the text extractor, letter extractor, recognition technique and a training set. We pull in the new CAPTCHA image, extract the text, extract the letters and then compare them to our training set to work out what letter it is, then print what we think the letter is. You can get the final program with training data and some CAPTCHA’s to attempt to break below. 
 
 You can download the code/trainingset/images using this link,
-<a href="http://www.boyter.org/wp-content/uploads/2013/07/captcha.zip">captcha.zip</a>
+
+[Download Source Code](/static/decoding-captchas/captcha.zip)
 
 The only new code added follows. 
 
