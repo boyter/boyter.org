@@ -907,9 +907,9 @@ I coded scc to work with how I wanted it to work. Perhaps in the future a flag c
 
 ## Benchmarks
 
-What follows is going to be a highly biased (I wrote one of the tools remember) collection of benchmarks that show while scc is not the fastest code counter on Linux (that honour is held by Tokei) it however the fastest on Windows. It is considerably faster than cloc, sloccount, loc and gocloc. It is however the only code counter that is very fast, supports removing duplicates and accurate. It is also the only code counter that performs complexity calculations for you. 
+What follows is going to be a highly biased (I wrote one of the tools remember) collection of benchmarks that show while scc is not the fastest code counter on Linux (that honour is held by Tokei) it gets very close. It is however the fastest on Windows. In either case it is considerably faster than cloc, sloccount, loc and gocloc. It is the only code counter that is fast, accurate and supports removing duplicate files. Lastly it is also the only code counter that performs complexity calculations for you. 
 
-In addition you can have the code complexity calculation running, duplicates detection or both and it will generally be almost as fast as tokei.
+In addition you can have the code complexity calculation running with or without duplicates detection and it will generally be almost as fast as tokei.
 
 With those outrageous claims out of the way lets see if I prove them.
 
