@@ -15,9 +15,10 @@ date: 2018-04-06
  - the golden rule of performance tuning is to profile/measure, profile/measure and profile/measure again
  - the best case vs worst case performance for parallel file tree walking is large
  - the default file walker is slow due to calling os.Stat on every node and not running in parallel
- - I have probably messed up the cocomo estimates calculation but I think it should be correct
+ - I have probably messed up the cocomo estimates calculation
  - the name comes from joining sloccount, cloc and code complexity in a way that sounds like a Guy Ritchie film
  - the whole thing below is written as I went along so its likely some parts are contradictory
+ - loc is only faster than tokei on single or dual core machines as far as I can tell
 
 For those who have never encountered cloc https://github.com/AlDanial/cloc it is what appears to be simple command line tool (it is not simple and has a LOT of functionality!) that iterates through a given directory checking files against a known list of programming languages and then counting the number of code, comment and blank lines. For getting an overview of how large a project is and what languages are being used it is incredibly useful. I remember first using it early in my career to estimate project sizes.
 
@@ -52,6 +53,8 @@ This might be a problem.
 
 I have experimented with Rust before and I was blown away with the performance you can wring out of it. So should I implement yet ANOTHER code counter in Rust? I decided against that. I do like a challenge though http://www.boyter.org/2017/03/golang-solution-faster-equivalent-java-solution/ and I was looking to expand my knowledge of Go and learn how to write multi CPU aware code in it. So I chose Go. At the time I did not know that Gocloc already existed so I thought I was being original in the choice of language.
 
+One very nice thing about Tokei however is that is has a nice database of language names with comment, quotes and file extensions. It seems both loc and gocloc have used this list as a reference. As such I took a copy and augmented it using some of the types I had gathered for https://searchcode.com/ and https://searchcodeserver.com/
+
 I started thinking about what sort of projects should I optimize for? After all at some point we may need to make a trade off in performance in calculating for larger vs smaller repositories. However after some more pondering I discarded this idea. I said I wanted absolute performance. This means I wanted it to work quickly on small and large projects. If I can optimize for one it should be possible to optimize for both.
 
 Given that tokei, loc and gocloc exist it means I also want to beat them when it comes to processing. Its good to have lofty goals.
@@ -62,13 +65,15 @@ Those days and the "free performance lunch" ended a while ago and now the answer
 
 Now-day's you want your program to do as little as possible, on many cores, while making it easier for the cores to do the next thing. This means you need to run the program in parallel, while being friendly to the CPU caches and the branch predictor. Thankfully compilers and CPU designers understand that these things are hard for all but the most brilliant of developers (I am not in this category). As such you probably don't worry too much about anything except how to run things in parallel. That said if you run into one an issue that can be solved by changing a branching instruction to help the predictor (I have done this exactly one time) you will feel like a programming god for a while.
 
-Some things to keep in mind when reading
+Some things to keep in mind when if you plan to continue reading
 
  - where command line output is included below I have often cut out empty lines to reduce the size
  - my development machine is a Surface Book 2 using Ubuntu WSL
  - many of the benchmarks/results before the benchmarks section are run on a variety of machines and sizes
 
-Architecture. Since this was my second attempt at a Go project I was able to use the benefits of hindsight to avoid making similar mistakes. The first one I made was dealing with lists. Coming from a C#/Java/Python background where the way to make code run in parallel is to build a list and then use parallel streams, parallel linq or multiprocessing to iterate over that list using all available CPU's. However in Go what you really want to do is build streams.
+## Architecture
+
+Since this was my second attempt at a Go project I was able to use the benefits of hindsight to avoid making similar mistakes. The first one I made was dealing with lists. Coming from a C#/Java/Python background where the way to make code run in parallel is to build a list and then use parallel streams, parallel linq or multiprocessing to iterate over that list using all available CPU's. However in Go what you really want to do is build streams.
 
 The other thing you need to do is let your prejudices go and embrace go-routines. The idea of spinning up thousands of threads in something like Java is going to land you in a world of pain. However the same cannot be said of Go. Not going to dive into this too much but suffice to say so long as you limit the CPU bound GoRoutines to the number of CPU's you can get away with many thousands performing other tasks.
 
@@ -1005,14 +1010,24 @@ That scc managed to beat tokei here makes me suspect that the differences in per
 
 ## Conclusion
 
-Alas I never managed to get scc to run as Tokei for the majority of tests on Linux. I suspect this may be down to the garbage collector from my experiments disabling it and if so its unlikely it will ever match it. I suspected this when I started coding but had hoped that the authors of it may have missed some simple optimizations. This turned out not to be the case.
+Disappointingly I never managed to get scc to run as tokei for the majority of tests on Linux. I suspect this may be down to the garbage collector based on my experiments disabling it. If so it's unlikely it will ever match unless something radical happens in the Go compiler. I suspected this would be the case when I started coding but had hoped that the authors of it may have missed some simple optimizations. This turned out not to be the case, so hats off to the authors of tokei.
 
-I have to wonder just how much the Windows WSL held me back here. It is an excellent piece of software and makes coding on Windows an absolute joy again. However I suspect that as I did all my profiling inside Windows and not Linux I may have missed out on optimizations that would work better there. If someone wants to do some work profiling in Linux and submit a PR to fix what I have probably missed for this I would really appreciate it. If I get time I may try this myself on my desktop machine.
+I have to wonder just how much the Windows WSL held me back here however. It is an excellent piece of software and makes coding on Windows an absolute joy again. However I suspect that as I did all my profiling inside Windows and not Linux I may have missed out on optimizations that would be linux specific. If someone wants to do some work profiling in Linux and submit a PR to fix what I have probably missed for this I would really appreciate it. If I get time I may try this myself on my desktop machine.
+
+The claims of loc to be faster than tokei appear to only hold true on single/dual core systems. The only way I could get loc to run faster than tokei was to run it on a single core machine or restricted it to a few cores using taskset. This suggests that the parallel code in loc is not efficient. In fact checking htop output while it is running on the test VM showed that most cores were underutilized. Since loc does not attempt to determine if code is in a string quote or not, if this was resolved I would expect it to run faster than tokei.
+
+| Program | Runtime |
+|---|---|
+| `taskset 0x01 scc django` | 1.362 s |
+| `taskset 0x01 tokei django` | 1.311 s |
+| `taskset 0x01 loc django` | 1.115 |
 
 Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats much faster than scc with duplicate detection and maybe complexity calculations. I would expect it to also be much faster than anything I could ever produce. 
 
 I have no problem with this. A lot of this post was about seeing how fast I could make things run while learning as much as possible. Besides I don't think of tools that do similar things as being in competition. Andy Lester of ack fame puts this far better than I ever could http://blog.petdance.com/2018/01/02/the-best-open-source-project-for-someone-might-not-be-yours-and-thats-ok/
 
 If you do like SCC though feel free to submit some pull requests. The language.json file could use some traditional submissions of languages and improvements to the languages that are already are in there. If you are able to find some additional performance somewhere in the code that would also be a nice thing to implement so long as it does not make things too unreadable.
+
+In short building scc was a nice diversion from working on https://searchcode.com/ and https://searchcodeserver.com/ and I will probably fold back into that things that I discovered while working on scc.
 
 Enjoy? Hate? Let me know via twitter or email directly.
