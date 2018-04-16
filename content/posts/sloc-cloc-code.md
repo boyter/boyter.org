@@ -1,6 +1,6 @@
 ---
-title: Sloc Cloc and Code
-date: 2018-04-06
+title: Sloc Cloc and Code - What happened on the way to faster Cloc
+date: 2018-04-16
 ---
 
 ### It started by wanting to write a code counter that would be faster than cloc.
@@ -15,10 +15,10 @@ date: 2018-04-06
  - the golden rule of performance tuning is to profile/measure, profile/measure and profile/measure again
  - the best case vs worst case performance for parallel file tree walking is large
  - the default file walker is slow due to calling os.Stat on every node and not running in parallel
- - I have probably messed up the cocomo estimates calculation
+ - I have probably messed up the COCOMO estimates calculation https://en.wikipedia.org/wiki/COCOMO
  - the name comes from joining sloccount, cloc and code complexity in a way that sounds like a Guy Ritchie film
  - the whole thing below is written as I went along so its likely some parts are contradictory
- - loc is only faster than tokei on single or dual core machines as far as I can tell
+ - loc is only faster than tokei on single or dual core machines
 
 For those who have never encountered cloc https://github.com/AlDanial/cloc it is what appears to be simple command line tool (it is not simple and has a LOT of functionality!) that iterates through a given directory checking files against a known list of programming languages and then counting the number of code, comment and blank lines. For getting an overview of how large a project is and what languages are being used it is incredibly useful. I remember first using it early in my career to estimate project sizes.
 
@@ -30,7 +30,7 @@ I would generally argue that performance, like money, isn't everything unless yo
 
 For some user driven tools performance can be everything. Personally when I ask a program to do something I want it done now dammit. Some users may be prepared to wait a while for a result if they perceive value in it such as calculating your tax, you at least want the illusion that a lot is happening to ensure it is correct. Programming tools tend to fall into the I want it now category. You may only run it once every few days, but if its so slow as to produce finger tapping it quickly becomes frustrating, causes the mind to wander and productivity to go down. 
 
-It also causes the developer to start thinking that they could make it run faster if they wanted and they start opening a repository and implementing a new version while waiting. Apparently waiting for C to compile is why Go became a programming language. Performance is also one of the reasons Google became so popular so quickly.
+It also causes the developer to start thinking that they could make it run faster if they wanted and they start opening a repository and implementing a new version while waiting. Apparently waiting for C++ to compile is why Go became a programming language. Performance is also one of the reasons Google became so popular so quickly.
 
 The other reason Google became popular was accuracy. The flip side to performance is that it usually comes at the expense of accuracy. Usually it is about trade offs. Are you willing to trade speed for accuracy? If you don't require any accuracy I promise to make the fastest program you have ever seen.
 
@@ -70,6 +70,7 @@ Some things to keep in mind when if you plan to continue reading
  - where command line output is included below I have often cut out empty lines to reduce the size
  - my development machine is a Surface Book 2 using Ubuntu WSL
  - many of the benchmarks/results before the benchmarks section are run on a variety of machines and sizes
+ - the times for the results can be either in milliseconds or seconds
 
 ## Architecture
 
@@ -400,13 +401,13 @@ TOTAL                            1              0              5              0
 $ sloccount samplefile
 
 SLOC    Directory       SLOC-by-Language (Sorted)
-5       complexity      java=5
+5       samplefile      java=5
 
 ```
 
-Not only does cloc get the counts wrong doing this by regular expression is a far slower way to process a file.
+Not only does cloc get the counts wrong doing this by regular expression it is a far slower way to process a file.
 
-So I decided that if I was not using regular expressions I would scan byte by byte. That is look through every byte of every file and using a very simple state machine determines if a line is empty, a comment, code or a string containing one of the others. Turns out this is how tokei works as well https://github.com/Aaronepower/tokei/issues/175
+So I decided that if I was not using regular expressions I would scan byte by byte. That is look through every byte of every file and using a very simple state machine determine if a line is empty, a comment, code or a string containing one of the others. Turns out this is how tokei works as well https://github.com/Aaronepower/tokei/issues/175
 
 Another option would be to build an AST which would probably be much slower than byte counting and possibly slower than the regular expression parser.
 
@@ -423,7 +424,7 @@ search to some degree. When we get to the single-file benchmarks, this variable 
 
 Note that scc falls very much into the category of counting lots of small files. My benchmarks show that as BurntSushi claims it is not a significant portion of the runtime. Also because scc does not need to check line boundaries there is no need to worry about newlines beyond resetting the current state we are in. So while it may be "slow" its not a factor at all in the way the application performs.
 
-Operating on single bytes also makes it much easier to move in the state engine. However it does mean you have to check each byte potentially multiple times. While it should be faster than the reading of files from the disk its something to keep in the back of your mind that its very possible to become CPU bound if not careful.
+Operating on single bytes also makes it much easier to move in the state engine. However it does mean you have to check each byte potentially multiple times. While it should be faster than the reading of files from the disk it is something to keep in the back of your mind that its very possible to become CPU bound if not careful.
 
 However while it sounds simple its not quite as easy as it would appear. Take the following examples.
 
@@ -461,11 +462,11 @@ fmt.Println(`
 
 All of the above is code but easily fools many parsers that rely on regular expressions. 
 
-So looking at the above we need to code in a simple state machine that works for the above. It looks something like the below and once I created this I realized how hideous it is.
+So looking at the above we need to code a simple state machine that works for the above. It looks something like the below.
 
 ![State Machine](/static/sloc-cloc-code/Sketch2.png)
 
-Thankfully the sort of cases I mention above are rare. Given enough creative evil you can probably fool any of the code counters I am comparing against, including Tokei which appears to be the most accurate.  I decided early on that while I wanted accuracy I want it for 99.999% of cases. Someone trying to confuse the counter is not a case I am going to spend a great deal of time working on.
+Thankfully the sort of cases I mention above are rare. Given enough creative evil you can probably fool any of the code counters I am comparing against, or rather any that do not build an AST. This includes Tokei which appears to be the most accurate. I decided early on that while I wanted accuracy I want it for 99.999% of cases. Someone trying to confuse the counter is not a case I am going to spend a great deal of time working on.
 
 ## Trying Things Out
 
@@ -1022,7 +1023,7 @@ The claims of loc to be faster than tokei appear to only hold true on single/dua
 | `taskset 0x01 tokei django` | 1.311 s |
 | `taskset 0x01 loc django` | 1.115 |
 
-Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats much faster than scc with duplicate detection and maybe complexity calculations. I would expect it to also be much faster than anything I could ever produce. 
+Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats much faster than scc with duplicate detection and maybe complexity calculations. I would expect it to also be much faster than anything I could ever produce. It's possible that Tokei and Loc could run faster already just by compiling for the specific CPU they run on or through the SIMD optimizations that at time of writing are still to hit the main-line rust compiler.
 
 I have no problem with this. A lot of this post was about seeing how fast I could make things run while learning as much as possible. Besides I don't think of tools that do similar things as being in competition. Andy Lester of ack fame puts this far better than I ever could http://blog.petdance.com/2018/01/02/the-best-open-source-project-for-someone-might-not-be-yours-and-thats-ok/
 
