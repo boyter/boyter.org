@@ -1,4 +1,4 @@
-baseurl = "http://boyter.org/"
+baseurl = "https://boyter.org/"
 languageCode = "en-us"
 title = "Ben E. C. Boyter"
 theme = "xmin"
