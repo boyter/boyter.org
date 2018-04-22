@@ -1032,3 +1032,66 @@ If you do like SCC though feel free to submit some pull requests. The language.j
 In short building scc was a nice diversion from working on https://searchcode.com/ and https://searchcodeserver.com/ and I will probably fold back into that things that I discovered while working on scc.
 
 Enjoy? Hate? Let me know via twitter or email directly.
+
+
+///////
+
+Updates for OSX
+
+
+$ hyperfine 'scc redis' && hyperfine 'scc -c redis' && hyperfine 'scc -d redis' && hyperfine 'tokei redis'
+Benchmark #1: scc redis
+
+  Time (mean ± σ):      81.6 ms ±   3.6 ms    [User: 249.4 ms, System: 20.5 ms]
+
+  Range (min … max):    76.6 ms …  91.1 ms
+
+Benchmark #1: scc -c redis
+
+  Time (mean ± σ):      65.1 ms ±   2.7 ms    [User: 177.9 ms, System: 20.6 ms]
+
+  Range (min … max):    60.0 ms …  72.9 ms
+
+Benchmark #1: scc -d redis
+
+  Time (mean ± σ):     122.0 ms ±   3.1 ms    [User: 405.8 ms, System: 21.0 ms]
+
+  Range (min … max):   117.8 ms … 129.6 ms
+
+Benchmark #1: tokei redis
+
+  Time (mean ± σ):      80.9 ms ±   3.8 ms    [User: 223.0 ms, System: 18.6 ms]
+
+  Range (min … max):    74.2 ms …  90.2 ms
+
+
+ hyperfine 'scc django' && hyperfine 'scc -c django' && hyperfine 'scc -d django' && hyperfine 'tokei django'
+
+ $  hyperfine 'scc django' && hyperfine 'scc -c django' && hyperfine 'scc -d django' && hyperfine 'tokei django'
+Benchmark #1: scc django
+
+  Time (mean ± σ):     324.6 ms ±   8.9 ms    [User: 918.3 ms, System: 205.9 ms]
+
+  Range (min … max):   313.4 ms … 343.9 ms
+
+Benchmark #1: scc -c django
+
+  Time (mean ± σ):     290.6 ms ±  13.2 ms    [User: 689.9 ms, System: 211.6 ms]
+
+  Range (min … max):   269.5 ms … 314.4 ms
+
+Benchmark #1: scc -d django
+
+  Time (mean ± σ):     460.5 ms ±  14.8 ms    [User: 1.406 s, System: 0.206 s]
+
+  Range (min … max):   446.9 ms … 489.2 ms
+
+Benchmark #1: tokei django
+
+  Time (mean ± σ):     284.2 ms ±  17.6 ms    [User: 624.3 ms, System: 173.8 ms]
+
+  Range (min … max):   270.1 ms … 324.6 ms
+
+
+
+
