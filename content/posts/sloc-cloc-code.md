@@ -908,7 +908,7 @@ I coded scc to work with how I wanted it to work. Perhaps in the future a flag c
 
 ## Benchmarks
 
-What follows is going to be a highly biased (I wrote one of the tools remember) collection of benchmarks that show while scc is not the fastest code counter on Linux (that honour is held by Tokei) it gets very close. It is however the fastest on Windows. In either case it is considerably faster than cloc, sloccount, loc and gocloc. It is the only code counter that is fast, accurate and supports removing duplicate files. Lastly it is also the only code counter that performs complexity calculations for you. 
+What follows is going to be a highly biased (I wrote one of the tools remember) collection of benchmarks that show while scc is not the fastest code counter on Linux (that honour is held by Tokei) it gets very close. It is however the fastest on Windows and OSX. In either case it is considerably faster than cloc, sloccount, loc and gocloc. It is the only code counter that is fast, accurate and supports removing duplicate files. Lastly it is also the only code counter that performs complexity calculations for you. 
 
 In addition you can have the code complexity calculation running with or without duplicates detection and it will generally be almost as fast as tokei.
 
@@ -921,6 +921,8 @@ All GNU/Linux tests were run on Digital Ocean 16 vCPU Compute optimized droplet 
 Keep in mind that this is not a dedicated machine. As such it is subject to noisy neighbors and issues with the underlying hardware. It is likely you will be unable to replicate the results 100% even if you spin up the same instance.
 
 The Windows tests were run on a Surface Book 2 with the i7-8650U CPU. This is problematic as there is the possibility that CPU throttling will kick in influencing the benchmark, and as it is not a freshly formatted machine that there may be something else running on it during the benchmark. Take these tests with a massive grain of salt and treat them as more an indication of performance than a perfect benchmark. I did my best to stop all background services and ran benchmarks several times only taking the best result for each to try and keep it as fair as possible. I ran the tests inside the Ubuntu WSL which means I was running Linux binaries in Windows which probably causes odd results as well.
+
+The macOS tests were run on a 2013 Macbook Pro Retina macOS Sierra 10.12.6. The tests were only run on Redis and Django as the Laptop was a loaner and I did not have time to get a copy of the Linux Kernel. Similar to the problems of the Surface Book 2 a new account was created on this to ensure as few background processes were running as possible. As it was a loaner I only had time to try out scc and tokei on it.
 
 I set scc to run first in order to ensure that it warms up everything and take any handicap that might incur from this process. To do the benchmark itself I used the excellent Rust tool hyperfine with 3 warm-up runs and 10 timed runs total to produce the results. These are the defaults for hyperfine but are set explicitly via the command line.
 
@@ -941,40 +943,45 @@ To keep things fair I also ran scc three times for each benchmark. The first was
 
 The first test was run against the redis code https://github.com/antirez/redis/ commit `#7980d87c3c72740f4609fdcaae088221f8f8eb59` With ~180,000 lines of code in its code-base it represents a reasonable sized project that someone may want to calculate code stats for.
 
-| Program | Linux | Windows (WSL) |
-|---|---|---|
-| scc | 36.7 ms ±  16.7 ms | 79.2 ms ±   2.4 ms |
-| scc (no complexity) | 36.4 ms ±  13.6 ms | 74.0 ms ±   2.3 ms |
-| scc (duplicates check) | 56.5 ms ±  21.3 ms | 99.4 ms ±   3.2 ms |
-| tokei | 28.1 ms ±   5.4 ms | 118.8 ms ±   4.1 ms |
-| loc | 147.7 ms ±  40.4 ms | 549.8 ms ±  10.6 ms |
-| gocloc | 117.0 ms ±   1.9 ms | 383.5 ms ±  12.1 ms |
-| cloc | 1.485 s ±  0.033 s | 27.345 s ±  3.384 s |
-| sloccount | 854.8 ms ±  20.5 ms | 67.568 s ±  10.167 s |
+| Program | Linux | Windows (WSL) | macOS |
+|---|---|---|---|
+| scc | 36.7 ms ±  16.7 ms | 79.2 ms ±   2.4 ms | 81.6 ms ±   3.6 ms |
+| scc (no complexity) | 36.4 ms ±  13.6 ms | 74.0 ms ±   2.3 ms | 65.1 ms ±   2.7 ms |
+| scc (duplicates check) | 56.5 ms ±  21.3 ms | 99.4 ms ±   3.2 ms | 122.0 ms ±   3.1 ms |
+| tokei | 28.1 ms ±   5.4 ms | 118.8 ms ±   4.1 ms | 80.9 ms ±   3.8 ms |
+| loc | 147.7 ms ±  40.4 ms | 549.8 ms ±  10.6 ms | N/A |
+| gocloc | 117.0 ms ±   1.9 ms | 383.5 ms ±  12.1 ms | N/A |
+| cloc | 1.485 s ±  0.033 s | 27.345 s ±  3.384 s | N/A |
+| sloccount | 854.8 ms ±  20.5 ms | 67.568 s ±  10.167 s | N/A |
 
-![Redis Benchmark](/static/sloc-cloc-code/benchmark_linux_redis.png)
-![Redis Benchmark](/static/sloc-cloc-code/benchmark_windows_redis.png)
+![scc tokei loc cloc gocloc sloccount Redis Benchmark](/static/sloc-cloc-code/benchmark_linux_redis.png)
+![scc tokei loc cloc gocloc sloccount Redis Benchmark](/static/sloc-cloc-code/benchmark_windows_redis.png)
+![scc tokei loc cloc gocloc sloccount Redis Benchmark](/static/sloc-cloc-code/benchmark_macos_redis.png)
 
 For GNU/Linux Tokei is the fastest code counter by ~10 ms. The removal of the code complexity check for scc brings almost no added performance. This is due to there not being enough code to to have an impact. The good news is that any of the newer projects are at least 8x faster than cloc or sloccount.
 
-On Windows the story is rather different. Not only is scc faster than everything else, its faster even using default settings or when adding duplicate detection. I must admit I am very impressed with how well the WSL works on Windows. The thing I find most interesting is that there is less variation between the runs. 
+On Windows the story is rather different. Not only is scc faster than everything else, its faster even using default settings or when adding duplicate detection. I must admit I am very impressed with how well the WSL works on Windows. The thing I find most interesting is that there is less variation between the runs.
+
+macOS has a similar story to Windows. What is nice to see here is that you can clearly see the impact of not calculating the complexity and calculating the duplicates. I suspect this is mostly down to the test macOS machine having by far the weakest CPU in the lineup.
 
 ### Django Source Benchmarks
 
 I chose to run the next benchmark using commit `#9a56b4b13ed92d2d5bb00d6bdb905a73bc5f2f0a` of the Django project. With ~500,000 lines it is about four times the size of Redis.
 
-| Program | Linux | Windows (WSL) |
-|---|---|---|
-| scc | 119.2 ms ±  32.7 ms | 637.8 ms ±  15.2 ms |
-| scc (no complexity) | 128.8 ms ±  30.4 ms | 652.3 ms ±  14.4 ms |
-| scc (duplicates check) | 171.1 ms ±  37.1 ms | 728.3 ms ±  35.3 ms |
-| tokei | 99.1 ms ±   6.1 ms | 914.7 ms ±  17.1 ms |
-| loc | 282.2 ms ±  42.9 ms | 20.058 s ±  1.731 s |
-| gocloc | 340.6 ms ±   3.0 ms | 3.201 s ±  0.595 s |
+| Program | Linux | Windows (WSL) | macOS |
+|---|---|---|---|
+| scc | 119.2 ms ±  32.7 ms | 637.8 ms ±  15.2 ms | 324.6 ms ±   8.9 ms |
+| scc (no complexity) | 128.8 ms ±  30.4 ms | 652.3 ms ±  14.4 ms | 270.6 ms ±  13.2 ms |
+| scc (duplicates check) | 171.1 ms ±  37.1 ms | 728.3 ms ±  35.3 ms | 460.5 ms ±  14.8 ms |
+| tokei | 99.1 ms ±   6.1 ms | 914.7 ms ±  17.1 ms |  284.2 ms ±  17.6 ms |
+| loc | 282.2 ms ±  42.9 ms | 20.058 s ±  1.731 s | N/A |
+| gocloc | 340.6 ms ±   3.0 ms | 3.201 s ±  0.595 s | N/A |
 
-![Redis Benchmark](/static/sloc-cloc-code/benchmark_linux_django.png)
-![Redis Benchmark](/static/sloc-cloc-code/benchmark_windows_django.png)
+![scc tokei loc cloc gocloc sloccount Django Benchmark](/static/sloc-cloc-code/benchmark_linux_django.png)
+![scc tokei loc cloc gocloc sloccount Django Benchmark](/static/sloc-cloc-code/benchmark_windows_django.png)
+![scc tokei loc cloc gocloc sloccount Django Benchmark](/static/sloc-cloc-code/benchmark_macos_django.png)
 
+Again you can see that tokei is the fastest on Linux but not by much and that scc pulls away on Windows and macOS.
 
 ### Linux Kernel Source Benchmarks
 
@@ -991,8 +998,8 @@ I gave up running loc and gocloc on Windows as both were taking greater than 3 m
 | loc | 3.368 s ±  0.452 s | DNF |
 | gocloc | 11.275 s ±  0.062 s | DNF |
 
-![Profile Result](/static/sloc-cloc-code/benchmark_linux_linuxkernel.png)
-![Profile Result](/static/sloc-cloc-code/benchmark_windows_linuxkernel.png)
+![scc tokei loc cloc gocloc sloccount Linux Benchmark](/static/sloc-cloc-code/benchmark_linux_linuxkernel.png)
+![scc tokei loc cloc gocloc sloccount Linux Benchmark](/static/sloc-cloc-code/benchmark_windows_linuxkernel.png)
 
 However a single count of the kernel was not enough for me. Just to push them to work that much harder I made ten copies in a single directory and timed the tools counting that. I did not run this test under Windows as it was really just to see how the counters work with extremely large code bases.
 
@@ -1005,7 +1012,7 @@ However a single count of the kernel was not enough for me. Just to push them to
 | loc | 22.363 s ±  3.075 s |
 | gocloc | 32.664 s ±  0.140 s |
 
-![Profile Result](/static/sloc-cloc-code/benchmark_linuxes_linuxkernel.png)
+![scc tokei loc cloc gocloc sloccount Linuxes Benchmark](/static/sloc-cloc-code/benchmark_linuxes_linuxkernel.png)
 
 That scc managed to beat tokei here makes me suspect that the differences in performance between tokei and scc are mostly down to how they walk through the file system. If true then it may be possible to modify scc to be faster or equal to tokei in all of the other tests if I were to explore parallel walking of the file tree more.
 
@@ -1023,6 +1030,8 @@ The claims of loc to be faster than tokei appear to only hold true on single/dua
 | `taskset 0x01 tokei django` | 1.311 s |
 | `taskset 0x01 loc django` | 1.115 |
 
+It is interesting to note how much stronger the Rust compiler/tool-chain is on Linux compared to Windows and macOS. By contrast the Go compiler seems to produces very efficient no matter where it is run, even if its performance is not quite up-to what Rust can produce in an ideal situation. Its a strength of Go that you can write code that works well on one architecture and be fairly confident it will work well elsewhere.
+
 Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats much faster than scc with duplicate detection and maybe complexity calculations. I would expect it to also be much faster than anything I could ever produce. It's possible that Tokei and Loc could run faster already just by compiling for the specific CPU they run on or through the SIMD optimizations that at time of writing are still to hit the main-line rust compiler.
 
 I have no problem with this. A lot of this post was about seeing how fast I could make things run while learning as much as possible. Besides I don't think of tools that do similar things as being in competition. Andy Lester of ack fame puts this far better than I ever could http://blog.petdance.com/2018/01/02/the-best-open-source-project-for-someone-might-not-be-yours-and-thats-ok/
@@ -1033,65 +1042,7 @@ In short building scc was a nice diversion from working on https://searchcode.co
 
 Enjoy? Hate? Let me know via twitter or email directly.
 
+For my future reference here is a list of tools used to create graphics in the above.
 
-///////
-
-Updates for OSX
-
-
-$ hyperfine 'scc redis' && hyperfine 'scc -c redis' && hyperfine 'scc -d redis' && hyperfine 'tokei redis'
-Benchmark #1: scc redis
-
-  Time (mean ± σ):      81.6 ms ±   3.6 ms    [User: 249.4 ms, System: 20.5 ms]
-
-  Range (min … max):    76.6 ms …  91.1 ms
-
-Benchmark #1: scc -c redis
-
-  Time (mean ± σ):      65.1 ms ±   2.7 ms    [User: 177.9 ms, System: 20.6 ms]
-
-  Range (min … max):    60.0 ms …  72.9 ms
-
-Benchmark #1: scc -d redis
-
-  Time (mean ± σ):     122.0 ms ±   3.1 ms    [User: 405.8 ms, System: 21.0 ms]
-
-  Range (min … max):   117.8 ms … 129.6 ms
-
-Benchmark #1: tokei redis
-
-  Time (mean ± σ):      80.9 ms ±   3.8 ms    [User: 223.0 ms, System: 18.6 ms]
-
-  Range (min … max):    74.2 ms …  90.2 ms
-
-
- hyperfine 'scc django' && hyperfine 'scc -c django' && hyperfine 'scc -d django' && hyperfine 'tokei django'
-
- $  hyperfine 'scc django' && hyperfine 'scc -c django' && hyperfine 'scc -d django' && hyperfine 'tokei django'
-Benchmark #1: scc django
-
-  Time (mean ± σ):     324.6 ms ±   8.9 ms    [User: 918.3 ms, System: 205.9 ms]
-
-  Range (min … max):   313.4 ms … 343.9 ms
-
-Benchmark #1: scc -c django
-
-  Time (mean ± σ):     290.6 ms ±  13.2 ms    [User: 689.9 ms, System: 211.6 ms]
-
-  Range (min … max):   269.5 ms … 314.4 ms
-
-Benchmark #1: scc -d django
-
-  Time (mean ± σ):     460.5 ms ±  14.8 ms    [User: 1.406 s, System: 0.206 s]
-
-  Range (min … max):   446.9 ms … 489.2 ms
-
-Benchmark #1: tokei django
-
-  Time (mean ± σ):     284.2 ms ±  17.6 ms    [User: 624.3 ms, System: 173.8 ms]
-
-  Range (min … max):   270.1 ms … 324.6 ms
-
-
-
-
+ - Charts JSFiddle and Google Charts https://developers.google.com/chart/interactive/docs/gallery/barchart https://jsfiddle.net/23c5cyar/30/
+ - WebGraphViz for state machine graphic http://webgraphviz.com/
