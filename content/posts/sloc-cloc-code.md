@@ -8,6 +8,7 @@ date: 2018-04-16
 **TL/DR**
 
  - scc is a very fast accurate code counter with complexity calculations and cocomo estimates written in Go
+ - scc can be the fastest code counter by a large margin if you disable the garbage collector
  - find the source for everything on github https://github.com/boyter/scc/
  - surprisingly walking the file tree can be the bottleneck in your application
  - memory maps for reading files is useful if the file you are opening is >= 6 MB in size (at least in WSL)
@@ -948,6 +949,7 @@ The first test was run against the redis code https://github.com/antirez/redis/ 
 | scc | 36.7 ms ±  16.7 ms | 79.2 ms ±   2.4 ms | 81.6 ms ±   3.6 ms |
 | scc (no complexity) | 36.4 ms ±  13.6 ms | 74.0 ms ±   2.3 ms | 65.1 ms ±   2.7 ms |
 | scc (duplicates check) | 56.5 ms ±  21.3 ms | 99.4 ms ±   3.2 ms | 122.0 ms ±   3.1 ms |
+| scc (no GC no complexity) | 13.4 ms ±   2.9 ms | 72.5 ms ±   5.0 ms | N/A |
 | tokei | 28.1 ms ±   5.4 ms | 118.8 ms ±   4.1 ms | 80.9 ms ±   3.8 ms |
 | loc | 147.7 ms ±  40.4 ms | 549.8 ms ±  10.6 ms | N/A |
 | gocloc | 117.0 ms ±   1.9 ms | 383.5 ms ±  12.1 ms | N/A |
@@ -958,7 +960,7 @@ The first test was run against the redis code https://github.com/antirez/redis/ 
 ![scc tokei loc cloc gocloc sloccount Redis Benchmark](/static/sloc-cloc-code/benchmark_windows_redis.png)
 ![scc tokei loc cloc gocloc sloccount Redis Benchmark](/static/sloc-cloc-code/benchmark_macos_redis.png)
 
-For GNU/Linux Tokei is the fastest code counter by ~10 ms. The removal of the code complexity check for scc brings almost no added performance. This is due to there not being enough code to to have an impact. The good news is that any of the newer projects are at least 8x faster than cloc or sloccount.
+For GNU/Linux by default Tokei is the fastest code counter by ~10 ms. The removal of the code complexity check for scc brings almost no added performance. This is due to there not being enough code to to have an impact. If you disabled the garbage collector for scc it flies and is almost 2x a fast as Tokei. The good news is that any of the newer projects are at least 8x faster than cloc or sloccount.
 
 On Windows the story is rather different. Not only is scc faster than everything else, its faster even using default settings or when adding duplicate detection. I must admit I am very impressed with how well the WSL works on Windows. The thing I find most interesting is that there is less variation between the runs.
 
@@ -973,6 +975,7 @@ I chose to run the next benchmark using commit `#9a56b4b13ed92d2d5bb00d6bdb905a7
 | scc | 119.2 ms ±  32.7 ms | 637.8 ms ±  15.2 ms | 324.6 ms ±   8.9 ms |
 | scc (no complexity) | 128.8 ms ±  30.4 ms | 652.3 ms ±  14.4 ms | 270.6 ms ±  13.2 ms |
 | scc (duplicates check) | 171.1 ms ±  37.1 ms | 728.3 ms ±  35.3 ms | 460.5 ms ±  14.8 ms |
+| scc (no GC no complexity) | 50.6 ms ±   6.4 ms | 647.9 ms ±  16.5 ms |  N/A |
 | tokei | 99.1 ms ±   6.1 ms | 914.7 ms ±  17.1 ms |  284.2 ms ±  17.6 ms |
 | loc | 282.2 ms ±  42.9 ms | 20.058 s ±  1.731 s | N/A |
 | gocloc | 340.6 ms ±   3.0 ms | 3.201 s ±  0.595 s | N/A |
@@ -981,7 +984,7 @@ I chose to run the next benchmark using commit `#9a56b4b13ed92d2d5bb00d6bdb905a7
 ![scc tokei loc cloc gocloc sloccount Django Benchmark](/static/sloc-cloc-code/benchmark_windows_django.png)
 ![scc tokei loc cloc gocloc sloccount Django Benchmark](/static/sloc-cloc-code/benchmark_macos_django.png)
 
-Again you can see that tokei is the fastest on Linux but not by much and that scc pulls away on Windows and macOS.
+Again you can see that tokei is the fastest on Linux but not by much and that scc pulls away on Windows and macOS. Again if you disable the garbage collector scc is about twice as fast as tokei.
 
 ### Linux Kernel Source Benchmarks
 
@@ -994,6 +997,7 @@ I gave up running loc and gocloc on Windows as both were taking greater than 3 m
 | scc | 1.489 s ±  0.055 s | 7.811 s ±  0.307 s |
 | scc (no complexity) | 1.713 s ±  0.157 s | 7.069 s ±  0.854 s |
 | scc (duplicates detection) | 2.122 s ±  0.054 s | 13.587 s ±  1.647 s |
+| scc (no GC no complexity) | 0.744 s ±  0.167 ms |  7.213 s ±  0.130 s |
 | tokei | 1.135 s ±  0.074 s | 13.363 s ±  1.262 s |
 | loc | 3.368 s ±  0.452 s | DNF |
 | gocloc | 11.275 s ±  0.062 s | DNF |
@@ -1008,6 +1012,7 @@ However a single count of the kernel was not enough for me. Just to push them to
 | scc | 11.665 s ±  0.200 s |
 | scc (no complexity) | 8.768 s ±  1.017 s  |
 | scc (duplicates detection) | 16.902 s ±  1.685 s |
+| scc (no GC no complexity) | 6.843 s ±  0.058 s |
 | tokei | 9.752 s ±  0.239 s |
 | loc | 22.363 s ±  3.075 s |
 | gocloc | 32.664 s ±  0.140 s |
@@ -1018,7 +1023,7 @@ That scc managed to beat tokei here makes me suspect that the differences in per
 
 ## Conclusion
 
-Disappointingly I never managed to get scc to run as tokei for the majority of tests on Linux. I suspect this may be down to the garbage collector based on my experiments disabling it. If so it's unlikely it will ever match unless something radical happens in the Go compiler. I suspected this would be the case when I started coding but had hoped that the authors of it may have missed some simple optimizations. This turned out not to be the case, so hats off to the authors of tokei.
+Disappointingly I never managed to get scc to run as tokei for the majority of tests on Linux. This appears to be totally down to the garbage collector based on my experiments disabling it. As such it's unlikely it will ever match unless something radical happens in the Go compiler. I suspected this would be the case when I started coding but had hoped that the authors of it may have missed some simple optimizations. This turned out not to be the case, so hats off to the authors of tokei. However if you do want the fastest code counter possible, and have RAM to spare just run it like so `GOGC=-1 scc -c .` for a massive speed improvement.
 
 I have to wonder just how much the Windows WSL held me back here however. It is an excellent piece of software and makes coding on Windows an absolute joy again. However I suspect that as I did all my profiling inside Windows and not Linux I may have missed out on optimizations that would be linux specific. If someone wants to do some work profiling in Linux and submit a PR to fix what I have probably missed for this I would really appreciate it. If I get time I may try this myself on my desktop machine.
 
