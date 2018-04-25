@@ -997,7 +997,7 @@ I gave up running loc and gocloc on Windows as both were taking greater than 3 m
 | scc | 1.489 s ±  0.055 s | 7.811 s ±  0.307 s |
 | scc (no complexity) | 1.713 s ±  0.157 s | 7.069 s ±  0.854 s |
 | scc (duplicates detection) | 2.122 s ±  0.054 s | 13.587 s ±  1.647 s |
-| scc (no GC no complexity) | 0.744 s ±  0.167 ms |  7.213 s ±  0.130 s |
+| scc (no GC no complexity) | 0.744 s ±  0.167 s |  7.213 s ±  0.130 s |
 | tokei | 1.135 s ±  0.074 s | 13.363 s ±  1.262 s |
 | loc | 3.368 s ±  0.452 s | DNF |
 | gocloc | 11.275 s ±  0.062 s | DNF |
