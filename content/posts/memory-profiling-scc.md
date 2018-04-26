@@ -205,3 +205,5 @@ ROUTINE ======================== github.com/boyter/scc/processor.processConstant
          .          .     95:                   SingleLineComment: singleLineComment,
          .          .     96:                   StringChecks:      stringChecks,
 ```
+
+The above is all wrong. It only becomes apparent because the repository tested was so small.
