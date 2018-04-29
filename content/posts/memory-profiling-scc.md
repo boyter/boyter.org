@@ -1,6 +1,6 @@
 ---
 title: Memory Profiling Sloc Cloc and Code - The goal to outperfom Tokei
-date: 2018-04-25
+date: 2098-04-25
 ---
 
 https://blog.golang.org/profiling-go-programs

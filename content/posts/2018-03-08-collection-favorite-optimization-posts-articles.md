@@ -42,5 +42,6 @@ In no particular order.
  - Why Writing Your Own Search Engine is Hard https://queue.acm.org/detail.cfm?id=988407
  - Effects of CPU caches https://medium.com/@minimarcel/effect-of-cpu-caches-57db81490a7f
  - Neon is the New Black: fast JPEG optimization on ARM server https://blog.cloudflare.com/neon-is-the-new-black/
+ - Beware of cute optimizations bearing gifts. Optimisations made to a fast fuzzy file matcher in Vim https://wincent.com/blog/optimization
 
 Will attempt to keep this list up to date as I find other content that really impresses me.
