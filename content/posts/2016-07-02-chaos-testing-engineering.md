@@ -19,13 +19,13 @@ categories:
 ---
 A blog post by the excellent technical people at Netflix about [Chaos Engineering][1] and further posts about the subject by [Microsoft in Azure Search][2] prompted me to ask the question, What is chaos engineering and how can chaos testing be applied to help me?
 
-_What is Chaos Testing?_
+## What is Chaos Testing?
 
 First coined by the afore-mentioned Netflix blog post, chaos engineering takes the approach that regardless how encompassing your test suite is, once your code is running on enough machines and reaches enough complexity errors are going to happen. Since failure is unavoidable, why not deliberately introduce it to ensure your systems and processes can deal with the failure?
 
 To accomplish this, Netflix created the Netflix Simian Army, which consists of a series of tools known as "monkeys" (AKA Chaos Monkey's) that deliberately inject failure into their services and systems. Microsoft adopted a similar approach by creating their own monkey's which were able to inject faults into their test environments.
 
-_What are the advantages of Chaos Testing?_
+### What are the advantages of Chaos Testing?
 
 The advantage of chaos engineering is that you can quickly smoke out issues that other testing layers cannot easily capture. This can save you a lot of downtime in the future and help design and build fault tolerant systems. For example, Netflix runs in AWS and as a response to a regional failure changed their systems to become region agnostic. The easiest way to confirm this works is to regularly take down important services in separate regions, which is all done through a chaos monkey designed to replicate this failure.
 
@@ -35,13 +35,13 @@ The result of this is you are forced to design and build highly fault tolerant s
 
 One thing commonly overlooked with chaos engineering is its ability to find issues caused by cascading failure. You may be confident that your application still works when the database goes down, but would you be so sure if it when down along with your caching layer?
 
-_Should I be Chaos Testing?_
+### Should I be Chaos Testing?
 
 This really depends on what your tolerances for failure are and based on the likelihood of them happening. If you are writing desktop software chaos testing is unlikely to yield any value. Much the same applies if you are running a financial system where failures are acceptable so long as everything reconciles at the end of the day.
 
 If however you are running large distributed systems using cloud computing (think 50 or more instances) with a variety of services and process's designed to scale up and out injecting some chaos will potentially be very valuable.
 
-_How to start Chaos Testing?_
+### How to start Chaos Testing?
 
 Thankfully with cloud computing and the API's provided it can be relatively easy to begin chaos testing. These tools by allowing you to control the infrastructure through code allow the replication of many errors not easily reproducible when running bare hardware. This does not mean that bare hardware systems cannot perform chaos testing, just that some classes of errors will be harder to reproduce.
 

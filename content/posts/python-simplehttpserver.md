@@ -7,3 +7,7 @@ Something I always forget and have to search for is how to use Python to serve a
 
     python -m SimpleHTTPServer 8090
 
+and in Python 3
+
+    python3 -m http.server
+
