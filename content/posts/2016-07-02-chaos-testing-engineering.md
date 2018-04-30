@@ -102,5 +102,5 @@ Similar to Chaos Monkey, but simulates an outage of an entire Amazon availabilit
 
 Well hopefully that explains what Chaos Testing / Engineering is for those who were previously unsure. Feel free to contact me over twitter or via the comments for further queries or information!
 
- [1]: http://techblog.netflix.com/2014/09/introducing-chaos-engineering.html
+ [1]: https://web.archive.org/web/20141008152549/http://techblog.netflix.com/2014/09/introducing-chaos-engineering.html
  [2]: http://azure.microsoft.com/blog/2015/07/01/inside-azure-search-chaos-engineering
