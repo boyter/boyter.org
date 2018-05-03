@@ -7,6 +7,8 @@ https://blog.sourced.tech/post/gld/
 
 Oh its on now. I can take a log of what I learn from optimising https://boyter.org/posts/sloc-cloc-code/ and apply it here.
 
+Called out publicly. Its on now anonymous internet person, this slight against my honour cannot be bourne! To be honest 
+
 License Checker referred to as `lc` from now on was never designed to be fast. In fact as it came from a Python script any performance improvements were a result of moving from Go and not though me trying to be clever. The application is single threaded for a start. However since I spent time with Sloc Cloc and Code I feel that its time to look at `lc` with fresh eyes and see what can be done.
 
 So the first thing I did was download the source of (isn't free/open source software wonderful) and had a trawl through the code in order to determine what they were doing differently. The first was to see how they walk the file tree.
