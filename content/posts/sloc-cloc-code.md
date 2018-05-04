@@ -1035,7 +1035,7 @@ The claims of loc to be faster than tokei appear to only hold true on single/dua
 | `taskset 0x01 tokei django` | 1.311 s |
 | `taskset 0x01 loc django` | 1.115 |
 
-It is interesting to note how much stronger the Rust compiler/tool-chain is on Linux compared to Windows and macOS. By contrast the Go compiler seems to produces very efficient no matter where it is run, even if its performance is not quite up-to what Rust can produce in an ideal situation. Its a strength of Go that you can write code that works well on one architecture and be fairly confident it will work well elsewhere.
+It is interesting to note how much stronger the Rust compiler/tool-chain is on Linux compared to Windows and macOS. By contrast the Go compiler seems to produces very efficient results no matter where it is run, even if it's performance is not quite up-to what Rust can produce in an ideal situation. Its a strength of Go that you can write code that works well on one architecture and be fairly confident it will work well elsewhere.
 
 Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats much faster than scc with duplicate detection and maybe complexity calculations. I would expect it to also be much faster than anything I could ever produce. It's possible that Tokei and Loc could run faster already just by compiling for the specific CPU they run on or through the SIMD optimizations that at time of writing are still to hit the main-line rust compiler.
 
