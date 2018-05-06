@@ -35,6 +35,8 @@ Some notable projects and blog posts of mine,
   * [The Great Benefit of Test Driven Development Nobody Talks About][4]
   * [Why You Shouldn’t roll your own CAPTCHA][5]
   * [Code a search engine in PHP][6]
+  * Sloc Cloc and Code https://boyter.org/posts/sloc-cloc-code/ https://github.com/boyter/scc/
+  * License Checker https://boyter.org/2018/03/licensechecker-command-line-application-identifies-software-license/ https://github.com/boyter/lc
 
 Also here are a few press write ups I have received for my project searchcode.com, with most of the details provided by myself
 
@@ -46,7 +48,7 @@ Want to hire me? Have a look at my attached [resume][9] and email me at bboyte01
  [1]: http://www.boyter.org/wp-content/uploads/2013/07/headshot.jpg
  [2]: http://searchcode.com/ "Source Code Search Engine"
  [3]: http://www.boyter.org/decoding-captchas/
- [4]: http://www.boyter.org/2010/08/the-great-benefit-of-test-driven-development-nobody-talks-about/
+ [4]: https://boyter.org/2015/06/unsung-benefits-software-testing/
  [5]: http://www.boyter.org/2010/08/why-you-shouldnt-roll-your-own-captcha/
  [6]: http://www.boyter.org/2013/01/code-for-a-search-engine-in-php-part-1/
  [7]: http://yourstory.com/2014/07/aussie-coder-benjamin-boyter/
