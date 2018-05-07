@@ -168,18 +168,18 @@ What I wanted to do is move to processing pipelines. So to start by building a v
 
 Looking
 
+```
+$ time lc .
+lc .  196.88s user 1.64s system 106% cpu 3:07.12 total
+```
 
-	$ time lc .
-	lc .  196.88s user 1.64s system 106% cpu 3:07.12 total
+to
 
-vs
-
-	$ time ./lc .
-	./lc .  226.33s user 2.28s system 735% cpu 31.066 total
-
-then with a tweak to use the faster license keyword method,
-
-	$ time ./lc .
-	./lc .  29.59s user 0.98s system 614% cpu 4.975 total
+```
+$ time ./lc .
+./lc .  29.59s user 0.98s system 614% cpu 4.975 total
+```
 
 Not a bad improvement. It would appear that moving over to multi processing has speed things up considerably. However there is more that can be done.
+
+

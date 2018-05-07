@@ -53,5 +53,5 @@ Want to hire me? Have a look at my attached [resume][9] and email me at bboyte01
  [6]: http://www.boyter.org/2013/01/code-for-a-search-engine-in-php-part-1/
  [7]: http://yourstory.com/2014/07/aussie-coder-benjamin-boyter/
  [8]: http://sphinxsearch.com/blog/2014/06/19/sphinx-searches-code-at-searchcode-com/
- [9]: http://www.boyter.org/wp-content/uploads/2013/07/Benjamin-Boyter-Resume.doc
+ [9]: /static/Benjamin-Boyter-Resume.doc
  [10]: https://searchcodeserver.com/
