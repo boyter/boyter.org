@@ -90,6 +90,10 @@ If you want to run an individual test you can do so,
 
 Which will attempt to any test in all packages that have the name `NameOfTest`. Keep in mind that the argument `NameOfTest` supports regular expressions so its possible to target groups of tests assuming you name them well.
 
+If you find yourself wanting or needing to run tests ignoring the cache you can do the following,
+
+	GOCACHE=off go test ./...
+
 The standard practice with Go tests is to put them next to the file you are testing. However this is not actually required. So long as you can import the code (that is it is made exposed with an uppercase prefix) you can put the tests anywhere you like. This of course means you cannot test the private code which some consider an anti-pattern anyway.
 
 ## Dependencies
@@ -172,3 +176,21 @@ RUN go build main.go
 
 CMD ["./main"]
 ```
+
+A few people who have read this post suggested using multi stage docker builds https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds which works well with Docker 17.05 or higher. More details here https://medium.com/travis-on-docker/multi-stage-docker-builds-for-creating-tiny-go-images-e0e1867efe5a An example would be,
+
+```
+FROM golang:1.10
+COPY . /go/src/bitbucket.code.company-name.com.au/scm/code
+WORKDIR /go/src/bitbucket.code.company-name.com.au/scm/code/
+RUN CGO_ENABLED=0 go build main.go
+
+FROM alpine:3.7
+RUN apk add --no-cache ca-certificates
+COPY --from=0 /go/src/bitbucket.code.company-name.com.au/scm/code/main .
+CMD ["./main"]
+```
+
+The result is much smaller images to run your code which is always nice.
+
+Addtional commentary on Hacker News https://news.ycombinator.com/item?id=17061713
