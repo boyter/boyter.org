@@ -79,7 +79,7 @@ The other thing I wanted to check was the accuracy. This was especially importan
  - Detect as many licenses as possible on the hand-collected and hand-checked dataset of 1,000 top-starred repositories on GitHub.
  - Comply with SPDX licenses list and detection guidelines.
 
-A further quote on the first `means that we should rather label a project with a slightly inaccurate license than miss its license completely`. Fair enought but against the goals I had for `lc`. I would rather accuracy. Also I think it might be possible to have both given a clever implementation.
+A further quote on the first `means that we should rather label a project with a slightly inaccurate license than miss its license completely`. Fair enough but against the goals I had for `lc`. I would rather accuracy. Also I think it might be possible to have both given a clever implementation.
 
 In the post the numbers sited for accuracy (and speed) are as such,
 

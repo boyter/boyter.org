@@ -412,7 +412,7 @@ So I decided that if I was not using regular expressions I would scan byte by by
 
 Another option would be to build an AST which would probably be much slower than byte counting and possibly slower than the regular expression parser.
 
-Why look at every byte? This is pretty easy to answer actually. Because it has to. We need to know where strings start and end, where comments begin etc... Since a comment can be a single byte we need to check every byte to know where they are. It is unlikely to be the slowest part of the application. It's more likely that reading from disk is going to slow things down than the CPU. Not that ripgrep uses a far fancier technique https://blog.burntsushi.net/ripgrep/#linux-literal-default as written by BurntSushi
+Why look at every byte? This is pretty easy to answer actually. Because it has to. We need to know where strings start and end, where comments begin etc... Since a comment can be a single byte we need to check every byte to know where they are. It is unlikely to be the slowest part of the application. It's more likely that reading from disk is going to slow things down than the CPU. Note that ripgrep uses a far fancier technique https://blog.burntsushi.net/ripgrep/#linux-literal-default as written by BurntSushi
 
 ```
 Counting lines can be quite expensive. A naive solution—a loop over every byte and comparing it to a \n—will 
