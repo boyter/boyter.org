@@ -1,6 +1,6 @@
 ---
 title: Improving lc's performance - Optimising the hell out of a Go application
-date: 2028-05-02
+date: 2028-05-27
 ---
 
 https://blog.sourced.tech/post/gld/
@@ -81,6 +81,8 @@ The other thing I wanted to check was the accuracy. This was especially importan
 
 A further quote on the first `means that we should rather label a project with a slightly inaccurate license than miss its license completely`. Fair enough but against the goals I had for `lc`. I would rather accuracy. Also I think it might be possible to have both given a clever implementation.
 
+On other issue is that if you allow your program to have inaccurate results than just printing `MIT` for as many files as there are is a reasonable attempt as it is likely to correct at least 30% of the time https://www.blackducksoftware.com/top-open-source-licenses and will be as fast as anything.
+
 In the post the numbers sited for accuracy (and speed) are as such,
 
 | Program | Accuracy | Runtime Seconds |
@@ -151,7 +153,6 @@ The reason this is slow is that it builds a concordance required for the vector 
 Lastly one other thing that bothered me is that `lc` as a SPDX tool calculates the MD5, SHA1 and SHA256 hash for everything it looks at. Since it was done in a fairly stupid way it is also slow as it iterates the bytes in the file at least 3 times just for the hashing algorithms. Again this was a stupid decision by me but it means the benchmark was not truly fair, as `lc` is doing considerably more work. For the benchmark that was run however there was no need to calculate these values at all as they are never displayed unless the output format is SPDX.
 
 
-
 With a fair idea of where the performance issues lets get started. I am not going to take this as far as I went with `scc` which was more about seeing how much performance I could squeeze out of Go but I am going to make this run a lot faster.
 
 At heart `lc` is a similar application to `scc`. Read through a directory, open the files, check for some strings and save those into a list. As such they share some optimisations that we can use.
@@ -182,4 +183,30 @@ $ time ./lc .
 
 Not a bad improvement. It would appear that moving over to multi processing has speed things up considerably. However there is more that can be done.
 
+I also added in the tweak to remove the hash calculation if the output is going to be the default tabular.
 
+After tweaking the processing pipeline and running against the sample that sourced had on my local machine I had the following runtime.
+
+```
+lc .  73.19s user 2.48s system 698% cpu 10.837 total
+```
+
+compared to license-detectors runtime of
+
+```
+license-detector *  47.34s user 4.30s system 519% cpu 9.935 total
+```
+
+Which is a good place to be. In fact there are a few things I can tweak in `lc` to improve the runtime. The first being that the way it works is slightly inefficient. When scanning directories it checks for files that may contain a possible license. These are analysed to determine the license chain. However the file is then reprocessed as part of producing the hashes. However in the case of tabular output we don't need the hash and in fact we don't need to reprocess the file at all.
+
+For the benchmark we are comparing against this means lc is processing everything twice.
+
+However before that I decided to track down some bugs. The first being why were multiple keywords matching a single license. Each group of keywords is meant to be a unique ngram https://boyter.org/2017/05/identify-software-licenses-python-vector-space-search-ngram-keywords/ however when run the application was finding multiples. This should have never happened.
+
+A quick look at the script to produce them indicated that there is indeed a bug in the way that the ngrams were calculated. When fixed however the script which was written in Python was horribly slow. I figured in for a penny in for a pound I would rewrite it in Go and get the benefits of a faster runtime along with some parallelism.
+
+The results were interesting, with the new build database script consuming not only all the CPU I could throw at it but also all of the RAM.
+
+![Build Database](/static/improving-lc-performance/build_database.png)
+
+In fact I had to limit it to running on only 4 of the available cores due to the RAM issues. The reason is that I modified how the script run to avoid looping each of the other licences ngrams and instead dump them into a hashmap which I could quickly check for the presense of another ngram. The result was a much faster program but considerably higher memory usage. Considering this meant to be a run once every now and then script however it is not a huge problem.
