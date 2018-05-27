@@ -201,7 +201,7 @@ Which is a good place to be. In fact there are a few things I can tweak in `lc` 
 
 For the benchmark we are comparing against this means lc is processing everything twice.
 
-However before that I decided to track down some bugs. The first being why were multiple keywords matching a single license. Each group of keywords is meant to be a unique ngram https://boyter.org/2017/05/identify-software-licenses-python-vector-space-search-ngram-keywords/ however when run the application was finding multiples. This should have never happened.
+However before that I decided to track down some bugs. The first being why were multiple keywords matching a single license. Each group of keywords is meant to be a unique ngram https://boyter.org/2017/05/identify-software-licenses-python-vector-space-search-ngram-keywords/ however when run the application was finding multiples. This should have never happened. The results should be close to binary, it either is a certain license because it contains the ngrams or not.
 
 A quick look at the script to produce them indicated that there is indeed a bug in the way that the ngrams were calculated. When fixed however the script which was written in Python was horribly slow. I figured in for a penny in for a pound I would rewrite it in Go and get the benefits of a faster runtime along with some parallelism.
 
