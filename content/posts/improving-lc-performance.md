@@ -279,4 +279,4 @@ checking::license-detector
 correct:47::94.0 percent::time:152.444951057
 ```
 
-Don't pay too much attention to the time values themselves. They are just taken using pythons `time.time()` and are best viewed as that it takes about 10x as long to run `license-detector` 50 times than it takes `lc`.
+Don't pay too much attention to the time values themselves. They are just taken using pythons `time.time()` and are best viewed as that it takes about 10x as long to run `license-detector` 50 times than it takes `lc` presumably because it has a slower startup time.
