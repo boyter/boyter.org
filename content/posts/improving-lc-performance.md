@@ -268,6 +268,8 @@ To do so a script was created `create_accuracy_checker.py` which takes the licen
 
 Then the second script `check_accuracy.py` as run. This collects the list of directories, and then calls each application to report on the licenses in each directory and determine if it was sucessful in identifying it or not. The number of correct guesses is returned and used to calculate success.
 
+The results,
+
 ```
 $ time python check_accuracy.py
 count::50
@@ -276,3 +278,5 @@ correct:50::100.0 percent::time:13.4573049545
 checking::license-detector
 correct:47::94.0 percent::time:152.444951057
 ```
+
+Don't pay too much attention to the time values themselves. They are just taken using pythons `time.time()` and are best viewed as that it takes about 10x as long to run `license-detector` 50 times than it takes `lc`.
