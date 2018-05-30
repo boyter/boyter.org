@@ -210,3 +210,69 @@ The results were interesting, with the new build database script consuming not o
 ![Build Database](/static/improving-lc-performance/build_database.png)
 
 In fact I had to limit it to running on only 4 of the available cores due to the RAM issues. The reason is that I modified how the script run to avoid looping each of the other licences ngrams and instead dump them into a hashmap which I could quickly check for the presense of another ngram. The result was a much faster program but considerably higher memory usage. Considering this meant to be a run once every now and then script however it is not a huge problem.
+
+After thinking about it a bit more, I realised I could switch to pointers in a few smart places, then RAM was no longer an issue, and could then increase the number of CPU's. With pointers what was taking several minutes per license ended up taking a few seconds. With pointers the need to worry about RAM usage also went away and I was able to simplify the code.
+
+The result was a drop in replacement database that worked just as well for all of the test cases I had.
+
+Now is the time to work on performance.
+
+Running against the sample directory
+
+	lc ~/Projects/lc  70.38s user 2.12s system 723% cpu 10.020 total
+
+	license-detector ~/Projects/lc/*  48.50s user 3.39s system 523% cpu 9.903 total
+
+Not much in it. However remember that lc is needlessly processing the file twice. Resolving that gives the following runtime.
+
+	lc ~/Projects/lc  42.58s user 2.34s system 683% cpu 6.569 total
+
+Great. From slightly slower to about 30% faster.
+
+There is one other tweak that could be done however. It would be far faster to check the top 20 most common licenses first, and only fall back to checking the rest if there was no match.
+
+```
+(pprof) top20
+Showing nodes accounting for 28.63s, 94.86% of 30.18s total
+Dropped 175 nodes (cum <= 0.15s)
+Showing top 20 nodes out of 48
+      flat  flat%   sum%        cum   cum%
+    10.23s 33.90% 33.90%     10.23s 33.90%  runtime.indexbytebody
+     9.86s 32.67% 66.57%     25.13s 83.27%  bytes.Index
+     2.38s  7.89% 74.45%      2.38s  7.89%  runtime.memeqbody
+     1.27s  4.21% 78.66%      1.27s  4.21%  bytes.Equal
+     1.23s  4.08% 82.74%      1.23s  4.08%  bytes.IndexByte
+     0.68s  2.25% 84.99%      0.68s  2.25%  runtime.memclrNoHeapPointers
+     0.56s  1.86% 86.85%      1.60s  5.30%  regexp.(*machine).tryBacktrack
+     0.38s  1.26% 88.10%      0.38s  1.26%  regexp/syntax.(*Inst).MatchRunePos
+     0.33s  1.09% 89.20%      0.33s  1.09%  regexp.(*inputString).step
+     0.26s  0.86% 90.06%      0.26s  0.86%  runtime.cgocall
+     0.22s  0.73% 90.79%      2.65s  8.78%  regexp.(*machine).backtrack
+     0.21s   0.7% 91.48%      0.21s   0.7%  runtime.memmove
+     0.19s  0.63% 92.11%      0.19s  0.63%  runtime.indexShortStr
+     0.18s   0.6% 92.71%      0.29s  0.96%  bytes.Map
+     0.17s  0.56% 93.27%      0.23s  0.76%  regexp.(*bitState).push (inline)
+     0.14s  0.46% 93.74%      0.52s  1.72%  regexp/syntax.(*Inst).MatchRune
+     0.14s  0.46% 94.20%      0.23s  0.76%  sync.(*Mutex).Lock
+     0.07s  0.23% 94.43%     25.33s 83.93%  github.com/boyter/lc/parsers.keywordGuessLicense.func1
+     0.07s  0.23% 94.67%      0.17s  0.56%  runtime.scanobject
+     0.06s   0.2% 94.86%      3.48s 11.53%  regexp.(*Regexp).replaceAll
+```
+
+
+At some point it was time to look at accuracy. I decided I wanted to do at least two tests. The first would be to run the license detectors against the samples given from the SPDX project itself. All licence detectors should get close to 100% accuracy on this test.
+
+Since I was at it I decided to check times in here as well. This is actually a measure of how quickly the application can start than anything but if you perhaps are using these tools to analyse thousands of directories it may be applicable to you.
+
+To do so a script was created `create_accuracy_checker.py` which takes the license file at the root of lc and uses that to build a collection of directories each named after the SPDX identifier name with a single licence file named `LICENSE.txt` in it. Keep in mind that the file which this is all based on contains my own inclusion of the fair source license which most other tools are unlikely to have.
+
+Then the second script `check_accuracy.py` as run. This collects the list of directories, and then calls each application to report on the licenses in each directory and determine if it was sucessful in identifying it or not. The number of correct guesses is returned and used to calculate success.
+
+```
+$ time python check_accuracy.py
+count::50
+checking::lc
+correct:50::100.0 percent::time:13.4573049545
+checking::license-detector
+correct:47::94.0 percent::time:152.444951057
+```
