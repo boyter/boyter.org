@@ -278,13 +278,13 @@ The results,
 
 ```
 $ python check_accuracy.py
-count::50
+count::370
 checking::lc
-correct:50::100.0 percent::time:7.33677601814
+correct:369::99.7297297297 percent::time:48.7510910034
 checking::license-detector
-correct:49::98.0 percent::time:183.209939957
+correct:321::86.7567567568 percent::time:1419.19354796
 checking::identify_license
-correct:26::52.0 percent::time:71.979019165
+correct:121::32.7027027027 percent::time:399.533063889
 ```
 
-Don't pay too much attention to the time values themselves. They are just taken using pythons `time.time()` and are best viewed as that it takes about 20x as long to run `license-detector` 50 times than it takes `lc` presumably because it has a slower startup time.
+Don't pay too much attention to the time values themselves. They are just taken using pythons `time.time()` and are best viewed as that it takes about 20x as long to run `license-detector` than it takes `lc` presumably because it has a slower startup time.
