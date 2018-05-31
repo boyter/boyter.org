@@ -285,6 +285,11 @@ checking::license-detector
 correct:321::86.7567567568 percent::time:1419.19354796
 checking::identify_license
 correct:121::32.7027027027 percent::time:399.533063889
+checking::askalono
+correct:330::89.1891891892 percent::time:166.055674076
 ```
 
 Don't pay too much attention to the time values themselves. They are just taken using pythons `time.time()` and are best viewed as that it takes about 20x as long to run `license-detector` than it takes `lc` presumably because it has a slower startup time.
+
+
+The nice thing about engineering solutions is that they quite often work. Not only that the work well. It might not be as fancy as using machine learning or other some other method but the results speak for themselves.
