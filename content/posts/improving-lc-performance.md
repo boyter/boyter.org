@@ -287,15 +287,28 @@ checking::askalono
 correct:330::89.1891891892 percent::time:166.055674076
 ```
 
-Don't pay too much attention to the time values themselves. They are just taken using pythons `time.time()` and are best viewed as that it takes about 20x as long to run `license-detector` than it takes `lc` presumably because it has a slower startup time.
+Don't pay too much attention to the time values. They are just taken using pythons `time.time()` and are best viewed as that it takes about 20x as long to run `license-detector` than it takes `lc` most likely  because it has a slower startup time.
 
-What is more interesting is the correct and percentage accuracy. Oddly enough Googles own tool is by far the least accurate. What is most suprising to me is that askalono and license-detector despite being trained on the SDPX licenses are unable to be correct 90% of the time. `lc` by contrast is 99.7% accurate and only misses out on a single license which is the Diffmark license. I don't know why but I do have this captured in the unit tests to be resolved at some point.
+What is more interesting is the correct count and percentage accuracy. Oddly enough the tool owned by Google is by far the least accurate. Most suprising to me is that `askalono` and `license-detector` despite being trained on the SDPX licenses are unable to break the 90% correct mark for this test. `lc` by contrast is 99.7% accurate and only misses out on a single license which is the Diffmark license. I don't know why but I do have this captured in the unit tests to be resolved at some point.
 
 This is a nice start, but what about the reference 1k dataset https://github.com/src-d/go-license-detector/blob/master/licensedb/dataset.zip that sourced used in their blog post.
 
-This required a bit more work. Firstly I needed to determine what licenses I should expect to come back for each. I briefly considered doing this by hand, before deciding to write a script that would run each of the tools against each folder and allow me to identify where disprenacies were. I could then manually check which ones were problematic and inspect them to determine the actual licence. With that information I could then determine what the true license was and get an idea about which tool is the most accurate.
+This required a bit more work. Mostly because I don't know what license each should be. 
+
+Firstly I needed to determine what licenses I should expect to come back for each. I briefly considered doing this by hand, before deciding to write a script that would run each of the tools against each folder and allow me to identify where disprenacies were. I could then manually check which ones were problematic and inspect them to determine the actual licence. With that information I could then determine what the true license was and get an idea about which tool is the most accurate.
 
 It would also allow me to check any tweaks I applied to `lc` in the future and see how accurate they are.
 
+I write a simple script that would run each tool against a single file in each directory and recorded the license guess. I then dumped them all into a spreadsheet for some analysis.
+
+Most consistent license/Least confused licenses
+Most confused licenses
+Most common licenses
+Least common licenses
+
+
+
 
 The nice thing about engineering solutions is that they quite often work. Not only that the work well. It might not be as fancy as using machine learning or other some other method but the results speak for themselves.
+
+What questions do people have? What license is this file? What licence is the product? What licenses are used in this project? What licenses do I think ths project is under?
