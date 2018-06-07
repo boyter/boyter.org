@@ -312,3 +312,14 @@ Least common licenses
 The nice thing about engineering solutions is that they quite often work. Not only that the work well. It might not be as fancy as using machine learning or other some other method but the results speak for themselves.
 
 What questions do people have? What license is this file? What licence is the product? What licenses are used in this project? What licenses do I think ths project is under?
+
+
+
+
+
+
+SCRATCHPAD
+
+./ref1k/androidannotations/LICENSE.txt
+
+Need to have some keyword matching inside here for sample headers and the like

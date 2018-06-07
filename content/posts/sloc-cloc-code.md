@@ -953,8 +953,8 @@ The first test was run against the redis code https://github.com/antirez/redis/ 
 | tokei | 28.1 ms ±   5.4 ms | 118.8 ms ±   4.1 ms | 80.9 ms ±   3.8 ms |
 | loc | 147.7 ms ±  40.4 ms | 549.8 ms ±  10.6 ms | N/A |
 | gocloc | 117.0 ms ±   1.9 ms | 383.5 ms ±  12.1 ms | N/A |
-| cloc | 1.485 s ±  0.033 s | 27.345 s ±  3.384 s | N/A |
-| sloccount | 854.8 ms ±  20.5 ms | 67.568 s ±  10.167 s | N/A |
+| cloc | 1.485 s ±  0.033 s | 67.568 s ±  10.167 s | N/A |
+| sloccount | 854.8 ms ±  20.5 ms | 27.345 s ±  3.384 s | N/A |
 
 ![scc tokei loc cloc gocloc sloccount Redis Benchmark](/static/sloc-cloc-code/benchmark_linux_redis.png)
 ![scc tokei loc cloc gocloc sloccount Redis Benchmark](/static/sloc-cloc-code/benchmark_windows_redis.png)
