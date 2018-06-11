@@ -32,9 +32,21 @@ Testimonials from SLOCCOunt
 > "Thanks for SLOCCount! It's great... We're using SLOCs derived from SLOCCount to compare our software to the software it replaces ... Keep up the good work" -- Sam Tregar
 > "Wow, using sloccount on the full POPFile source shows that developing it would have cost around $500K in a regular software company. That seems about right given the length of time we've been working on it and the number of people involved. Cool tool." -- John Graham Cumming 
 
+https://www.reddit.com/r/rust/comments/82k9iy/loc_count_lines_of_code_quickly/
+https://www.reddit.com/r/programming/comments/59bjoy/a_fast_cloc_replacement_written_in_rust/
+https://www.reddit.com/r/rust/comments/3lnxht/tokei_a_cloccount_lines_of_code_tool_built_in_rust/
+
+been using loc for quite a while now and it's pretty great. I love being able to update the team on how far along we are converting all java to kotlin XD
+
+ah, I just usually use it to see how fast different parts of our codebases are growing. A few months ago in one of our projects we had 70k lines of kotlin, and now we're at 90k.
+
+It's just a fun little tool. And yeah as someone pointed out below it shows you rogue languages in a project. For example here is loc run against most of our backend code. 
+
 
 
 `scc` takes the idea a little further than the other tools by including a complexity estimate. Anyone who has worked with Visual Studio and the .NET languages for a few years will have eventually discovered that one of the neat things you can do with it is produce cyclomatic complexity https://en.wikipedia.org/wiki/Cyclomatic_complexity calculations, down to counts per solution/project/namespace/file/class/method.
+
+https://stackoverflow.com/questions/911637/what-is-cyclomatic-complexity#911648
 
 Cyclomatic complexity is a software metric that allows you to extimate the complexity of a project. What this allows you to do 
 
