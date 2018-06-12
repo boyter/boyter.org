@@ -1,15 +1,15 @@
 ---
 title: Why count lines of code?
-date: 2018-06-07
+date: 2018-06-11
 ---
 
-A work college (let's call him Owen as that's his name) asked me the other day 
+A work colleague (let's call him Owen as that's his name) asked me the other day 
 
 > "I dont understand the problem space `scc` et al solve. If you wanted to write a short post, i'd read and share the hell out of it. Basically, it seems like a heap of people can see the need for it, and I'm trying to understand it myself"
 
 Owen is one of the more switched on people I know. As such if he is asking whats the point of tools such as scc, tokei, sloccount, cloc, loc and gocloc then I suspect quite a few other people are asking the same thing.
 
-To quote the lead from a few of the tools mentioned.
+To quote the hero lead from a few of the tools mentioned.
 
 > scc is a very fast accurate code counter with complexity calculations and COCOMO estimates written in pure Go 
 
@@ -23,37 +23,36 @@ So what?
 
 I am going to explain personally where I have used these tools. Others may have different experiences but I suspect there will be a lot of overlap.
 
-
-Testimonials from SLOCCOunt
+Here are some testimonials from SLOCCount
 
 > "SLOCCount allows me to easily and quickly quantify the source lines of code and variety in languages. Even though these are just two fairly basic aspects of a project, it helps a lot to get a first impression of the size and complexity of projects." -- Auke Jilderda, Philips Research.
 
 > "SLOCCount has really helped us a lot in our studies on libre software engineering" -- Jesus M. Gonzalez Barahona, Grupo de Sistemas y Comunicaciones, ESCET, Universidad Rey Juan Carlos.
+
 > "Thanks for SLOCCount! It's great... We're using SLOCs derived from SLOCCount to compare our software to the software it replaces ... Keep up the good work" -- Sam Tregar
+
 > "Wow, using sloccount on the full POPFile source shows that developing it would have cost around $500K in a regular software company. That seems about right given the length of time we've been working on it and the number of people involved. Cool tool." -- John Graham Cumming 
 
-https://www.reddit.com/r/rust/comments/82k9iy/loc_count_lines_of_code_quickly/
-https://www.reddit.com/r/programming/comments/59bjoy/a_fast_cloc_replacement_written_in_rust/
-https://www.reddit.com/r/rust/comments/3lnxht/tokei_a_cloccount_lines_of_code_tool_built_in_rust/
+From some reddit threads https://www.reddit.com/r/rust/comments/82k9iy/loc_count_lines_of_code_quickly/ https://www.reddit.com/r/programming/comments/59bjoy/a_fast_cloc_replacement_written_in_rust/ 
+https://www.reddit.com/r/rust/comments/3lnxht/tokei_a_cloccount_lines_of_code_tool_built_in_rust/ I found the following,
 
-been using loc for quite a while now and it's pretty great. I love being able to update the team on how far along we are converting all java to kotlin XD
+> Been using loc for quite a while now and it's pretty great. I love being able to update the team on how far along we are converting all java to kotlin.
 
-ah, I just usually use it to see how fast different parts of our codebases are growing. A few months ago in one of our projects we had 70k lines of kotlin, and now we're at 90k.
+> I just usually use it to see how fast different parts of our codebases are growing. A few months ago in one of our projects we had 70k lines of kotlin, and now we're at 90k.
 
-It's just a fun little tool. And yeah as someone pointed out below it shows you rogue languages in a project. For example here is loc run against most of our backend code. 
+> It's just a fun little tool. And yeah as someone pointed out below it shows you rogue languages in a project.
 
+The above comments apply to all of the code counting tools `tokei`, `cloc`, `sloccount`, `gocloc`, `loc` and `scc`.
 
+However `scc` takes the idea a little further than the other tools by including a complexity estimate. Anyone who has worked with Visual Studio and .NET languages for a few years will have eventually discovered that one of the neat things you can do with it is produce cyclomatic complexity https://en.wikipedia.org/wiki/Cyclomatic_complexity reports, down to counts per solution/project/namespace/file/class/method.
 
-`scc` takes the idea a little further than the other tools by including a complexity estimate. Anyone who has worked with Visual Studio and the .NET languages for a few years will have eventually discovered that one of the neat things you can do with it is produce cyclomatic complexity https://en.wikipedia.org/wiki/Cyclomatic_complexity calculations, down to counts per solution/project/namespace/file/class/method.
+I always wanted something like that for all languages. While calculating true cyclomatic complexity requires building a AST for each language and processing edges in it, I took a different approach. It is certainly not as accurate as the proper calculation but considerably faster and in all my tests gives a reasonable estimate that should be in line with a proper cyclomatic complexity calculation on a per file level.
 
-https://stackoverflow.com/questions/911637/what-is-cyclomatic-complexity#911648
+What triggered me to do this however was working on an existing project I inherited. The code was in a bad state. But without a tool like `scc` I was unable to see how bad it really was. As such I underestimated how long it took to manage and it ended up exploding in scope, which is something I don't care to repeat.
 
-Cyclomatic complexity is a software metric that allows you to extimate the complexity of a project. What this allows you to do 
+To show how it all works I am going to briefly walk through analyzing a project that I know Owen is far more familiar with than myself, Kombusion https://github.com/KablamoOSS/kombustion which is a AWS Cloudformation Tool on steroids. I am going to assume that the reader knows nothing about it beyond the name and what it does at this point.
 
-
-To show how it all works I am going to walk through analysing a project that I know Owen is far more familiar with than myself. Kombusion https://github.com/KablamoOSS/kombustion which is a AWS Cloudformation Tool on steriods. I am going to assume that the reader knows nothing about it beyond the name and what it does at this point.
-
-To start lets just get a basic idea of what is in the current repository and the size.
+To start lets just get a basic idea of what is in the current repository and the size. This example would work for any of the tools mentioned.
 
 ```
 $ scc
@@ -84,7 +83,7 @@ Estimated People Required 52.248735
 -------------------------------------------------------------------------------
 ```
 
-What is apparent is that the vast majority of the appliation is written using Go. Knowing this, and that Go has a vendor directory which contains all of the requirements lets run `scc` ignoring that directory.
+What is apparent is that the vast majority of the application is written using Go. Knowing this, and that Go likely has a vendor directory which contains all of the requirements. Given that these are libraries which we probably do not want to know too much about lets run `scc` ignoring that directory. Again any of the code counting tools should be able to do this.
 
 ```
 $ scc --pbl vendor -co .
@@ -106,7 +105,7 @@ Total                     1167    365401   355645      2681     7075       4158
 
 What we can now see is that compared to the previous run the number of lines has dropped considerably from `333844` to `43605`. This means there is a huge amount of code that this application depends on. We can also see that most of the languages have dropped off the list.
 
-Perhaps most interesting is that there is a huge amount of JSON in the application. Lets inspect just the JSON to see what it might be. The below will whitelist to just json files and ignore all the complexity calculations, but with the `--files` flag we can also see each file individually.
+Perhaps most interesting at the moment is that there is a huge amount of JSON in the application. Lets inspect just the JSON to see what it might be. The below will white-list to just JSON files and ignore all the complexity calculations, but with the `--files` flag we can also see each file individually. Again any of the tools mentioned can do this.
 
 ```
 $ scc --pbl vendor -wl json --files -c -co .
@@ -134,7 +133,7 @@ Total                           14      319087    319087           0          0
 -------------------------------------------------------------------------------
 ```
 
-Looks like these are generated and region specific. I am going to make a guess at this point that they are checked in cloudformation definitions. 
+Looks like these are generated and region specific. I am going to make a guess at this point that they are checked in AWS cloud-formation definitions. 
 
 ```
 $ head -n 10 generate/source/Sydney.json
@@ -150,7 +149,9 @@ $ head -n 10 generate/source/Sydney.json
           "UpdateType": "Mutable"
 ```
 
-Looks like the guess was right. Lets continue to explore, but this time lets ignore JSON and focus on Go which is the meat of the application. The below will whitelist to Go files sorted by complexity ignoring the vendor directory.
+Looks like the guess was right. Lets continue to explore, but this time lets ignore JSON and focus on Go which is the meat of the application. 
+
+This is where `scc` is most useful as we can sort by complexity to find which files are likey to contain the most logic. The below will white-list to Go files sorted by complexity ignoring the vendor directory.
 
 ```
 $ scc --pbl vendor -wl go --files -s complexity .
@@ -168,9 +169,30 @@ internal/plugins/add.go              220      163        23       34         36
 ~loudformation/tasks/upsert.go       128      109         6       13         26
 ```
 
-From the above we can deduce that there are four areas that are reasonably complex. Those would be the file genplugin.go, generate.go, template.go and the files in internal/plugins. We can also make a guess that there are few unit tests for any of the above as I would expect complex test files to appear next to them. They may still be covered by integration tests however.
+From the above we can deduce that there are three files and one group of files that are reasonably complex and worth a look at if we wanted to work with this code-base. Those being  genplugin.go, generate.go, template.go and the files in internal/plugins. We can also make a guess that there are few unit tests for any of the above as I would expect complex test files to appear next to them. They may still be covered by integration tests though perhaps written in another language.
 
-Lets have a look at `genplugin.go` where two portions caught my eye.
+Lets compare the above to `tokei`.
+
+```
+$ tokei --files -e vendor -s lines .
+-------------------------------------------------------------------------------
+ Go                   1110        43626        34292         2576         6758
+-------------------------------------------------------------------------------
+ ./generate/generate.go             689          574           23           92
+ |l/genplugin/genplugin.go          399          336            3           60
+ |ernal/plugins/install.go          284          231           15           38
+ ./pkg/parsers/output.go            281          275            3            3
+ |pkg/parsers/resources.go          281          275            3            3
+ |oudformation/template.go          277          216           19           42
+ |anifest/manifest_test.go          259          168           81           10
+ ./internal/plugins/add.go          220          163           23           34
+ |internal/plugins/load.go          211          157           22           32
+ ./main.go                          176          101           57           18
+```
+
+Ignoring the differences in counts (all of the tools come up with different numbers) you can see that the tools have a difference of opinion when it comes to which files are potentially the most complex.
+
+Looking at `genplugin.go` identified by `scc` as the most complex where two portions caught my eye.
 
 {{<highlight go>}}
 func getVal(v interface{}, depth int, append string) string {
@@ -190,6 +212,8 @@ func getVal(v interface{}, depth int, append string) string {
 	return "UNKNOWN_TYPE_" + typ.String()
 }
 {{</highlight>}}
+
+and
 
 {{<highlight go>}}
 	if len(config.Parameters) > 0 {
@@ -221,6 +245,25 @@ func getVal(v interface{}, depth int, append string) string {
 	}
 {{</highlight>}}
 
-I'd say both of those are reasonable complex. Note I have no idea what they are doing, I am just exploring a codebase I have never looked at before.
+I'd say both of those are portions of code I would want to take great care with were I do modify them. Note I have no idea what they are doing, and as such not commenting on the code quality here I am just exploring a code-base I have never looked at before. Its entirely possible this is the simplest way to solve this problem.
 
-The file `generate.go` is another target.
+Whats nice is that you can use all of the above to get an idea of complex files in any project. For example, the below is an analysis of the source code for searchcodeserver.com
+
+```
+$ scc --wl java --files -s complexity searchcode-server
+-------------------------------------------------------------------------------
+Language                 Files     Lines     Code  Comments   Blanks Complexity
+-------------------------------------------------------------------------------
+Java                       131     19445    13913      1716     3816       1107
+-------------------------------------------------------------------------------
+~e/app/util/SearchCodeLib.java       616      418        90      108        108
+~app/service/IndexService.java      1097      798        91      208         96
+~/app/service/CodeMatcher.java       325      234        41       50         66
+~service/TimeCodeSearcher.java       582      429        49      104         65
+~ce/route/ApiRouteService.java       394      293        12       89         63
+~de/app/service/Singleton.java       335      245        20       70         53
+~rchcode/app/util/Helpers.java       396      299        38       59         52
+~e/route/CodeRouteService.java       453      348         9       96         50
+```
+
+Hope that helps Owen with is understanding and whoever else happens to read this article. If you find `scc` useful please let me know either through email, twitter or just a nice comment on github.
