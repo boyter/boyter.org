@@ -316,8 +316,6 @@ What questions do people have? What license is this file? What licence is the pr
 
 
 
-
-
 SCRATCHPAD
 
 ./ref1k/androidannotations/LICENSE.txt
