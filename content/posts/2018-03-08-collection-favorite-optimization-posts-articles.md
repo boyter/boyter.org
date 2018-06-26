@@ -43,5 +43,6 @@ In no particular order.
  - Effects of CPU caches https://medium.com/@minimarcel/effect-of-cpu-caches-57db81490a7f
  - Neon is the New Black: fast JPEG optimization on ARM server https://blog.cloudflare.com/neon-is-the-new-black/
  - Beware of cute optimizations bearing gifts. Optimisations made to a fast fuzzy file matcher in Vim https://wincent.com/blog/optimization
+ - Go code refactoring : the 23x performance hunt https://medium.com/@val_deleplace/go-code-refactoring-the-23x-performance-hunt-156746b522f7
 
 Will attempt to keep this list up to date as I find other content that really impresses me.
