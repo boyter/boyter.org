@@ -29,7 +29,7 @@ In no particular order.
  - Another from Paul Tyma of Mailinator but less about Mailinator and more about how cache misses on the CPU can impact your performance. https://mailinator.blogspot.com.au/2010/02/how-i-sped-up-my-server-by-factor-of-6.html
  - Another from Paul (that guy is seriously smart) about the architecture of Mailinator and some tricks it employs to run on a single server (at the time). https://mailinator.blogspot.com.au/2007/01/architecture-of-mailinator.html
  - Improving spelling correction algorithm. Has code as well which is useful to learn from. http://blog.faroo.com/2012/06/07/improved-edit-distance-based-spelling-correction/
- - Profiling Ag. Writing My Own Scandir. Written by the author og ag the code searcher. https://geoff.greer.fm/2012/09/03/profiling-ag-writing-my-own-scandir/
+ - Profiling Ag. Writing My Own Scandir. Written by the author of ag the code searcher. https://geoff.greer.fm/2012/09/03/profiling-ag-writing-my-own-scandir/
  - Another Ag post about adding threads into Ag to improve searching performance. https://geoff.greer.fm/2012/09/07/the-silver-searcher-adding-pthreads/
  - LMAX Distruptor interesting collection of posts about how it works https://lmax-exchange.github.io/disruptor/ the HN comments on the Martin Fowler blog are worth looking at https://news.ycombinator.com/item?id=3173993
  - Regular Expression Matching with a Trigram Index or How Google Code Search Worked. https://swtch.com/~rsc/regexp/regexp4.html
@@ -44,5 +44,6 @@ In no particular order.
  - Neon is the New Black: fast JPEG optimization on ARM server https://blog.cloudflare.com/neon-is-the-new-black/
  - Beware of cute optimizations bearing gifts. Optimisations made to a fast fuzzy file matcher in Vim https://wincent.com/blog/optimization
  - Go code refactoring : the 23x performance hunt https://medium.com/@val_deleplace/go-code-refactoring-the-23x-performance-hunt-156746b522f7
+ - Shameless self promotion but what I went through when building scc which is a code counter similar to cloc https://boyter.org/posts/sloc-cloc-code/
 
 Will attempt to keep this list up to date as I find other content that really impresses me.
