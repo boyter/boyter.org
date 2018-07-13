@@ -3,7 +3,7 @@ title: How to start with Elastic Search in 2018
 date: 2028-05-27
 ---
 
-The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search http endpoint. Now what?
+The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search http endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
 
 The first thing to do is determine what version of elastic you are working with. Either ask your friendly DevOps person or alturnativly load the elastic http endpoint in your browser of choice,
 
@@ -60,19 +60,18 @@ ElasticSearch
 │   │   └── Document1
 ```
 
-The confusing thing however is that documents stored in elastic don't actually have the same structure. You can index both of the documents,
+The confusing thing however is that documents stored in elastic don't actually need to have the same structure. You can index both of the documents,
 
-```
+{{<highlight json>}}
 {
 	"title": "The Matrix",
 	"year": 1999
 }
+{{</highlight>}}
 
-```
+and
 
-and 
-
-```
+{{<highlight json>}}
 {
 	"person": {
 		"name": "Keanu Reeves",
@@ -80,8 +79,24 @@ and
 		"Citizenship": "Canadian"
 	} 
 }
+{{</highlight>}}
+
+Into the same index/type and everything will work. However it will be problematic as a consumer as you will need to guess what type the documents coming out of elastic are. It will be especially problematic when it comes to adding facets and other fancy queries on top of your search.
+
+For the purposes of your project, you probably want a single index and then one or multiple types. Have your index named somthing like what your project is called. As for the types for each "thing" you want to search across E.G. `ticket`, `document`, `metadata record` define a type for each one. 
+
+
+SEARCHING
+
+almost everyone puts some "magic" on top of the queries.
+
+EXPLAIN
+
 ```
-
-Into the same index/type and everything will work as you expect. However it will be problematic as a consumer as you will need to guess what type
-
-For the purposes of your project, you probably want a single index and then one or multiple types.
+{
+  "explain": true,
+  "query": {
+    "bool": {
+      "must": [
+        {
+```

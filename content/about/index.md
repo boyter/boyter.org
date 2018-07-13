@@ -37,6 +37,8 @@ Some notable projects and blog posts of mine,
   * [Code a search engine in PHP][6]
   * Sloc Cloc and Code https://boyter.org/posts/sloc-cloc-code/ https://github.com/boyter/scc/
   * License Checker https://boyter.org/2018/03/licensechecker-command-line-application-identifies-software-license/ https://github.com/boyter/lc
+  * How to start a Go Project in 2018 https://boyter.org/posts/how-to-start-go-project-2018/
+  * What is Chaos Testing/Engineering https://boyter.org/2016/07/chaos-testing-engineering/
 
 Also here are a few press write ups I have received for my project searchcode.com, with most of the details provided by myself
 
