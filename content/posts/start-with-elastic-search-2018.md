@@ -1,6 +1,6 @@
 ---
 title: How to start with Elastic Search in 2018
-date: 2028-05-27
+date: 2018-05-27
 ---
 
 The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search http endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
@@ -64,8 +64,8 @@ The confusing thing however is that documents stored in elastic don't actually n
 
 {{<highlight json>}}
 {
-	"title": "The Matrix",
-	"year": 1999
+  "title": "The Matrix",
+  "year": 1999
 }
 {{</highlight>}}
 
@@ -73,22 +73,74 @@ and
 
 {{<highlight json>}}
 {
-	"person": {
-		"name": "Keanu Reeves",
-		"DOB": "1964",
-		"Citizenship": "Canadian"
-	} 
+  "fact": "Originally intended on becoming an Olympic hockey player for Canada",
+  "type": "Actor",
+  "person": {
+    "name": "Keanu Reeves",
+    "DOB": "1964-09-02",
+    "Citizenship": "Canadian"
+  }
 }
 {{</highlight>}}
 
 Into the same index/type and everything will work. However it will be problematic as a consumer as you will need to guess what type the documents coming out of elastic are. It will be especially problematic when it comes to adding facets and other fancy queries on top of your search.
 
+> Rule of thumb. Use an index per project and type per each unique thing you want to search against.
+
 For the purposes of your project, you probably want a single index and then one or multiple types. Have your index named somthing like what your project is called. As for the types for each "thing" you want to search across E.G. `ticket`, `document`, `metadata record` define a type for each one.
+
+
+MAPPINGS
+
+Mappings define documents. You can use them to specify that fields within your document should be treated as numbers, dates, geolocations etc... You can also define the stemming algorithm used and other useful index fields.
+
+> You have to define a mapping if you want to provide functionality such as aggregations or facets. You cannot add a mapping after indexing any document.
+
+You define a mapping by putting to the index/type inside elastic before then adding a document. Consider For example our previous document defining Keanu Reeves. With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and ignore malformed dates (IE missing or otherwise).
+
+{{<highlight json>}}
+{
+  "mappings": {
+    "meta": {
+      "properties": {
+        "person.DOB": { 
+          "type": "date",
+          "format": "yyyy-MM-dd",
+          "ignore_malformed": true
+        },
+        "type": { 
+          "type": "keyword"
+        }
+      }
+    }
+  }
+}
+{{</highlight>}}
+
+FACETS
+
+One of the things you likely want from your search
+
+
+MULTIPLE-FIELDS
+
+If you are searching across multiple fields terms need to be in all of them
 
 
 SEARCHING
 
 almost everyone puts some "magic" on top of the queries.
+
+Multiple Fields
+Highlights
+Aggregations/Facets
+Size/Pages
+Sorting
+
+If you sort based on a date field that in its mapping ignores malformed then documents which break the format will appear at the bottom of the results irrespective of which way you sort the document. For example, if you have one document with a proper date and another with nothing, sorting descending or ascending will have the document with the data appear in the first result.
+
+Date Ranges
+
 
 EXPLAIN
 
