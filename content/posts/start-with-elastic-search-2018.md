@@ -69,11 +69,11 @@ The confusing thing however is that documents stored in elastic don't actually n
 }
 {{</highlight>}}
 
-and
+and (N.B. I will be using this document for the rest of the article)
 
 {{<highlight json>}}
 {
-  "fact": "Originally intended on becoming an Olympic hockey player for Canada",
+  "fact": "Originally intended on becoming an Olympic hockey player for Canada.",
   "type": "Actor",
   "person": {
     "name": "Keanu Reeves",
@@ -90,13 +90,13 @@ Into the same index/type and everything will work. However it will be problemati
 For the purposes of your project, you probably want a single index and then one or multiple types. Have your index named somthing like what your project is called. As for the types for each "thing" you want to search across E.G. `ticket`, `document`, `metadata record` define a type for each one.
 
 
-MAPPINGS
+## MAPPINGS
 
 Mappings define documents. You can use them to specify that fields within your document should be treated as numbers, dates, geolocations etc... You can also define the stemming algorithm used and other useful index fields.
 
 > You have to define a mapping if you want to provide functionality such as aggregations or facets. You cannot add a mapping after indexing any document.
 
-You define a mapping by putting to the index/type inside elastic before then adding a document. Consider For example our previous document defining Keanu Reeves. With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and ignore malformed dates (IE missing or otherwise).
+You define a mapping by putting to the index/type inside elastic before then adding a document. Consider For example our previous document defining Keanu Reeves. With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and ignore malformed dates, which may have the wrong format or be missing. It will also treat the `type` field of the document as a single keyword allowing us to perform aggregations and facets on this field.
 
 {{<highlight json>}}
 {
@@ -117,32 +117,42 @@ You define a mapping by putting to the index/type inside elastic before then add
 }
 {{</highlight>}}
 
-FACETS
+## FACETS
 
-One of the things you likely want from your search
+One of the things you likely want from your search are facets. These are the aggregation rollups you commonly see on the left side of your search results allowing you in the example of Ebay to filter down to new or used products.
+
+![Profile Result](/static/start-with-elastic-search-2018/search_facets.png)
 
 
-MULTIPLE-FIELDS
+## MULTIPLE-FIELDS
 
 If you are searching across multiple fields terms need to be in all of them
 
 
-SEARCHING
+## SEARCHING
 
-almost everyone puts some "magic" on top of the queries.
+Almost everyone puts some "magic" on top of the queries. Its worth keeping in mind that any search at heart is a big dumb string matching algorithm with some ranking on top. The true value from search is knowing the data, knowing that the user is trying to achive and tweaking both the index and the queries to help achieve this goal.
 
-Multiple Fields
-Highlights
-Aggregations/Facets
-Size/Pages
-Sorting
+To search across an index you have two options. 
+
+For basic search across everything and return the most relevant documents a basic GET request will work. Given that you should have elastic running locally you can browse to http://localhost:9200/_search?q=keanu which will perform a search across all indexes and all types. To restrict to an index you have created http://localhost:9200/film/_search?q=keanu and to restrict to a type inside that index http://localhost:9200/film/actor/_search?q=keanu
+
+With the above you get all of the usual elastic syntax. Boolean searches `keanu AND reeves`, wildcards `kean*`, proximity `"keanu reeves"~2`, fuzzy search `kean~2` all work as you expect. You can target specific fields to search `person.name:keanu` or combine multiples of the above `person.name:kean~2 AND canadi*`. For cases where all you require is to present the information this might be enough.
+
+The other option is to post to the same endpoints using the elastic search syntax. This is far more complex and involved but provides the option to perform aggregations and the like.
+
+### Multiple Fields
+### Highlights
+### Aggregations/Facets
+### Size/Pages
+### Sorting
 
 If you sort based on a date field that in its mapping ignores malformed then documents which break the format will appear at the bottom of the results irrespective of which way you sort the document. For example, if you have one document with a proper date and another with nothing, sorting descending or ascending will have the document with the data appear in the first result.
 
 Date Ranges
 
 
-EXPLAIN
+## EXPLAIN
 
 ```
 {
