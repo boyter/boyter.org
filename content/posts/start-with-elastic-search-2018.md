@@ -5,6 +5,12 @@ date: 2018-05-27
 
 The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search http endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
 
+## Basics
+
+The main thing to keep in mind with elastic (or any search service) is that there are two main portions. Indexing and searching. Indexing is the process of taking a document you have defined and adding it to the search service in such a way that you can support your search requirements. Searching is the process of taking the users wants and turning it into a query that uses the index to return something useful.
+
+As with most things you need to know what the user is trying to achieve before you can work on either.
+
 The first thing to do is determine what version of elastic you are working with. Either ask your friendly DevOps person or alturnativly load the elastic http endpoint in your browser of choice,
 
 {{<highlight json>}}
@@ -121,13 +127,9 @@ You define a mapping by putting to the index/type inside elastic before then add
 
 One of the things you likely want from your search are facets. These are the aggregation rollups you commonly see on the left side of your search results allowing you in the example of Ebay to filter down to new or used products.
 
+Sticking with our example of Keanu you can see that in the below mockup (suppplied by our glorious and talented UX/UI Designer) that we want to be able to filter on the `type` field of our document so we can narrow down to actors, directors, producers or whatever other types we have for people in our index.
+
 ![Profile Result](/static/start-with-elastic-search-2018/search_facets.png)
-
-
-## MULTIPLE-FIELDS
-
-If you are searching across multiple fields terms need to be in all of them
-
 
 ## SEARCHING
 
@@ -137,12 +139,80 @@ To search across an index you have two options.
 
 For basic search across everything and return the most relevant documents a basic GET request will work. Given that you should have elastic running locally you can browse to http://localhost:9200/_search?q=keanu which will perform a search across all indexes and all types. To restrict to an index you have created http://localhost:9200/film/_search?q=keanu and to restrict to a type inside that index http://localhost:9200/film/actor/_search?q=keanu
 
-With the above you get all of the usual elastic syntax. Boolean searches `keanu AND reeves`, wildcards `kean*`, proximity `"keanu reeves"~2`, fuzzy search `kean~2` all work as you expect. You can target specific fields to search `person.name:keanu` or combine multiples of the above `person.name:kean~2 AND canadi*`. For cases where all you require is to present the information this might be enough.
+With the above you get all of the usual elastic syntax. Boolean searches `keanu AND reeves`, wildcards `kean*`, proximity `"keanu reeves"~2`, fuzzy search `kean~2` all work as you expect. You can target specific fields to search `person.name:keanu` or combine multiples of the above `person.name:kean~2 AND canadi*`. For cases where all you require is to present the information this might be enough. One thing to keep in mind however is that a search done like this will default to an OR search. This means each addtional search term added to the query will increase the number or results which can seem counter intuitive.
 
 The other option is to post to the same endpoints using the elastic search syntax. This is far more complex and involved but provides the option to perform aggregations and the like.
 
+If you open postman or whatever tool you like to use to craft custom HTTP requests and post like the following,
+
+```
+POST: http://localhost:9200/film/actor/_search
+TYPE: application/json
+BODY: {
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "keanu",
+            "default_operator": "AND",
+            "fields": [
+              "person.name",
+              "fact",
+              "person.citizenship"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+The result will be a search for `keanu` over the fields `person.name` `fact` and `person.citizenship`. If keanu appears in any of those fields within a document it will be returned as a match.
+
+
 ### Multiple Fields
+
+If you are searching across multiple fields terms need to be in all of them
+
+
 ### Highlights
+
+Highlights are how you show the relevant portion of the search to your user. Usually they just consist of a relevant potion of text extracted from the document with the matching terms highlighted. I am not sure how elastic actualy achives this under the hood, but if you are curious you can read https://boyter.org/2013/04/building-a-search-result-extract-generator-in-php/ which explains how I created one some years ago.
+
+Thankfully elastic can do this for you. Add highlight to your query and it will return highlights for the matching fields.
+
+{{<highlight json>}}
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "keanu",
+            "default_operator": "AND",
+            "fields": [
+              "person.name",
+              "type",
+              "fact",
+              "person.citizenship"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "highlight": {
+    "number_of_fragments": 1,
+    "fragment_size": 150,
+    "fields": {
+      "*": {}
+    }
+  }
+}
+{{</highlight>}}
+
 ### Aggregations/Facets
 ### Size/Pages
 ### Sorting
