@@ -95,7 +95,6 @@ Into the same index/type and everything will work. However it will be problemati
 
 For the purposes of your project, you probably want a single index and then one or multiple types. Have your index named somthing like what your project is called. As for the types for each "thing" you want to search across E.G. `ticket`, `document`, `metadata record` define a type for each one.
 
-
 ## MAPPINGS
 
 Mappings define documents. You can use them to specify that fields within your document should be treated as numbers, dates, geolocations etc... You can also define the stemming algorithm used and other useful index fields.
@@ -212,6 +211,7 @@ Thankfully elastic can do this for you. Add highlight to your query and it will 
   }
 }
 {{</highlight>}}
+
 
 ### Aggregations/Facets
 ### Size/Pages
