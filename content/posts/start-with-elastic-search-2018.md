@@ -173,8 +173,89 @@ The result will be a search for `keanu` over the fields `person.name` `fact` and
 
 ### Multiple Fields
 
-If you are searching across multiple fields terms need to be in all of them
+If you are searching across multiple fields terms need to be in all of them.
 
+This is especially annoying if your plan to search over multiple specific fields is something like the below,
+
+```
+POST: http://localhost:9200/film/actor/_search
+TYPE: application/json
+BODY: {
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "keanu canada",
+            "default_operator": "AND",
+            "fields": [
+              "person.name",
+              "fact",
+              "person.citizenship"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+As belive it or not it will not match anything as elastic is looking for a field that has both terms in it. To get around this you can create an aggregated field which contains everything you want to search across and then search against that,
+
+```
+{
+  "mappings": {
+    "meta": {
+        "person.name": {
+          "type": "text",
+          "copy_to": "_everything"
+        },
+        "fact": {
+          "type": "text",
+          "copy_to": "_everything"
+        },
+        "person.citizenship": {
+          "type": "text",
+          "copy_to": "_everything"
+        },
+        "_everything": {
+          "type": "text"
+        }
+      }
+    }
+  }
+}
+```
+
+then the following search will work.
+
+```
+POST: http://localhost:9200/film/actor/_search
+TYPE: application/json
+BODY: {
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "keanu canada",
+            "default_operator": "AND",
+            "fields": [
+              "person.name",
+              "fact",
+              "person.citizenship",
+              "_everything"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+```
+
+Note that we keep the other fields. This is because if all the terms do match elastic can use them as a signal in its internal ranking algorithm which should help it produce more relevant results.
 
 ### Highlights
 
