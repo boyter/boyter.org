@@ -262,3 +262,5 @@ Benchmark #1: ./rust
 Which is better than before but still not as good as I had hoped. Its not a blocking issue in my goal of porting `scc` though.
 
 Anyway what I have discovered so far is that Go seems to take reasonable defaults. Rust gives you more power, but also allows you to shoot yourself in the foot easily. If you ask to iterate the bytes of a file thats what it will do. Such an operation is not supported in the Go base libraries. That said Rust does push the happy parts of my brain in a way that Python does.
+
+Its a start towards what I hope will be a faster version of `scc` and failing that a start on my goal of learning enough Rust to be productive.
