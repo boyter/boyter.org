@@ -1,23 +1,27 @@
 ---
 title: Reading files quickly in Rust
-date: 2018-05-27
+date: 2018-08-20
 ---
 
-I have been wanting to learn Rust for a while now. I did play with it some time back https://boyter.org/2017/09/working-rust/ for solving some of the project Euler problems and was resonably impressed with how it turned out. However as I had no practical use for it at the time I ended up investing more time in Go. 
+I have been wanting to learn Rust for a while now. I did play with it some time back https://boyter.org/2017/09/working-rust/ for solving some of the project Euler problems and was reasonably impressed with how it turned out. However as I had no practical use for it at the time I ended up investing more time in Go. 
 
 Go as it turns out is a pretty decent language, and somewhat akin to Python in terms of getting things done. There is usually one obvious way to solve any problem. I was even very happy with the performance I was getting out of it. As such I took on building the fastest version of a count lines of code program I could using Go `scc` which you can read about at [sloc cloc and code](https://boyter.org/posts/sloc-cloc-code/).
 
-However with the latest release of 1.27 of Rust (SIMD support) the code counters written in Rust were suddenly a lot faster. In fact it meant that the fastest one `tokei` was suddenly faster than my `scc` for almost all test. In addtion a new project [polyglot](https://github.com/vmchale/polyglot) written in a language I have never heard of [ATS](https://en.wikipedia.org/wiki/ATS_%28programming_language%29) popped up which is also now faster than my Go program for any repository when running on a machine with less than 8 cores and on Linux.
+However with the latest release of 1.27 of Rust (SIMD support) the code counters written in Rust were suddenly a lot faster in Linux. In fact it meant that the fastest one `tokei` was suddenly faster than my `scc` for almost all tests. In addition a new project [polyglot](https://github.com/vmchale/polyglot) written in a language I have never heard of [ATS](https://en.wikipedia.org/wiki/ATS_%28programming_language%29) popped up which is also now faster than my Go program for any repository when running on a machine with less than 8 cores.
 
-I looked a little further into `scc` to determine if I could improve the performance at all and came away unconvinced. When I tried running it compared to `tokei` on a 32 core machine with 50 copies of the linux kernel `tokei` showed an interesting thing. It started by using only a few of the cores then after a time maxed out all of them. By contrast `scc` started by maxing out every core it could from the moment it started. This suggested that `tokei` started by walking the file system, then processing every file once that process was done. I had designed `scc` to walk the file system and process each file as it went by chaining streams. This suggests that as one might expect for tight loops which code counting is Rust is faster than Go.
+I looked a little further into `scc` to determine if I could improve the performance at all and came away unconvinced. There was little opportunity as far as I could see to make it run faster. It still holds the performance crown on Windows however.
+
+During this process I tried running it compared to `tokei` on a 32 core machine with 50 copies of the linux kernel. In this test `tokei` showed an interesting characteristic. It started by using only a few of the cores then after a brief period maxed out all of them. By contrast `scc` started by maxing out every core it could from the moment it started. This suggests that `tokei` started by walking the file system, then processing every file once that process was done. By contrast I had designed `scc` to walk the file system and process each file as it went by chaining Go streams. This suggests that as one might expect for tight loops which code counting is Rust is not just faster than Go but considerably faster.
 
 I played around with how `scc` worked internally and I couldn't come up with any way to speed it up. Does not mean its not possible, but I doubt I have enough skill to do so.
 
-Seeing as I wanted to learn Rust anyway it seemed like a good idea to attempt to port `scc` into Rust, and learn if `scc` would have been faster had I written it in Rust.
+Seeing as I wanted to learn Rust anyway it seemed like a good idea to attempt to port `scc` into Rust, and learn if `scc` would have been faster if so.
 
-NB I am likely to contine to use Go for the forseeable future. Its certainly a very easy language to get started with, has a fast feedback loop and generally I don't write any code that need maximum performance.
+Please note that I going to continue to use Go for the foreseeable future. Its certainly a very easy language to get started with, has a fast feedback loop and generally I don't write much code that needs such a level performance. When you are working with HTTP endpoints whats a few milliseconds between friends.
 
 So on to learning Rust. To start with I wanted to see how to write a simple Rust program that walks the file tree, loads each file into memory, loops each byte in the file checking if any are null which indicates the file is binary, and end the loop saying so. Otherwise continue counting every byte. I was not going to do this with any parallel code as I wanted to see how fast Rust was compared to Go on the core loop.
+
+This would be the very least amount required in order to start porting `scc` across.
 
 Knowing already how to do so in Go I wrote a simple program using the fastest file walker I know in it. My goal was to a Rust version to run at the same speed.
 
@@ -119,7 +123,9 @@ Benchmark #1: ./rust
   Range (min … max):    99.3 ms … 108.5 ms
 ```
 
-Clearly I have done something wrong here. It seems at odd that Go would be so much faster in this case. Looking again at the Rust docs its possible to read the file into a Vector from the start. Since thats what the Go code is actually doing, its possible that in my version the Rust code is not doing this. Changing it to do so is not a huge chore.
+Clearly I have done something wrong here. It seems at odd that Go would be so much faster in this case. Looking again at the Rust docs its possible to read the file into a Vector from the start. Since the Go code actually reads the whole file into memory this seemed like a likely candidate as to the difference. 
+
+In fact what is actually happening in the above Rust is that it is performing a syscall to fetch every byte. Changing it to be in line with the Go version is not too hard.
 
 {{<highlight rust>}}
 extern crate walkdir;
@@ -185,4 +191,74 @@ Benchmark #1: ./rust
 
 Seems it was not a case of just my laptop being silly. Wondering if perhaps the first version was faster on linux I copied that up and ran it. It took even longer. 
 
-Not sure what was wrong I turned to the reddit rust.
+Not sure what was wrong I turned to the Rust subreddit https://www.reddit.com/r/rust/comments/98japr/newbie_to_rust_question_about_reading_files_from/
+
+A few decent responses there I managed to modify my code to the below. The changes are to set up the buffer Vector outside the core loop and clear it and reload each run. It also removes the to_string calls (which made almost no difference).
+
+{{<highlight rust>}}
+extern crate walkdir;
+
+use walkdir::WalkDir;
+use std::fs::File;
+use std::io::Read;
+use std::io;
+
+fn main() -> Result<(), io::Error> {
+    let nul :u8 = 0;
+    let mut bytes_count: i32;
+    let mut buffer = Vec::new();
+
+    for entry in WalkDir::new("./").into_iter().filter_map(|e| e.ok()) {
+        if !entry.file_type().is_file() {
+            continue
+        }
+
+        let path = entry.path();
+        let mut file = File::open(path)?;
+
+        bytes_count = 0;
+        buffer.clear();
+        file.read_to_end(&mut buffer)?;
+
+        for b in buffer.iter() {
+            if b == &nul {
+                println!("{} bytes={} binary file", path.display(), bytes_count);
+                break
+            }
+
+            bytes_count += 1;
+        }
+
+        println!("{} bytes={}", path.display(), bytes_count)
+    }
+    Ok(())
+}
+{{</highlight>}}
+
+With the following runtime.
+
+```
+Benchmark #1: ./go
+  Time (mean ± σ):      51.8 ms ±   4.0 ms    [User: 7.8 ms, System: 50.2 ms]
+  Range (min … max):    46.8 ms …  66.2 ms
+
+Benchmark #1: ./rust
+  Time (mean ± σ):      57.0 ms ±   3.7 ms    [User: 2.2 ms, System: 52.8 ms]
+  Range (min … max):    51.7 ms …  68.0 ms
+```
+
+Which is much closer to what I was expecting. Incidentally this introduced me to the `?` [operator](https://stackoverflow.com/questions/42917566/what-is-this-question-mark-operator-about) in Rust. Trying it out on a much larger repository, which is a fresh checkout of the Linux kernel.
+
+```
+Benchmark #1: ./go
+  Time (mean ± σ):      1.661 s ±  0.046 s    [User: 1.069 s, System: 0.658 s]
+  Range (min … max):    1.563 s …  1.722 s
+
+Benchmark #1: ./rust
+  Time (mean ± σ):      2.076 s ±  0.029 s    [User: 1.534 s, System: 0.531 s]
+  Range (min … max):    2.034 s …  2.131 s
+```
+
+Which is better than before but still not as good as I had hoped. Its not a blocking issue in my goal of porting `scc` though.
+
+Anyway what I have discovered so far is that Go seems to take reasonable defaults. Rust gives you more power, but also allows you to shoot yourself in the foot easily. If you ask to iterate the bytes of a file thats what it will do. Such an operation is not supported in the Go base libraries. That said Rust does push the happy parts of my brain in a way that Python does.

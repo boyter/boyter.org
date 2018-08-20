@@ -1,6 +1,6 @@
 ---
 title: How to start with Elastic Search in 2018
-date: 2018-05-27
+date: 2028-05-27
 ---
 
 The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search http endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
