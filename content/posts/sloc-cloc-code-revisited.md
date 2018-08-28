@@ -111,3 +111,9 @@ However
 So the reason /`* /**/ */` works in tokei is because `/* /* */` does not.
 
 In fact I remember looking into this when I first wrote `scc`. I was wondering about nested multiline comments which turned out to be a compile error in Java, hence while I toyed with getting it working never bothered to finish it off.
+
+
+*Depression: Stage four of software debugging.*
+
+
+*Acceptance: Stage five of software debugging.*
