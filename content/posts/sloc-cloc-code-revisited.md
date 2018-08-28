@@ -112,6 +112,10 @@ So the reason /`* /**/ */` works in tokei is because `/* /* */` does not.
 
 In fact I remember looking into this when I first wrote `scc`. I was wondering about nested multiline comments which turned out to be a compile error in Java, hence while I toyed with getting it working never bothered to finish it off.
 
+Turns out that rust DOES support nested comments. My first thought was that this is a bad idea. For example if you write the following `/*/**/` that is going to break `tokei` as everything will be a comment still. Thankfully since I am starting to play around with rust I can try it out, and as it turns out that happens to be a compiler error. 
+
+Side note, this is why it is a good idea to at least toy around with other languages. If gives you greater perspective. Before I started my Rust journey I would have insisted that no mainstream language supports nested multi-line comments. Always be learning people.
+
 
 *Depression: Stage four of software debugging.*
 
