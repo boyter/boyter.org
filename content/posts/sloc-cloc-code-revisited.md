@@ -9,6 +9,8 @@ The other was that the author of `tokei` released a new update v8.0.0 and includ
 
 I had been tracking the improvements in `tokei`, `loc` and `polyglot` over the last few weeks. However what really suprised me was the accuracy issues pointed out, particullary the fact that `scc` version 1.7.0 was misreporting the number of lines.
 
+### Denial: Step one of software debugging.
+
 I tried testing it out on the example provided by `tokei` in the comparison page https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md
 
 ```
@@ -40,9 +42,9 @@ for i := 0; i < 5000; i++ {
 
 That should never happen. 
 
-*Denial: Step one of software debugging.*
+### Bargining/Self-Blame: Stage two of software debugging.
 
-Time to go code spelunking. Since I wrote `scc` and its a fairly small codebase I had a feeling it was an issue to do with the skip ahead logic. When `scc` finds a matching condition it keeps the offset around so it can jump ahead. However if there was an error its possible it would jump over any newlines \n which are used to determine to total count.
+Time to go code spelunking. Since I wrote `scc` and its a fairly small codebase I had a feeling it was an issue to do with the skip ahead logic. When `scc` finds a matching condition it keeps the offset around so it can jump ahead. The idea being we skip bytes we have looked at where possible if we know they matched a condition which changed the state. However if there was an error in this logic its possible it would jump over any newlines \n which are used to determine to total count.
 
 The offending code in mind was this one.
 
@@ -52,11 +54,11 @@ The offending code in mind was this one.
 index += offsetJump
 {{</highlight>}}
 
-Just commenting out this and I got `scc` to report the correct number of lines. 
+Just commenting out this and I got `scc` to report the correct number of lines. Ouch. Turns out I made a booboo. That was rather stupid of me.
 
-Still issues with the rest of the stats but I turned my attention to the tokei test suite and the simpler examples it had. The author of `tokei` suggested just using the test suite from `tokei` https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/ so it seemed like a good idea. Also how could I be so stupid as to introduce this bug from day one and not notice it?
+I Still issues with the rest of the stats but was happy with progress. I then turned my attention to the tokei test suite and the simpler examples it had to verify correct output. The author of `tokei` suggested just using the test suite from `tokei` https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/ so it seemed like a good idea. Also how could I be so stupid as to introduce this bug from day one and not notice it?
 
-*Bargining/Self-Blame: Stage two of software debugging.*
+### Anger: Stage three of software debugging.
 
 I turned my attention to this example from the tokei codebase written in Java.
 
@@ -101,14 +103,13 @@ Total                        1        23       18         2        3          0
 
 Well thats not brilliant. The only thing `scc` got right was the number of files and the number of lines. Maybe if I tweak it a little bit I can resolve this issue and everything else will go away? In any case how in the heck could I never have noticed this. I knew that the edge cases are a bitch to deal with, but still...
 
-*Anger: Stage three of software debugging.*
-
+### Depression: Stage four of software debugging.
 
 Looking into it the issues still appeared to be related to the end of line comments. When I first implemented `scc` I set a special state at the end of closing multiline comments. This would allow it to fall back into the code state when it hit a newline. However the result of this is that I introduced a bug. When there was a multiline comment the last line of the multiline would be counted as code. I never caught it because when I checked all my projects I don't use multiline comments most of the time.
 
 In reality what should I should have done (which seems obvious in hindsight) is never process whitespace characters, unless they are a `\n` newline which resets the state and counts whatever state the application is is. When I realised this I was rather depressed that it took me so long to work this out.
 
-*Depression: Stage four of software debugging.*
+### Acceptance: Stage five of software debugging.
 
 A quick change to resolve it and all of a sudden everything was working as it should.
 
@@ -172,12 +173,11 @@ Clearly the above is wrong, but then again so is the code as it will not compile
 
 Side note, this is why it is a good idea to at least toy around with other languages. If gives you greater perspective. Before I started my Rust journey I would have insisted that no mainstream language supports nested multi-line comments. Always be learning people.
 
-*Acceptance: Stage five of software debugging.*
+### Acceptance: Stage five of software debugging.
 
 Well knowing what is wrong is the second step to fixing it, with the first being knowing something is wrong. Clearly I underestimated how devious language designers can be.
 
 To fix this isn't a huge issue. Just need to keep a stack of the comment opens, and check when in comments for another one.
-
 
 https://www.reddit.com/r/rust/comments/9aa6t8/tokei_v800_language_filtering_dynamic_term_width/
 https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/
