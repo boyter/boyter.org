@@ -1,5 +1,5 @@
 ---
-title: Sloc Cloc and Code Revisited - Making a fast Go program faster and throughts on code counter accuracy
+title: Sloc Cloc and Code Revisited - Going through the 5 stages of software debugging
 date: 2018-08-28
 ---
 
@@ -99,25 +99,86 @@ Total                        1        23       18         2        3          0
 -------------------------------------------------------------------------------
 ```
 
-Well thats not brilliant. The only thing `scc` got right was the number of files and the number of lines. Maybe if I tweak it a little bit I can resolve this issue and everything else will go away? In any case how in the heck could I never have noticed this. I knew that the edge cases are a bitch to deal with.
+Well thats not brilliant. The only thing `scc` got right was the number of files and the number of lines. Maybe if I tweak it a little bit I can resolve this issue and everything else will go away? In any case how in the heck could I never have noticed this. I knew that the edge cases are a bitch to deal with, but still...
 
 *Anger: Stage three of software debugging.*
 
 
-However
+Looking into it the issues still appeared to be related to the end of line comments. When I first implemented `scc` I set a special state at the end of closing multiline comments. This would allow it to fall back into the code state when it hit a newline. However the result of this is that I introduced a bug. When there was a multiline comment the last line of the multiline would be counted as code. I never caught it because when I checked all my projects I don't use multiline comments most of the time.
 
-
-
-So the reason /`* /**/ */` works in tokei is because `/* /* */` does not.
-
-In fact I remember looking into this when I first wrote `scc`. I was wondering about nested multiline comments which turned out to be a compile error in Java, hence while I toyed with getting it working never bothered to finish it off.
-
-Turns out that rust DOES support nested comments. My first thought was that this is a bad idea. For example if you write the following `/*/**/` that is going to break `tokei` as everything will be a comment still. Thankfully since I am starting to play around with rust I can try it out, and as it turns out that happens to be a compiler error. 
-
-Side note, this is why it is a good idea to at least toy around with other languages. If gives you greater perspective. Before I started my Rust journey I would have insisted that no mainstream language supports nested multi-line comments. Always be learning people.
-
+In reality what should I should have done (which seems obvious in hindsight) is never process whitespace characters, unless they are a `\n` newline which resets the state and counts whatever state the application is is. When I realised this I was rather depressed that it took me so long to work this out.
 
 *Depression: Stage four of software debugging.*
 
+A quick change to resolve it and all of a sudden everything was working as it should.
+
+```
+-------------------------------------------------------------------------------
+Language                 Files     Lines     Code  Comments   Blanks Complexity
+-------------------------------------------------------------------------------
+Java                         1        23       16         4        3          0
+-------------------------------------------------------------------------------
+Total                        1        23       16         4        3          0
+-------------------------------------------------------------------------------
+```
+
+In fact runing over the `tokei` samples everything worked. So I had a look again at the torture test posted.
+
+```
+-------------------------------------------------------------------------------
+Language                 Files     Lines     Code  Comments   Blanks Complexity
+-------------------------------------------------------------------------------
+Rust                         1        38       29         5        4          5
+-------------------------------------------------------------------------------
+Total                        1        38       29         5        4          5
+-------------------------------------------------------------------------------
+```
+
+A much better result. However it still is not accurate, nor matching tokei which produces, (BTW I am not a fan of the new full width result tokei now produces and made it hard to get the below close to the above)
+
+```
+-------------------------------------------------------------------------------
+ Language            Files        Lines         Code     Comments       Blanks
+-------------------------------------------------------------------------------
+ Rust                    1           38           32            2            4
+-------------------------------------------------------------------------------
+ Total                   1           38           32            2            4
+-------------------------------------------------------------------------------
+```
+
+What's the difference? One thing when looking at the source that caught my eye was the following,
+
+{{<highlight rust>}}
+let this_does_not = /* a /* nested */ comment " */
+{{</highlight>}}
+
+Nested comments? In fact I remember looking into this when I first wrote `scc`. I was wondering about nested multiline comments which turned out to be a compile error in Java, hence while I toyed with getting it working never bothered to finish it off.
+
+So the reason for the difference is that `tokei` has some sort of stack for dealing with nested comments. I didn't even know was a thing.
+
+Playing around with Rust and it turns out that it DOES support nested comments. My first thought was that this implementation is a bad idea. For example if you write the following `/*/**/` that is going to break `tokei` as everything will be a comment. Trying it out happens to be a compiler error... so it is not a case. If however you did happen to half implement a nested comment you get the following (I added it to the first line),
+
+```
+-------------------------------------------------------------------------------
+ Language            Files        Lines         Code     Comments       Blanks
+-------------------------------------------------------------------------------
+ Rust                    1           38            0           34            4
+-------------------------------------------------------------------------------
+ Total                   1           38            0           34            4
+-------------------------------------------------------------------------------
+```
+
+Clearly the above is wrong, but then again so is the code as it will not compile. I have no idea if other languages will allow the above state though. Also on that if you are reading this and know why you would even want nested comments please let me know. I cannot think of a good reason to implement them other than its a neat trick to put into your language.
+
+Side note, this is why it is a good idea to at least toy around with other languages. If gives you greater perspective. Before I started my Rust journey I would have insisted that no mainstream language supports nested multi-line comments. Always be learning people.
 
 *Acceptance: Stage five of software debugging.*
+
+Well knowing what is wrong is the second step to fixing it, with the first being knowing something is wrong. Clearly I underestimated how devious language designers can be.
+
+To fix this isn't a huge issue. Just need to keep a stack of the comment opens, and check when in comments for another one.
+
+
+https://www.reddit.com/r/rust/comments/9aa6t8/tokei_v800_language_filtering_dynamic_term_width/
+https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/
+https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md
