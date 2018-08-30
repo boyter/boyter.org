@@ -201,7 +201,25 @@ Total                        1        38       32         2        4          5
 -------------------------------------------------------------------------------
 ```
 
-Excellent. With what appears to be most of the bugs ironed out time to look at performance again. With the changes that were made there are bound to be some wins, and with the new tools in Go I can hopefully spot some other issues.
+Excellent.
+
+However what price has tokei paid for this logic. Is it intelligent for example to know that Java does not support nested multiline comments? Turns out it is. Also turns out that nested multiline comments are more common than I expected. Of course there is one catch with this, if someone does the following,
+
+{{<highlight rust>}}
+/* /* trollolol */
+fn main() {
+   let start = "/*";
+   loop {
+       if x.len() >= 2 && x[0] == '*' && x[1] == '/' { // found the */
+           break;
+       }
+   }
+}
+{{</highlight>}}
+
+The above will produce for both `tokei` and `scc` a file containing 9 lines of comments, with no code. This is a serious edge case though, and as far as I can tell not possible to solve without building an AST. As such if you want to confuse either `tokei`, `loc` or `scc` then feel free to write comments like the above. Note that none of the other tools I tried `cloc`, `gocloc` and `polyglot` report the above accurately either but they to mark some lines as being code.
+
+With what appears to be most of the bugs ironed out time to look at performance again. With the changes that were made there are bound to be some wins, and with the new tools in Go I can hopefully spot some other issues.
 
 ### Performance
 
@@ -212,6 +230,8 @@ Candidates for optimisation are wide flames, ideally at the tip. Oddly though Go
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/flame-graph-start.png)
 
 On the far right you can see the code which walks the file tree. Next to it is the code which pulls files into memory. To the left of that is the code which processes the files. The methods which process the files take up more room. This indicates that the application is CPU bound. 
+
+Of course one big issue with flame graphs is that if you arent calling out to methods it looks rather flat like the above.
 
 From my previous benchmarks with `scc` I was aware that the method `complexityCount` was one of the more painful ones. At the time I managed to get it down to being about as optimial as I thought I could. However the brilliance of the flame graph is that I was able to see it was making some addtional calls. 
 
@@ -225,7 +245,7 @@ Interesting. Looks like there is some sort of hash table lookup and if it can be
 complexityBytes := LanguageFeatures[fileJob.Language].ComplexityBytes
 {{</highlight>}}
 
-For every time the method is called it goes back to the language lookup and looks for the bytes it needs to identify anything. This method is called a lot, almost every single byte in the file in some cases. If we look this information up once and pass it along to the method we can save thousands of lookups.
+For every time the method is called it goes back to the language lookup and looks for the bytes it needs to identify anything. This method is called a lot, almost every single byte in the file in some cases. If we look this information up once and pass it along to the method we can save porentially thousands of lookups and a lot of CPU burn time.
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/flame-graph-after.png)
 
@@ -249,7 +269,7 @@ Benchmark #1: scc redis
   Range (min … max):   180.5 ms … 268.8 ms
 ```
 
-Not a bad saving there.
+Not a bad saving there. Poking around the codebase I also identified some additional lookups and method calls that could be removed. There were a result of changing the logic to skip whitespace characters.
 
 https://www.reddit.com/r/rust/comments/9aa6t8/tokei_v800_language_filtering_dynamic_term_width/
 https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/
