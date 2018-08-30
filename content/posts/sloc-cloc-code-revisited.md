@@ -177,7 +177,79 @@ Side note, this is why it is a good idea to at least toy around with other langu
 
 Well knowing what is wrong is the second step to fixing it, with the first being knowing something is wrong. Clearly I underestimated how devious language designers can be.
 
-To fix this isn't a huge issue. Just need to keep a stack of the comment opens, and check when in comments for another one.
+To fix this isn't a huge issue. Just need to keep a stack of the comment opens, and check when in comments for another one. Sadly during this process I noticed that `scc` was missing quite a few edge cases. Thankfully the `tokei` stress test is pretty brutal and allowed me to identify them all and resolve them.
+
+After much tweaking and fiddling with the logic.
+
+```
+$ tokei
+--------------------------------------------------------------------------------
+ Language             Files        Lines         Code     Comments       Blanks
+--------------------------------------------------------------------------------
+ Rust                     1           38           32            2            4
+--------------------------------------------------------------------------------
+ Total                    1           38           32            2            4
+--------------------------------------------------------------------------------
+
+$ scc
+-------------------------------------------------------------------------------
+Language                 Files     Lines     Code  Comments   Blanks Complexity
+-------------------------------------------------------------------------------
+Rust                         1        38       32         2        4          5
+-------------------------------------------------------------------------------
+Total                        1        38       32         2        4          5
+-------------------------------------------------------------------------------
+```
+
+Excellent. With what appears to be most of the bugs ironed out time to look at performance again. With the changes that were made there are bound to be some wins, and with the new tools in Go I can hopefully spot some other issues.
+
+### Performance
+
+One of the really neat things about Go 1.11 that I quickly discovered is that the web pprof view now supports flame graphs. Flame graphs for those that don't know show a base from which methods rise out of. The wider the base of the flame the more time is spent in that method. Taller flames indicate deeper calls. They give a nice visual overview of where the program is spending its time and how many calls it made.
+
+Candidates for optimisation are wide flames, ideally at the tip. Oddly though Go's flame graphs are inverted but no matter. Here is what I started with.
+
+![Flame Graph Start](/static/sloc-cloc-code-revisited/flame-graph-start.png)
+
+On the far right you can see the code which walks the file tree. Next to it is the code which pulls files into memory. To the left of that is the code which processes the files. The methods which process the files take up more room. This indicates that the application is CPU bound. 
+
+From my previous benchmarks with `scc` I was aware that the method `complexityCount` was one of the more painful ones. At the time I managed to get it down to being about as optimial as I thought I could. However the brilliance of the flame graph is that I was able to see it was making some addtional calls. 
+
+Clicking into that method produced the following.
+
+![Flame Graph Start](/static/sloc-cloc-code-revisited/flame-graph-interesting.png)
+
+Interesting. Looks like there is some sort of hash table lookup and if it can be avoided it will shave 6% of the total running time of the application. The offending code is,
+
+{{<highlight go>}}
+complexityBytes := LanguageFeatures[fileJob.Language].ComplexityBytes
+{{</highlight>}}
+
+For every time the method is called it goes back to the language lookup and looks for the bytes it needs to identify anything. This method is called a lot, almost every single byte in the file in some cases. If we look this information up once and pass it along to the method we can save thousands of lookups.
+
+![Flame Graph Start](/static/sloc-cloc-code-revisited/flame-graph-after.png)
+
+What does this translate to in the real world?
+
+Before 
+
+```
+$ hyperfine 'scc redis'
+Benchmark #1: scc redis
+  Time (mean ± σ):     239.7 ms ±  43.7 ms    [User: 607.0 ms, System: 822.3 ms]
+  Range (min … max):   213.0 ms … 327.5 ms
+```
+
+After
+
+```
+$ hyperfine 'scc redis'
+Benchmark #1: scc redis
+  Time (mean ± σ):     199.7 ms ±  26.1 ms    [User: 608.0 ms, System: 716.6 ms]
+  Range (min … max):   180.5 ms … 268.8 ms
+```
+
+Not a bad saving there.
 
 https://www.reddit.com/r/rust/comments/9aa6t8/tokei_v800_language_filtering_dynamic_term_width/
 https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/
