@@ -203,7 +203,7 @@ Total                        1        38       32         2        4          5
 
 Excellent.
 
-However what price has tokei paid for this logic. Is it intelligent for example to know that Java does not support nested multiline comments? Turns out it is. Also turns out that nested multiline comments are more common than I expected. Of course there is one catch with this, if someone does the following,
+However what price has tokei paid for this logic. Is it for example intelligent enough to know that Java does not support nested multiline comments? Turns out it is. Also turns out that nested multiline comments are more common than I expected. As such I added in the same checks to ensure that `scc` is as accurate as `tokei`. Of course there is one catch with this, if someone does the following,
 
 {{<highlight rust>}}
 /* /* trollolol */
@@ -223,17 +223,17 @@ With what appears to be most of the bugs ironed out time to look at performance 
 
 ### Performance
 
-One of the really neat things about Go 1.11 that I quickly discovered is that the web pprof view now supports flame graphs. Flame graphs for those that don't know show a base from which methods rise out of. The wider the base of the flame the more time is spent in that method. Taller flames indicate deeper calls. They give a nice visual overview of where the program is spending its time and how many calls it made.
+One of the really neat things about Go 1.11 that I discovered is that the web pprof view now supports flame graphs. Flame graphs for those that don't know show a base from which methods rise (or fall as the Go one is inverted) out of. The wider the base of the flame the more time is spent in that method. Taller flames indicate more method calls, where one method calls another. They give a nice visual overview of where the program is spending its time and how many calls are made.
 
-Candidates for optimisation are wide flames, ideally at the tip. Oddly though Go's flame graphs are inverted but no matter. Here is what I started with.
+Candidates for optimisation are wide flames, ideally at the tip. As mentioned oddly enough Go's flame graphs are inverted. Here is what I started with.
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/flame-graph-start.png)
 
-On the far right you can see the code which walks the file tree. Next to it is the code which pulls files into memory. To the left of that is the code which processes the files. The methods which process the files take up more room. This indicates that the application is CPU bound. 
+On the far right you can see the code which walks the file tree. Next to it is the code which pulls files into memory. To the left of that is the code which processes the files. The methods which process the files take up more room. This indicates that the application is CPU bound, as that method is only invoked when the far right methods are finished.
 
-Of course one big issue with flame graphs is that if you arent calling out to methods it looks rather flat like the above.
+One big issue with flame graphs is that if you arent calling out to methods it looks rather flat like the above. This can be solved by breaking large methods down into smaller ones, which will produce more tips in the flame graph.
 
-From my previous benchmarks with `scc` I was aware that the method `complexityCount` was one of the more painful ones. At the time I managed to get it down to being about as optimial as I thought I could. However the brilliance of the flame graph is that I was able to see it was making some addtional calls. 
+From my previous benchmarks with `scc` I was aware that the method `complexityCount` was one of the more painful ones. At the time I managed to get it down to being about as optimial as I thought. However the brilliance of the flame graph is that it makes it easy to see where addtional calls are being made and how long it spends in them.
 
 Clicking into that method produced the following.
 
@@ -245,7 +245,7 @@ Interesting. Looks like there is some sort of hash table lookup and if it can be
 complexityBytes := LanguageFeatures[fileJob.Language].ComplexityBytes
 {{</highlight>}}
 
-For every time the method is called it goes back to the language lookup and looks for the bytes it needs to identify anything. This method is called a lot, almost every single byte in the file in some cases. If we look this information up once and pass it along to the method we can save porentially thousands of lookups and a lot of CPU burn time.
+Every time the method is called it goes back to the language lookup and looks for the bytes it needs to identify complexity. This method is called a lot, almost every single byte in the file in some cases. If we look this information up once and pass it along to the method we can save porentially thousands of lookups and a lot of CPU burn time. A simple change to implement and the result looks like the below.
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/flame-graph-after.png)
 
@@ -269,7 +269,22 @@ Benchmark #1: scc redis
   Range (min … max):   180.5 ms … 268.8 ms
 ```
 
-Not a bad saving there. Poking around the codebase I also identified some additional lookups and method calls that could be removed. There were a result of changing the logic to skip whitespace characters.
+Not a bad saving there. Following this easy win I started poking around the codebase and identified some additional lookups and method calls that could be removed. These changes were largly a result of changing the logic to skip whitespace characters which improve accuracy.
+
+The result of the above tweaks was that the complexity calculation inside `scc` is now calculated almost for free. Trying it out on the redis codebase on a more powerful machine.
+
+```
+$ hyperfine 'scc redis' && hyperfine 'scc -c redis'
+Benchmark #1: scc redis
+  Time (mean ± σ):     117.7 ms ±   6.8 ms    [User: 288.8 ms, System: 431.1 ms]
+  Range (min … max):   108.9 ms … 133.5 ms
+
+Benchmark #1: scc -c redis
+  Time (mean ± σ):     112.3 ms ±   7.6 ms    [User: 253.7 ms, System: 436.5 ms]
+  Range (min … max):   101.1 ms … 127.6 ms
+```
+
+Only 5ms difference between the run with complexity vs the one without when running against the redis source code. Note that this is not a proper benchmark on a clean system, and not the largest codebase around but it gives an idea of just how inefficient that lookup was, and how much those addtional savings helped.
 
 https://www.reddit.com/r/rust/comments/9aa6t8/tokei_v800_language_filtering_dynamic_term_width/
 https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/
