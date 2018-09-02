@@ -111,7 +111,7 @@ In reality what should I should have done (which seems obvious in hindsight) is 
 
 ### Acceptance: Stage five of software debugging.
 
-A quick change to resolve it and all of a sudden everything was working as it should.
+A quick change to resolve the above, never process whitespace characters and all of a sudden everything was working as it should.
 
 ```
 -------------------------------------------------------------------------------
@@ -135,7 +135,7 @@ Total                        1        38       29         5        4          5
 -------------------------------------------------------------------------------
 ```
 
-A much better result. However it still is not accurate, nor matching tokei which produces, (BTW I am not a fan of the new full width result tokei now produces and made it hard to get the below close to the above)
+A much better result. However it still is not accurate, nor matching tokei which produces, (BTW I am not a fan of the new full width result tokei now produces and made it hard to get the below close to the above in terms of matching width).
 
 ```
 -------------------------------------------------------------------------------
@@ -153,11 +153,11 @@ What's the difference? One thing when looking at the source that caught my eye w
 let this_does_not = /* a /* nested */ comment " */
 {{</highlight>}}
 
-Nested comments? In fact I remember looking into this when I first wrote `scc`. I was wondering about nested multiline comments which turned out to be a compile error in Java, hence while I toyed with getting it working never bothered to finish it off.
+Nested comments? In fact I remember looking into this when I first wrote `scc`. I was wondering about nested multiline comments which turned out to be a compile error in Java, hence while I toyed with getting it working figured that was not a brilliant idea and explicitly made it work without them.
 
-So the reason for the difference is that `tokei` has some sort of stack for dealing with nested comments. I didn't even know was a thing.
+So the reason for the difference is that `tokei` has some sort of stack for dealing with nested comments so it know when to finish with them. I didn't even know was a thing.
 
-Playing around with Rust and it turns out that it DOES support nested comments. My first thought was that this implementation is a bad idea. For example if you write the following `/*/**/` that is going to break `tokei` as everything will be a comment. Trying it out happens to be a compiler error... so it is not a case. If however you did happen to half implement a nested comment you get the following (I added it to the first line),
+Playing around with Rust and it turns out that it DOES support nested comments. My first thought was that this implementation is a bad idea. For example if you write the following `/*/**/` that is going to break `tokei` as everything will be a comment. Trying it out happens to be a compiler error... so it is not a case worth worrying about. If however you did happen to half implement a nested comment you get the following (I added it to the first line),
 
 ```
 -------------------------------------------------------------------------------
@@ -169,15 +169,15 @@ Playing around with Rust and it turns out that it DOES support nested comments. 
 -------------------------------------------------------------------------------
 ```
 
-Clearly the above is wrong, but then again so is the code as it will not compile. I have no idea if other languages will allow the above state though. Also on that if you are reading this and know why you would even want nested comments please let me know. I cannot think of a good reason to implement them other than its a neat trick to put into your language.
+Clearly the above is wrong, but then again so is the code as it will not compile. I have no idea if other languages will allow the above state. Also if you are reading this and know why you would even want nested comments please let me know. I cannot think of a good reason to implement them other than its a neat trick to put into your language.
 
-Side note, this is why it is a good idea to at least toy around with other languages. If gives you greater perspective. Before I started my Rust journey I would have insisted that no mainstream language supports nested multi-line comments. Always be learning people.
+Side note, this is why it is a good idea to at least toy around with other languages. If gives you greater perspective. Before I started my Rust journey I would have insisted that no mainstream language supports nested multi-line comments. Always be learning.
 
 ### Acceptance: Stage five of software debugging.
 
 Well knowing what is wrong is the second step to fixing it, with the first being knowing something is wrong. Clearly I underestimated how devious language designers can be.
 
-To fix this isn't a huge issue. Just need to keep a stack of the comment opens, and check when in comments for another one. Sadly during this process I noticed that `scc` was missing quite a few edge cases. Thankfully the `tokei` stress test is pretty brutal and allowed me to identify them all and resolve them.
+To fix this isn't a huge issue. Just need to keep a stack of the multi-line comment opens, and check when in comments for another one. Sadly during this process I noticed that `scc` was missing quite a few edge cases. Thankfully the `tokei` stress test is pretty brutal and allowed me to identify them all and resolve them.
 
 After much tweaking and fiddling with the logic.
 
@@ -203,21 +203,21 @@ Total                        1        38       32         2        4          5
 
 Excellent.
 
-However what price has tokei paid for this logic. Is it for example intelligent enough to know that Java does not support nested multiline comments? Turns out it is. Also turns out that nested multiline comments are more common than I expected. As such I added in the same checks to ensure that `scc` is as accurate as `tokei`. Of course there is one catch with this, if someone does the following,
+However what price has tokei paid for this logic. Is it for example intelligent enough to know that Java does not support nested multiline comments? Turns out it is. Also turns out that nested multiline comments are more common across languages than I expected, Lisp, Rust, Lean, Jai, Idris, Scheme, Swift, Julia and Kotlin all suppot them. As such I added in the same checks to ensure that `scc` is as accurate as `tokei`. Of course there is one big catch with this, if someone does the following,
 
-{{<highlight rust>}}
+{{<highlight java>}}
 /* /* trollolol */
-fn main() {
-   let start = "/*";
-   loop {
-       if x.len() >= 2 && x[0] == '*' && x[1] == '/' { // found the */
-           break;
-       }
-   }
+
+public class Test
+{
+    public static void main(String[] args)
+    {
+        System.out.println("FooBar");
+    }
 }
 {{</highlight>}}
 
-The above will produce for both `tokei` and `scc` a file containing 9 lines of comments, with no code. This is a serious edge case though, and as far as I can tell not possible to solve without building an AST. As such if you want to confuse either `tokei`, `loc` or `scc` then feel free to write comments like the above. Note that none of the other tools I tried `cloc`, `gocloc` and `polyglot` report the above accurately either but they to mark some lines as being code.
+The above will produce for both `tokei` and `scc` a Java file containing 9 lines of comments, with no code. This is a serious edge case though, and as far as I can tell not possible to solve without building an AST. As such if you want to confuse either `tokei`, `loc` or `scc` then feel free to write comments like the above in your Java or C#. Note that none of the other tools I tried `cloc`, `gocloc` and `polyglot` report the above accurately either but they to mark some lines as being code.
 
 With what appears to be most of the bugs ironed out time to look at performance again. With the changes that were made there are bound to be some wins, and with the new tools in Go I can hopefully spot some other issues.
 
@@ -284,7 +284,12 @@ Benchmark #1: scc -c redis
   Range (min … max):   101.1 ms … 127.6 ms
 ```
 
+TODO verify the above
+
 Only 5ms difference between the run with complexity vs the one without when running against the redis source code. Note that this is not a proper benchmark on a clean system, and not the largest codebase around but it gives an idea of just how inefficient that lookup was, and how much those addtional savings helped.
+
+The flatness of the flame graph made me realise that the main method CountStats had become a bit of a monster which prompted me to pull it apart. This would allow for easier maintenance as well as allowing tools like the flame graph to help spot those hotspots in the code.
+
 
 https://www.reddit.com/r/rust/comments/9aa6t8/tokei_v800_language_filtering_dynamic_term_width/
 https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/
