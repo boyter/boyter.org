@@ -71,6 +71,28 @@ Benchmark #1: scc -c redis
 Only 5ms difference between the run with complexity vs the one without when running against the redis source code. Oddly for some reason the complexity calcuation is faster but this is a very synthetic benchmark. It does give an idea of just how inefficient that lookup was, and how much those addtional savings helped.
 
 
+
+
+
+
+
+One annoying thing that comes out of the very tight benchmarks posted is that scc spends a non trivial amount of time parsing the JSON it uses for language features. For example
+
+```
+TRACE 2018-09-05T22:20:40Z: milliseconds unmarshal: 11
+TRACE 2018-09-05T22:20:40Z: nanoseconds build extension to language: 419100
+TRACE 2018-09-05T22:20:40Z: milliseconds build language features: 1
+```
+
+That is ~12 milliseconds spent every time it is called just getting ready to parse. This could be moved into a pre-process step of `go generate` and shave the time of every call to `scc`.
+
+
+
+
+
+
+
+
 ### Benchmarks
 
 All GNU/Linux tests were run on Digital Ocean 16 vCPU Compute optimized droplet with 32 GB of RAM and a 200 GB SSD. The machine used was doing nothing else at the time and was created with the sole purpose of running the tests to ensure no interference from other processes. The OS used is Ubuntu 18.04 and the rust programs were installed using cargo install.
