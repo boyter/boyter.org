@@ -234,11 +234,14 @@ Benchmark #1: scc cpython
 
 The result is not a bad one at all. In fact this was a very large performance gain vs the amount of work required.
 
+I then started thinking about the problem some more. 
+
+The application as written has a main loop which processes over every byte in the file. It keeps track of the state it is in and uses a switch over that state to know what processing should happen. I was wonder if rather than having a large single loop over the whole byte array, what if when we entered a new state we drifted into a new loop which processed bytes until the state changed? IE rather than loop and check the state, change state and then loop. Would this be faster?
+
+This is a rather large change to implement but because it totally changes how the core loop works it might produce the best speed boost. For a start it would mean that the loops would be much shorter which increases the chance that the loop hits the lower level CPU caches.
 
 
-I then started thinking about the problem some more. Rather than having a large single loop over the whole in memory file, what if we had one loop over, and when we entered a new state we drifted into a new state which processed bytes until the state changed? IE rather than loop and check the state, change state and then loop. Would this be faster?
 
-This is a rather large change but because it totally changes how the application works it might produce the best result so far. For a start it would mean that the loops would be much shorter which increases the chance that the code lives totally in cache.
 
 
 
@@ -338,138 +341,97 @@ As you can see both `tokei` and `scc` get the numbers correct. The other tools h
 
 #### Cython f3267144269b873bcb87a9fcafe94b37be1bcfdc
 
-
+```
 root@ubuntu-c-16-sgp1-01:~# hyperfine './scc cpython' && hyperfine 'GOGC=-1 ./scc -c cpython' && hyperfine 'tokei cpython' && hyperfine 'loc cpython' && hyperfine './polyglot cpython'
 Benchmark #1: ./scc cpython
-
   Time (mean ± σ):     170.1 ms ±   5.1 ms    [User: 1.925 s, System: 0.093 s]
-
   Range (min … max):   163.9 ms … 182.8 ms
 
 Benchmark #1: GOGC=-1 ./scc -c cpython
-
   Time (mean ± σ):     136.5 ms ±   3.3 ms    [User: 1.529 s, System: 0.099 s]
-
   Range (min … max):   130.5 ms … 142.5 ms
 
 Benchmark #1: tokei cpython
-
   Time (mean ± σ):      82.6 ms ±   5.0 ms    [User: 710.1 ms, System: 80.0 ms]
-
   Range (min … max):    75.0 ms …  91.9 ms
 
 Benchmark #1: loc cpython
-
   Time (mean ± σ):      62.0 ms ±  12.7 ms    [User: 695.6 ms, System: 72.1 ms]
-
   Range (min … max):    48.2 ms …  97.7 ms
 
 Benchmark #1: ./polyglot cpython
-
   Time (mean ± σ):      76.6 ms ±   5.1 ms    [User: 117.7 ms, System: 83.3 ms]
-
   Range (min … max):    63.3 ms …  86.5 ms
 
 
 
 root@ubuntu-c-16-sgp1-01:~# hyperfine './scc redis' && hyperfine 'GOGC=-1 ./scc -c redis' && hyperfine 'tokei redis' && hyperfine 'loc redis' && hyperfine './polyglot redis'
 Benchmark #1: ./scc redis
-
   Time (mean ± σ):      25.3 ms ±   2.1 ms    [User: 198.4 ms, System: 16.7 ms]
-
   Range (min … max):    22.9 ms …  33.5 ms
 
 Benchmark #1: GOGC=-1 ./scc -c redis
-
   Time (mean ± σ):      23.0 ms ±   2.3 ms    [User: 159.0 ms, System: 18.1 ms]
-
   Range (min … max):    20.1 ms …  31.2 ms
 
 Benchmark #1: tokei redis
-
   Time (mean ± σ):      20.4 ms ±   2.4 ms    [User: 91.9 ms, System: 21.6 ms]
-
   Range (min … max):    17.0 ms …  29.9 ms
 
 Benchmark #1: loc redis
-
   Time (mean ± σ):      19.6 ms ±   8.7 ms    [User: 138.1 ms, System: 13.6 ms]
-
   Range (min … max):    13.2 ms …  70.8 ms
 
   Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet PC without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
 
 Benchmark #1: ./polyglot redis
-
   Time (mean ± σ):      16.0 ms ±   0.9 ms    [User: 16.4 ms, System: 18.0 ms]
-
   Range (min … max):    14.0 ms …  22.1 ms
-
 
 
 root@ubuntu-c-16-sgp1-01:~# hyperfine './scc rust' && hyperfine 'GOGC=-1 ./scc -c rust' && hyperfine 'tokei rust' && hyperfine 'loc rust' && hyperfine './polyglot rust'
 Benchmark #1: ./scc rust
-
   Time (mean ± σ):     129.9 ms ±   2.5 ms    [User: 977.2 ms, System: 161.8 ms]
-
   Range (min … max):   127.2 ms … 137.0 ms
 
 Benchmark #1: GOGC=-1 ./scc -c rust
-
   Time (mean ± σ):     118.9 ms ±   2.2 ms    [User: 807.1 ms, System: 163.4 ms]
-
   Range (min … max):   115.4 ms … 124.5 ms
 
 Benchmark #1: tokei rust
-
   Time (mean ± σ):     112.2 ms ±   5.6 ms    [User: 609.6 ms, System: 146.8 ms]
-
   Range (min … max):   105.6 ms … 124.8 ms
 
 Benchmark #1: loc rust
-
   Time (mean ± σ):     141.0 ms ±  34.1 ms    [User: 1.964 s, System: 0.123 s]
-
   Range (min … max):   116.1 ms … 215.5 ms
 
 Benchmark #1: ./polyglot rust
-
   Time (mean ± σ):     122.6 ms ±   4.0 ms    [User: 214.3 ms, System: 152.5 ms]
-
   Range (min … max):   115.5 ms … 130.9 ms
 
 
 root@ubuntu-c-16-sgp1-01:~# hyperfine './scc linux' && hyperfine 'GOGC=-1 ./scc -c linux' && hyperfine 'tokei linux' && hyperfine 'loc linux' && hyperfine './polyglot linux'
 Benchmark #1: ./scc linux
-
   Time (mean ± σ):      2.312 s ±  0.131 s    [User: 28.127 s, System: 0.900 s]
-
   Range (min … max):    2.134 s …  2.547 s
 
 Benchmark #1: GOGC=-1 ./scc -c linux
-
   Time (mean ± σ):      1.538 s ±  0.013 s    [User: 21.671 s, System: 1.180 s]
-
   Range (min … max):    1.523 s …  1.561 s
 
 Benchmark #1: tokei linux
-
   Time (mean ± σ):     884.6 ms ±  33.5 ms    [User: 9.506 s, System: 0.850 s]
-
   Range (min … max):   845.4 ms … 936.9 ms
 
 Benchmark #1: loc linux
-
   Time (mean ± σ):     654.8 ms ±   6.8 ms    [User: 9.085 s, System: 0.813 s]
-
   Range (min … max):   646.6 ms … 664.9 ms
 
 Benchmark #1: ./polyglot linux
-
   Time (mean ± σ):     999.5 ms ±  35.0 ms    [User: 2.378 s, System: 0.816 s]
-
   Range (min … max):   943.9 ms … 1041.8 ms
-
+```
 
 https://www.reddit.com/r/rust/comments/9aa6t8/tokei_v800_language_filtering_dynamic_term_width/
 https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/
