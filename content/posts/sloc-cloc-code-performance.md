@@ -235,6 +235,13 @@ Benchmark #1: scc cpython
 The result is not a bad one at all. In fact this was a very large performance gain vs the amount of work required.
 
 
+
+I then started thinking about the problem some more. Rather than having a large single loop over the whole in memory file, what if we had one loop over, and when we entered a new state we drifted into a new state which processed bytes until the state changed? IE rather than loop and check the state, change state and then loop. Would this be faster?
+
+This is a rather large change but because it totally changes how the application works it might produce the best result so far. For a start it would mean that the loops would be much shorter which increases the chance that the code lives totally in cache.
+
+
+
 One annoying thing that comes out of the very tight benchmarks posted is that scc spends a non trivial amount of time parsing the JSON it uses for language features. For example over a few runs with the trace logging enabled I recorded the following,
 
 ```
