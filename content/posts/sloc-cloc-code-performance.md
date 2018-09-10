@@ -433,6 +433,65 @@ Benchmark #1: ./polyglot linux
   Range (min … max):   943.9 ms … 1041.8 ms
 ```
 
+```
+root@ubuntu-c-16-sgp1-01:~# hyperfine './scc linux' && hyperfine './scc -c linux' && hyperfine 'GOGC=-1 ./scc -c linux' && hyperfine 'tokei linux' && hyperfine 'loc linux' && hyperfine './polyglot linux' && hyperfine './scc1.10 linux' &&
+ hyperfine './scc1.10 -c linux' && hyperfine 'GOGC=-1 ./scc1.10 -c linux'
+Benchmark #1: ./scc linux
+
+  Time (mean ± σ):      2.343 s ±  0.097 s    [User: 27.740 s, System: 0.868 s]
+
+  Range (min … max):    2.187 s …  2.509 s
+
+Benchmark #1: ./scc -c linux
+
+  Time (mean ± σ):      1.859 s ±  0.087 s    [User: 22.369 s, System: 0.845 s]
+
+  Range (min … max):    1.720 s …  1.955 s
+
+Benchmark #1: GOGC=-1 ./scc -c linux
+
+  Time (mean ± σ):      1.529 s ±  0.009 s    [User: 21.616 s, System: 1.090 s]
+
+  Range (min … max):    1.517 s …  1.547 s
+
+Benchmark #1: tokei linux
+
+  Time (mean ± σ):     849.2 ms ±  31.9 ms    [User: 9.264 s, System: 0.808 s]
+
+  Range (min … max):   819.6 ms … 899.2 ms
+
+Benchmark #1: loc linux
+
+  Time (mean ± σ):     671.1 ms ±  38.2 ms    [User: 9.362 s, System: 0.849 s]
+
+  Range (min … max):   645.0 ms … 775.5 ms
+
+Benchmark #1: ./polyglot linux
+
+  Time (mean ± σ):      1.044 s ±  0.056 s    [User: 2.610 s, System: 0.812 s]
+
+  Range (min … max):    0.956 s …  1.122 s
+
+Benchmark #1: ./scc1.10 linux
+
+  Time (mean ± σ):      1.392 s ±  0.019 s    [User: 19.415 s, System: 0.825 s]
+
+  Range (min … max):    1.367 s …  1.430 s
+
+Benchmark #1: ./scc1.10 -c linux
+
+  Time (mean ± σ):      1.280 s ±  0.022 s    [User: 17.477 s, System: 0.843 s]
+
+  Range (min … max):    1.247 s …  1.314 s
+
+Benchmark #1: GOGC=-1 ./scc1.10 -c linux
+
+  Time (mean ± σ):      1.175 s ±  0.006 s    [User: 16.321 s, System: 1.168 s]
+
+  Range (min … max):    1.167 s …  1.185 s
+
+```
+
 https://www.reddit.com/r/rust/comments/9aa6t8/tokei_v800_language_filtering_dynamic_term_width/
 https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/
 https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md
