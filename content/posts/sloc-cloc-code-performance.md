@@ -1,15 +1,17 @@
 ---
-title: Sloc Cloc and Code Revisited - Optimizing an already fast Go program
+title: Sloc Cloc and Code Revisited - Optimizing what is already a fast Go program
 date: 2018-09-06
 ---
 
-I don't want to make any false claims about the impact of the release of `scc` and the blog post about it https://boyter.org/posts/sloc-cloc-code/ but following its release both `tokei` and `loc` have been updated with impressive performance improvements and a new tool `polyglot` was released which also has a focus on performance.
+I don't want to make any false claims about the impact of the release of `scc` and the blog post about it https://boyter.org/posts/sloc-cloc-code/ but following its release both `tokei` and `loc` have been updated with impressive performance improvements and a new tool `polyglot` was released which claims excellent performance.
 
 Heck I even finished that article with the prophetic statement,
 
-> Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats much faster than scc with duplicate detection and maybe complexity calculations. I would expect it to also be much faster than anything I could ever produce. It’s possible that Tokei and Loc could run faster already just by compiling for the specific CPU they run on or through the SIMD optimizations that at time of writing are still to hit the main-line rust compiler.
+> Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats much faster than scc with duplicate detection and maybe complexity calculations. I would expect it to also be much faster than anything I could ever produce. It's possible that Tokei and Loc could run faster already just by compiling for the specific CPU they run on or through the SIMD optimizations that at time of writing are still to hit the main-line rust compiler.
 
-If my blog post in any way shape or form pushed forward the performance of code counters and resulted in them saving countless amounts of time around the IT industry I will consider that the highlight of my career thus far.
+Looks like I called it, at least on the performance front. However it was not Rust/C/C++ or even D that stepped up but a polyglot which was written in a language I had never heard of ATS. `scc` is still the only tool with complexity estimates, and the author of tokei explicitly has ruled it out as a change https://github.com/Aaronepower/tokei/issues/237
+
+If my blog post in any way shape or form pushed forward the performance of code counters and resulted in the saving of countless amounts of time around the IT industry I will consider that the highlight of my career thus far.
 
 Of course it also means I need to revisit `scc` and see what I can do to bring `scc` back into contention on the performance front.
 
@@ -238,11 +240,79 @@ I then started thinking about the problem some more.
 
 The application as written has a main loop which processes over every byte in the file. It keeps track of the state it is in and uses a switch over that state to know what processing should happen. I was wonder if rather than having a large single loop over the whole byte array, what if when we entered a new state we drifted into a new loop which processed bytes until the state changed? IE rather than loop and check the state, change state and then loop. Would this be faster?
 
-This is a rather large change to implement but because it totally changes how the core loop works it might produce the best speed boost. For a start it would mean that the loops would be much shorter which increases the chance that the loop hits the lower level CPU caches.
+In effect the loop structure of 
 
+```
+for byte in file
+	switch state
+```
 
+becomes
 
+```
+for byte in file
+	switch state
+		loop in state
+```
 
+This seems counter intuitive at first because its introducing a loop in loop, but because each of the state loops would be very tight it would mean that the loops code would be much shorter which increases the chance that the loops spend time in the lower level CPU caches. It also has the added benefit of improving the visibility of the flame graph as each state loop is pulled out into another method.
+
+After implementing the flame graph looks like the below,
+
+![Flame Graph Start](/static/sloc-cloc-code-revisited/flame-graph-large-refactor.png)
+
+And the new profile output,
+
+![Flame Graph Start](/static/sloc-cloc-code-revisited/methods-refactor.png)
+
+Both of which suggest that the `shouldProcess` method is our next target. More importantly however is what affect has this has on the core loop. I took version 1.9.0 of `scc` and tried it out against the current branch version on the Linux kernel.
+
+```
+Benchmark #1: ./scc1.9.0 linux
+  Time (mean ± σ):      2.343 s ±  0.097 s    [User: 27.740 s, System: 0.868 s]
+  Range (min … max):    2.187 s …  2.509 s
+
+Benchmark #1: ./scc linux
+  Time (mean ± σ):      1.392 s ±  0.019 s    [User: 19.415 s, System: 0.825 s]
+  Range (min … max):    1.367 s …  1.430 s
+```
+
+Wow! Almost a 50% reduction in the time to run. Pretty clearly that guess about moving to tighter loops worked. If you have a look at the original flame graph you can see that the `CountStats` method which ideally should be calling other methods has a large empty bar on its right side. This has shrunk with the above change. This suggests that even though this method should have been spending all its time processing state changes through methods `checkForMatchMultiOpen` `checkComplexity` `isWhitespace` `checkForMatchSingle` `checkForMatch` it was actually spending most of its time processing the loop. By breaking it into smaller tight loops it spends less time in this state, which speeds everything up.
+
+I was about to call it a day at this point when a colleague raised a very interesting PR which promised to improve performance even more. He implemented something I should have considered a long time ago, bit-masks.
+
+Thats right bit-masks. How in the heck of all thats holy did I forget bit-masks. In my defense for day to day programming I have needed bit-masks exactly 0 times. A few PR fixes later and boom another performance gain. It also allowed me to simplify the code considerably further. I swapped over all the checks that were working against the first byte for bit-marks, and suddenly one of the most expensive methods I added `shouldProcess` was optimized away.
+
+![Flame Graph Start](/static/sloc-cloc-code-revisited/methods-refactor-bitmask.png)
+
+Another very nice thing my colleague raise was that there was contention for the number of goroutines launched https://github.com/boyter/scc/pull/31 and he graciously supplied a very nice nice patch which resolved the issue. It also had the nice benefit of reducing load on the goroutine scheduler which speed things up a little bit.
+
+```
+* linux-4.19-rc1 on a 4 core c5.xlarge:
+before: Time (mean ± σ):      4.680 s ±  0.727 s    [User: 17.920 s, System: 0.632 s]
+after:  Time (mean ± σ):      4.532 s ±  0.005 s    [User: 17.340 s, System: 0.705 s]
+```
+
+The above made me think about the core loop as well It operates using a switch statement. A bit of searching about how Go optimise's switch statements turned up the following by Ken Thomson https://groups.google.com/forum/#!msg/golang-nuts/IURR4Z2SY7M/R7ORD_yDix4J 
+
+> jump tables become impossible. also note that go switches are different than c switches. non-constant cases have to be tested individually no matter what.
+
+Interesting. This means it might be possible to convert the switch over to just if/else statements or to a map of function and get some more speed. Alas trying this locally keep running into CPU throttling issues.
+
+I tried with an if statement against the Linux kernel on fresh virtual machine,
+
+```
+Benchmark #1: ./scc-switch linux
+  Time (mean ± σ):      3.278 s ±  0.012 s    [User: 24.999 s, System: 0.784 s]
+  Range (min … max):    3.258 s …  3.293 s
+
+Benchmark #1: ./scc-if linux
+  Time (mean ± σ):      3.288 s ±  0.016 s    [User: 25.085 s, System: 0.788 s]
+  Range (min … max):    3.271 s …  3.321 s
+```
+Which worked out to be slightly worse with the if statements. Hence I stuck with the switch.
+
+One thing I had identified in my original post about `scc` was that the Go garbage collector was a hindrance to performance. I had also tried turning it off with bad results on machines with less memory. As such I took a slightly different approach. By default `scc` turns the garbage collector off, and if by default 10000 files are parsed then it is turned back on. Usually for small projects this means it is very off and you get the benefit.
 
 
 One annoying thing that comes out of the very tight benchmarks posted is that scc spends a non trivial amount of time parsing the JSON it uses for language features. For example over a few runs with the trace logging enabled I recorded the following,
@@ -265,7 +335,7 @@ That is ~10 milliseconds spent every time it is called just getting ready to par
 
 The entire step can actually be removed into a pre-process step of `go generate` and shave the time of every call to `scc` by a few milliseconds for each run.
 
-Of course this means a non trivial change to how the task in `go generate` works, but I think the result is probably worth it.
+Of course this means a non trivial change to how the task in `go generate` works, but I think the result is probably worth it. Its something I will consider in the future. I like the way it currently works because it allows the rapid changes that allowed bit-masks and such to be implemented.
 
 
 
@@ -280,7 +350,7 @@ With that out of the way time for the usual benchmarks. Similar to the compariso
 
 Tools under test
 
- - scc 1.9.0
+ - scc 1.10.0
  - tokei 8.0.1
  - loc 0.4.1
  - polyglot 0.5.10
@@ -338,6 +408,161 @@ root@ubuntu-c-16-sgp1-01:~# ./polyglot tokeitest/
 ```
 
 As you can see both `tokei` and `scc` get the numbers correct. The other tools have varying degrees of success.
+
+#### Performance
+
+Finding a fair benchmark for code counters is hard.
+
+Ideally what we want to test is the core loop of the application. However this means a handicap for both `tokei` and `scc` as they both check the presence of strings which neither `loc` nor as far as I can tell `polyglot` do. Its also an issue for any regular project because `loc` and `scc` both count JSON files with `tokei` and `polyglot` not doing so. This is true for other languages as well as none of the tools share the same language definitions. Its also harder for `scc` as it attempts to perform complexity estimates, which while they can be disabled still incurs some overhead. Some tools check recursively for git-ignore files, some have deny-lists, some have duplicate detection, some have checks for binary files, and the list goes on.
+
+The result is that every tool over any normal project is doing different amounts of work. As such I decided to create a totally artificial test, for which every tool under test produces the exact same result. This way each tool is working equally hard for the same number of bytes they need to process.
+
+To create this situation I picked the language Java and created the following file.
+
+{{<highlight java>}}
+public class Test
+{
+    int j = 0;
+    public static void main(String[] args)
+    {
+        Foo f = new Foo();
+        f.bar();
+        f.bar();
+    }
+}
+
+class Foo
+{
+    public void bar()
+    {
+          System.out.println("FooBar"); //Not counted
+          System.out.println("this is a string")
+    }
+}
+
+{{</highlight>}}
+
+20 lines, 18 lines of code, 2 blank lines. This was the first combination I could find for which every tool produced the same result. `polyglot` was especially troublesome in this regard as it was the one that produced incorrect results most of the time. Once done I repurposed my script which create directories of different depths with files to write out the above.
+
+{{<highlight python>}}
+# Create folders with files in them to check out the performance of code counters
+
+import os
+import errno
+
+code = '''public class Test
+{
+    int j = 0;
+    public static void main(String[] args)
+    {
+        Foo f = new Foo();
+        f.bar();
+        f.bar();
+    }
+}
+
+class Foo
+{
+    public void bar()
+    {
+          System.out.println("FooBar"); //Not counted
+          System.out.println("this is a string")
+    }
+}
+
+'''
+
+def make_sure_path_exists(path):
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+
+# Case 0
+# Create a directory thats quite deep and put a 10000 files at the end
+deep_dir = './' + '/'.join(["0" for x in range(21)]) + '/'
+make_sure_path_exists(deep_dir)
+for x in range(10000):
+    with open(deep_dir + str(x) +'.java', 'w') as myfile:
+        myfile.write(code)
+
+# Case 1
+# Create a directory thats quite deep and put 100 files in each folder
+deep_dir = './'
+for x in range(21):
+    deep_dir += '1/'
+    make_sure_path_exists(deep_dir)
+    for x in range(100):
+        with open(deep_dir + str(x) +'.java', 'w') as myfile:
+            myfile.write(code)
+
+# Case 2
+# Create a directory that has a single level and put 10000 files in it
+deep_dir = './2/'
+make_sure_path_exists(deep_dir)
+for x in range(10000):
+    with open(deep_dir + str(x) +'.java', 'w') as myfile:
+        myfile.write(code)
+
+# Case 3
+# Create a directory that has a two levels with 10000 directories in the second with a single file in each
+deep_dir = './3/'
+make_sure_path_exists(deep_dir)
+for x in range(10000):
+    tmp_dir = deep_dir + str(x) + '/'
+    make_sure_path_exists(tmp_dir)
+    with open(tmp_dir + '1.java', 'w') as myfile:
+        myfile.write(code)
+
+# Case 4
+# Create a directory that with 10 subdirectories and 1000 files in each
+deep_dir = './4/'
+make_sure_path_exists(deep_dir)
+for x in range(10):
+    tmp_dir = deep_dir + str(x) + '/'
+    make_sure_path_exists(tmp_dir)
+    for x in range(1000):
+        with open(tmp_dir + str(x) +'.java', 'w') as myfile:
+            myfile.write(code)
+
+# Case 5
+# Create a directory that with 20 subdirectories and 500 files in each
+deep_dir = './5/'
+make_sure_path_exists(deep_dir)
+for x in range(20):
+    tmp_dir = deep_dir + str(x) + '/'
+    make_sure_path_exists(tmp_dir)
+    for x in range(500):
+        with open(tmp_dir + str(x) +'.java', 'w') as myfile:
+            myfile.write(code)
+
+# Case 6
+# Create a directory that with 5 subdirectories and 2000 files in each
+deep_dir = './6/'
+make_sure_path_exists(deep_dir)
+for x in range(5):
+    tmp_dir = deep_dir + str(x) + '/'
+    make_sure_path_exists(tmp_dir)
+    for x in range(2000):
+        with open(tmp_dir + str(x) +'.java', 'w') as myfile:
+            myfile.write(code)
+
+# Case 7
+# Create a directory that with 100 subdirectories and 100 files in each
+deep_dir = './7/'
+make_sure_path_exists(deep_dir)
+for x in range(100):
+    tmp_dir = deep_dir + str(x) + '/'
+    make_sure_path_exists(tmp_dir)
+    for x in range(100):
+        with open(tmp_dir + str(x) +'.java', 'w') as myfile:
+            myfile.write(code)
+{{</highlight>}}
+
+With that done I was able to run each of the code counters in what hopefully is percieved to be a fair way. The point of this is not to pick on any single counter, but instead to discover how fast the core counter is all things being equal. Some counters will naturally be faster in some situations over others.
+
+
 
 #### Cython f3267144269b873bcb87a9fcafe94b37be1bcfdc
 
@@ -491,6 +716,10 @@ Benchmark #1: GOGC=-1 ./scc1.10 -c linux
   Range (min … max):    1.167 s …  1.185 s
 
 ```
+
+
+
+Conclustions. In the tight core loop of counting both tokei and loc are still faster than `scc`. The reason `scc` is able to keep pace on smaller reporitories is because `scc` is able to start processing while scanning the file directory whereas tokei and loc wait till the end. 
 
 https://www.reddit.com/r/rust/comments/9aa6t8/tokei_v800_language_filtering_dynamic_term_width/
 https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/
