@@ -1,21 +1,21 @@
 ---
-title: Sloc Cloc and Code Revisited - Optimizing what is already a fast Go program
+title: Sloc Cloc and Code Revisited - Optimizing an already fast Go application
 date: 2018-09-06
 ---
 
-I don't want to make any false claims about the impact of the release of `scc` and the blog post about it https://boyter.org/posts/sloc-cloc-code/ but following its release both `tokei` and `loc` have been updated with impressive performance improvements and a new tool `polyglot` was released which claims excellent performance.
+I don't want to make any false claims about the impact of the release of `scc` and the blog post about it https://boyter.org/posts/sloc-cloc-code/ but following its release both `tokei` and `loc` have been updated with impressive performance improvements and a new tool `polyglot` was released which claims excellent performance. In addition the tool `gocloc` appears to be getting updates as well. All good stuff.
 
-Heck I even finished that article with the prophetic statement,
+I  finished that article with the what now seems prophetic statement,
 
 > Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats much faster than scc with duplicate detection and maybe complexity calculations. I would expect it to also be much faster than anything I could ever produce. It's possible that Tokei and Loc could run faster already just by compiling for the specific CPU they run on or through the SIMD optimizations that at time of writing are still to hit the main-line rust compiler.
 
-Looks like I called it, at least on the performance front. However it was not Rust/C/C++ or even D that stepped up but a polyglot which was written in a language I had never heard of ATS. `scc` is still the only tool with complexity estimates, and the author of tokei explicitly has ruled it out as a change https://github.com/Aaronepower/tokei/issues/237
+Looks like I called it, at least on the performance front. All the projects mentioned are getting renewed attention. However it was not Rust/C/C++ or even D that stepped up to be the new tool but `polyglot` which was written in ATS which is a language I had never heard of. That said `scc` is still the only tool with complexity estimates, and the author of tokei at least has explicitly has ruled it out as a change https://github.com/Aaronepower/tokei/issues/237 so I give myself half marks on this one.
 
 If my blog post in any way shape or form pushed forward the performance of code counters and resulted in the saving of countless amounts of time around the IT industry I will consider that the highlight of my career thus far.
 
-Of course it also means I need to revisit `scc` and see what I can do to bring `scc` back into contention on the performance front.
+Of course being the person I am it also means I need to revisit `scc` and see what I can do to bring it back into contention on the performance front.
 
-I figured that since I was already making changes to improve accuracy https://boyter.org/posts/sloc-cloc-code-revisited/ I would have a poke through the source and see if there were any wins to made on the performance front. However one large issue with this was that I spent a great amount of time making `scc` about as fast as I could the first time around. I seriously doubt if there are going to be too may things I know about that I missed, or new things I have discovered that I can apply this time around.
+I figured that since I was already making changes to improve accuracy https://boyter.org/posts/sloc-cloc-code-revisited/ I would have a poke through the source and see if there were any wins to made on the performance front. One large issue with this was that I spent a great amount of time making `scc` about as fast as I could the first time around. I seriously doubted when I started if there was going to be many things I missed.
 
 One of the really neat things about Go 1.11 that I discovered is that the web pprof view now supports flame graphs. Flame graphs for those that don't know show a base from which methods rise (or fall as the Go one is inverted) out of. The wider the base of the flame the more time is spent in that method. Taller flames indicate more method calls, where one method calls another. They give a nice visual overview of where the program is spending its time and how many calls are made.
 
@@ -23,7 +23,7 @@ Candidates for optimization are wide flames, ideally at the tip. As mentioned od
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/flame-graph-start.png)
 
-On the far right you can see the code which walks the file tree. Next to it is the code which pulls files into memory. To the left of that is the code which processes the files. The methods which process the files take up more room. This indicates that the application is CPU bound, as that method is only invoked when the far right methods are finished, and which wholly deal with getting the files off disk into memory.
+On the far right you can see the code which walks the file tree. Next to it is the code which pulls files into memory. To the left of that is the code which processes the files. The methods which process the files take up more room. This indicates that the application is CPU bound, as that method is only invoked when the far right methods have finished their work, and they only deal with getting the files off disk into memory.
 
 One big issue with flame graphs is that if you aren't calling out to methods it looks rather flat like the above. This can be solved by breaking large methods down into smaller ones, which will produce more tips in the flame graph.
 
@@ -89,7 +89,7 @@ for match in start_comments:
     check char match 
 ```
 
-Loop in a loop can be a performance problem as I found in a previous play with performance https://boyter.org/2017/03/golang-solution-faster-equivalent-java-solution/ where flattening the loop improved an algorithms performance 3x both in Java and in Go.
+Loop in a loop can be a performance problem as I found in a previous play with performance https://boyter.org/2017/03/golang-solution-faster-equivalent-java-solution/ where flattening the loop improved an algorithms performance considerably in both Java and Go.
 
 So I tried flattening the loop. My first candidate to try was the complexity check logic. I turned the following structure which has a nested loop over the items, and then the bytes they have in turn,
 
@@ -147,9 +147,9 @@ BenchmarkCheckComplexity-8   	 3000000	       466 ns/op
 BenchmarkCheckComplexityNew-8   	 2000000	       699 ns/op
 ```
 
-A meaningful result, but not the one I wanted. Turns out that at this small level of nested looping there is no performance to be gained here. In fact in this case the opposite occurred and it actually ran slower. This was especially annoying because any gains here would have really helped speed up all of the hot methods.
+A meaningful result, but not the one I wanted. Turns out that at this small level of nested looping there is no performance to be gained here. In fact in this case the opposite occurred and it actually ran slower. This was especially annoying because any gains here could have been applied universally and would have really helped speed up the hot methods.
 
-Another thought was to do what the complexity check does and build a small list of the first bytes for each lookup and then loop that to see if we should process any further. As mentioned the complexity check does this and as such it was a fairly simple thing to add, since similar code already existed. Another benchmark later.
+Another thought was to do what the complexity check does in the checking for open matchs (it finds open comments, strings etc..) and build a small list of the first bytes for each lookup and then loop that to see if we should process any further. As mentioned the complexity check does this and as such it was a fairly simple thing to add, since similar code already existed. Another benchmark later.
 
 ```
 github.com/boyter/scc/processor.checkForMatchMultiOpen (15.15%, 0.75s) "with byte check"
@@ -162,7 +162,7 @@ At this point I was running out of ideas.
 
 I decided I would have a look at changing the order of the if statements in the different state cases. Due to how they had a bailout condition ideally you want to hit the most common ones first in order to trigger these conditions and avoid additional processing. Note that this is a serious micro optimization. It only makes sense to even consider something like this because the application runs in a very tight loop.
 
-I started tweaking the order of the if conditions in the process blank state. The results were rather surprising.
+I started tweaking the order of the if conditions in the blank state processor. The results were rather surprising.
 
 ```
 $ hyperfine -m 50 'scc cpython'
@@ -244,18 +244,32 @@ In effect the loop structure of
 
 ```
 for byte in file
-	switch state
+  switch
+    code state
+      process
+    blank state
+      process
+    comment state
+      process
 ```
 
 becomes
 
 ```
 for byte in file
-	switch state
-		loop in state
+  switch
+    code state
+      loop bytes
+        process
+    blank state
+      loop bytes
+        process
+    comment state
+      loop bytes
+        process
 ```
 
-This seems counter intuitive at first because its introducing a loop in loop, but because each of the state loops would be very tight it would mean that the loops code would be much shorter which increases the chance that the loops spend time in the lower level CPU caches. It also has the added benefit of improving the visibility of the flame graph as each state loop is pulled out into another method.
+This seems counter intuitive at first because its introducing a loop in loop, but because each of the state loops would be very tight it would mean that the loops code would be much shorter. In theory this increases the chance that the loops spend time in the lower level CPU caches. It also has the added benefit of improving the visibility of the flame graph as each state loop is pulled out into another method.
 
 After implementing the flame graph looks like the below,
 
@@ -281,11 +295,13 @@ Wow! Almost a 50% reduction in the time to run. Pretty clearly that guess about 
 
 I was about to call it a day at this point when a colleague raised a very interesting PR which promised to improve performance even more. He implemented something I should have considered a long time ago, bit-masks.
 
-Thats right bit-masks. How in the heck of all thats holy did I forget bit-masks. In my defense for day to day programming I have needed bit-masks exactly 0 times. A few PR fixes later and boom another performance gain. It also allowed me to simplify the code considerably further. I swapped over all the checks that were working against the first byte for bit-marks, and suddenly one of the most expensive methods I added `shouldProcess` was optimized away.
+Thats right bit-masks. How in the heck of all thats holy did I forget bit-masks. The only explanation I can come up with is that for day to day programming I have needed bit-masks exactly 0 times. My day job is usually writing web api's where the network is my biggest bottleneck. That said I still should have considered this.
+
+A few PR fixes later and boom another performance gain. It also allowed me to simplify the code considerably further. I swapped over all the checks that were working against the first byte for bit-marks, and suddenly one of the most expensive methods I added `shouldProcess` was optimized away.
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/methods-refactor-bitmask.png)
 
-Another very nice thing my colleague raise was that there was contention for the number of goroutines launched https://github.com/boyter/scc/pull/31 and he graciously supplied a very nice nice patch which resolved the issue. It also had the nice benefit of reducing load on the goroutine scheduler which speed things up a little bit.
+Another very nice thing my colleague raised was that there was contention for the number of goroutines launched when walking the file system https://github.com/boyter/scc/pull/31 and he graciously supplied a very nice nice patch which resolved the issue. It also had the nice benefit of reducing load on the goroutine scheduler which speed things up a little bit.
 
 ```
 * linux-4.19-rc1 on a 4 core c5.xlarge:
@@ -312,10 +328,59 @@ Benchmark #1: ./scc-if linux
 ```
 Which worked out to be slightly worse with the if statements. Hence I stuck with the switch.
 
-One thing I had identified in my original post about `scc` was that the Go garbage collector was a hindrance to performance. I had also tried turning it off with bad results on machines with less memory. As such I took a slightly different approach. By default `scc` turns the garbage collector off, and if by default 10000 files are parsed then it is turned back on. Usually for small projects this means it is very off and you get the benefit.
+Thinking what else could possibly speed this up David https://github.com/dbaggerman submitted yet another PR https://github.com/boyter/scc/pull/33 with something I had considered a while back and discarded for one reason or another, using a Trie structure to determine if there is a match or not. His impementation was better than mine and it looked like he was getting about a 15% speedup on some processes. 
+
+DEFINE TRIE HERE
+
+In theory because of how the trie works you can remove the bitmask checks entirely.
+
+```
+4 cores, master: Time (mean ± σ): 6.360 s ± 0.007 s [User: 24.677 s, System: 0.679 s]
+4 cores, tries: Time (mean ± σ): 5.489 s ± 0.008 s [User: 21.145 s, System: 0.690 s]
+
+8 cores, master: Time (mean ± σ): 3.217 s ± 0.005 s [User: 24.840 s, System: 0.708 s]
+8 cores, tries: Time (mean ± σ): 2.784 s ± 0.005 s [User: 21.270 s, System: 0.733 s]
+
+16 cores, master: Time (mean ± σ): 1.660 s ± 0.016 s [User: 24.936 s, System: 0.778 s]
+16 cores, tries: Time (mean ± σ): 1.446 s ± 0.014 s [User: 21.378 s, System: 0.801 s]
+```
+
+I merged the change in and started verifying. Sadly at first I noticed that the results were inconsistent.
+
+For example,
+
+```
+$ hyperfine 'scc -c ~/Projects/cpython'
+Benchmark #1: scc -c ~/Projects/cpython
+  Time (mean ± σ):     481.4 ms ±  18.4 ms    [User: 1.100 s, System: 2.306 s]
+  Range (min … max):   467.8 ms … 518.9 ms
+```
+
+vs
+
+```
+$ hyperfine 'scc -c ~/Projects/cpython'
+Benchmark #1: scc -c ~/Projects/cpython
+  Time (mean ± σ):     526.2 ms ±  14.5 ms    [User: 1.334 s, System: 2.235 s]
+  Range (min … max):   502.6 ms … 560.8 ms
+```
+
+However thinking about how the application works. As mentioned before it spends most of its time not moving state. As such you want to identify this state as quickly as possible, even if it means redoing work when you do need to move. Putting the bitmask back in for just the code state calculations,
+
+```
+$ hyperfine 'scc -c ~/Projects/cpython'
+Benchmark #1: scc -c ~/Projects/cpython
+  Time (mean ± σ):     505.2 ms ±  14.1 ms    [User: 1.034 s, System: 2.401 s]
+  Range (min … max):   490.1 ms … 536.4 ms
+```
+
+Seems its worth keeping the bit-mask checks, at least for the hotter methods.
 
 
-One annoying thing that comes out of the very tight benchmarks posted is that scc spends a non trivial amount of time parsing the JSON it uses for language features. For example over a few runs with the trace logging enabled I recorded the following,
+
+One thing I had identified in my original post about `scc` was that the Go garbage collector was a hindrance to performance. I had also tried turning it off with bad results on machines with less memory. As such I took a slightly different approach. By default `scc` turns the garbage collector off, and if by default 10000 files are parsed then it is turned back on. This results in a nice speed gain for smaller projects.
+
+One annoying thing that comes out of the very tight benchmarks posted is that `scc` spends a non trivial amount of time parsing the JSON it uses for language features. For example over a few runs with the trace logging enabled I recorded the following,
 
 ```
 TRACE 2018-09-05T22:20:40Z: milliseconds unmarshal: 11
@@ -331,11 +396,11 @@ TRACE 2018-09-08T04:36:48Z: milliseconds unmarshal: 14
 TRACE 2018-09-08T04:36:48Z: milliseconds build language features: 3
 ```
 
-That is ~10 milliseconds spent every time it is called just getting ready to parse. The most annoying part is that it gets worse with slower CPU's or if you CPU is being throttled for some reason.
+That is ~10 milliseconds spent every time it is called just getting ready to parse. The most annoying part is that it gets worse with slower CPU's or if you CPU is being throttled for some reason. The above were all observed when running on a laptop on the train, and being throttled as a result.
 
 The entire step can actually be removed into a pre-process step of `go generate` and shave the time of every call to `scc` by a few milliseconds for each run.
 
-Of course this means a non trivial change to how the task in `go generate` works, but I think the result is probably worth it. Its something I will consider in the future. I like the way it currently works because it allows the rapid changes that allowed bit-masks and such to be implemented.
+Of course this means a non trivial change to how the task in `go generate` works, but I think the result is potentially worth it. It is something I will consider in the future. I like the way it currently works because it allows the rapid changes that allowed bit-masks and such to be implemented.
 
 
 
@@ -354,6 +419,7 @@ Tools under test
  - tokei 8.0.1
  - loc 0.4.1
  - polyglot 0.5.10
+ - gocloc b3aa5f37096bbbfa22803a532214a11dbefa0206
 
 I compiled `tokei` and `loc` on the machine used for testing using the latest version of Rust 1.28.
 
@@ -413,9 +479,11 @@ As you can see both `tokei` and `scc` get the numbers correct. The other tools h
 
 Finding a fair benchmark for code counters is hard.
 
-Ideally what we want to test is the core loop of the application. However this means a handicap for both `tokei` and `scc` as they both check the presence of strings which neither `loc` nor as far as I can tell `polyglot` do. Its also an issue for any regular project because `loc` and `scc` both count JSON files with `tokei` and `polyglot` not doing so. This is true for other languages as well as none of the tools share the same language definitions. Its also harder for `scc` as it attempts to perform complexity estimates, which while they can be disabled still incurs some overhead. Some tools check recursively for git-ignore files, some have deny-lists, some have duplicate detection, some have checks for binary files, and the list goes on.
+Ideally what we want to test is the core loop of the application. However this means both `tokei` and `scc` are disadvantages as they both check the presence of strings which neither `loc` nor as far as I can tell `polyglot` do. Its also an issue for any random project because `loc` and `scc` both count JSON files while `tokei` and `polyglot` do not. This applies to other language types as well as none of the tools share the same language definitions. Some tools check recursively for git-ignore files, some have deny-lists, some have duplicate detection, some have checks for binary files, and the list goes on.
 
-The result is that every tool over any normal project is doing different amounts of work. As such I decided to create a totally artificial test, for which every tool under test produces the exact same result. This way each tool is working equally hard for the same number of bytes they need to process.
+It's also harder for `scc` as it attempts to perform complexity estimates, which can be disabled and do speed things up still incurs some overhead.
+
+The result is that every tool over any random project is doing different amounts of work. As such I decided to create a totally artificial test, for which every tool under test produces the exact same result. This way each tool is has the same number of bytes they need to process to produce the same output, and it should come down to how they walk the file system and the algorithms used in the core loop.
 
 To create this situation I picked the language Java and created the following file.
 
@@ -560,7 +628,13 @@ for x in range(100):
             myfile.write(code)
 {{</highlight>}}
 
-With that done I was able to run each of the code counters in what hopefully is percieved to be a fair way. The point of this is not to pick on any single counter, but instead to discover how fast the core counter is all things being equal. Some counters will naturally be faster in some situations over others.
+With that done I was able to run each of the code counters in what hopefully is percieved to be a fair way. The point of this is not to pick on any single counter, but instead to discover how fast the core counter and the file processing is all other things being as equal as possible. 
+
+Some counters will naturally be faster in some situations over others. I tried to keep the playing field as level as possible because its fairly easy to craft situations where one counter is faster than another. 
+
+I should note, that as far as I am aware none of the counters under test have any logic to explicitly deal with the above artifical test and as such are not able to game it to achive a higher score.
+
+
 
 
 
