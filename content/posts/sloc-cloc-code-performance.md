@@ -374,35 +374,36 @@ Benchmark #1: scc -c ~/Projects/cpython
   Range (min … max):   490.1 ms … 536.4 ms
 ```
 
-Seems its worth keeping the bit-mask checks, at least for the hotter methods.
+Seems its worth keeping the bit-mask checks, at least for the hotter methods. However David had other ideas, and instead split out the trie similar to how the the bit-masks and a merge later.
 
+```
+$ hyperfine 'scc -c ~/Projects/cpython'
+Benchmark #1: scc -c ~/Projects/cpython
+  Time (mean ± σ):     430.6 ms ±  25.0 ms    [User: 554.5 ms, System: 2327.7 ms]
+  Range (min … max):   417.8 ms … 500.7 ms
+```
 
+In addition a nice pickup by Jeff Haynie https://github.com/jhaynie in a PR managed to remove some pointless allocations which should help performance just that little bit more.
 
-One thing I had identified in my original post about `scc` was that the Go garbage collector was a hindrance to performance. I had also tried turning it off with bad results on machines with less memory. As such I took a slightly different approach. By default `scc` turns the garbage collector off, and if by default 10000 files are parsed then it is turned back on. This results in a nice speed gain for smaller projects.
+One thing I had identified in my original post about `scc` was that the Go garbage collector was a hindrance to performance. I had also tried turning it off with bad results on machines with less memory. As such I took a slightly different approach. By default `scc` turns the garbage collector off, and if by default 10000 files are parsed then it is turned back on. This results in a nice speed gain for smaller projects. Of course this did result in a bug where the GC gettings leaked out, but thankfully Jeff picked this one up as well and I ensured the scope was limited to the `scc` main.
 
 One annoying thing that comes out of the very tight benchmarks posted is that `scc` spends a non trivial amount of time parsing the JSON it uses for language features. For example over a few runs with the trace logging enabled I recorded the following,
 
 ```
-TRACE 2018-09-05T22:20:40Z: milliseconds unmarshal: 11
-TRACE 2018-09-05T22:20:40Z: milliseconds build language features: 1
-
-TRACE 2018-09-08T04:34:28Z: milliseconds unmarshal: 5
-TRACE 2018-09-08T04:34:28Z: milliseconds build language features: 2
-
-TRACE 2018-09-08T04:35:58Z: milliseconds unmarshal: 3
-TRACE 2018-09-08T04:35:58Z: milliseconds build language features: 2
-
-TRACE 2018-09-08T04:36:48Z: milliseconds unmarshal: 14
-TRACE 2018-09-08T04:36:48Z: milliseconds build language features: 3
+TRACE 2018-09-14T07:20:21Z: milliseconds build language features: 42
 ```
 
-That is ~10 milliseconds spent every time it is called just getting ready to parse. The most annoying part is that it gets worse with slower CPU's or if you CPU is being throttled for some reason. The above were all observed when running on a laptop on the train, and being throttled as a result.
+That is 40 milliseconds spent every time `scc` is called just getting ready to parse. The most annoying part is that it gets worse with slower CPU's or if you CPU is being throttled for some reason. 
 
 The entire step can actually be removed into a pre-process step of `go generate` and shave the time of every call to `scc` by a few milliseconds for each run.
 
-Of course this means a non trivial change to how the task in `go generate` works, but I think the result is potentially worth it. It is something I will consider in the future. I like the way it currently works because it allows the rapid changes that allowed bit-masks and such to be implemented.
+Of course this means a non trivial change to how the task in `go generate` works, but I think the result is potentially worth it in the future. It is something I will consider in the future. I like the way it currently works because it allows the rapid changes that allowed bit-masks and such to be implemented.
 
+The result of all of the above? It now appears that `scc` is almost not bottlenecked by CPU anymore but by reading files off disk, at least on my development machine. Almost the holy grail for any application that works like this.
 
+![Flame Graph Final](/static/sloc-cloc-code-revisited/flame-final.png)
+
+The CPU flame is almost the same width as the disk access. An excellent result from where it started. It also means there is little point investigating too much futher.
 
 
 ### Benchmarks
@@ -794,6 +795,9 @@ Benchmark #1: GOGC=-1 ./scc1.10 -c linux
 
 
 Conclustions. In the tight core loop of counting both tokei and loc are still faster than `scc`. The reason `scc` is able to keep pace on smaller reporitories is because `scc` is able to start processing while scanning the file directory whereas tokei and loc wait till the end. 
+
+
+Probably the sadest thing about this post is that for the most part is how long it is and all about discussing performance. The previous post about fixing the bugs was far shorter and less interesting. Its probably hard to make any post about fixing off by one errors interesting, even though those are the ones that produce the most value.
 
 https://www.reddit.com/r/rust/comments/9aa6t8/tokei_v800_language_filtering_dynamic_term_width/
 https://www.reddit.com/r/rust/comments/99e4tq/reading_files_quickly_in_rust/
