@@ -9,13 +9,15 @@ I  finished that article with what I am now claiming as a prophetic statement,
 
 > Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats much faster than scc with duplicate detection and maybe complexity calculations. I would expect it to also be much faster than anything I could ever produce. It's possible that Tokei and Loc could run faster already just by compiling for the specific CPU they run on or through the SIMD optimizations that at time of writing are still to hit the main-line rust compiler.
 
-Looks like I called it, at least on the performance front. All the projects mentioned are getting renewed attention. However it was not Rust/C/C++ or even D that stepped up to be the new tool but `polyglot` written in ATS which is a language I had never heard of. That said `scc` is still the only tool with complexity estimates, and the author of `tokei` at least has explicitly has ruled it out as a change https://github.com/Aaronepower/tokei/issues/237
+Totally claiming that I called it, at least when regarding performance. All the projects mentioned are getting renewed attention. However it was not Rust/C/C++ or even D that stepped up to be the new tool but `polyglot` written in ATS which is a language I had never heard of. That said `scc` is still the only tool with complexity estimates, and the author of `tokei` at least has explicitly has ruled it out as a change https://github.com/Aaronepower/tokei/issues/237
 
 If my blog post in any way shape or form pushed forward the performance of code counters and resulted in the saving of countless amounts of time around the IT industry I will consider that the highlight of my career thus far.
 
 Of course being the person I am it also means I need to revisit `scc` and see what I can do to bring it back into contention on the performance front.
 
-I figured that since I was already making changes to improve accuracy https://boyter.org/posts/sloc-cloc-code-revisited/ I would have a poke through the source and see if there were any wins to made on the performance front. One large issue with this was that I spent a great amount of time making `scc` about as fast as I could the first time around. I seriously doubted when I started if there was going to be many things I missed, which of course is a naive thing to think.
+I figured that since I was already making changes to improve accuracy https://boyter.org/posts/sloc-cloc-code-revisited/ I would have a poke through the source and see if there were any wins to made on the performance front. One large issue with this was that I spent a great amount of time making `scc` about as fast as I could the first time around. I seriously doubted when I started if there was going to be many things I missed, which is a naive thing to think.
+
+#### The quest for more speed
 
 One of the really neat things about Go 1.11 that I discovered is that the web pprof view now supports flame graphs. Flame graphs for those that don't know show a base from which methods rise (or fall as the Go one is inverted) out of. The wider the base of the flame the more time is spent in that method. Taller flames indicate more method calls, where one method calls another. They give a nice visual overview of where the program is spending its time and how many calls are made.
 
@@ -25,7 +27,7 @@ Candidates for optimization are wide flames, ideally at the tip. As mentioned od
 
 On the far right you can see the code which walks the file tree. Next to it is the code which pulls files into memory. To the left of that is the code which processes the files. The methods which process the files take up more room. This indicates that the application is CPU bound, as that method is only invoked when the far right methods have finished their work, and they only deal with getting the files off disk into memory.
 
-One big issue with flame graphs is that if you aren't calling out to methods it looks rather flat like the above. This can be solved by breaking large methods down into smaller ones, which will produce more tips in the flame graph.
+One big issue with flame graphs is that if you aren't calling out to methods it looks rather flat like the above. This is symptomatic of either a very dense method (consider breaking it up) or a very CPU bound method which you can do little about. This can be solved by breaking large methods down into smaller ones, which will produce more tips in the flame graph.
 
 From my previous benchmarks with `scc` I was aware that the method `complexityCount` was one of the more painful ones. At the time I managed to get it down to being about as optimal as I thought. However the brilliance of the flame graph is that it makes it easy to see where additional calls are being made and how long it spends in them.
 
@@ -33,13 +35,13 @@ Clicking into that method produced the following.
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/flame-graph-interesting.png)
 
-Interesting. Looks like there is some sort of hash table lookup and if it can be avoided it will shave 6% of the total running time of the application. The offending code is,
+Interesting. Looks like there is a hash table lookup and if it can be avoided it will shave 6% of the total running time of the application. The offending code is,
 
 {{<highlight go>}}
 complexityBytes := LanguageFeatures[fileJob.Language].ComplexityBytes
 {{</highlight>}}
 
-Every time the method is called it goes back to the language lookup and looks for the bytes it needs to identify complexity. This method is called a lot, almost every single byte in the file in some cases. If we look this information up once and pass it along to the method we can save potentially thousands of lookups and a lot of CPU burn time. A simple change to implement and the result looks like the below.
+Every time the method is called it goes back to the language lookup and looks for the bytes it needs to identify complexity. This method is called a lot, almost every single byte in the file in some cases. If we look this information up once and pass it along to the method we can save potentially thousands of lookups and a lot of CPU burn time. A simple change to implement this and after another test the result looks like the below.
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/flame-graph-after.png)
 
@@ -79,12 +81,12 @@ Benchmark #1: scc -c ~/Projects/redis
   Range (min … max):    86.9 ms … 102.7 ms
 ```
 
-Only 2 ms difference between the run with complexity vs the one without when running against the redis source code. It does give an idea of just how inefficient that lookup was, and how much those additional savings helped, to the point that a 100 ms run had no real difference. I really did not expect there to be such a massive performance gain that easily.
+Only 2 ms difference between the run with complexity vs the one without when running against the redis source code. It does give an idea of just how inefficient that lookup was, and how those additional savings helped. So much so that a 100 ms run had no real difference in the runtime. I really did not expect there to be such a massive performance gain that easily.
 
 Moving on. Another thought I had was that the core matching algorithm has a very tight nested loop like so
 
 ```
-for match in start_comments:
+for match in complexity_checks:
   for char in match
     check if match 
 ```
@@ -115,7 +117,7 @@ into the following representation,
 "for _for(_if _if(_switch _while _else _||_&&_!=_=="
 ```
 
-Separated by a null byte separator (represented by _ in this case). I could then reset the state when that was hit in order to determine if we have a match or not. The loop became similar to the below.
+Separated by a null byte separator (represented by _ above). I could then reset the state when that was hit in order to determine if we have a match or not. The loop became similar to the below.
 
 {{<highlight go>}}
 potentialMatch := true
@@ -143,7 +145,7 @@ for i := 0; i < len(complexity); i++ {
 The theory being that by avoiding the nested loop it should have less bookkeeping to do. We just reset the state when we hit a null byte and continue processing. I was fairly confident that this would produce a meaningful result. A quick benchmark later, with the existing method and the new one.
 
 ```
-BenchmarkCheckComplexity-8   	 3000000	       466 ns/op
+BenchmarkCheckComplexity-8      	 3000000	       466 ns/op
 BenchmarkCheckComplexityNew-8   	 2000000	       699 ns/op
 ```
 
@@ -181,23 +183,23 @@ Benchmark #1: scc cpython
   Range (min … max):   516.5 ms … 574.7 ms
 ```
 
-I set hyperfine to run 50 times to try and remove any noise from the results and converge on a result. As you can see from the above changing the if conditions on such a tight loop can actually improve performance quite a bit. In this case the time to process ended up taking 15 ms less than before for the best order of the statements I found.
+I set hyperfine to run 50 times to try and remove any noise from the results and converge on a result. As you can see from the above, changing the if conditions on such a tight loop can actually improve performance quite a bit. In this case the time to process ended up taking ~10 ms less for the best order of the statements I found.
 
 With the blank state sorted I made the change permanent and had a look at the other conditions, starting with multi-line comments.
 
 ```
 $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
-  Time (mean ± σ):     527.1 ms ±   9.5 ms    [User: 1.899 s, System: 1.793 s]
-  Range (min … max):   502.6 ms … 577.8 ms
+  Time (mean ± σ):     540.6 ms ±  20.0 ms    [User: 1.936 s, System: 1.825 s]
+  Range (min … max):   515.4 ms … 607.9 ms
 
 $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
-  Time (mean ± σ):     540.6 ms ±  20.0 ms    [User: 1.936 s, System: 1.825 s]
-  Range (min … max):   515.4 ms … 607.9 ms
+  Time (mean ± σ):     527.1 ms ±   9.5 ms    [User: 1.899 s, System: 1.793 s]
+  Range (min … max):   502.6 ms … 577.8 ms
 ```
 
-Another small gain of almost 10 ms from re-ordering the if statements. I then moved to the last state that has any if conditionals which was the code state. This state is where the application spends most of its time so any wins here are likely to yield the biggest benefits.
+Another small gain of almost ~10 ms from re-ordering the if statements. I then moved to the last state that with if conditionals, the code state. This state is where the application spends most of its time so any wins here are likely to yield the biggest benefits.
 
 ```
 Benchmark #1: scc cpython
@@ -210,7 +212,7 @@ Benchmark #1: scc cpython
   Range (min … max):   476.3 ms … 539.5 ms
 ```
 
-Since this is where the application spends most of its time it does indeed give the biggest gain with about 30 ms of time shaved from the previous result. 
+Since this is where the application spends most of its time it does indeed give the biggest gain with about 30 ms of time shaved from the previous result.
 
 The final result of reordering the if statements? About 50 ms of processing time for the repository I chose which is almost a 10% processing time saving. For tight loops messing around with the order of if statements can produce results.
 
@@ -236,9 +238,9 @@ Benchmark #1: scc cpython
 
 The result is not a bad one at all. In fact this was a very large performance gain vs the amount of work required.
 
-I then started thinking about the problem some more. 
+I then started thinking about the problem some more. The following struck me after a good nights sleep and walking in a park.
 
-The application as written has a main loop which processes over every byte in the file. It keeps track of the state it is in and uses a switch over that state to know what processing should happen. I was wondering if rather than having a large single loop over the whole byte array, what if when we entered a new state we started a new loop which processed bytes until the state changed or we hit a newline? IE rather than loop and check the state, change state and then loop. Would this be faster?
+The application as written has a main loop which processes over every byte in the file. It keeps track of the state it is in and uses a switch over that state to know what processing should happen. I was wondering if rather than having a large single loop over the whole byte array, what if when we entered a new state we started a new loop which processed bytes until the state changed or we hit a newline? That is, rather than loop and check the state, change state and then loop. Would this be faster?
 
 In effect the loop structure of 
 
@@ -279,7 +281,7 @@ And the new profile output,
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/methods-refactor.png)
 
-Both of which suggest that the `shouldProcess` method is our next target. More importantly however is what affect has this has on the core loop. I took version 1.9.0 of `scc` and tried it out against the current branch version on the Linux kernel.
+Both of which suggest that the `shouldProcess` method is our next target. More importantly is what affect has this has on the core loop. I took version 1.9.0 of `scc` and tried it out against the current branch version on the Linux kernel.
 
 ```
 Benchmark #1: ./scc1.9.0 linux
@@ -295,9 +297,9 @@ Wow! Almost a 50% reduction in the time to run. Pretty clearly that guess about 
 
 I was about to call it a day at this point when a colleague David https://github.com/dbaggerman raised a very interesting PR which promised to improve performance even more. He implemented something I should have considered a long time ago, bit-masks.
 
-Thats right bit-masks. How in the heck of all thats holy did I forget bit-masks. The only explanation I can come up with is that for day to day programming I have needed bit-masks exactly 0 times. My day job is usually writing web API's where the network is my biggest bottleneck. That said I still should have considered this, and frankly I am a little ashamed that I did not.
+Thats right bit-masks. How in the heck of all thats holy did I forget bit-masks. The only explanation I can come up with is that for day to day programming I have needed bit-masks exactly 0 times. My day job is usually writing web API's where the network is by far the largest bottleneck. That said I still should have considered this, and frankly I am a little ashamed I did not.
 
-His use of bit-marks as a bloom filter was an especially neat application of them though.
+His use of bit-marks as a bloom filter was an especially neat application though.
 
 A few PR fixes later and boom another performance gain. It also allowed me to simplify the code considerably further. I swapped over all the checks that were working against the first byte for bit-marks, and suddenly one of the most expensive methods I added `shouldProcess` was optimized away.
 
@@ -389,7 +391,7 @@ Benchmark #1: scc -c ~/Projects/cpython
 
 And now we are faster again for every repository I tried.
 
-In addition a nice pickup by Jeff Haynie https://github.com/jhaynie in a PR https://github.com/boyter/scc/pull/35 managed to remove some pointless allocations which should help performance just that little bit more.
+In addition a nice pickup by Jeff Haynie https://github.com/jhaynie came through in a PR https://github.com/boyter/scc/pull/35 managed to remove some pointless allocations which should help performance just that little bit more. I suspect that this is more an issue for him as he is using `scc` in a long lived process but every little bit helps.
 
 One thing I had identified in my original post about `scc` was that the Go garbage collector was a hindrance to performance. I had also tried turning it off with bad results on machines with less memory. As such I took a slightly different approach. By default `scc` turns the garbage collector off, and if by default 10000 files are parsed then it is turned back on. This results in a nice speed gain for smaller projects. Of course this did result in a bug https://github.com/boyter/scc/issues/32 where the GC gettings leaked out, but thankfully Jeff picked this one up as well and I modified the source to ensure that the scope was limited to the `scc` main function.
 
