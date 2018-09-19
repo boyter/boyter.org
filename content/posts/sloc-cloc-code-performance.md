@@ -17,7 +17,7 @@ Of course being the person I am it also means I need to revisit `scc` and see wh
 
 I figured that since I was already making changes to improve accuracy https://boyter.org/posts/sloc-cloc-code-revisited/ I would have a poke through the source and see if there were any wins to made on the performance front. One large issue with this was that I spent a great amount of time making `scc` about as fast as I could the first time around. I seriously doubted when I started if there was going to be many things I missed, which is a naive thing to think.
 
-#### The quest for more speed
+### The quest for more speed
 
 One of the really neat things about Go 1.11 that I discovered is that the web pprof view now supports flame graphs. Flame graphs for those that don't know show a base from which methods rise (or fall as the Go one is inverted) out of. The wider the base of the flame the more time is spent in that method. Taller flames indicate more method calls, where one method calls another. They give a nice visual overview of where the program is spending its time and how many calls are made.
 
@@ -417,7 +417,7 @@ The CPU flame is almost the same width as the disk access. This is an excellent 
 
 The big question though. With all of the above tweaks is `scc` able to pick the performance that `tokei`, `loc` and `polyglot` are throwing down?
 
-### Benchmarks
+## Benchmarks
 
 All GNU/Linux tests were run on Digital Ocean 16 vCPU Compute optimized droplet with 32 GB of RAM and a 200 GB SSD. The machine used was doing nothing else at the time and was created with the sole purpose of running the tests to ensure no interference from other processes. The OS used is Ubuntu 18.04 and the rust programs were installed using cargo install.
 
@@ -514,29 +514,195 @@ Lastly for this test I have run `scc` without the complexity calculations. I hav
 
 
 
-#### Cython f3267144269b873bcb87a9fcafe94b37be1bcfdc
+#### Cython 471503954a91d86cf04228c38134108c67a263b0
 
 ```
-root@ubuntu-c-16-sgp1-01:~# hyperfine './scc cpython' && hyperfine 'GOGC=-1 ./scc -c cpython' && hyperfine 'tokei cpython' && hyperfine 'loc cpython' && hyperfine './polyglot cpython'
+hyperfine './scc cpython' && hyperfine './scc -c cpython' && hyperfine 'tokei cpython' && hyperfine 'loc cpython' && hyperfine './polyglot cpython' && hyperfine './gocloc cpython'
 
-root@ubuntu-c-16-sgp1-01:~# hyperfine './scc redis' && hyperfine 'GOGC=-1 ./scc -c redis' && hyperfine 'tokei redis' && hyperfine 'loc redis' && hyperfine './polyglot redis'
+Benchmark #1: ./scc cpython
+  Time (mean ± σ):      69.8 ms ±   2.7 ms    [User: 612.6 ms, System: 140.1 ms]
+  Range (min … max):    65.9 ms …  75.0 ms
 
-root@ubuntu-c-16-sgp1-01:~# hyperfine './scc rust' && hyperfine 'GOGC=-1 ./scc -c rust' && hyperfine 'tokei rust' && hyperfine 'loc rust' && hyperfine './polyglot rust'
+Benchmark #1: ./scc -c cpython
+  Time (mean ± σ):      55.9 ms ±   2.6 ms    [User: 470.9 ms, System: 137.0 ms]
+  Range (min … max):    51.4 ms …  62.5 ms
 
-root@ubuntu-c-16-sgp1-01:~# hyperfine './scc linux' && hyperfine 'GOGC=-1 ./scc -c linux' && hyperfine 'tokei linux' && hyperfine 'loc linux' && hyperfine './polyglot linux'
+Benchmark #1: tokei cpython
+  Time (mean ± σ):      65.9 ms ±   6.4 ms    [User: 745.6 ms, System: 120.1 ms]
+  Range (min … max):    58.3 ms …  89.2 ms
+
+Benchmark #1: loc cpython
+  Time (mean ± σ):     104.0 ms ±  58.4 ms    [User: 2.184 s, System: 0.059 s]
+  Range (min … max):    42.0 ms … 260.9 ms
+
+Benchmark #1: ./polyglot cpython
+  Time (mean ± σ):      84.3 ms ±   8.4 ms    [User: 159.3 ms, System: 90.9 ms]
+  Range (min … max):    62.8 ms … 100.5 ms
+
+Benchmark #1: ./gocloc cpython
+  Time (mean ± σ):     787.2 ms ±   7.1 ms    [User: 811.7 ms, System: 84.2 ms]
+  Range (min … max):   780.0 ms … 801.5 ms
+```
+
+#### Redis 7cdf272d46ad9b658ef8f5d8485af0eeb17cae6d
+
+```
+hyperfine './scc redis' && hyperfine './scc -c redis' && hyperfine 'tokei redis' && hyperfine 'loc redis' && hyperfine './polyglot redis' && hyperfine './gocloc redis'
+
+Benchmark #1: ./scc redis
+  Time (mean ± σ):      38.1 ms ±   1.2 ms    [User: 84.6 ms, System: 39.9 ms]
+  Range (min … max):    35.7 ms …  41.2 ms
+
+Benchmark #1: ./scc -c redis
+  Time (mean ± σ):      27.2 ms ±   1.7 ms    [User: 57.7 ms, System: 31.4 ms]
+  Range (min … max):    25.0 ms …  34.7 ms
+
+Benchmark #1: tokei redis
+  Time (mean ± σ):      17.2 ms ±   3.0 ms    [User: 110.4 ms, System: 25.2 ms]
+  Range (min … max):    13.7 ms …  31.7 ms
+
+Benchmark #1: loc redis
+  Time (mean ± σ):      31.5 ms ±  23.5 ms    [User: 475.1 ms, System: 12.9 ms]
+  Range (min … max):    11.5 ms … 112.5 ms
+
+Benchmark #1: ./polyglot redis
+  Time (mean ± σ):      15.2 ms ±   1.3 ms    [User: 16.1 ms, System: 15.5 ms]
+  Range (min … max):    12.9 ms …  21.9 ms
+
+Benchmark #1: ./gocloc redis
+  Time (mean ± σ):     129.3 ms ±   2.1 ms    [User: 131.3 ms, System: 22.2 ms]
+  Range (min … max):   126.6 ms … 134.1 ms
 
 ```
 
-```
-root@ubuntu-c-16-sgp1-01:~# hyperfine './scc linux' && hyperfine './scc -c linux' && hyperfine 'GOGC=-1 ./scc -c linux' && hyperfine 'tokei linux' && hyperfine 'loc linux' && hyperfine './polyglot linux' && hyperfine './scc1.10 linux' &&
- hyperfine './scc1.10 -c linux' && hyperfine 'GOGC=-1 ./scc1.10 -c linux'
+#### Rust ff6422d7a392acfc8af28994d65af2bbaecea4f6
 
 ```
 
+hyperfine './scc rust' && hyperfine './scc -c rust' && hyperfine 'tokei rust' && hyperfine 'loc rust' && hyperfine './polyglot rust' && hyperfine './gocloc rust'
 
-### Conclusions
+Benchmark #1: ./scc rust
+  Time (mean ± σ):     107.2 ms ±   5.5 ms    [User: 540.0 ms, System: 288.4 ms]
+  Range (min … max):   101.9 ms … 130.4 ms
 
-For almost every possible situation `scc` is now as fast as any of the other tools even with complexity calculations. In addition there is more that can be done in `scc` itself. Modifying how the language features are built would be a good start. However I do believe that there is not much more performance to be gained by these tools, and they are all getting close to the limits of what the disk and CPU can deliver.
+Benchmark #1: ./scc -c rust
+  Time (mean ± σ):      93.4 ms ±   2.7 ms    [User: 420.0 ms, System: 277.7 ms]
+  Range (min … max):    89.7 ms … 100.8 ms
+
+Benchmark #1: tokei rust
+  Time (mean ± σ):      90.7 ms ±   5.7 ms    [User: 647.8 ms, System: 166.3 ms]
+  Range (min … max):    82.5 ms … 101.2 ms
+
+Benchmark #1: loc rust
+  Time (mean ± σ):     182.8 ms ±  55.1 ms    [User: 5.209 s, System: 0.116 s]
+  Range (min … max):   120.5 ms … 292.8 ms
+
+Benchmark #1: ./polyglot rust
+  Time (mean ± σ):     119.6 ms ±   3.0 ms    [User: 177.2 ms, System: 118.5 ms]
+  Range (min … max):   114.3 ms … 125.1 ms
+
+Benchmark #1: ./gocloc rust
+  Time (mean ± σ):     679.2 ms ±   5.8 ms    [User: 612.5 ms, System: 190.1 ms]
+  Range (min … max):   673.2 ms … 692.8 ms
+```
+
+#### Linux 7876320f88802b22d4e2daf7eb027dd14175a0f8
+
+```
+hyperfine './scc linux' && hyperfine './scc -c linux' && hyperfine 'tokei linux' && hyperfine 'loc linux' && hyperfine './polyglot linux' && hyperfine './gocloc linux'
+
+Benchmark #1: ./scc linux
+  Time (mean ± σ):     623.5 ms ±  22.1 ms    [User: 10.389 s, System: 0.925 s]
+  Range (min … max):   587.5 ms … 652.8 ms
+
+Benchmark #1: ./scc -c linux
+  Time (mean ± σ):     471.1 ms ±  18.0 ms    [User: 6.622 s, System: 0.944 s]
+  Range (min … max):   447.9 ms … 499.7 ms
+
+Benchmark #1: tokei linux
+  Time (mean ± σ):     549.7 ms ±  30.8 ms    [User: 9.239 s, System: 0.890 s]
+  Range (min … max):   512.7 ms … 610.3 ms
+
+Benchmark #1: loc linux
+  Time (mean ± σ):     556.7 ms ± 145.7 ms    [User: 15.667 s, System: 0.834 s]
+  Range (min … max):   455.6 ms … 841.0 ms
+
+
+Benchmark #1: ./polyglot linux
+  Time (mean ± σ):     953.1 ms ±  31.0 ms    [User: 3.370 s, System: 0.702 s]
+  Range (min … max):   905.2 ms … 993.2 ms
+
+Benchmark #1: ./gocloc linux
+  Time (mean ± σ):     12.083 s ±  0.030 s    [User: 12.446 s, System: 0.885 s]
+  Range (min … max):   12.049 s … 12.146 s
+```
+
+
+```
+hyperfine './scc artificial' && hyperfine './scc -c artificial' && hyperfine 'tokei artificial' && hyperfine 'loc artificial' && hyperfine './polyglot artificial' && hyperfine './gocloc artificial'
+
+Benchmark #1: ./scc artificial
+  Time (mean ± σ):     304.9 ms ±  15.8 ms    [User: 4.557 s, System: 1.632 s]
+  Range (min … max):   269.0 ms … 330.5 ms
+
+Benchmark #1: ./scc -c artificial
+  Time (mean ± σ):     239.4 ms ±   8.7 ms    [User: 2.660 s, System: 1.589 s]
+  Range (min … max):   215.9 ms … 248.9 ms
+
+Benchmark #1: tokei artificial
+  Time (mean ± σ):     392.8 ms ±  12.9 ms    [User: 3.014 s, System: 0.840 s]
+  Range (min … max):   374.2 ms … 414.3 ms
+
+Benchmark #1: loc artificial
+  Time (mean ± σ):     518.3 ms ± 130.2 ms    [User: 14.488 s, System: 0.726 s]
+  Range (min … max):   447.5 ms … 868.3 ms
+
+Benchmark #1: ./polyglot artificial
+  Time (mean ± σ):     990.4 ms ±  31.3 ms    [User: 3.076 s, System: 0.827 s]
+  Range (min … max):   935.0 ms … 1055.3 ms
+
+Benchmark #1: ./gocloc artificial
+  Time (mean ± σ):      1.620 s ±  0.010 s    [User: 1.468 s, System: 0.600 s]
+  Range (min … max):    1.610 s …  1.645 s
+
+hyperfine './scc linuxes' && hyperfine './scc -c linuxes' && hyperfine 'tokei linuxes' && hyperfine 'loc linuxes' && hyperfine './polyglot linuxes' && hyperfine './gocloc linuxes'
+
+Benchmark #1: ./scc linuxes
+  Time (mean ± σ):      4.760 s ±  0.060 s    [User: 105.417 s, System: 15.971 s]
+  Range (min … max):    4.711 s …  4.898 s
+
+Benchmark #1: ./scc -c linuxes
+  Time (mean ± σ):      3.462 s ±  0.024 s    [User: 63.336 s, System: 17.001 s]
+  Range (min … max):    3.398 s …  3.484 s
+
+Benchmark #1: tokei linuxes
+  Time (mean ± σ):      5.294 s ±  0.206 s    [User: 92.387 s, System: 8.294 s]
+  Range (min … max):    5.069 s …  5.538 s
+
+Benchmark #1: loc linuxes
+  Time (mean ± σ):      5.399 s ±  0.399 s    [User: 157.479 s, System: 7.495 s]
+  Range (min … max):    4.742 s …  6.254 s
+
+Benchmark #1: ./polyglot linuxes
+  Time (mean ± σ):      8.686 s ±  0.826 s    [User: 58.611 s, System: 5.561 s]
+  Range (min … max):    7.504 s …  9.894 s
+
+Benchmark #1: ./gocloc linuxes
+
+ ⠋ Current estimate: 32.930 s
+
+
+```
+
+
+```
+git clone --depth=1 https://github.com/python/cpython.git && git clone --depth=1 https://github.com/antirez/redis.git && git clone --depth=1 https://github.com/torvalds/linux.git && git clone --depth=1 https://github.com/rust-lang/rust.git
+```
+
+
+## Conclusions
+
+For every possible situation I tested `scc` is now as fast as any of the other tools even with complexity calculations. Turn them off and you can really see it fly. In addition there is more that can be done in `scc` itself. Modifying how the language features are built would be a good start. However I do believe that there is not much more performance to be gained by these tools, and they are all getting close to the limits of what the disk and CPU can deliver.
 
 That said, all of the optimizations done in `scc` could be applied to any of the other tools and I would expect them to become faster than `scc` again. I actually started my own project `rcc` https://github.com/boyter/rcc/ to port `scc` over to rust and see what that would be. When I get some free time again its something I will continue to work on. I will make another claim now then, that someone is going to copy what is now in `scc` into `tokei`, `loc`, `polyglot` or perhaps another new tool and get that additional boost.
 
