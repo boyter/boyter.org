@@ -419,9 +419,9 @@ The big question though. With all of the above tweaks is `scc` able to pick the 
 
 ## Benchmarks
 
-All GNU/Linux tests were run on Digital Ocean 32 vCPU Compute optimized droplet with 64 GB of RAM and a 400 GB SSD. The machine used was doing nothing else at the time and was created with the sole purpose of running the tests to ensure no interference from other processes. The OS used is Ubuntu 18.04 and the rust programs were installed using cargo install.
+All GNU/Linux tests were run on Digital Ocean 32 vCPU Compute optimized droplet with 64 GB of RAM and a 400 GB SSD. The machine used was doing nothing else at the time and was created with the sole purpose of running the tests to ensure no interference from other processes. The OS used is Ubuntu 18.04 and the rust programs were installed using cargo install. The programs `scc` and `polyglot` were downloaded from github and `gocloc` was compiled locally and pushed onto the server.
 
-I am not running benchmarks on Windows this time, but the results are much the same.
+I am not running benchmarks on Windows or macOS this time but when I tried them out the results were similar.
 
 With that out of the way time for the usual benchmarks. Similar to the comparison by `tokei` https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md I have included a few tools, `tokei`, `cloc`, `scc`, `loc` and `polyglot`.
 
@@ -446,8 +446,6 @@ Language                 Files     Lines     Code  Comments   Blanks Complexity
 -------------------------------------------------------------------------------
 Rust                         1        38       32         2        5          5
 -------------------------------------------------------------------------------
-Total                        1        38       32         2        5          5
--------------------------------------------------------------------------------
 
 root@ubuntu-c-32-sgp1-01:~# tokei tokeitest/
 --------------------------------------------------------------------------------
@@ -455,16 +453,12 @@ root@ubuntu-c-32-sgp1-01:~# tokei tokeitest/
 --------------------------------------------------------------------------------
  Rust                     1           38           32            2            4
 --------------------------------------------------------------------------------
- Total                    1           38           32            2            4
---------------------------------------------------------------------------------
 
 root@ubuntu-c-32-sgp1-01:~# loc tokeitest/
 --------------------------------------------------------------------------------
  Language             Files        Lines        Blank      Comment         Code
 --------------------------------------------------------------------------------
- Rust                     1           39            5           34            0
---------------------------------------------------------------------------------
- Total                    1           39            5           34            0
+ Rust                     1           38            5           34            0
 --------------------------------------------------------------------------------
 
 root@ubuntu-c-32-sgp1-01:~# cloc tokeitest/
@@ -479,9 +473,7 @@ root@ubuntu-c-32-sgp1-01:~# ./polyglot tokeitest/
 -------------------------------------------------------------------------------
  Language             Files       Lines         Code     Comments       Blanks
 -------------------------------------------------------------------------------
- Rust                     1          39           34            0            5
--------------------------------------------------------------------------------
- Total                    1          39           34            0            5
+ Rust                     1          38           34            0            5
 -------------------------------------------------------------------------------
 ```
 
@@ -505,7 +497,9 @@ With that done I was able to run each of the code counters in what hopefully is 
 
 I should note, that as far as I am aware none of the counters under test have any logic to explicitly deal with the above artificial test and as such are not able to game it to achieve a higher score.
 
-Lastly for all test I have run `scc` with and without the complexity calculations.
+Lastly for all test I have run `scc` with and without the complexity calculations in an attempt to show that there is almost no cost running them in `scc` and to keep the playing field as fair as possible. It is important to show how the applications perform without tweaks, but also to try and provide an apples to apples comparison.
+
+For real world projects, I picked the same ones used on the `tokei` comparison page, but rather then using the unreal engine (which I don't want to sign up to download) I swapped that out for the linux kernel.
 
 #### Artificial
 
@@ -521,7 +515,6 @@ This is the purely artificial benchmark I discussed above. Each of the 8 directo
 | gocloc | 1.620 s ±  0.010 s |
 
 ![Benchmark Artificial](/static/sloc-cloc-code-revisited/benchmark_linux_artificial.png)
-
 
 #### Cython commit 471503954a91d86cf04228c38134108c67a263b0
 
@@ -575,7 +568,7 @@ This is the purely artificial benchmark I discussed above. Each of the 8 directo
 
 ![Benchmark Linux](/static/sloc-cloc-code-revisited/benchmark_linux_linux.png)
 
-* NB gocloc removed from the graph as its results compressed the other counters so much results were hard to read
+* N.B. gocloc was removed from the graph as its results compressed the other counters so much results were hard to read.
 
 #### Linuxes 10 copies of the linux kernel
 
@@ -606,21 +599,22 @@ linuxes
 
 ![Benchmark Linuxes](/static/sloc-cloc-code-revisited/benchmark_linux_linuxes.png)
 
+* N.B. gocloc was removed from the graph as its results compressed the other counters so much results were hard to read.
 
 ## Conclusions
 
 The trade off of building the trie structures when `scc` starts does slow down the application for smaller repositories such as `redis`. That said a slowdown of only 10 ms is probably worth it. Keeping in mind on linux that 17 ms of overhead is usually the process starting, and that most people will not notice the difference between 17 ms and 30 ms for this sort of application, I think its an acceptable trade. Feel free to direct any hate over this decision to https://github.com/boyter/scc/. In short trie's sell out small repositories somewhat, but I believe it to be a worthwhile gain.
 
-For every possible situation I tested `scc` is now comparably fast with every other tool even with complexity calculations enabled. Turn them off and you can really see it fly. As for additional performance well there is some more that can be done in `scc` itself. Modifying how the language features are built would be a good start, but as mentioned this is only applicable on repositories that are small, so its unlikely to modify the benchmarks much.
+For every possible situation I tested `scc` is now comparably fast with every other tool even with complexity calculations enabled. Without them it is a similar story but you gain some additional speed. There is some more that can be done in `scc` itself to improve this still. Modifying how the language features are built would be a good start, but as mentioned this is only applicable on repositories that are small, so its unlikely to modify the benchmarks much.
 
-I honestly do believe that there is not much more performance to be gained from any of these code counting tools from where they are now. They are all getting close to the limits of what the disk and CPU can deliver. Both `tokei` and `loc` are pushing very close to this limit along with `scc`.
+I honestly do believe that there is not much more performance to be gained from any of these code counting tools from where they are now. They are all getting close to the limits of what the disk and CPU can deliver. Both `tokei` and `loc` are pushing very close to this limit along with `scc`. Regardless I will be revisiting `scc` from time to time to see if I can get even more performance out of it.
 
 Lastly, all of the optimizations done in `scc` could be applied to any of the other tools and I would expect them to become faster than `scc` again, simply because rust in my tests produces slightly more efficient loops. I actually started my own project `rcc` https://github.com/boyter/rcc/ to port `scc` over to rust to see what the result would be. When I get some free time again its something I will continue to work on. 
 
-I am going to make another claim. That someone is going to copy what is now in `scc` into `tokei`, `loc`, `polyglot` or perhaps another new tool and get that additional boost, perhaps with a preflight trie that I missed which should reduce the startup time.
+I am going to make another claim. That someone is going to copy what is now in `scc` into `tokei`, `loc`, `polyglot` or perhaps another new tool and get that additional boost, perhaps with a preflight trie which should reduce the startup time.
 
 What I would really like to see though is a standardized JSON file describing all languages. I did think that `tokei` was perhaps the closest to that goal (hence basing `scc` on it) but I suspect that since `loc` and `scc` have diverged from it there would be a difference of opinion over JSON files being counted for example. Thankfully with all the projects looking at each other more languages will be added and any one of them as a base will be a good place to start.
 
 Probably the saddest thing about this post is that for the most part is how long it is and all about discussing performance. The previous post about fixing the bugs was far shorter and less interesting. I found wiring the previous post somewhat tedious which is not a great sign. Its probably hard to make any post about fixing off by one errors interesting, even though those are the ones that produce the most value usually.
 
-If you made it this far thanks for reading my post, and please do try `scc` on your local repositories and let me know if you run into any bugs or issues.
+If you made it this far thanks for reading my post, and please do try `scc` on your local repositories and let me know if you run into any bugs or issues on [github](https://github.com/boyter/scc/).
