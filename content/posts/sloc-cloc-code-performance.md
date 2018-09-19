@@ -415,7 +415,7 @@ The result of all of the above? It now appears that `scc` is almost not bottlene
 
 The CPU flame is almost the same width as the disk access. This is an excellent result from where it started. It also means `scc` is getting to the point where there is little reason to investigate additional CPU savings (I will still take them if they come up of course!). 
 
-The big question though. With all the above is `scc` able to pick the performance that `tokei`, `loc` and `polyglot` are throwing down?
+The big question though. With all of the above tweaks is `scc` able to pick the performance that `tokei`, `loc` and `polyglot` are throwing down?
 
 ### Benchmarks
 
@@ -518,73 +518,10 @@ Lastly for this test I have run `scc` without the complexity calculations. I hav
 
 ```
 root@ubuntu-c-16-sgp1-01:~# hyperfine './scc cpython' && hyperfine 'GOGC=-1 ./scc -c cpython' && hyperfine 'tokei cpython' && hyperfine 'loc cpython' && hyperfine './polyglot cpython'
-Benchmark #1: ./scc cpython
-  Time (mean ± σ):     170.1 ms ±   5.1 ms    [User: 1.925 s, System: 0.093 s]
-  Range (min … max):   163.9 ms … 182.8 ms
-
-Benchmark #1: GOGC=-1 ./scc -c cpython
-  Time (mean ± σ):     136.5 ms ±   3.3 ms    [User: 1.529 s, System: 0.099 s]
-  Range (min … max):   130.5 ms … 142.5 ms
-
-Benchmark #1: tokei cpython
-  Time (mean ± σ):      82.6 ms ±   5.0 ms    [User: 710.1 ms, System: 80.0 ms]
-  Range (min … max):    75.0 ms …  91.9 ms
-
-Benchmark #1: loc cpython
-  Time (mean ± σ):      62.0 ms ±  12.7 ms    [User: 695.6 ms, System: 72.1 ms]
-  Range (min … max):    48.2 ms …  97.7 ms
-
-Benchmark #1: ./polyglot cpython
-  Time (mean ± σ):      76.6 ms ±   5.1 ms    [User: 117.7 ms, System: 83.3 ms]
-  Range (min … max):    63.3 ms …  86.5 ms
-
-
 
 root@ubuntu-c-16-sgp1-01:~# hyperfine './scc redis' && hyperfine 'GOGC=-1 ./scc -c redis' && hyperfine 'tokei redis' && hyperfine 'loc redis' && hyperfine './polyglot redis'
-Benchmark #1: ./scc redis
-  Time (mean ± σ):      25.3 ms ±   2.1 ms    [User: 198.4 ms, System: 16.7 ms]
-  Range (min … max):    22.9 ms …  33.5 ms
-
-Benchmark #1: GOGC=-1 ./scc -c redis
-  Time (mean ± σ):      23.0 ms ±   2.3 ms    [User: 159.0 ms, System: 18.1 ms]
-  Range (min … max):    20.1 ms …  31.2 ms
-
-Benchmark #1: tokei redis
-  Time (mean ± σ):      20.4 ms ±   2.4 ms    [User: 91.9 ms, System: 21.6 ms]
-  Range (min … max):    17.0 ms …  29.9 ms
-
-Benchmark #1: loc redis
-  Time (mean ± σ):      19.6 ms ±   8.7 ms    [User: 138.1 ms, System: 13.6 ms]
-  Range (min … max):    13.2 ms …  70.8 ms
-
-  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet PC without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
-
-Benchmark #1: ./polyglot redis
-  Time (mean ± σ):      16.0 ms ±   0.9 ms    [User: 16.4 ms, System: 18.0 ms]
-  Range (min … max):    14.0 ms …  22.1 ms
-
 
 root@ubuntu-c-16-sgp1-01:~# hyperfine './scc rust' && hyperfine 'GOGC=-1 ./scc -c rust' && hyperfine 'tokei rust' && hyperfine 'loc rust' && hyperfine './polyglot rust'
-Benchmark #1: ./scc rust
-  Time (mean ± σ):     129.9 ms ±   2.5 ms    [User: 977.2 ms, System: 161.8 ms]
-  Range (min … max):   127.2 ms … 137.0 ms
-
-Benchmark #1: GOGC=-1 ./scc -c rust
-  Time (mean ± σ):     118.9 ms ±   2.2 ms    [User: 807.1 ms, System: 163.4 ms]
-  Range (min … max):   115.4 ms … 124.5 ms
-
-Benchmark #1: tokei rust
-  Time (mean ± σ):     112.2 ms ±   5.6 ms    [User: 609.6 ms, System: 146.8 ms]
-  Range (min … max):   105.6 ms … 124.8 ms
-
-Benchmark #1: loc rust
-  Time (mean ± σ):     141.0 ms ±  34.1 ms    [User: 1.964 s, System: 0.123 s]
-  Range (min … max):   116.1 ms … 215.5 ms
-
-Benchmark #1: ./polyglot rust
-  Time (mean ± σ):     122.6 ms ±   4.0 ms    [User: 214.3 ms, System: 152.5 ms]
-  Range (min … max):   115.5 ms … 130.9 ms
-
 
 root@ubuntu-c-16-sgp1-01:~# hyperfine './scc linux' && hyperfine 'GOGC=-1 ./scc -c linux' && hyperfine 'tokei linux' && hyperfine 'loc linux' && hyperfine './polyglot linux'
 
@@ -599,7 +536,11 @@ root@ubuntu-c-16-sgp1-01:~# hyperfine './scc linux' && hyperfine './scc -c linux
 
 ### Conclusions
 
-In the tight core loop of counting both `tokei` and `loc` are still faster than `scc`. The reason `scc` is able to keep pace on smaller repositories is because `scc` is able to start processing while scanning the file directory whereas `tokei` and `loc` wait till the end. 
+For almost every possible situation `scc` is now as fast as any of the other tools even with complexity calculations. In addition there is more that can be done in `scc` itself. Modifying how the language features are built would be a good start. However I do believe that there is not much more performance to be gained by these tools, and they are all getting close to the limits of what the disk and CPU can deliver.
+
+That said, all of the optimizations done in `scc` could be applied to any of the other tools and I would expect them to become faster than `scc` again. I actually started my own project `rcc` https://github.com/boyter/rcc/ to port `scc` over to rust and see what that would be. When I get some free time again its something I will continue to work on. I will make another claim now then, that someone is going to copy what is now in `scc` into `tokei`, `loc`, `polyglot` or perhaps another new tool and get that additional boost.
+
+What I would really like to see though is a standardized JSON file describing all languages. I did think that `tokei` was perhaps the closest to that goal (hence basing `scc` on it) but I suspect that there would be a difference of opinion over JSON files being counted for example.
 
 Probably the saddest thing about this post is that for the most part is how long it is and all about discussing performance. The previous post about fixing the bugs was far shorter and less interesting. I found wiring the previous post somewhat tedious which is not a great sign. Its probably hard to make any post about fixing off by one errors interesting, even though those are the ones that produce the most value usually.
 
