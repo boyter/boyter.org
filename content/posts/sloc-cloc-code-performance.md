@@ -271,7 +271,7 @@ for byte in file
         process
 ```
 
-This seems counter intuitive at first because it introduces a loop in loop, but because each of the state loops would be very tight it would mean that the lopping code would be much shorter. In theory this increases the chance that the loops spend time faster CPU caches. It also has the added benefit of improving the visibility of the flame graph as each state loop can more easily be pulled out into another method.
+This seems counter intuitive at first because it introduces a loop in loop, but because each of the state loops would be very tight it would mean that the looping code would be much shorter. In theory this increases the chance that the loops spend time faster CPU caches. It also has the added benefit of improving the visibility of the flame graph as each state loop can more easily be pulled out into another method.
 
 After implementing the flame graph looks like the below,
 
@@ -444,7 +444,7 @@ root@ubuntu-c-32-sgp1-01:~# ./scc tokeitest/
 -------------------------------------------------------------------------------
 Language                 Files     Lines     Code  Comments   Blanks Complexity
 -------------------------------------------------------------------------------
-Rust                         1        38       32         2        5          5
+Rust                         1        38       32         2        4          5
 -------------------------------------------------------------------------------
 
 root@ubuntu-c-32-sgp1-01:~# tokei tokeitest/
@@ -458,7 +458,7 @@ root@ubuntu-c-32-sgp1-01:~# loc tokeitest/
 --------------------------------------------------------------------------------
  Language             Files        Lines        Blank      Comment         Code
 --------------------------------------------------------------------------------
- Rust                     1           38            5           34            0
+ Rust                     1           38            4           34            0
 --------------------------------------------------------------------------------
 
 root@ubuntu-c-32-sgp1-01:~# cloc tokeitest/
@@ -466,14 +466,14 @@ github.com/AlDanial/cloc v 1.74  T=0.01 s (127.5 files/s, 4974.4 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-Rust                             1              5             10             24
+Rust                             1              4             10             24
 -------------------------------------------------------------------------------
 
 root@ubuntu-c-32-sgp1-01:~# ./polyglot tokeitest/
 -------------------------------------------------------------------------------
  Language             Files       Lines         Code     Comments       Blanks
 -------------------------------------------------------------------------------
- Rust                     1          38           34            0            5
+ Rust                     1          38           34            0            4
 -------------------------------------------------------------------------------
 ```
 
@@ -603,7 +603,7 @@ linuxes
 
 ## Conclusions
 
-The trade off of building the trie structures when `scc` starts does slow down the application for smaller repositories such as `redis`. That said a slowdown of only 10 ms is probably worth it. Keeping in mind on linux that 17 ms of overhead is usually the process starting, and that most people will not notice the difference between 17 ms and 30 ms for this sort of application, I think its an acceptable trade. Feel free to direct any hate over this decision to https://github.com/boyter/scc/. In short trie's sell out small repositories somewhat, but I believe it to be a worthwhile gain.
+The trade off of building the trie structures when `scc` starts does slow down the application for smaller repositories such as `redis`. That said a slowdown of only 10 ms is probably worth it. Keeping in mind on linux that ~15 ms of overhead is usually the process starting, and that most people will not notice the difference between 15 ms and 30 ms for this sort of application, I think its an acceptable trade. Feel free to direct any hate over this decision to https://github.com/boyter/scc/. In short trie's sell out small repositories somewhat, but I believe it to be a worthwhile gain.
 
 For every possible situation I tested `scc` is now comparably fast with every other tool even with complexity calculations enabled. Without them it is a similar story but you gain some additional speed. There is some more that can be done in `scc` itself to improve this still. Modifying how the language features are built would be a good start, but as mentioned this is only applicable on repositories that are small, so its unlikely to modify the benchmarks much.
 
