@@ -1,6 +1,6 @@
 ---
-title: Generating Harry Potter Spells and Kelewan Houses
-date: 2018-10-29
+title: Generating Harry Potter Spell Names and Kelewan House Names
+date: 2018-10-28
 ---
 
 Occasionally I try to branch out from working on https://searchcode.com/ https://searchcodeserver.com/ or https://github.com/boyter/scc and find something that I find interesting to toy around with. Usually I go for something that will only take a few hours to play around with.
@@ -64,6 +64,6 @@ Bombto
 Revhidio Impelrius
 ```
 
-Turns out it works reasonably well there.
+Turns out it works reasonably well there. Same technique, get a list of spell names, break them into syllable's and then combine them together to produce what look like spell names from the series.
 
 You can get the source for both of the above at https://github.com/boyter/spells and https://github.com/boyter/empire-building
