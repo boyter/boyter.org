@@ -86,3 +86,5 @@ I am seriously considering writing content for the "Expert Excuses for Not Writi
 ![Book Cover](/static/books/a0f278b167ec23c35fe091f38096571a.jpg)
 ![Book Cover](/static/books/DVfL0c-VoAEFs1R.jpg-large.jpg)
 ![Book Cover](/static/books/another.png)
+![Book Cover](/static/books/rust1.png)
+![Book Cover](/static/books/rust2.png)
