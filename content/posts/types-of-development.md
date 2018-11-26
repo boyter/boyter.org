@@ -35,8 +35,6 @@ Development driven by an intense desire by everyone involved to get a new job or
 
 ----------
 
-TO TWEET
-
 ### Types of Development #5
 
 *Sales Driven Development*
@@ -58,5 +56,4 @@ Where you use real users to drive your development methology and end up deliveri
 *Contract Driven Development*
 
 You split into front-end and back-end teams who build ivory tower solutions and then blame each other for not conforming when the integration fails. Examples include most companies that adopt a micro-service architecture.
-
 
