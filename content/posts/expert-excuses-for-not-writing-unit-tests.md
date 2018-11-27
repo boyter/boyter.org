@@ -3,49 +3,50 @@ title: Expert Excuses for Not Writing Unit Tests
 date: 2018-11-26
 ---
 
-Management has cracked it. "Start writing unit-tests!", "We need to improve code quality!" they cry. You however are a ninja 1% programmer and have no need for this. Sometimes however you need to play the system to get what is right. Here is a brief document to help with that.
+A while back I collected all of the fake Orly book covers I could find an posted them online https://boyter.org/2016/04/collection-orly-book-covers/ 
 
-This is going to sound strange but in this goal Wally of Dilbert https://en.wikipedia.org/wiki/Wally_(Dilbert) must be your inspiration.
+I also mentioned that I was seriously considering writing content for the "Expert Excuses for Not Writing Unit Tests" one. I think I had this idea at the time that it was something I could potentially sell or use to raise my profile. Since I am not a comedy writer there is a market of about 0 people in the universe who would pay for content like this. I have no idea what I was thinking.
 
-For any piece of code the following excuses are applicable. Feel free to use any at random or in order.
+Anyway I did write some content, which I have cleaned up and put below.
 
-## Generic Fall-back Excuses
+-----
 
- - The code is too complex to unit test.
- - The code is too simple to unit test.
- - There's no point unit testing for code that doesn't change.
- - This is a destructive process, so it cannot be unit tested.
- - Unit tests won't tell me if the application actually works.
- - I can test this stuff myself without writing code for it.
- - The client is paying for a deliverable not unit tests.
- - Thats QA's problem.
- - Unit tests are just assertions in disguise.
- - Unit testing was a staple of the FORTRAN days.
- - Unit testing is not about finding bugs.
- - Measuring programming progress by lines of code is like measuring aircraft building progress by weight. - Bill Gates
- - There is an exception to every rule, and we must of course be flexible.
- - Never ascribe to malice, that which can be explained by incompetence. - Napoleon
- - Testing is for communists.
+## Expert Excuses for Not Writing Unit Tests
 
+Management has cracked it. "Start writing unit-tests!", "We need to improve code quality!" they cry. The problem is that you are a ninja 10x programmer and have no need for tests. Management clearly does not understand on what level you operate on. However sometimes you need to play the system to get what you need. What follows is a brief document to help with this.
+
+This is going to sound strange but in this goal Wally of Dilbert Fame https://en.wikipedia.org/wiki/Wally_(Dilbert) must be your inspiration. His whole goal is to avoid doing any work, and as such a lot of the techniques apply to avoiding writing unit tests.
 
 ## The Promise of Bad Tests
 
 The first line of defense against unit testing is to fight before the decision to write them is even made. If you can win this argument you are ahead of anything else. If you are starting from an existing code-base you are in the enviable position have being able to have a few additional arguments.
+
+Lets discuss a few ways you can help support your argument here.
 
 ### Testing leads to bad design
 
 A lot of arguments point out that testing can lead to a better design. Use this against itself. It can always produce a crappy design all about accommodating the tests and not the requirements. If you have clearly specified roles be sure to point out this is is taking work away from the architects and project leads. Always use the argument that if you want to test then every method needs to be public which makes things worse.
 
 ### Adding of cost
-	LOC which is discussed later
-	Wring them takes too long
-	There's no point unit testing for code that doesn't change
-	Fixing Bugs
-	Cost of increasing LOC
-		Measuring programming progress by lines of code is like measuring aircraft building progress by weight. - Bill Gates
-		Use this argument
-		Many studies do show a rough correlation between LOC and the overall cost and length of development, and between LOC and number of defects. So while it may not be a precise indication of anything (in particular, "progress"), it is not a completely useless metric. The lower your LOC measurement is, the better off you probably are.
-	
+
+Point out that code has cost. The more lines of code (LoC) the greater the cost. Its worthwhile pointing out that the business pays for functionality not tests. Remember to reference the COCOMO model https://en.wikipedia.org/wiki/COCOMO when talking about LoC and cost. 
+
+ > Measuring programming progress by lines of code is like measuring aircraft building progress by weight. - Bill Gates
+
+Use this argument.
+
+Many studies do show a correlation between LoC and the overall cost and length of development, and between LoC and number of defects. So while it may not be a precise indication of progress, it is not a completely useless metric. The lower your LoC measurement is, the better off you are.
+
+For a tool to calculate this for you try https://github.com/boyter/scc/ which will also give you a COCOMO estimation. Be sure to run it over projects that have tests and see how much additional cost the tests add. Do this internally if you can with projects that have tests.
+
+If someone challenges that the project with tests was more successful point out using the same model that the project cost more. More money spent means more quality to most people. If you mix metaphors and ideas here you can also impress and confuse people to the point they will be afraid to challenge you further. 
+
+For example say someone suggests that project A has tests and as such tests are valuable. A good response to would be "A Ferrari costs more than a Kia", and that having a larger QA budget would be more effective.
+
+Be sure to point out that adding tests means writing more code which takes longer, which also impacts cost.
+
+Also be sure to point out that while tests are being written (especially for existing projects) that nobody will be fixing bugs. This is usually enough of an argument to stop everything dead in its tracks.
+
 ### Faking It
 
 So management is coming down hard on you or your team is all brainwashed. What do you do now? The first thing to do is start faking your tests as quickly as possible. Don't worry. A few weeks of creative code should help us 
@@ -107,14 +108,17 @@ For example, if you are using Java here is a standard chain of components you ca
 `Your Program -> Java Compiler -> JVM -> JVM Compiler -> Operating System -> Operating System Compiler -> Hardware Software -> Hardware Software Compiler -> Hardware Itself`
 
 
-Undermining Managers
-	Reading into Reports
-		If your manager is worth squat they will be pulling reports from somewhere about bug counts, test coverage, tests run, sucessful test, sucessful builds etc... game them. Ensure to mark all bugs as requirement or process issues. Most bug trackers don't report via email closed issues. Update them after the fact to obscure the cause to something unrelated to the tests.
+###Undermining Managers
 
-		The best part is that if they use these reports to measure performance you can game them. Open/Close 50 bug tickets a day and outperform everyone by a mile. 
-	
+Reading into Reports
+
+If your manager is worth squat they will be pulling reports from somewhere about bug counts, test coverage, tests run, successful test, successful builds etc... game them. Ensure to mark all bugs as requirement or process issues. Most bug trackers don't report via email closed issues. Update them after the fact to obscure the cause to something unrelated to the tests.
+
+The best part is that if they use these reports to measure performance you can game them. Open and Close 50 bug tickets a day and outperform everyone by a mile. Whatever tool you are using to track this likely has an API. You can single handedly become the most important person on every available metric if you get creative.
+
 ### Creating Diversions
-	Introducing subtle bugs.
+
+Introducing subtle bugs.
 
 Read the art of writing unmaintainable code. Apply it. This will not only make things harder to fix ensuring you have a job for life but also make writing tests after the fact impossible for the double whammy. The harder the code is to maintain the harder it is to add tests. Be creative when doing this! A personal favorite,
 
@@ -137,7 +141,7 @@ Some users will use use syntax highlighters (the fools!) which may defeat the ab
 
 Remember to double down on something like the above. Write MANY unit tests which test the code but do not find the bug. Use this as ammunition later when it is discovered. Point out that following the process did nothing, and you spent all your time writing tests rather then actually testing anything.
 
-This is unlikely, but if you code ever does fail (gotta be someone else's fault?) remember to swallow the error and if you are forced to report on it use a message such as `"Error: Something went wrong ¯\_(ツ)_/¯"`. Never ever ever return the stack trace. Also be sure to reuse the error as much as possible, with slight variations. For example,
+This is unlikely, but if you code ever does fail (someone else's fault of course!) remember to swallow the error and if you are forced to report on it use a message such as `"Error: Something went wrong ¯\_(ツ)_/¯"`. Never ever return or print the stack trace. Also be sure to reuse the error as much as possible, with slight variations. For example,
 
  - `"Error: Something went wrong ¯\_(ツ)_/¯"`
  - `"Error: Soemthing went wrong ¯\_(ツ)_/¯"`
@@ -145,18 +149,28 @@ This is unlikely, but if you code ever does fail (gotta be someone else's fault?
  - `"Error: Something went wrong ¯_(ツ)_/¯"`
  - `"Error: Something went wong ¯\_(ツ)_/¯"`
 
-Use the above randomly through your code to really make it hard to track things down.
+Use the above randomly through your code to really make it hard to track things down. If you really want to help with this use emoji and other character sets that editors and terminals have issues with.
 
+ > **HANDY TIP:**
+ > iTerm and Terminal on macOS have issues with displaying a lot of characters such as those in the https://github.com/minimaxir/big-list-of-naughty-strings/ so be sure to include those in your errors and test suites to crash your fellow developers terminals!
 
 ### Test Failing? Delete it!
 
-If you ever find a failing test delete it. You are a 10x developer and don't have time to fix other peoples crap. Make sure to mention that it was flaky or no longer relevant in the commit comment. Make sure at any stand up or meeting you point out how much of a hero you are for cleaning up other peoples mess. Challenge anyone who suggests otherwise by asking what they have fixed recently. If you continue to get pushed on this start muting the tests. This can usually be done inside your CI system or in the code itself. A mixture of both is usually the best solution especially if the tests are in the same file. Remember that you want someone to look in many places to diagnose any issue.
+If you ever find a failing test delete it. You are a 10x developer and don't have time to fix other peoples dodgy code. Make sure to mention that it was flaky or no longer relevant in the commit comment. Make sure at any stand up or meeting you point out how much of a hero you are for cleaning up other peoples mess. Challenge anyone who suggests otherwise by asking what they have fixed recently. If get pushed for details then start muting the tests. This can usually be done inside your CI system or in the code itself. A mixture of both is usually the best solution especially if the tests are in the same file. Remember that you want someone to look in many places to diagnose any issue and determine why a test did not capture the failure.
 
-Introducing Unreliability
-	If they are reliable why do we have bugs?
-	If our goal is 100% reliable why do we shoot for less than 100% coverage?
-	How to write flaky tests
-		Flaky tests undermine confidence in your test suite and will result in the tests being muted or ignored. Either way you win. Leave temp files around, connections open and generally anything you can think of that will introduce failure conditions into your tests. Take the following example,
+### Introducing Unreliability
+
+So the team has pushed ahead, and nothing is working. Your new position is to make the tests unreliable. Then you want to expand out and ask if the goal is to have 100% reliable code you need 100% test coverage.
+
+ > If they are reliable why do we have bugs?
+
+ > If our goal is 100% reliable why do we shoot for less than 100% coverage?
+
+#### How to write flaky tests
+
+Flaky tests undermine confidence in the test suite and will result in the tests being muted or ignored. Either way you win. Leave temp files around, connections open, forked processes running and generally anything you can think of that will introduce failure conditions into your tests. 
+
+Take the following example,
 
 {{<highlight python>}}
 def writeheartbeat():
@@ -178,19 +192,45 @@ def testheatbeatexists():
     assertTrue(exists)
 {{</highlight>}}
 
-The problem with the above is simple. Assuming the tests run in order everything should be fine for the first test run. However on the second run the first test will assume that the heartbeat file will be missing, however as it would have been created from the previous run this test will now begin to fail! Worse still, if the tests run out of order or someone reorganizes them such that the second becomes the first it will start to fail every time. Even if you introduce a clean up task to delete the file if that ever fails perhaps you left the file handle open? You will have a flaky test. Be creative with this. The more external dependencies you have the harder it will be to test correctly.
+The problem with the above is simple. Assuming the tests run in order everything should be fine for the first test run. However on the second run the first test will assume that the heartbeat file will be missing, however as it would have been created from the previous run this test will now begin to fail! Better yet, if the tests run out of order or someone reorganizes them such that the second becomes the first it will start to fail every time. Even if you introduce a clean up task to delete the file if that ever fails perhaps you left the file handle open? You will have a flaky test. Be creative with this! The more external dependencies you have the harder it will be to test correctly.
 
+Also note that the above is written to only work on unix style operating systems. This is another advantage you can use! Write some tests so they are unix specific, then in another file write them to be windows specific. If challenged point out that you use X in production so the tests should be specific to that, and when the other style is picked up mention landing a contract with a new customer who uses the other OS.
 
-	What not to test
-		If you are forced to write tests you can start by being selective. Tests for setters and getters not only make you 
+ > **HANDY TIP:**
+ > The use of docker in CI/CD allows you to get really creative. Build a layer that adds 3000 new users and watch the image size blow up to hundreds of gigabytes which will likely crash the build agent. Say you were testing how the application performs when running against files with multiple owners.
+
+### What not to test
+
+If you are forced to write tests you can start by being selective. Tests for setters and getters not only make you 
 look good, but for dynamic languages you can go to town testing all sorts of stuff. Be sure that your method expecting an integer fails gracefully when passed an array. With a little creativity you can auto generate most of these. For everything else follow the following rules.
 
-	* Never test any error case because your code is error free
-	* Never test return codes becuase it never happens and slows the test suite down
-	* Never test anything that requires you to mock. After all mocking is the work of the devil and a classic anti-pattern.
-	* Only test for success under ideal situations. You code is a perfect snowflake.
-	* Only write integration tests and make them as flaky as possible to further your cause. See how to write flaky tests.
- 
+ - Never test any error case because your code is error free
+ - Never test return codes because it never happens and slows the test suite down
+ - Never test anything that requires you to mock. After all mocking is the work of the devil and a classic anti-pattern.
+ - Only test for success under ideal situations. You code is a perfect snowflake.
+ - Only write integration tests and make them as flaky as possible to further your cause. See how to write flaky tests.
 
+## Generic Fall-back Excuses
 
+For any piece of code the following excuses are usually applicable. Feel free to use any at random or in order. Remember to cycle though them over time to avoid your excuses being picked up.
 
+ - The code is too complex to unit test.
+ - The code is too simple to unit test.
+ - There's no point unit testing code that doesn't change.
+ - This is a destructive process, so it cannot be unit tested.
+ - Unit tests won't tell me if this code actually works.
+ - That code is side effect free so there is no need to test it.
+ - It would be too slow to test that code due to the dependencies.
+ - I can test this more quickly manually.
+ - The client is paying for a deliverable not unit tests.
+ - Thats QA's problem.
+ - Unit tests are just assertions in disguise.
+ - Unit testing was a staple of the FORTRAN days.
+ - Unit testing is not about finding bugs.
+ - Measuring programming progress by lines of code is like measuring aircraft building progress by weight. - Bill Gates
+ - There is an exception to every rule, and we must of course be flexible.
+ - Never ascribe to malice, that which can be explained by incompetence. - Napoleon
+ - Testing is for communists.
+
+ > **HANDY TIP:**
+ > Lead the narrative. If you challenge other peoples test writing using the above, not only are you not writing tests but you will be seen as the test expert without doing anything.
