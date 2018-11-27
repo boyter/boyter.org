@@ -1,15 +1,17 @@
 ---
 title: Expert Excuses for Not Writing Unit Tests
-date: 2018-11-26
+date: 2018-11-27
 ---
 
 A while back I collected all of the fake Orly book covers I could find an posted them online https://boyter.org/2016/04/collection-orly-book-covers/ 
 
 I also mentioned that I was seriously considering writing content for the "Expert Excuses for Not Writing Unit Tests" one. I think I had this idea at the time that it was something I could potentially sell or use to raise my profile. Since I am not a comedy writer there is a market of about 0 people in the universe who would pay for content like this. I have no idea what I was thinking.
 
-Anyway I did write some content, which I have cleaned up and put below.
+Anyway I did write some content, which I have cleaned up and included below.
 
 -----
+
+![Book Cover](/static/books/CeZu1YjUsAEfhcP.jpg)
 
 # Expert Excuses for Not Writing Unit Tests
 
@@ -75,7 +77,7 @@ Remember this needs to be a long con.
 
 Leave the fix in place for a few weeks/months and then pull it. Better yet remove it a few days before that critical production release. Everyone will be scrambling to patch the code and fix the tests. With your coffee cup in hand politely suggest that you skip the pipeline and push straight into production. After all the code was working yesterday right? If the exception is made then you are almost there. Just repeat a few times until skipping the testing pipeline is the normal work-flow. Keep track of how often this is done, and start reporting it after it has happened a few times.
 
-### Shifting Blame
+## Shifting Blame
 
 It might come to pass that since you are being forced to test you may become accountable for software quality. You must shoot down this argument as quickly as possible. If you are ever held accountable you are sunk. Lets go through various lines of shifting the blame.
 
@@ -113,11 +115,17 @@ Using a static language? Great! Point out how everything is rigid making it impo
 
 #### Blaming the process
 
-This is the best argument ever if you have a process driven company. If things aren't working, blame the process. Do it loudly and insist on many meetings about problems in the process. For full marks complain loudly outside of these meetings about how long they are taking too long and if you could just side step everything it would be done by now. Remember that when attacking the process you need to attack everything in it. If part of the process is requirements gathering insist that developers should be involved with the business analyst and project manager. If part of the process is QA insist that the project manager needs to be involved as they are a key stakeholder. At every step try to include as many people as possible. This will slow down development and increase costs. As this happens stakeholders will start to complain about the escalating project costs and time-lines. You can then smoothly suggest dropping writing the tests. Use your previous arguments about doubling up on QA's costs and the increased costs to help. 
+This is the best argument ever if you have a process driven company. If things aren't working, blame the process. Do it loudly and insist on many meetings about problems in the process. For full marks complain loudly outside of these meetings about how long they are taking too long and if you could just side step everything it would be done by now. 
+
+Remember that when attacking the process you need to attack everything in it. If part of the process is requirements gathering insist that developers should be involved with the business analyst and project manager. If part of the process is QA insist that the project manager needs to be involved as they are a key stakeholder. At every step try to include as many people as possible. This will slow down development and increase costs. 
+
+As this happens stakeholders will start to complain about the escalating project costs and time-lines. You can then smoothly suggest dropping writing the tests. Use your previous arguments about doubling up on QA's costs and the increased costs to help. 
 
 #### Blaming the requirements
 
-I'm only as good as my requirements! Fluid requirements are your ally. The more often the requirements change the more cost you can allocate to changing tests to meet the new requirements, of course you didn't write any, so use this time for chilling by the water cooler or getting another coffee. Tell anyone who asks you are networking and discussing how to improve quality without increasing costs.
+ > I'm only as good as my requirements! 
+
+Fluid requirements are your ally. The more often the requirements change the more cost you can allocate to changing tests to meet the new requirements, of course you didn't write any, so use this time for chilling by the water cooler or getting another coffee. Tell anyone who asks you are networking and discussing how to improve quality without increasing costs.
 
 #### Blame a lower level, OS / Hardware
 
@@ -127,8 +135,9 @@ Its worth it to remember the chain of things that it takes to run your code. You
 
 For example, if you are using Java here is a standard chain of components you can attribute blame to.
 
-`Your Program -> Java Compiler -> JVM -> JVM Compiler -> Operating System -> Operating System Compiler -> Hardware Software -> Hardware Software Compiler -> Hardware Itself`
+`Your Glorious Code -> Java Compiler -> JVM -> JVM Compiler -> Operating System -> Operating System Compiler -> Hardware Software -> Hardware Software Compiler -> Hardware`
 
+This is even easier when you are in the "cloud". You have a few additional layers to attribute blame to.
 
 ## Undermining Managers
 
@@ -138,7 +147,7 @@ If your manager is worth squat they will be pulling reports from somewhere about
 
 The best part is that if they use these reports to measure performance you can game them. Open and Close 50 bug tickets a day and outperform everyone by a mile. Whatever tool you are using to track this likely has an API. You can single handedly become the most important person on every available metric if you get creative.
 
-## Creating Diversions
+## Creating Diversions and Ruining Work-flows
 
 Introducing subtle bugs.
 
@@ -178,19 +187,37 @@ Use the above randomly through your code to really make it hard to track things 
 
 ### Test Failing? Delete it!
 
-If you ever find a failing test delete it. You are a 10x developer and don't have time to fix other peoples dodgy code. Make sure to mention that it was flaky or no longer relevant in the commit comment. Make sure at any stand up or meeting you point out how much of a hero you are for cleaning up other peoples mess. Challenge anyone who suggests otherwise by asking what they have fixed recently. If get pushed for details then start muting the tests. This can usually be done inside your CI system or in the code itself. A mixture of both is usually the best solution especially if the tests are in the same file. Remember that you want someone to look in many places to diagnose any issue and determine why a test did not capture the failure.
+If you ever find a failing test delete it. You are a 10x developer and don't have time to fix other peoples dodgy code. Make sure to mention that it was flaky or no longer relevant in the commit comment. Make sure at any stand up or meeting you point out how much of a hero you are for cleaning up other peoples mess. Challenge anyone who suggests otherwise by asking what they have fixed recently. 
+
+If get pushed for details then start muting the tests. This can usually be done inside your CI system or in the code itself. A mixture of both is the best solution especially if the tests are in the same file. Remember that you want someone to look in many places to diagnose any issue and determine why a test did not capture the failure. Make it as hard as possible to debug as you can. You want to have an incentive for others to delete and mute tests themselves.
+
+Keep track of the number of muted and deleted tests. When it reaches some threshold you can use that as an argument to drop them totally. 
 
 ### Introducing Unreliability
 
-So the team has pushed ahead, and nothing is working. Your new position is to make the tests unreliable. Then you want to expand out and ask if the goal is to have 100% reliable code you need 100% test coverage.
+So the team has pushed ahead, and nothing is working. Your new position is to make the tests unreliable. Then you want to expand out and point out that if the goal is to have 100% reliable code you need 100% test coverage. This sounds counter intuitive and against your goal, but you have to remember that its not an easy metric to get. It will cost a lot of time, slow development down and more importantly introduce flaky tests.
 
- > If they are reliable why do we have bugs?
+Arguments to achieve this are,
 
- > If our goal is 100% reliable why do we shoot for less than 100% coverage?
+ > The goal is to have 100% reliable code
+
+ therefore
+
+ > If our goal is 100% reliable why do we shoot for less than 100% test coverage?
+
+leading to a test suite that is unreliable 
+
+ > If they are unreliable why even have them?
+
+ and
+
+ > If we have tests why do we still have bugs?
 
 #### How to write flaky tests
 
 Flaky tests undermine confidence in the test suite and will result in the tests being muted or ignored. Either way you win. Leave temp files around, connections open, forked processes running and generally anything you can think of that will introduce failure conditions into your tests. 
+
+The best flaky tests however are those that fail apparently randomly, and never repeat themselves.
 
 Take the following example,
 
@@ -218,21 +245,25 @@ The problem with the above is simple. Assuming the tests run in order everything
 
 Also note that the above is written to only work on unix style operating systems. This is another advantage you can use! Write some tests so they are unix specific, then in another file write them to be windows specific. If challenged point out that you use X in production so the tests should be specific to that, and when the other style is picked up mention landing a contract with a new customer who uses the other OS.
 
+For further marks have another test which changes the permissions of the file, or better yet multiple. Remove write access. Change the owner. Make the file immutable. Attempt to rename it to reserved windows file names such as CON. All of which will cause random fails after multiple runs.
+
+If you have concurrent code then launch concurrent tests. These Heisenbug's are your greatest ally in creating a flaky test suite. 
+
  > **HANDY TIP:**
- > The use of docker in CI/CD allows you to get really creative. Build a layer that adds 3000 new users and watch the image size blow up to hundreds of gigabytes which will likely crash the build agent. Say you were testing how the application performs when running against files with multiple owners.
+ > The use of docker and other container layers in CI/CD allows you to get really creative. Build a layer that adds 3000 new users and watch the image size blow up to hundreds of gigabytes which will likely crash the build agent. Say you were testing how the application performs when running against files with multiple owners.
 
 ### What not to test
 
 If you are forced to write tests you can start by being selective. Tests for setters and getters not only make you 
-look good, but for dynamic languages you can go to town testing all sorts of stuff. Be sure that your method expecting an integer fails gracefully when passed an array. With a little creativity you can auto generate most of these. For everything else follow the following rules.
+look good from a metrics point of view, but for dynamic languages you can go to town testing all sorts of stuff. Be sure that your method expecting an integer fails gracefully when passed an array. With a little creativity you can auto generate most of these. For everything else follow the following rules.
 
- - Never test any error case because your code is error free
+ - Never test any error case because your code is naturally error free
  - Never test return codes because it never happens and slows the test suite down
- - Never test anything that requires you to mock. After all mocking is the work of the devil and a classic anti-pattern.
+ - Never test anything that requires you to mock. After all mocking is the work of the devil and a anti-pattern.
  - Only test for success under ideal situations. You code is a perfect snowflake.
  - Only write integration tests and make them as flaky as possible to further your cause. See how to write flaky tests.
 
-## Generic Fall-back Excuses
+## List Generic Fall-back Excuses
 
 For any piece of code the following excuses are usually applicable. Feel free to use any at random or in order. Remember to cycle though them over time to avoid your excuses being picked up.
 
