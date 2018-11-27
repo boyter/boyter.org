@@ -47,7 +47,7 @@ Where you value potential customers more than existing customers. Usually caused
 
 *Behavior Driven Development*
 
-Where you use real users to drive your development methology and end up delivering a product that mostly works for about 3 people as everyone else had their voice drowned out. Examples include mobile apps tested by your Mum.
+Where you use real users to drive your development methodology and end up delivering a product that mostly works for about 3 people as everyone else had their voice drowned out. Examples include mobile apps tested by your Mum.
 
 ----------
 
