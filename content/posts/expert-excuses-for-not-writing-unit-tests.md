@@ -263,7 +263,7 @@ look good from a metrics point of view, but for dynamic languages you can go to 
  - Only test for success under ideal situations. You code is a perfect snowflake.
  - Only write integration tests and make them as flaky as possible to further your cause. See how to write flaky tests.
 
-## List Generic Fall-back Excuses
+## List of Generic Fall-back Excuses
 
 For any piece of code the following excuses are usually applicable. Feel free to use any at random or in order. Remember to cycle though them over time to avoid your excuses being picked up.
 
