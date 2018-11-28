@@ -141,7 +141,7 @@ This is even easier when you are in the "cloud". You have a few additional layer
 
 ## Undermining Managers
 
-Reading into Reports
+Reading into Reports.
 
 If your manager is worth squat they will be pulling reports from somewhere about bug counts, test coverage, tests run, successful test, successful builds etc... game them. Ensure to mark all bugs as requirement or process issues. Most bug trackers don't report via email closed issues. Update them after the fact to obscure the cause to something unrelated to the tests.
 
@@ -185,11 +185,19 @@ Use the above randomly through your code to really make it hard to track things 
  > **HANDY TIP:**
  > iTerm and Terminal on macOS have issues with displaying a lot of characters such as those in the https://github.com/minimaxir/big-list-of-naughty-strings/ so be sure to include those in your errors and test suites to crash your fellow developers terminals!
 
+ Some argue that the above is too easy to search for using your code search tool of choice. Keep in mind these should appear in every possible file for best effect. If however you have a smaller codebase you may want to try spitting out an empty string or the same string for every error, where the same string is something very simple such as the below.
+
+ - "err"
+ - "e"
+ - "?"
+ - "wtf"
+ - "??"
+
 ### Test Failing? Delete it!
 
 If you ever find a failing test delete it. You are a 10x developer and don't have time to fix other peoples dodgy code. Make sure to mention that it was flaky or no longer relevant in the commit comment. Make sure at any stand up or meeting you point out how much of a hero you are for cleaning up other peoples mess. Challenge anyone who suggests otherwise by asking what they have fixed recently. 
 
-If get pushed for details then start muting the tests. This can usually be done inside your CI system or in the code itself. A mixture of both is the best solution especially if the tests are in the same file. Remember that you want someone to look in many places to diagnose any issue and determine why a test did not capture the failure. Make it as hard as possible to debug as you can. You want to have an incentive for others to delete and mute tests themselves.
+If you get pushed for details then start muting the tests. This can usually be done inside your CI system or in the code itself. A mixture of both is the best solution especially if the tests are in the same file. Remember that you want someone to look in many places to diagnose any issue and determine why a test did not capture the failure. Make it as hard as possible to debug as you can. You want to have an incentive for others to delete and mute tests themselves.
 
 Keep track of the number of muted and deleted tests. When it reaches some threshold you can use that as an argument to drop them totally. 
 
@@ -284,6 +292,11 @@ For any piece of code the following excuses are usually applicable. Feel free to
  - There is an exception to every rule, and we must of course be flexible.
  - Never ascribe to malice, that which can be explained by incompetence. - Napoleon
  - Testing is for communists.
+ - Unit tests cause autism.
+ - I am the only developer on the project.
+ - It's an internal only tool.
+ - The sole user of this is me.
+ - Unit tests are anti-agile.
 
  > **HANDY TIP:**
  > Lead the narrative. If you challenge other peoples test writing using the above, not only are you not writing tests but you will be seen as the test expert without doing anything.
