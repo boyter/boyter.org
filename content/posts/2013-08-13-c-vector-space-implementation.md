@@ -21,7 +21,8 @@ Since I am writing lots of Vector Space implementations in Go, Python etc&#8230;
 
 In any case here it is in case you are looking for a simple implementation of this useful class.
 
-<pre>class Program
+{{<highlight csharp>}}
+class Program
 {
 	static void Main(string[] args)
 	{
@@ -93,4 +94,5 @@ public class VectorCompare
 
 		return con;
 	}
-}</pre>
+}
+{{</highlight>}}
