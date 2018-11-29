@@ -1,5 +1,5 @@
 ---
-title: How to start with Elastic Search in 2018
+title: How to start with Elastic Search in 2019
 date: 2028-05-27
 ---
 
@@ -261,9 +261,9 @@ Note that we keep the other fields. This is because if all the terms do match el
 
 ### Highlights
 
-Highlights are how you show the relevant portion of the search to your user. Usually they just consist of a relevant potion of text extracted from the document with the matching terms highlighted. I am not sure how elastic actually achieves this under the hood, but if you are curious you can read https://boyter.org/2013/04/building-a-search-result-extract-generator-in-php/ which explains how I created one some years ago.
+Highlights are how you show the relevant portion of the search to your user. Usually they just consist of a relevant potion of text extracted from the document with the matching terms highlighted. I am not sure how elastic actually achieves this under the hood, but if you are curious you can read https://boyter.org/2013/04/building-a-search-result-extract-generator-in-php/ which explains how I created one some years ago and compared it to other solutions.
 
-Thankfully elastic can do this for you. Add highlight to your query and it will return highlights for the matching fields.
+Thankfully elastic can do this for you saving you the effort. Add highlight to your query and it will return highlights for the matching fields.
 
 {{<highlight json>}}
 {
@@ -295,6 +295,8 @@ Thankfully elastic can do this for you. Add highlight to your query and it will 
 }
 {{</highlight>}}
 
+The parameter number of fragments allows you to control the number of highlights that return. Say you have a document with a single field with lots of text and lots of matching snippets setting the value to higher than 1 will return more relevant highlights from the field up-to the value you specify. The fragment size is the amount of surrounding characters. It should never exceed this value but will quite often be less. Fields specifies which fields can produce a highlight.
+
 
 ### Aggregations/Facets
 ### Size/Pages
@@ -320,7 +322,7 @@ By default Elastic uses TF/IDF
 
   How often does the term appear in all documents in the collection? The more often, the lower the weight. Common terms like and or the contribute little to relevance, as they appear in most documents, while uncommon terms like elastic or hippopotamus help us zoom in on the most interesting documents. The inverse document frequency is calculated as follows:
 
-   The inverse document frequency (idf) of term t is the logarithm of the number of documents in the index, divided by the number of documents that contain the term.
+   The inverse document frequency (IFD) of term t is the logarithm of the number of documents in the index, divided by the number of documents that contain the term.
   Field-length norm
   edit
 
@@ -332,7 +334,9 @@ The result of this is that if you search for the following "commonWord OR rareWo
 
 
 
-## EXPLAIN
+## Explain
+
+If someone ever does ask to explain how the ranking works you can add to any search JSON `"explain": true` and get an overview of what is actually happening under the hood by elastic.
 
 ```
 {
