@@ -3,7 +3,7 @@ title: How to start with Elastic Search in 2018
 date: 2028-05-27
 ---
 
-The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search http endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
+The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search HTTP endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
 
 ## Basics
 
@@ -11,7 +11,7 @@ The main thing to keep in mind with elastic (or any search service) is that ther
 
 As with most things you need to know what the user is trying to achieve before you can work on either.
 
-The first thing to do is determine what version of elastic you are working with. Either ask your friendly DevOps person or alternatively load the elastic http endpoint in your browser of choice,
+The first thing to do is determine what version of elastic you are working with. Either ask your friendly DevOps person or alternatively load the elastic HTTP endpoint in your browser of choice,
 
 {{<highlight json>}}
 {
