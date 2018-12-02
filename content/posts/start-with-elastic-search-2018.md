@@ -136,7 +136,7 @@ Almost everyone puts some "magic" on top of the queries, where the magic is tryi
 
 To search across an index you have two options. 
 
-For basic search across everything and return the most relevant documents a basic GET request will work. Given that you should have elastic running locally you can browse to http://localhost:9200/_search?q=keanu which will perform a search across all indexes and all types. To restrict to an index you have created http://localhost:9200/film/_search?q=keanu and to restrict to a type inside that index http://localhost:9200/film/actor/_search?q=keanu
+For basic search across everything and return the most relevant documents a basic GET request will work. Given that you should have elastic running locally you can browse to `http://localhost:9200/_search?q=keanu` which will perform a search across all indexes and all types. To restrict to an index you have created `http://localhost:9200/film/_search?q=keanu` and to restrict to a type inside that index `http://localhost:9200/film/actor/_search?q=keanu`
 
 With the above you get all of the usual elastic syntax. Boolean searches `keanu AND reeves`, wildcards `kean*`, proximity `"keanu reeves"~2`, fuzzy search `kean~2` all work as you expect. You can target specific fields to search `person.name:keanu` or combine multiples of the above `person.name:kean~2 AND canadi*`. For cases where all you require is to present the information this might be enough. One thing to keep in mind however is that a search done like this will default to an OR search. This means each additional search term added to the query will increase the number or results which can seem counter intuitive.
 
@@ -307,7 +307,6 @@ If you sort based on a date field that in its mapping ignores malformed then doc
 Date Ranges
 
 
-
 ## Ranking / Scoring / Relevance
 
 By default Elastic uses TF/IDF 
@@ -328,15 +327,22 @@ By default Elastic uses TF/IDF
 
   How long is the field? The shorter the field, the higher the weight. If a term appears in a short field, such as a title field, it is more likely that the content of that field is about the term than if the same term appears in a much bigger body field. The field length norm is calculated as follows:
 
-It also used to apply the Vector Space model to ranking at query time, but I am not sure if this is still the case. If you want some detail about the Vector Space model read the following, https://boyter.org/2011/06/vector-space-search-model-explained/ https://boyter.org/2010/08/build-vector-space-search-engine-python/ https://boyter.org/2013/08/c-vector-space-implementation/ https://boyter.org/2013/08/golang-vector-space-implementation/
+Elastic search uses TF/IDF ranking by default. You can change this to other implementations of rankers such as BM25 but generally its good enough that there is no need. TF/IDF is a pre-ranking algorithm which means it happens as the document is indexed and not at runtime. In effect it explits the idea that not all words are considered equally important, and not all documents contain the same words. 
 
-The result of this is that if you search for the following "commonWord OR rareWord" documents containing the rare word will be ranked higher, and documents where the rare word appears in shorter fields will outrank those where the rare word appears in longer ones.
+TF is term frequency just means how often does the word appear in the document. A document with multiple occurances of the same word is probably more relevant for that word. IDF is inverse document frequency, which smooths out the TF but determining that while a word may appear 10 times in a document it occurs in every document and as such is probably not very important.
 
+As such a word is considered important if it does not appear very often across all document. A search for this workd would rank a document with multiple occurances of this word higher then a document with a single occurance. In addition shorter fields outrank longer ones.
+
+Elastic search also used to apply the Vector Space model to ranking at query time, but I am not sure if this is still the case. If you want some detail about the Vector Space model read the following, https://boyter.org/2011/06/vector-space-search-model-explained/ https://boyter.org/2010/08/build-vector-space-search-engine-python/ https://boyter.org/2013/08/c-vector-space-implementation/ https://boyter.org/2013/08/golang-vector-space-implementation/ This is a query time ranking algorithm run when it actually runs a search. Due to the way it works it ranks documents of similar length as being a closer match, which in practice with a users usual search terms means it also ranks shorter fields higher over longer ones.
+
+The result of the above is that if you search for the following "commonWord OR rareWord" documents containing the rare word will be ranked higher. Of the documents with the rare word, those which have multiple occurances of it or those where it exists in shorter fields will outrank others where the rare word appears in longer ones.
 
 
 ## Explain
 
 If someone ever does ask to explain how the ranking works you can add to any search JSON `"explain": true` and get an overview of what is actually happening under the hood by elastic.
+
+You can see how to do so using the below,
 
 ```
 {
@@ -346,3 +352,5 @@ If someone ever does ask to explain how the ranking works you can add to any sea
       "must": [
         {
 ```
+
+The response of which will look something like the following
