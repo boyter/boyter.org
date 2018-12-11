@@ -33,7 +33,7 @@ The first thing to do is determine what version of elastic you are working with.
 }
 {{</highlight>}}
 
-You should see something like the above. In this case the version number is 6.5.0. This is important to know as there have been breaking changes between the major versions and a lot of the books and documentation you are likely to encounter on-line will not be correct. This guide is written with version 6.5.0 in mind.
+You should see something like the above. In this case the version number is 6.5.0. This is important to know as there have been breaking changes between the major versions and a lot of the books and documentation you are likely to encounter on-line will not be correct. This guide is written with version 6.5.0 in mind, but was tested with versions back in the 6.2.0 range.
 
 At this point you should investigate running elastic locally so you can avoid impacting anyone else, requiring network connectivity and to speed up local development. You have two options. The easiest is run a docker image. However due to licensing issues elastic (the company) has made this a little harder. A while ago elastic released the source code to XPack which is a collection of their propitiatory tools. You can read the release here https://www.elastic.co/blog/doubling-down-on-open however one catch is that it means you can accidentally run the XPack tools and potentially run into licensing issues. You can read the HN discussion here https://news.ycombinator.com/item?id=16487440
 
@@ -50,7 +50,7 @@ Option two is to download and run elastic on your machine natively. I have tried
 
 ## Communication
 
-The easiest way to communicate with elastic search is though HTTP POST and GET requests. I personally found it easiest to do this when testing and trying ideas using Postman https://www.getpostman.com/ Once I had things working convert into code which made appropiate restful GET/POST/PUT/DELETE requests. CURL would work just as well for this, however I found that Postman's ability to control headers easily made it a good tool for this.
+The easiest way to communicate with elastic search is though restful HTTP requests. I personally found it easiest to do this when testing and trying ideas using Postman https://www.getpostman.com/ Once I had things working I converted them into code which made appropiate restful GET/POST/PUT/DELETE requests. CURL would work just as well for this, however I found that Postman's ability to control headers with dropdowns and saving of requests useful.
 
 There are many different API wrappers for Elastic written for different languages, however I humbly suggest that you avoid them. The reasons being,
 
@@ -59,7 +59,7 @@ There are many different API wrappers for Elastic written for different language
  * You cannot easily convert between languages
  * Generally you cannot easily replay the HTTP requests using Postman or CURL
 
-I did try a few wrappers, but quickly discarded them in favor of direct HTTP calls based on the above.
+I did try a few wrappers, but quickly discarded them in favor of direct HTTP calls based on the above reasons.
 
 ## How Elastic Stores Documents
 
@@ -174,7 +174,7 @@ To set the mapping you need to PUT the above to http://localhost:9200/film/ whic
 }
 {{</highlight>}}
 
-## Facets
+## Facets/Aggregations
 
 One of the things you likely want from your search are facets. These are the aggregation roll-ups you commonly see on the left side of your search results allowing you in the example of Ebay to filter down to new or used products.
 
@@ -182,7 +182,9 @@ Sticking with our example of Keanu you can see that in the below mock-up (suppli
 
 ![Profile Result](/static/start-with-elastic-search-2018/search_facets.png)
 
-Facets are the result of setting the keyword type in the mapping.
+Facets are the result of setting the keyword type in the mapping. Once you have set the mapping then added the document you can then request facets to be produced for that field.
+
+To generate facts for a search
 
 ## Searching
 
@@ -194,9 +196,9 @@ For basic search across everything and return the most relevant documents a basi
 
 With the above you get all of the usual elastic syntax. Boolean searches `keanu AND reeves`, wildcards `kean*`, proximity `"keanu reeves"~2`, fuzzy search `kean~2` all work as you expect. You can target specific fields to search `person.name:keanu` or combine multiples of the above `person.name:kean~2 AND canadi*`. For cases where all you require is to present the information this might be enough. One thing to keep in mind however is that a search done like this will default to an OR search. This means each additional search term added to the query will increase the number or results which can seem counter intuitive.
 
-The other option is to post to the same endpoints using the elastic search syntax. This is far more complex and involved but provides the option to perform aggregations and the like.
+The other option is to post to the same endpoints using the elastic search syntax. This is more complex and involved but provides the option to perform facet/aggregations and as such is likely what you will need to do.
 
-If you open postman or whatever tool you like to use to craft custom HTTP requests and post like the following,
+If craft the following HTTP requests and POST like the following,
 
 ```
 POST: http://localhost:9200/film/actor/_search
@@ -224,10 +226,11 @@ BODY: {
 
 The result will be a search for `keanu` over the fields `person.name` `fact` and `person.citizenship`. If keanu appears in any of those fields within a document it will be returned as a match.
 
+Things to note. This query is by default an AND search. This means adding addtional terms will reduce the number of results. You can of course change this to OR if that is your requirement.
 
 ### Multiple Fields
 
-If you are searching across multiple fields terms need to be in all of them.
+If you are searching across multiple fields the terms you are searching for need to be in all of them.
 
 This is especially annoying if your plan to search over multiple specific fields is something like the below,
 
@@ -255,9 +258,13 @@ BODY: {
 }
 ```
 
-Believe it or not it will not match anything as elastic is looking for a single field that has both terms in it. To get around this you can create an aggregated field which contains everything you want to search across and then search against that.
+Believe it or not it will not match anything as Elastic is looking for a single field that has both terms of keanu and canada in it. To get around this you have two options. The first is to educate your users and the second is to modify elastic and how it indexes. 
 
-You need to define the aggregated field when defining mappings. As such in order to make the above search work drop the index, and create the mapping like below. Then add the document back to the index.
+If you educate your users to put AND in between the terms that will resolve the issue. This is something you can put into your "magic" on top of the search however, it means you need to parse the users queries which can be problematic.
+
+To modify elastic you can create an aggregated field which contains everything you want to search across and then search against that. You need to define the aggregated field when defining mappings. As such in order to make the above search work drop the index, and create the mapping like below. Then add the document back to the index.
+
+The below has a special field which I called `_everything` but could be whatever name you want which contains the concaternation of the fields specified above it.
 
 ```
 {
@@ -311,7 +318,7 @@ BODY: {
 }
 ```
 
-Note that we keep the other fields. This is because if all the terms do match elastic can use them as a signal in its internal ranking algorithm which should help it produce more relevant results. This would not be the case in the above search but for example searching for `canada` would be impacted by this.
+The new addition is searching against the `_everything` field. Note that we keep the other fields. This is because if all the terms do match elastic can use them as a signal in its internal ranking algorithm which should help it produce more relevant results. This would not be the case in the above search but for example searching for `canada` would be impacted by this.
 
 ### Highlights
 
@@ -349,10 +356,9 @@ Thankfully elastic can do this for you saving you the effort. Add highlight to y
 }
 {{</highlight>}}
 
-The parameter number of fragments allows you to control the number of highlights that return. Say you have a document with a single field with lots of text and lots of matching snippets setting the value to higher than 1 will return more relevant highlights from the field up-to the value you specify. The fragment size is the amount of surrounding characters. It should never exceed this value but will quite often be less. Fields specifies which fields can produce a highlight.
+The parameter number of fragments allows you to control the number of highlights that return. Say you have a document with a single field with lots of text and lots of matching snippets setting the value to higher than 1 will return more relevant highlights from the field up-to the value you specify. The fragment size is the amount of surrounding characters. It should never exceed this value but can be less. Fields specifies which fields can produce a highlight, with * as done above meaning any field search across can produce a highlight.
 
 
-### Aggregations/Facets
 ### Size/Pages
 ### Sorting
 
@@ -361,36 +367,21 @@ If you sort based on a date field that in its mapping ignores malformed then doc
 Date Ranges
 
 
-## Ranking / Scoring / Relevance
+## Explaining Ranking / Scoring / Relevance
 
-By default Elastic uses TF/IDF 
+The below is a fairly simplistic explanation of how ranking works in Elastic.
 
-  Once we have a list of matching documents, they need to be ranked by relevance. Not all documents will contain all the terms, and some terms are more important than others. The relevance score of the whole document depends (in part) on the weight of each query term that appears in that document.
+Generally any search service uses a mixture of pre-ranking and query time ranking to produce results. Pre-ranking happens when the document is indexed. Query ranking takes into account the users query and augments the pre-ranking algorithm. Pre-ranking is the most efficient way of ranking results but best of breed engines use a combination of both.
 
-  The weight of a term is determined by three factors, which we already introduced in What Is Relevance?. The formulae are included for interest’s sake, but you are not required to remember them.
-  Term frequency
-  edit
+Elastic search uses TF/IDF ranking by default for pre-ranking. You can change this to other implementations of rankers such as BM25 but unless you have specific reasons to do so there is no need. TD/IDF In effect exploits the idea that not all words are considered equally important, and not all documents contain the same words.
 
-  How often does the term appear in this document? The more often, the higher the weight. A field containing five mentions of the same term is more likely to be relevant than a field containing just one mention. The term frequency is calculated as follows:
+TF is term frequency just means how often does the word appear in the document. A document with multiple occurrences of the same word is probably more relevant for that word. IDF is inverse document frequency, which smooths out the TF by determining that while a word may appear 10 times in a document it also occurs in every document and as such is probably not very important.
 
-  How often does the term appear in all documents in the collection? The more often, the lower the weight. Common terms like and or the contribute little to relevance, as they appear in most documents, while uncommon terms like elastic or hippopotamus help us zoom in on the most interesting documents. The inverse document frequency is calculated as follows:
+As such a word is considered important if it does not appear very often across all document. A search for this word would rank a document with multiple occurrences of this word higher then a document with a single occurrence. In addition to the above shorter fields outrank longer ones. So things like titles tend to outrank fields with large bodies of text.
 
-   The inverse document frequency (IFD) of term t is the logarithm of the number of documents in the index, divided by the number of documents that contain the term.
-  Field-length norm
-  edit
+Elastic search also used to apply the Vector Space model to ranking at query time, but I am not sure if this is still the case. If you want some detail about the Vector Space model read the following, https://boyter.org/2011/06/vector-space-search-model-explained/ https://boyter.org/2010/08/build-vector-space-search-engine-python/ https://boyter.org/2013/08/c-vector-space-implementation/ https://boyter.org/2013/08/golang-vector-space-implementation/ This is a query time ranking algorithm run at search time. Due to the way it works it ranks documents of similar length as being a closer match, which in practice with a users usual search terms means it also ranks shorter fields higher over longer ones.
 
-  How long is the field? The shorter the field, the higher the weight. If a term appears in a short field, such as a title field, it is more likely that the content of that field is about the term than if the same term appears in a much bigger body field. The field length norm is calculated as follows:
-
-Elastic search uses TF/IDF ranking by default. You can change this to other implementations of rankers such as BM25 but generally its good enough that there is no need. TF/IDF is a pre-ranking algorithm which means it happens as the document is indexed and not at runtime. In effect it explits the idea that not all words are considered equally important, and not all documents contain the same words. 
-
-TF is term frequency just means how often does the word appear in the document. A document with multiple occurances of the same word is probably more relevant for that word. IDF is inverse document frequency, which smooths out the TF but determining that while a word may appear 10 times in a document it occurs in every document and as such is probably not very important.
-
-As such a word is considered important if it does not appear very often across all document. A search for this workd would rank a document with multiple occurances of this word higher then a document with a single occurance. In addition shorter fields outrank longer ones.
-
-Elastic search also used to apply the Vector Space model to ranking at query time, but I am not sure if this is still the case. If you want some detail about the Vector Space model read the following, https://boyter.org/2011/06/vector-space-search-model-explained/ https://boyter.org/2010/08/build-vector-space-search-engine-python/ https://boyter.org/2013/08/c-vector-space-implementation/ https://boyter.org/2013/08/golang-vector-space-implementation/ This is a query time ranking algorithm run when it actually runs a search. Due to the way it works it ranks documents of similar length as being a closer match, which in practice with a users usual search terms means it also ranks shorter fields higher over longer ones.
-
-The result of the above is that if you search for the following "commonWord OR rareWord" documents containing the rare word will be ranked higher. Of the documents with the rare word, those which have multiple occurances of it or those where it exists in shorter fields will outrank others where the rare word appears in longer ones.
-
+The result of the above is that if you search for the following "commonWord OR rareWord" documents containing the rare word will be ranked higher. Of the documents with the rare word, those which have multiple occurrences of it or those where it exists in shorter fields will outrank others where the rare word appears in longer ones.
 
 ## Explain
 
@@ -407,4 +398,4 @@ You can see how to do so using the below,
         {
 ```
 
-The response of which will look something like the following
+The response of which will look something like the following,
