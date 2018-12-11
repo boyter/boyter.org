@@ -107,7 +107,7 @@ Mappings define documents. You can use them to specify that fields within your d
 
 > You have to define a mapping if you want to provide functionality such as aggregations or facets. You cannot add a mapping after indexing any document. To add one afterwards requires dropping the index and re-indexing the content.
 
-You define a mapping by putting to the index/type inside elastic before then adding a document. Consider For example our previous document defining Keanu Reeves. With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and ignore malformed dates, which may have the wrong format or be missing. It will also treat the `type` field of the document as a single keyword allowing us to perform aggregations and facets on this field.
+You define a mapping by putting to the index/type inside elastic before then adding a document. Consider For example our previous document defining Keanu Reeves. With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and will ignore malformed dates. Those being dates which may have the wrong format or be empty. It will also treat the `type` field of the document as a single keyword allowing us to perform aggregations and facets on this field.
 
 {{<highlight json>}}
 {
