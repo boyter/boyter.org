@@ -5,7 +5,11 @@ date: 2018-12-10
 
 The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search HTTP endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
 
-## Basics
+The below should be enough for anyone to get started with elastic producing a modern search interface.
+
+https://www.cheatography.com/jelle/cheat-sheets/elasticsearch-query-string-syntax/
+
+## Basics / Getting Started
 
 The main thing to keep in mind with elastic (or any search service) is that there are two main portions. Indexing and searching. Indexing is the process of taking a document you have defined and adding it to the search service in such a way that you can support your search requirements. Searching is the process of taking the users wants and turning it into a query that uses the index to return something useful.
 
@@ -59,7 +63,7 @@ There are many different API wrappers for Elastic written for different language
  * You cannot easily convert between languages
  * Generally you cannot easily replay the HTTP requests using Postman or CURL
 
-I did try a few wrappers, but quickly discarded them in favor of direct HTTP calls based on the above reasons. Keep in mind this is just my opinion. 
+I did try a few wrappers, but quickly discarded them in favor of direct HTTP calls based on the above reasons. Keep in mind this is just my opinion, but I found every wrapper more annoying then anything else and favor the ability to verify in postman before implementing the same thing in code.
 
 I have included an export of the postman queries TODO ADD POSTMAN LINK HERE to assist with getting started quickly.
 
@@ -118,7 +122,7 @@ For the purposes of your project, you probably want a single index and then one 
 
 To store a document in elastic under an index and type you POST to the endpoint with the JSON you want to create.
 
-For the above you could POST our Keanu document to the index `film` and the type `actor` to the endpoint http://localhost:9200/film/actor with the type as `application/json`. The result of this should be similar to the below,
+For the above you could POST our Keanu document to the index `film` and the type `actor` to the endpoint `http://localhost:9200/film/actor` with the type as `application/json`. The result of this should be similar to the below,
 
 {{<highlight json>}}
 {
@@ -141,12 +145,16 @@ The above indicates that the document was added to the index film with the type 
 
 ## Mappings
 
-Mappings define documents. You can use them to specify that fields within your document should be treated as numbers, dates, geo-locations and whatever other types Elastic supports. You can also define the stemming algorithm used and other useful index fields.
+Mappings define type and values in documents. You use them to specify that fields within your document should be treated as numbers, dates, geo-locations and whatever other types elastic supports. You can also define the stemming algorithm used and other useful index fields.
 
-> You have to define a mapping if you want to provide functionality such as aggregations or facets. You cannot add a mapping after indexing any document. To add one afterwards requires dropping the index and re-indexing the content.
+ > You have to define a mapping if you want to provide functionality such as aggregations or facets. You cannot add a mapping after indexing any document. To add one afterwards requires dropping the index and re-indexing the content.
 
 You define a mapping by putting to the index/type inside elastic before then adding a document. Consider For example our previous document defining Keanu Reeves. With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and will ignore malformed dates. Malformed dates being dates which have a non matching format or are empty. It will also treat the `type` field of the document as a single keyword allowing us to perform aggregations and facets on this field.
 
+```
+PUT: http://localhost:9200/film/
+TYPE: application/json
+```
 {{<highlight json>}}
 {
   "mappings": {
@@ -166,13 +174,13 @@ You define a mapping by putting to the index/type inside elastic before then add
 }
 {{</highlight>}}
 
-To set the mapping you need to PUT the above to http://localhost:9200/film/ which would create the new type of actor with the mappings as specified. The result of this would look similar to the below,
+To set the mapping you need to PUT the above to `http://localhost:9200/film/` which would create the new type of actor with the mappings as specified. The result of this would look similar to the below,
 
 {{<highlight json>}}
 {
     "acknowledged": true,
     "shards_acknowledged": true,
-    "index": "metadata"
+    "index": "film"
 }
 {{</highlight>}}
 
@@ -193,7 +201,9 @@ If craft the following HTTP requests and POST like the following,
 ```
 POST: http://localhost:9200/film/actor/_search
 TYPE: application/json
-BODY: {
+```
+{{<highlight json>}}
+{
   "query": {
     "bool": {
       "must": [
@@ -212,11 +222,11 @@ BODY: {
     }
   }
 }
-```
+{{</highlight>}}
 
 The result will be a search for `keanu` over the fields `person.name` `fact` and `person.citizenship`. If keanu appears in any of those fields within a document it will be returned as a match.
 
-Things to note. This query is by default an AND search. This means adding addtional terms will reduce the number of results. You can of course change this to OR if that is your requirement.
+Things to note. This query is by default an AND search. This means adding additional terms will reduce the number of results. You can of course change this to OR if that is your requirement.
 
 ### Multiple Fields
 
@@ -347,11 +357,11 @@ Thankfully elastic can do this for you saving you the effort. Add highlight to y
 
 The parameter number of fragments allows you to control the number of highlights that return. Say you have a document with a single field with lots of text and lots of matching snippets setting the value to higher than 1 will return more relevant highlights from the field up-to the value you specify. The fragment size is the amount of surrounding characters. It should never exceed this value but can be less. Fields specifies which fields can produce a highlight, with * as done above meaning any field search across can produce a highlight.
 
-## Facets/Aggregations
+## Facets / Aggregations
 
 One of the things you likely want from your search are facets. These are the aggregation roll-ups you commonly see on the left side of your search results allowing you in the example of Ebay to filter down to new or used products.
 
-Sticking with our example of Keanu you can see that in the below mock-up (supplied by our glorious and talented UX/UI Designer) that we want to be able to filter on the `type` field of our document so we can narrow down to actors, directors, producers or whatever other types we have for people in our index.
+Sticking with our example of Keanu you can see that in the below mock-up that we want to be able to filter on the `type` field of our document so we can narrow down to actors, directors, producers or whatever other types we have for people in our index.
 
 ![Profile Result](/static/start-with-elastic-search-2018/search_facets.png)
 
@@ -360,11 +370,31 @@ Facets are the result of setting the keyword type in the mapping. Once you have 
 To generate facts for a search you want to run a search with aggregations set.
 
 {{<highlight json>}}
-"aggregations": {
-  "type": {
-    "terms": {
-      "field": "type",
-      "min_doc_count": 0
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "keanu",
+            "default_operator": "AND",
+            "fields": [
+              "person.name",
+              "fact",
+              "person.citizenship",
+              "_everything"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "aggregations": {
+    "type": {
+      "terms": {
+        "field": "type",
+        "min_doc_count": 0
+      }
     }
   }
 }
@@ -387,10 +417,53 @@ When run against an index with the mapping setup you will get back in your respo
     }
 {{</highlight>}}
 
-Which is a sum of each of the unique keys based on the field you specified. You can have multiple aggregation types if you have multiple facets.
+Which is a sum of each of the unique keys based on the field you specified. You can have multiple aggregation types if you have multiple facets, with each having the key of the name you set in your aggregation request.
 
-### Size/Pages
-### Sorting
+## Size/Pages
+
+## Deleting
+
+Dropping or deleting an index is actually scarily simple. You need only send a HTTP DELETE to the index you want to remove. 
+
+```
+DELETE: http://localhost:9200/film/
+```
+
+The above will return the below if the index exists and it was able to be deleted.
+
+{{<highlight json>}}
+{
+    "acknowledged": true
+}
+{{</highlight>}}
+
+To delete a single document from the index you need to know its id which you can find by using a query and looking at the value `_id` which for auto generated id's will be something like `x-Apn2cB5wabZ-h5-SLf`. To remove it you send a DELETE against the index/type with the id like so.
+
+```
+DELETE: http://localhost:9200/film/actor/x-Apn2cB5wabZ-h5-SLf
+```
+
+Which when run with the correct id will produce a result like the below.
+
+{{<highlight json>}}
+{
+    "_index": "film",
+    "_type": "actor",
+    "_id": "x-Apn2cB5wabZ-h5-SLf",
+    "_version": 2,
+    "result": "deleted",
+    "_shards": {
+        "total": 2,
+        "successful": 1,
+        "failed": 0
+    },
+    "_seq_no": 1,
+    "_primary_term": 1
+}
+{{</highlight>}}
+
+
+## Sorting
 
 If you sort based on a date field that in its mapping ignores malformed then documents which break the format will appear at the bottom of the results irrespective of which way you sort the document. For example, if you have one document with a proper date and another with nothing, sorting descending or ascending will have the document with the data appear in the first result.
 
