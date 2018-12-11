@@ -33,7 +33,7 @@ The first thing to do is determine what version of elastic you are working with.
 }
 {{</highlight>}}
 
-You should see something like the above. In this case the version number is 6.5.0. This is important to know as there have been breaking changes between the major versions and a lot of the books and documentation you are likely to encounter on-line will not be correct. This guide will be written with version 6.5.0 in mind.
+You should see something like the above. In this case the version number is 6.5.0. This is important to know as there have been breaking changes between the major versions and a lot of the books and documentation you are likely to encounter on-line will not be correct. This guide is written with version 6.5.0 in mind.
 
 At this point you should investigate running elastic locally so you can avoid impacting anyone else, requiring network connectivity and to speed up local development. You have two options. The easiest is run a docker image. However due to licensing issues elastic (the company) has made this a little harder. A while ago elastic released the source code to XPack which is a collection of their propitiatory tools. You can read the release here https://www.elastic.co/blog/doubling-down-on-open however one catch is that it means you can accidentally run the XPack tools and potentially run into licensing issues. You can read the HN discussion here https://news.ycombinator.com/item?id=16487440
 
@@ -47,6 +47,19 @@ docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -d docker.e
 The above will pull the OSS version of elastic and run it on port 9200 on your local machine which is the default Elastic Search port. Once started you can browse to http://localhost:9200/ and hopefully see the JSON like the above which we used to determine the version. If you need a different version you can find the docker images at https://www.docker.elastic.co/
 
 Option two is to download and run elastic on your machine natively. I have tried the various methods they list including package managers and the like. I found the the easiest and most reliable was download the zip file from https://www.elastic.co/downloads/elasticsearch and then run `bin/elasticsearch` or `bin\elasticsearch.bat`. After a time it should start and you can browse to http://localhost:9200/ to verify.
+
+## Communication
+
+The easiest way to communicate with elastic search is though HTTP POST and GET requests. I personally found it easiest to do this when testing and trying ideas using Postman https://www.getpostman.com/ Once I had things working convert into code which made appropiate restful GET/POST/PUT/DELETE requests. CURL would work just as well for this, however I found that Postman's ability to control headers easily made it a good tool for this.
+
+There are many different API wrappers for Elastic written for different languages, however I humbly suggest that you avoid them. The reasons being,
+
+ * They are an abstraction on an abstraction which is the Elastic API
+ * It removes you from knowing what is actually happening
+ * You cannot easily convert between languages
+ * Generally you cannot easily replay the HTTP requests using Postman or CURL
+
+I did try a few wrappers, but quickly discarded them in favor of direct HTTP calls based on the above.
 
 ## How Elastic Stores Documents
 
@@ -101,18 +114,41 @@ Into the same index of the same type and everything will work. However it will b
 
 For the purposes of your project, you probably want a single index and then one or multiple types. Have your index named something like what your project is called. As for the types for each "thing" you want to search across E.G. `ticket`, `document`, `metadata record` and define a type for each one.
 
+To store a document in elastic under an index and type you POST to the endpoint with the JSON you want to create.
+
+For the above you could POST our Keanu document to the index `film` and the type `actor` to the endpoint http://localhost:9200/film/actor with the type as `application/json`. The result of this should be similar to the below,
+
+{{<highlight json>}}
+{
+    "_index": "film",
+    "_type": "actor",
+    "_id": "xeB3nGcB5wabZ-h5JSJW",
+    "_version": 1,
+    "result": "created",
+    "_shards": {
+        "total": 2,
+        "successful": 1,
+        "failed": 0
+    },
+    "_seq_no": 0,
+    "_primary_term": 1
+}
+{{</highlight>}}
+
+The above indicates that the document was added to the index film with the type actor and that Elastic has generated the unique ID for this document as being `xeB3nGcB5wabZ-h5JSJW`.
+
 ## Mappings
 
 Mappings define documents. You can use them to specify that fields within your document should be treated as numbers, dates, geo-locations and whatever other types Elastic supports. You can also define the stemming algorithm used and other useful index fields.
 
 > You have to define a mapping if you want to provide functionality such as aggregations or facets. You cannot add a mapping after indexing any document. To add one afterwards requires dropping the index and re-indexing the content.
 
-You define a mapping by putting to the index/type inside elastic before then adding a document. Consider For example our previous document defining Keanu Reeves. With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and will ignore malformed dates. Those being dates which may have the wrong format or be empty. It will also treat the `type` field of the document as a single keyword allowing us to perform aggregations and facets on this field.
+You define a mapping by putting to the index/type inside elastic before then adding a document. Consider For example our previous document defining Keanu Reeves. With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and will ignore malformed dates. Malformed dates being dates which have a non matching format or are empty. It will also treat the `type` field of the document as a single keyword allowing us to perform aggregations and facets on this field.
 
 {{<highlight json>}}
 {
   "mappings": {
-    "meta": {
+    "actor": {
       "properties": {
         "person.DOB": { 
           "type": "date",
@@ -128,6 +164,16 @@ You define a mapping by putting to the index/type inside elastic before then add
 }
 {{</highlight>}}
 
+To set the mapping you need to PUT the above to http://localhost:9200/film/ which would create the new type of actor with the mappings as specified. The result of this would look similar to the below,
+
+{{<highlight json>}}
+{
+    "acknowledged": true,
+    "shards_acknowledged": true,
+    "index": "metadata"
+}
+{{</highlight>}}
+
 ## Facets
 
 One of the things you likely want from your search are facets. These are the aggregation roll-ups you commonly see on the left side of your search results allowing you in the example of Ebay to filter down to new or used products.
@@ -135,6 +181,8 @@ One of the things you likely want from your search are facets. These are the agg
 Sticking with our example of Keanu you can see that in the below mock-up (supplied by our glorious and talented UX/UI Designer) that we want to be able to filter on the `type` field of our document so we can narrow down to actors, directors, producers or whatever other types we have for people in our index.
 
 ![Profile Result](/static/start-with-elastic-search-2018/search_facets.png)
+
+Facets are the result of setting the keyword type in the mapping.
 
 ## Searching
 
