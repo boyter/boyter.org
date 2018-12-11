@@ -59,7 +59,9 @@ There are many different API wrappers for Elastic written for different language
  * You cannot easily convert between languages
  * Generally you cannot easily replay the HTTP requests using Postman or CURL
 
-I did try a few wrappers, but quickly discarded them in favor of direct HTTP calls based on the above reasons.
+I did try a few wrappers, but quickly discarded them in favor of direct HTTP calls based on the above reasons. Keep in mind this is just my opinion. 
+
+I have included an export of the postman queries TODO ADD POSTMAN LINK HERE to assist with getting started quickly.
 
 ## How Elastic Stores Documents
 
@@ -150,12 +152,12 @@ You define a mapping by putting to the index/type inside elastic before then add
   "mappings": {
     "actor": {
       "properties": {
-        "person.DOB": { 
+        "person.DOB": {
           "type": "date",
           "format": "yyyy-MM-dd",
           "ignore_malformed": true
         },
-        "type": { 
+        "type": {
           "type": "keyword"
         }
       }
@@ -173,18 +175,6 @@ To set the mapping you need to PUT the above to http://localhost:9200/film/ whic
     "index": "metadata"
 }
 {{</highlight>}}
-
-## Facets/Aggregations
-
-One of the things you likely want from your search are facets. These are the aggregation roll-ups you commonly see on the left side of your search results allowing you in the example of Ebay to filter down to new or used products.
-
-Sticking with our example of Keanu you can see that in the below mock-up (supplied by our glorious and talented UX/UI Designer) that we want to be able to filter on the `type` field of our document so we can narrow down to actors, directors, producers or whatever other types we have for people in our index.
-
-![Profile Result](/static/start-with-elastic-search-2018/search_facets.png)
-
-Facets are the result of setting the keyword type in the mapping. Once you have set the mapping then added the document you can then request facets to be produced for that field.
-
-To generate facts for a search
 
 ## Searching
 
@@ -270,21 +260,20 @@ The below has a special field which I called `_everything` but could be whatever
 {
   "mappings": {
     "meta": {
-        "person.name": {
-          "type": "text",
-          "copy_to": "_everything"
-        },
-        "fact": {
-          "type": "text",
-          "copy_to": "_everything"
-        },
-        "person.citizenship": {
-          "type": "text",
-          "copy_to": "_everything"
-        },
-        "_everything": {
-          "type": "text"
-        }
+      "person.name": {
+        "type": "text",
+        "copy_to": "_everything"
+      },
+      "fact": {
+        "type": "text",
+        "copy_to": "_everything"
+      },
+      "person.citizenship": {
+        "type": "text",
+        "copy_to": "_everything"
+      },
+      "_everything": {
+        "type": "text"
       }
     }
   }
@@ -358,6 +347,47 @@ Thankfully elastic can do this for you saving you the effort. Add highlight to y
 
 The parameter number of fragments allows you to control the number of highlights that return. Say you have a document with a single field with lots of text and lots of matching snippets setting the value to higher than 1 will return more relevant highlights from the field up-to the value you specify. The fragment size is the amount of surrounding characters. It should never exceed this value but can be less. Fields specifies which fields can produce a highlight, with * as done above meaning any field search across can produce a highlight.
 
+## Facets/Aggregations
+
+One of the things you likely want from your search are facets. These are the aggregation roll-ups you commonly see on the left side of your search results allowing you in the example of Ebay to filter down to new or used products.
+
+Sticking with our example of Keanu you can see that in the below mock-up (supplied by our glorious and talented UX/UI Designer) that we want to be able to filter on the `type` field of our document so we can narrow down to actors, directors, producers or whatever other types we have for people in our index.
+
+![Profile Result](/static/start-with-elastic-search-2018/search_facets.png)
+
+Facets are the result of setting the keyword type in the mapping. Once you have set the mapping then added the document you can then request facets to be produced for that field.
+
+To generate facts for a search you want to run a search with aggregations set.
+
+{{<highlight json>}}
+"aggregations": {
+  "type": {
+    "terms": {
+      "field": "type",
+      "min_doc_count": 0
+    }
+  }
+}
+{{</highlight>}}
+
+When run against an index with the mapping setup you will get back in your response the following,
+
+{{<highlight json>}}
+  "aggregations": {
+        "type": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+                {
+                    "key": "Actor",
+                    "doc_count": 1
+                }
+            ]
+        }
+    }
+{{</highlight>}}
+
+Which is a sum of each of the unique keys based on the field you specified. You can have multiple aggregation types if you have multiple facets.
 
 ### Size/Pages
 ### Sorting
