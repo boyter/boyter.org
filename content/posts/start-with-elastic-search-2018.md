@@ -1,6 +1,6 @@
 ---
 title: How to start with Elastic Search in 2019
-date: 2028-05-27
+date: 2018-12-10
 ---
 
 The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search HTTP endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
@@ -11,19 +11,21 @@ The main thing to keep in mind with elastic (or any search service) is that ther
 
 As with most things you need to know what the user is trying to achieve before you can work on either.
 
-The first thing to do is determine what version of elastic you are working with. Either ask your friendly DevOps person or alternatively load the elastic HTTP endpoint in your browser of choice,
+The first thing to do is determine what version of elastic you are working with. Either ask your friendly DevOps person or alternatively load the elastic HTTP endpoint (running locally it would be http://localhost:9200/ )in your browser of choice,
 
 {{<highlight json>}}
 {
-  "name" : "AMXkZa8",
+  "name" : "3v6q69Q",
   "cluster_name" : "docker-cluster",
-  "cluster_uuid" : "F7Wshi-8TiWjlGeNywDALA",
+  "cluster_uuid" : "3iTmTSfTRbWs_Cs48_7EDQ",
   "version" : {
-    "number" : "6.2.4",
-    "build_hash" : "ccec39f",
-    "build_date" : "2018-04-12T20:37:28.497551Z",
+    "number" : "6.5.0",
+    "build_flavor" : "oss",
+    "build_type" : "tar",
+    "build_hash" : "816e6f6",
+    "build_date" : "2018-11-09T18:58:36.352602Z",
     "build_snapshot" : false,
-    "lucene_version" : "7.2.1",
+    "lucene_version" : "7.5.0",
     "minimum_wire_compatibility_version" : "5.6.0",
     "minimum_index_compatibility_version" : "5.0.0"
   },
@@ -31,22 +33,24 @@ The first thing to do is determine what version of elastic you are working with.
 }
 {{</highlight>}}
 
-You should see something like the above. In this case the version number is 6.2.4. This is important to know as there have been breaking changes between the major versions and a lot of the books and documentation you are likely to encounter on-line will not be correct. This guide will be written with version 6.2.4 in mind.
+You should see something like the above. In this case the version number is 6.5.0. This is important to know as there have been breaking changes between the major versions and a lot of the books and documentation you are likely to encounter on-line will not be correct. This guide will be written with version 6.5.0 in mind.
 
 At this point you should investigate running elastic locally so you can avoid impacting anyone else, requiring network connectivity and to speed up local development. You have two options. The easiest is run a docker image. However due to licensing issues elastic (the company) has made this a little harder. A while ago elastic released the source code to XPack which is a collection of their propitiatory tools. You can read the release here https://www.elastic.co/blog/doubling-down-on-open however one catch is that it means you can accidentally run the XPack tools and potentially run into licensing issues. You can read the HN discussion here https://news.ycombinator.com/item?id=16487440
 
 To avoid this and potentially avoid some angry emails I have set the below to use the OSS versions of elastic.
 
 ```
-docker pull docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.4
-docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -d docker.elastic.co/elasticsearch/elasticsearch-oss:6.2.4
+docker pull docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.0
+docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -d docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.0
 ```
 
 The above will pull the OSS version of elastic and run it on port 9200 on your local machine which is the default Elastic Search port. Once started you can browse to http://localhost:9200/ and hopefully see the JSON like the above which we used to determine the version. If you need a different version you can find the docker images at https://www.docker.elastic.co/
 
 Option two is to download and run elastic on your machine natively. I have tried the various methods they list including package managers and the like. I found the the easiest and most reliable was download the zip file from https://www.elastic.co/downloads/elasticsearch and then run `bin/elasticsearch` or `bin\elasticsearch.bat`. After a time it should start and you can browse to http://localhost:9200/ to verify.
 
-The next thing to understand is how elastic stores documents. Documents that are indexed need to go into an index and have a type. Indexes can contain one or more types. This sounds limiting but you can search over all indexes or all types within an index or just one type within an index.
+## How Elastic Stores Documents
+
+The next thing to understand is how elastic stores documents. Documents that are indexed need to go into an index and have a type. Indexes can contain one or more types. This may sound limiting but you can search over all indexes or all types within an index or just one type within an index if you require.
 
 Consider it logically like the below. You can search at any part of the tree which will search across all children, or pull back a specific document if you know the key.
 
@@ -56,14 +60,16 @@ ElasticSearch
 │   ├── Type1
 │   │   └── Document1
 │   ├── Type2
-│   │   └── Document1
 │   │   └── Document2
 │   │   └── Document3
+│   │   └── Document4
 │   ├── Type3
-│   │   └── Document1
+│   │   └── Document5
 ├── Index2
+│   ├── Type1
+│   │   └── Document6
 │   ├── Type4
-│   │   └── Document1
+│   │   └── Document7
 ```
 
 The confusing thing however is that documents stored in elastic don't actually need to have the same structure. You can index both of the documents,
@@ -89,7 +95,7 @@ and (N.B. I will be using this document for the rest of the article)
 }
 {{</highlight>}}
 
-Into the same index/type and everything will work. However it will be problematic as a consumer as you will need to guess what type the documents coming out of elastic are. It will be especially problematic when it comes to adding facets and other fancy queries on top of your search.
+Into the same index of the same type and everything will work. However it will be problematic as a consumer as you will need to guess what type the documents coming out of elastic are. It will be especially annoying when it comes to adding facets and other fancy queries on top of your search.
 
 > Rule of thumb. Use an index per project and type per each unique thing you want to search against.
 
