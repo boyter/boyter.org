@@ -5,9 +5,7 @@ date: 2018-12-10
 
 The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search HTTP endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
 
-The below should be enough for anyone to get started with elastic producing a modern search interface.
-
-https://www.cheatography.com/jelle/cheat-sheets/elasticsearch-query-string-syntax/
+The below should be enough for anyone to get started with elastic and then produce a modern search interface.
 
 ## Basics / Getting Started
 
@@ -142,6 +140,10 @@ For the above you could POST our Keanu document to the index `film` and the type
 {{</highlight>}}
 
 The above indicates that the document was added to the index film with the type actor and that Elastic has generated the unique ID for this document as being `xeB3nGcB5wabZ-h5JSJW`.
+
+> Don't use elastic as a primary data store. Use another document store for persistence and populate elastic using it.
+
+It is worth-while writing a robust way of populating elastic from your documents before doing anything else. This allows you to delete and rebuild the index at will allowing for rapid iteration. It also ensures that you have a way to rebuild everything should your elastic cluster die or have issues. For a smallish cluster of 6 nodes with 4 CPU's each you should be able to index over 1 million documents in under an hour.
 
 ## Mappings
 
@@ -588,7 +590,7 @@ The response of which will include something like the following which is horribl
 
 ## Search Tips / Tricks
 
-Given the below document here are some searches you can use against it, and why you might want to do them.
+Given the below document here are some searches you can use against it, and why you might want to do them. I do recommend checking https://www.cheatography.com/jelle/cheat-sheets/elasticsearch-query-string-syntax/ for a general purpose elastic search cheat sheet.
 
 {{<highlight json>}}
 {
