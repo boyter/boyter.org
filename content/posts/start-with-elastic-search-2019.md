@@ -268,9 +268,9 @@ If you educate your users to put AND in between the terms that will resolve the 
 
 To modify elastic you can create an aggregated field which contains everything you want to search across and then search against that. You need to define the aggregated field when defining mappings. As such in order to make the above search work drop the index, and create the mapping like below. Then add the document back to the index.
 
-The below has a special field which I called `_everything` but could be whatever name you want which contains the concaternation of the fields specified above it.
+The below has a special field which I called `_everything` but could be whatever name you want which contains the concatenation of the fields specified above it.
 
-```
+{{<highlight json>}}
 {
   "mappings": {
     "meta": {
@@ -292,7 +292,7 @@ The below has a special field which I called `_everything` but could be whatever
     }
   }
 }
-```
+{{</highlight>}}
 
 At this point the following search will work.
 
@@ -325,7 +325,7 @@ TYPE: application/json
 
 The new addition is searching against the `_everything` field. Note that we keep the other fields. This is because if all the terms do match elastic can use them as a signal in its internal ranking algorithm which should help it produce more relevant results. This would not be the case in the above search but for example searching for `canada` would be impacted by this.
 
-### Highlights
+## Highlights / Snippets
 
 Highlights are how you show the relevant portion of the search to your user. Usually they just consist of a relevant potion of text extracted from the document with the matching terms highlighted. I am not sure how elastic actually achieves this under the hood, but if you are curious you can read https://boyter.org/2013/04/building-a-search-result-extract-generator-in-php/ which explains how I created one some years ago and compared it to other solutions.
 
@@ -433,9 +433,57 @@ When run against an index with the mapping setup you will get back in your respo
 
 Which is a sum of each of the unique keys based on the field you specified. You can have multiple aggregation types if you have multiple facets, with each having the key of the name you set in your aggregation request.
 
-## Size/Pages
 
-`searchRequest.PerPage, searchRequest.Page*searchRequest.PerPage`
+TODO how to actually use the result of the above to filter a search down
+
+
+## Size / Pages
+
+You can page through results by adding size and from to your queries.
+
+{{<highlight json>}}
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "keanu",
+            "default_operator": "AND",
+            "fields": [
+              "person.name",
+              "fact",
+              "person.citizenship",
+              "_everything"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "highlight": {
+    "number_of_fragments": 1,
+    "fragment_size": 150,
+    "fields": {
+      "*": {}
+    }
+  },
+  "aggregations": {
+    "type": {
+      "terms": {
+        "field": "type",
+        "min_doc_count": 0
+      }
+    }
+  },
+  "size": 15,
+  "from": 0
+}
+{{</highlight>}}
+
+Size is the number of results to return and from is from which count you want to start. So to get page 2 where you have 15 results per page you need to set from to be `Page*PerPage` which in this case would be 15.
+
+> By default you can only page through the first 10,000 records but you can change this using the index.max_result_window setting against the settings endpoint
 
 ## Deleting
 
@@ -449,7 +497,7 @@ The above will return the below if the index exists and it was able to be delete
 
 {{<highlight json>}}
 {
-    "acknowledged": true
+  "acknowledged": true
 }
 {{</highlight>}}
 
@@ -487,14 +535,47 @@ Which indicates that the document was deleted with details about which index and
 
 By default if you don't specify any sorting then the results are sorted by the score which is the rank of the document. The score is based on whatever terms you searched for. However searches for say `*` have every document returning a score of 1 and as such there is no natural sorting that can apply, and the results will return in what appears to be a random or nondeterministic order.
 
-If you sort based on a date field that if its mapping ignores malformed then documents which break the format will appear at the bottom of the results irrespective of which way you sort the document. For example, if you have two documents indexed with the first document having a proper date and another document with an empty one then sorting descending or ascending will have the document with the proper date appear as the first result.
+Given our sample document we can change the sorting to be based on the date field we defined in the mapping. TO search ascending we can use the below.
 
-Date Ranges
+{{<highlight json>}}
+  {
+  "sort": [
+    {
+      "person.DOB": {
+        "order": "asc"
+      }
+    },
+    "_score",
+    "_doc"
+  ],
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "keanu",
+            "default_operator": "AND",
+            "fields": [
+              "person.name",
+              "fact",
+              "person.citizenship",
+              "_everything"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+{{</highlight>}}
 
+The above will order by the DOB field descending. Where the DOB is the same it will then rank based on score and then finally the document id. Doing it like this ensures that you have a stable sort order for your results.
 
-### Smoothing out scoring.
+If you sort based on a date field and its mapping ignores malformed values then documents which break the format will appear at the bottom of the results irrespective of which way you sort the document. For example, if you have two documents indexed with the first document having a proper date and another document with an empty one then sorting descending or ascending will have the document with the proper date appear as the first result in the list.
 
-> Scoring varies between nodes.
+> Remember that scoring varies between nodes on the same cluster
+
+Because of the above you may want to try to smooth out the scoring.
 
 It is likely that someone will want to know why on multi-node elastic clusters that the scores between documents change slightly if you spam the same search over and over. The reason for this is that the TF/IDF ranking algorithm produces slightly different results between nodes as they don't contain the same documents. When a search is run the master picks different nodes to run and as such the score changes. This means for some searches that have very common words such as "europe" that repeated searches may have documents move up and down in the ranking.
 
