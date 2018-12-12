@@ -600,7 +600,7 @@ The response of which will include something like the following which is horribl
 
 `fact:canada` 
 
-Will search inside the field fact for the term canada.
+Will search inside the field fact for the term canada. Use when you want to target a single field inside documents of if you have a field that is not searched by default.
 
 `fact:(canada OR england)`
 
@@ -608,9 +608,24 @@ Will search inside the field fact for the term canada or england, if you omit th
 
 `person.name:keanu`
 
-Search under the field person.name for keanu.
+Search under the field person.name for keanu. If the field you are targetting is an array EG `"name": ["one", "two", "three"]` then the search will apply over each of those terms.
 
 `person.*:canadian`
 
 Search any field under person for the term canadian.
 
+`ke?nu`
+
+Search with ? replaced by any single character. You can use this to find common mis-spellings of words that are off by one character. This works well with shorter words where fuzzy search is less effective.
+
+`kea*`
+
+Search where * is replaced by zero or more of any character.
+
+`/[a-c]+/`
+
+Search using regular expression. Note not all regular expressions will work. These searches can be very powerful.
+
+`kean~` 
+
+Fuzzy or sloppy search. Will search for words within 2 characters edit distance of the above by default. Can modify this to
