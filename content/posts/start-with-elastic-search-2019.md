@@ -453,6 +453,8 @@ The above will return the below if the index exists and it was able to be delete
 }
 {{</highlight>}}
 
+> I always read the above using the Red Alert Soviet voice in my head which causes me to giggle to the annoyance of my colleagues
+
 To delete a single document from the index you need to know its id which you can find by using a query and looking at the value `_id` which for auto generated id's will be something like `x-Apn2cB5wabZ-h5-SLf`. To remove it you send a DELETE against the index/type with the id like so.
 
 ```
@@ -480,18 +482,32 @@ Which when run with the correct id will produce a result like the below.
 
 Which indicates that the document was deleted with details about which index and type it was removed from.
 
-## Caching
 
 ## Sorting
 
-By default if you don't specify any sorting then the results are sorted by the score which is the rank of the document. However searches for say `*` have every document returning a score of 1 and as such there is no natural sorting that can apply.
-
-> Sorting varies slightly between nodes
+By default if you don't specify any sorting then the results are sorted by the score which is the rank of the document. The score is based on whatever terms you searched for. However searches for say `*` have every document returning a score of 1 and as such there is no natural sorting that can apply, and the results will return in what appears to be a random or nondeterministic order.
 
 If you sort based on a date field that if its mapping ignores malformed then documents which break the format will appear at the bottom of the results irrespective of which way you sort the document. For example, if you have two documents indexed with the first document having a proper date and another document with an empty one then sorting descending or ascending will have the document with the proper date appear as the first result.
 
 Date Ranges
 
+
+### Smoothing out scoring.
+
+> Scoring varies between nodes.
+
+It is likely that someone will want to know why on multi-node elastic clusters that the scores between documents change slightly if you spam the same search over and over. The reason for this is that the TF/IDF ranking algorithm produces slightly different results between nodes as they don't contain the same documents. When a search is run the master picks different nodes to run and as such the score changes. This means for some searches that have very common words such as "europe" that repeated searches may have documents move up and down in the ranking.
+
+There is not much you can do about this. Elastic does have the ability to pre-check the ranks by contacting all the shards to get a global TF/IDF score but this slows things down and in my tests didn't impact the result. Suggestions to help with this are as follows.
+
+* Sort the documents by score followed by id. This should help ensure a more consistent order.
+* Have elastic cache the results (see below).
+
+Keeping in mind that edits to documents or adding new ones potentially influences the score of every other document and on a live system having 100% identical results is never going to be possible without caching externally and then having stale results. Also for any real search that contains multiple terms this is less likely to become an issue as the natural sorting of the documents will have enough variance so documents will not rank equally.
+
+## Caching
+
+You can have elastic cache search results internally by adding `?request_cache=true` to the end of your search queries. As far as I am aware there is no penalty to this as elastic will expire the cache based on document changes. It is also useful to have this on as it will help smooth out results for the same search term done repeatedly.
 
 ## Explaining Ranking / Scoring / Relevance
 
