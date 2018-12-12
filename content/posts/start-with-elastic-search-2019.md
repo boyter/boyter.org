@@ -180,9 +180,9 @@ To set the mapping you need to PUT the above to `http://localhost:9200/film/` wh
 
 {{<highlight json>}}
 {
-    "acknowledged": true,
-    "shards_acknowledged": true,
-    "index": "film"
+  "acknowledged": true,
+  "shards_acknowledged": true,
+  "index": "film"
 }
 {{</highlight>}}
 
@@ -480,7 +480,13 @@ Which when run with the correct id will produce a result like the below.
 
 Which indicates that the document was deleted with details about which index and type it was removed from.
 
+## Caching
+
 ## Sorting
+
+By default if you don't specify any sorting then the results are sorted by the score which is the rank of the document. However searches for say `*` have every document returning a score of 1 and as such there is no natural sorting that can apply.
+
+> Sorting varies slightly between nodes
 
 If you sort based on a date field that if its mapping ignores malformed then documents which break the format will appear at the bottom of the results irrespective of which way you sort the document. For example, if you have two documents indexed with the first document having a proper date and another document with an empty one then sorting descending or ascending will have the document with the proper date appear as the first result.
 
@@ -507,16 +513,13 @@ The result of the above is that if you search for the following "commonWord OR r
 
 If someone ever does ask to explain how the ranking works you can add to any search JSON `"explain": true` and get an overview of what is actually happening under the hood by elastic.
 
-You can see how to do so using the below,
+You can see how to do so using the below by adding `"explain": true` to your search queries.
 
-```
+{{<highlight json>}}
 {
   "explain": true,
   "query": {
-    "bool": {
-      "must": [
-        {
-```
+{{</highlight>}}
 
 The response of which will include something like the following which is horribly verbose, but very explicit in what is happening under the hood. You can find details of what this actually means on the elastic documentation https://www.elastic.co/guide/en/elasticsearch/reference/current/search-explain.html
 
