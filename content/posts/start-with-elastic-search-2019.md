@@ -237,7 +237,9 @@ This is especially annoying if your plan to search over multiple specific fields
 ```
 POST: http://localhost:9200/film/actor/_search
 TYPE: application/json
-BODY: {
+```
+{{<highlight json>}}
+{
   "query": {
     "bool": {
       "must": [
@@ -256,7 +258,7 @@ BODY: {
     }
   }
 }
-```
+{{</highlight>}}
 
 Believe it or not it will not match anything as Elastic is looking for a single field that has both terms of keanu and canada in it. To get around this you have two options. The first is to educate your users and the second is to modify elastic and how it indexes. 
 
@@ -295,7 +297,9 @@ At this point the following search will work.
 ```
 POST: http://localhost:9200/film/actor/_search
 TYPE: application/json
-BODY: {
+```
+{{<highlight json>}}
+{
   "query": {
     "bool": {
       "must": [
@@ -315,7 +319,7 @@ BODY: {
     }
   }
 }
-```
+{{</highlight>}}
 
 The new addition is searching against the `_everything` field. Note that we keep the other fields. This is because if all the terms do match elastic can use them as a signal in its internal ranking algorithm which should help it produce more relevant results. This would not be the case in the above search but for example searching for `canada` would be impacted by this.
 
@@ -325,6 +329,10 @@ Highlights are how you show the relevant portion of the search to your user. Usu
 
 Thankfully elastic can do this for you saving you the effort. Add highlight to your query and it will return highlights for the matching fields.
 
+```
+POST: http://localhost:9200/film/actor/_search
+TYPE: application/json
+```
 {{<highlight json>}}
 {
   "query": {
@@ -367,8 +375,12 @@ Sticking with our example of Keanu you can see that in the below mock-up that we
 
 Facets are the result of setting the keyword type in the mapping. Once you have set the mapping then added the document you can then request facets to be produced for that field.
 
-To generate facts for a search you want to run a search with aggregations set.
+To generate facts for a search you want to run a search with some aggregations set.
 
+```
+POST: http://localhost:9200/film/actor/_search
+TYPE: application/json
+```
 {{<highlight json>}}
 {
   "query": {
@@ -421,6 +433,8 @@ Which is a sum of each of the unique keys based on the field you specified. You 
 
 ## Size/Pages
 
+`searchRequest.PerPage, searchRequest.Page*searchRequest.PerPage`
+
 ## Deleting
 
 Dropping or deleting an index is actually scarily simple. You need only send a HTTP DELETE to the index you want to remove. 
@@ -462,17 +476,18 @@ Which when run with the correct id will produce a result like the below.
 }
 {{</highlight>}}
 
+Which indicates that the document was deleted with details about which index and type it was removed from.
 
 ## Sorting
 
-If you sort based on a date field that in its mapping ignores malformed then documents which break the format will appear at the bottom of the results irrespective of which way you sort the document. For example, if you have one document with a proper date and another with nothing, sorting descending or ascending will have the document with the data appear in the first result.
+If you sort based on a date field that if its mapping ignores malformed then documents which break the format will appear at the bottom of the results irrespective of which way you sort the document. For example, if you have two documents indexed with the first document having a proper date and another document with an empty one then sorting descending or ascending will have the document with the proper date appear as the first result.
 
 Date Ranges
 
 
 ## Explaining Ranking / Scoring / Relevance
 
-The below is a fairly simplistic explanation of how ranking works in Elastic.
+The below is a fairly simplistic explanation of how ranking works in Elastic. It is unlikely you will need to know this in depth, but it is useful to know if people start asking why some documents outrank others and how to search effectively.
 
 Generally any search service uses a mixture of pre-ranking and query time ranking to produce results. Pre-ranking happens when the document is indexed. Query ranking takes into account the users query and augments the pre-ranking algorithm. Pre-ranking is the most efficient way of ranking results but best of breed engines use a combination of both.
 
@@ -501,4 +516,101 @@ You can see how to do so using the below,
         {
 ```
 
-The response of which will look something like the following,
+The response of which will include something like the following which is horribly verbose, but very explicit in what is happening under the hood. You can find details of what this actually means on the elastic documentation https://www.elastic.co/guide/en/elasticsearch/reference/current/search-explain.html
+
+{{<highlight json>}}
+"_explanation": {
+    "value": 0.2876821,
+    "description": "max of:",
+    "details": [
+        {
+            "value": 0.2876821,
+            "description": "weight(person.name:keanu in 0) [PerFieldSimilarity], result of:",
+            "details": [
+                {
+                    "value": 0.2876821,
+                    "description": "score(doc=0,freq=1.0 = termFreq=1.0\n), product of:",
+                    "details": [
+                        {
+                            "value": 0.2876821,
+                            "description": "idf, computed as log(1 + (docCount - docFreq + 0.5) / (docFreq + 0.5)) from:",
+                            "details": [
+                                {
+                                    "value": 1,
+                                    "description": "docFreq",
+                                    "details": []
+                                },
+                                {
+                                    "value": 1,
+                                    "description": "docCount",
+                                    "details": []
+                                }
+                            ]
+                        },
+                        {
+                            "value": 1,
+                            "description": "tfNorm, computed as (freq * (k1 + 1)) / (freq + k1 * (1 - b + b * fieldLength / avgFieldLength)) from:",
+                            "details": [
+                                {
+                                    "value": 1,
+                                    "description": "termFreq=1.0",
+                                    "details": []
+                                },
+                                {
+                                    "value": 1.2,
+                                    "description": "parameter k1",
+                                    "details": []
+                                },
+                                {
+                                    "value": 0.75,
+                                    "description": "parameter b",
+                                    "details": []
+                                },
+                                {
+                                    "value": 2,
+                                    "description": "avgFieldLength",
+                                    "details": []
+                                },
+                                {
+                                    "value": 2,
+                                    "description": "fieldLength",
+                                    "details": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
+{{</highlight>}}
+
+## Search Tips / Tricks
+
+{
+  "fact": "Originally intended on becoming an Olympic hockey player for Canada.",
+  "type": "Actor",
+  "person": {
+    "name": "Keanu Reeves",
+    "DOB": "1964-09-02",
+    "Citizenship": "Canadian"
+  }
+}
+
+`fact:canada` 
+
+Will search inside the field fact for the term canada.
+
+`fact:(canada OR england)`
+
+Will search inside the field fact for the term canada or england, if you omit the OR you will get whatever is the default operator.
+
+`person.name:keanu`
+
+Search under the field person.name for keanu.
+
+`person.*:canadian`
+
+Search any field under person for the term canadian.
+
