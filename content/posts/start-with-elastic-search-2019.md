@@ -588,6 +588,9 @@ The response of which will include something like the following which is horribl
 
 ## Search Tips / Tricks
 
+Given the below document here are some searches you can use against it, and why you might want to do them.
+
+{{<highlight json>}}
 {
   "fact": "Originally intended on becoming an Olympic hockey player for Canada.",
   "type": "Actor",
@@ -597,6 +600,8 @@ The response of which will include something like the following which is horribl
     "Citizenship": "Canadian"
   }
 }
+{{</highlight>}}
+
 
 `fact:canada` 
 
@@ -622,10 +627,14 @@ Search with ? replaced by any single character. You can use this to find common 
 
 Search where * is replaced by zero or more of any character.
 
-`/[a-c]+/`
+`/[keanu|neo]/`
 
-Search using regular expression. Note not all regular expressions will work. These searches can be very powerful.
+Search using regular expression. Note not all regular expressions will work. These searches can be very powerful, but generally you can do 99% of what you require without them. Included here just to show that it is possible.
 
 `kean~` 
 
-Fuzzy or sloppy search. Will search for words within 2 characters edit distance of the above by default. Can modify this to
+Fuzzy or sloppy search. Will search for words within 2 characters edit distance of the above by default. Can modify this to specify how fuzzy the search will be.
+
+`keanu~1` 
+
+Fuzzy search within distance of 1 character. An example of using this would be `keanu~1 -keanu` which would find all misspellings of Keanu. The shorter the word the less effective this is and you should look at using ? wildcards instead.
