@@ -347,7 +347,7 @@ GET: http://localhost:9200/film/actor/id
 
 ## Highlights / Snippets
 
-Highlights are how you show the relevant portion of the search to your user. Usually they just consist of a relevant potion of text extracted from the document with the matching terms highlighted. I am not sure how elastic actually achieves this under the hood, but if you are curious you can read https://boyter.org/2013/04/building-a-search-result-extract-generator-in-php/ which explains how I created one some years ago and compared it to other solutions.
+Highlights are how you show the relevant portion of the search to your user. Usually they just consist of a relevant potion of text extracted from the document with the matching terms highlighted. I am not sure how elastic actually achieves this under the hood, but if you are curious you can read [Building a Search Result Extract/Snippet/Highlight generator in PHP](https://boyter.org/2013/04/building-a-search-result-extract-generator-in-php/) which explains how I created one some years ago and compared it to other solutions.
 
 Thankfully elastic can do this for you saving you the effort. Add highlight to your query and it will return highlights for the matching fields.
 
@@ -669,7 +669,14 @@ TF is term frequency just means how often does the word appear in the document. 
 
 As such a word is considered important if it does not appear very often across all document. A search for this word would rank a document with multiple occurrences of this word higher then a document with a single occurrence. In addition to the above shorter fields outrank longer ones. So things like titles tend to outrank fields with large bodies of text.
 
-Elastic search also used to apply the Vector Space model to ranking at query time, but I am not sure if this is still the case. If you want some detail about the Vector Space model read the following, https://boyter.org/2011/06/vector-space-search-model-explained/ https://boyter.org/2010/08/build-vector-space-search-engine-python/ https://boyter.org/2013/08/c-vector-space-implementation/ https://boyter.org/2013/08/golang-vector-space-implementation/ This is a query time ranking algorithm run at search time. Due to the way it works it ranks documents of similar length as being a closer match, which in practice with a users usual search terms means it also ranks shorter fields higher over longer ones.
+Elastic search also used to apply the Vector Space model to ranking at query time, but I am not sure if this is still the case. If you want some detail about the Vector Space model you can read the following, 
+
+ - [Vector space search model explained](https://boyter.org/2011/06/vector-space-search-model-explained/)
+ - [Vector space search engine in Python](https://boyter.org/2010/08/build-vector-space-search-engine-python/)
+ - [C# Vector Space Implementation](https://boyter.org/2013/08/c-vector-space-implementation/ )
+ - [GoLang Vector Space implementation](https://boyter.org/2013/08/golang-vector-space-implementation/)
+
+This is a query time ranking algorithm run at search time. Due to the way it works it ranks documents of similar length as being a closer match, which in practice means that when used against standard search terms it also ranks shorter fields as being more relevant over longer ones.
 
 The result of the above is that if you search for the following "commonWord OR rareWord" documents containing the rare word will be ranked higher. Of the documents with the rare word, those which have multiple occurrences of it or those where it exists in shorter fields will outrank others where the rare word appears in longer ones.
 
@@ -804,7 +811,7 @@ Fuzzy or sloppy search. Will search for words within 2 characters edit distance 
 
 `keanu~1` 
 
-Fuzzy search within distance of 1 character. An example of using this would be `keanu~1 -keanu` which would find all misspellings of Keanu. The shorter the word the less effective this is and you should look at using ? wildcards instead.
+Fuzzy search within distance of 1 character. An example of using this would be `keanu~1 -keanu` which would find all misspellings of Keanu. The shorter the word the less effective this is and you should look at using ? wildcards instead. You can use values of 1 or 2 for the distance.
 
 `"keanu reeves"~5`
 
