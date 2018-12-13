@@ -1,6 +1,6 @@
 ---
 title: How to start with Elastic Search in 2019
-date: 2018-12-10
+date: 2028-12-10
 ---
 
 The below is aimed at developers who need to write a search interface which is backed by elastic search. If you need to perform basic searches across documents with facets then read on. It will not cover the setup or use of tools for elastic such as Kibana.
@@ -595,7 +595,6 @@ Which when run with the correct id will produce a result like the below.
 {{</highlight>}}
 
 Which indicates that the document was deleted with details about which index and type it was removed from.
-
 
 ## Sorting
 
