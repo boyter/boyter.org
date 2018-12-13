@@ -1,0 +1,389 @@
+{
+	"info": {
+		"_postman_id": "2a616236-df41-46cf-88dd-740afa2679d4",
+		"name": "Elastic Blog Post",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Actor",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Query",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"keanu\",\r\n            \"default_operator\": \"AND\",\r\n            \"fields\": [\r\n              \"person.name\",\r\n              \"fact\",\r\n              \"person.citizenship\"\r\n            ]\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9200/film/_search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9200",
+					"path": [
+						"film",
+						"_search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Query Highlight",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"keanu\",\r\n            \"default_operator\": \"AND\",\r\n            \"fields\": [\r\n              \"person.name\",\r\n              \"type\",\r\n              \"fact\",\r\n              \"person.citizenship\"\r\n            ]\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"highlight\": {\r\n    \"number_of_fragments\": 1,\r\n    \"fragment_size\": 150,\r\n    \"fields\": {\r\n      \"*\": {}\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9200/film/_search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9200",
+					"path": [
+						"film",
+						"_search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Query Aggregation",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"keanu\",\r\n            \"default_operator\": \"AND\",\r\n            \"fields\": [\r\n              \"person.name\",\r\n              \"fact\",\r\n              \"person.citizenship\",\r\n              \"_everything\"\r\n            ]\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"aggregations\": {\r\n    \"type\": {\r\n      \"terms\": {\r\n        \"field\": \"type\",\r\n        \"min_doc_count\": 0\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9200/film/_search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9200",
+					"path": [
+						"film",
+						"_search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Query With Aggregation ",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"keanu\",\r\n            \"default_operator\": \"AND\",\r\n            \"fields\": [\r\n              \"person.name\",\r\n              \"fact\",\r\n              \"person.citizenship\",\r\n              \"_everything\"\r\n            ]\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": {\r\n        \"bool\": {\r\n          \"must\": [\r\n            {\r\n              \"term\": {\r\n                \"type\": \"Actor\"\r\n              }\r\n            }\r\n          ]\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"aggregations\": {\r\n    \"type\": {\r\n      \"terms\": {\r\n        \"field\": \"type\",\r\n        \"min_doc_count\": 0\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9200/film/_search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9200",
+					"path": [
+						"film",
+						"_search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Query Paging",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"keanu\",\r\n            \"default_operator\": \"AND\",\r\n            \"fields\": [\r\n              \"person.name\",\r\n              \"fact\",\r\n              \"person.citizenship\",\r\n              \"_everything\"\r\n            ]\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"highlight\": {\r\n    \"number_of_fragments\": 1,\r\n    \"fragment_size\": 150,\r\n    \"fields\": {\r\n      \"*\": {}\r\n    }\r\n  },\r\n  \"aggregations\": {\r\n    \"type\": {\r\n      \"terms\": {\r\n        \"field\": \"type\",\r\n        \"min_doc_count\": 0\r\n      }\r\n    }\r\n  },\r\n  \"size\": 15,\r\n  \"from\": 0\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9200/film/_search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9200",
+					"path": [
+						"film",
+						"_search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Query Sorting",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"sort\": [\r\n    {\r\n      \"person.DOB\": {\r\n        \"order\": \"asc\"\r\n      }\r\n    },\r\n    \"_score\",\r\n    \"_doc\"\r\n  ],\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"keanu\",\r\n            \"default_operator\": \"AND\",\r\n            \"fields\": [\r\n              \"person.name\",\r\n              \"fact\",\r\n              \"person.citizenship\",\r\n              \"_everything\"\r\n            ]\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9200/film/_search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9200",
+					"path": [
+						"film",
+						"_search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Query Caching",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"keanu\",\r\n            \"default_operator\": \"AND\",\r\n            \"fields\": [\r\n              \"person.name\",\r\n              \"fact\",\r\n              \"person.citizenship\",\r\n              \"_everything\"\r\n            ]\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9200/film/_search?request_cache=true",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9200",
+					"path": [
+						"film",
+						"_search"
+					],
+					"query": [
+						{
+							"key": "request_cache",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Query Explain",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"explain\": true,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"keanu\",\r\n            \"default_operator\": \"AND\",\r\n            \"fields\": [\r\n              \"person.name\",\r\n              \"fact\",\r\n              \"person.citizenship\",\r\n              \"_everything\"\r\n            ]\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:9200/film/_search",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9200",
+					"path": [
+						"film",
+						"_search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Mapping",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"mappings\": {\r\n    \"meta\": {\r\n        \"person.name\": {\r\n          \"type\": \"text\",\r\n          \"copy_to\": \"_everything\"\r\n        },\r\n        \"fact\": {\r\n          \"type\": \"text\",\r\n          \"copy_to\": \"_everything\"\r\n        },\r\n        \"person.citizenship\": {\r\n          \"type\": \"text\",\r\n          \"copy_to\": \"_everything\"\r\n        },\r\n        \"_everything\": {\r\n          \"type\": \"text\"\r\n        }\r\n      }\r\n    }\r\n  }\r\n}"
+				},
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Index",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:9200/film/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9200",
+					"path": [
+						"film",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Document",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:9200/film/actor/x-Apn2cB5wabZ-h5-SLf",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9200",
+					"path": [
+						"film",
+						"actor",
+						"x-Apn2cB5wabZ-h5-SLf"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Document",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Document",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:9200/film/actor/x-Apn2cB5wabZ-h5-SLf",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "9200",
+					"path": [
+						"film",
+						"actor",
+						"x-Apn2cB5wabZ-h5-SLf"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

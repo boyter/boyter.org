@@ -3,15 +3,15 @@ title: How to start with Elastic Search in 2019
 date: 2018-12-10
 ---
 
-The below is aimed at developers who need to write a search interface which is backed by Elastic search. It will not cover the setup or use or install of anything like Kibana. Pure custom interfaces is what we are talking about.
+The below is aimed at developers who need to write a search interface which is backed by elastic search. If you need to perform basic searches across documents with facets then read on. It will not cover the setup or use of tools for elastic such as Kibana.
 
-The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search HTTP endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
+The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your Operations/DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search HTTP endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
 
-The below should be enough for anyone to get started with elastic and then produce a modern search interface.
+The below should be enough for anyone to get started with elastic, produce a modern search interface and know how to do most things. Anything beyond this should be fairly easy to pick up from the elastic documentation once you have this grounding.
 
 ## Basics / Getting Started
 
-The main thing to keep in mind with elastic (or any search service) is that there are two main portions. Indexing and searching. Indexing is the process of taking a document you have defined and adding it to the search service in such a way that you can support your search requirements. Searching is the process of taking the users wants and turning it into a query that uses the index to return something useful.
+The main thing to keep in mind with elastic (or any search service) is that there are two main portions. Indexing and searching. Indexing is the process of taking a document you have defined and adding it to the search service in such a way that you can support your search requirements. Searching is the process of taking the users actions and turning it into a query that uses the index to return something useful.
 
 As with most things you need to know what the user is trying to achieve before you can work on either.
 
@@ -65,7 +65,9 @@ There are many different API wrappers for Elastic written for different language
 
 I did try a few wrappers, but quickly discarded them in favor of direct HTTP calls based on the above reasons. Keep in mind this is just my opinion, but I found every wrapper more annoying then anything else and favor the ability to verify in postman before implementing the same thing in code.
 
-I have included an export of the postman queries TODO ADD POSTMAN LINK HERE to assist with getting started quickly.
+I have included an export of the postman queries to assist with getting started quickly.
+
+[Elastic Postman Collection (2.1)](/static/start-with-elastic-search-2018/Elastic.postman_collection.2.1.json)
 
 ## How Elastic Stores Documents
 
@@ -147,6 +149,8 @@ The above indicates that the document was added to the index film with the type 
 
 It is worth-while writing a robust way of populating elastic from your documents before doing anything else. This allows you to delete and rebuild the index at will allowing for rapid iteration. It also ensures that you have a way to rebuild everything should your elastic cluster die or have issues. For a smallish cluster of 6 nodes with 4 CPU's each you should be able to index over 1 million documents in under an hour.
 
+> If you want to use a custom id and not an elastic generated one post to `http://localhost:9200/film/actor/id` where id is the id you want to use. Keep in mind that if that id already exists you will replace the existing document with your new one
+
 ## Mappings
 
 Mappings define type and values in documents. You use them to specify that fields within your document should be treated as numbers, dates, geo-locations and whatever other types elastic supports. You can also define the stemming algorithm used and other useful index fields.
@@ -193,6 +197,8 @@ There are ways to add dynamic mappings where elastic will guess the type, but ge
 ## Searching
 
 Almost everyone puts some "magic" on top of the queries, where the magic is trying to modify the users query to produce the intended result. Its worth keeping in mind that any search program at heart is a big dumb string matching algorithm with some ranking on top. The true value from search is knowing the data, knowing that the user is trying to archive and tweaking both the index and the queries to help achieve this goal.
+
+> Searching for * will return all documents
 
 To search across an index you have two options. 
 
@@ -329,6 +335,16 @@ TYPE: application/json
 
 The new addition is searching against the `_everything` field. Note that we keep the other fields. This is because if all the terms do match elastic can use them as a signal in its internal ranking algorithm which should help it produce more relevant results. This would not be the case in the above search but for example searching for `canada` would be impacted by this.
 
+## Get Document By Id
+
+If you have your documents stored in elastic and you know the id you can access them from elastic directly without going back to your primary data store. In effect you are treating elastic as a document cache. If you do this consider adding a fall-back to your primary data store in the case that elastic goes down for a more reliable system. You will need to do this anyway if you want to do updates to ensure that you can re-sync everything anyway. 
+
+To get a single document out of elastic you use a GET HTTP request against the index/type/id that you want to get and it will be returned as a JSON file for you
+
+```
+GET: http://localhost:9200/film/actor/id
+```
+
 ## Highlights / Snippets
 
 Highlights are how you show the relevant portion of the search to your user. Usually they just consist of a relevant potion of text extracted from the document with the matching terms highlighted. I am not sure how elastic actually achieves this under the hood, but if you are curious you can read https://boyter.org/2013/04/building-a-search-result-extract-generator-in-php/ which explains how I created one some years ago and compared it to other solutions.
@@ -375,7 +391,7 @@ The parameter number of fragments allows you to control the number of highlights
 
 One of the things you likely want from your search are facets. These are the aggregation roll-ups you commonly see on the left side of your search results allowing you in the example of Ebay to filter down to new or used products.
 
-Sticking with our example of Keanu you can see that in the below mock-up that we want to be able to filter on the `type` field of our document so we can narrow down to actors, directors, producers or whatever other types we have for people in our index.
+Sticking with our example of Keanu you can see that in the below mock-up that we want to be able to filter on the `type` field of our document so we can narrow down to actors, directors, producers or whatever other types we have in our index.
 
 ![Profile Result](/static/start-with-elastic-search-2018/search_facets.png)
 
@@ -660,9 +676,7 @@ The result of the above is that if you search for the following "commonWord OR r
 
 ## Explain
 
-If someone ever does ask to explain how the ranking works you can add to any search JSON `"explain": true` and get an overview of what is actually happening under the hood by elastic.
-
-You can see how to do so using the below by adding `"explain": true` to your search queries.
+If someone ever does ask to explain how the ranking works for a specific query you can add to any search the JSON `"explain": true` and get an overview of what is actually happening under the hood.
 
 {{<highlight json>}}
 {
