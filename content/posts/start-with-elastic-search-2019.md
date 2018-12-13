@@ -5,6 +5,8 @@ date: 2018-12-10
 
 The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search HTTP endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
 
+The below is aimed at developers who need to write a search interface which is backed by Elastic search. It will not cover the setup or use or install of anything like Kibana. Pure custom interfaces is what we are talking about.
+
 The below should be enough for anyone to get started with elastic and then produce a modern search interface.
 
 ## Basics / Getting Started
