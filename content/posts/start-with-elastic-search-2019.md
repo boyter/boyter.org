@@ -3,9 +3,9 @@ title: How to start with Elastic Search in 2019
 date: 2018-12-10
 ---
 
-The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search HTTP endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
-
 The below is aimed at developers who need to write a search interface which is backed by Elastic search. It will not cover the setup or use or install of anything like Kibana. Pure custom interfaces is what we are talking about.
+
+The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your friendly DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search HTTP endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
 
 The below should be enough for anyone to get started with elastic and then produce a modern search interface.
 
@@ -15,7 +15,7 @@ The main thing to keep in mind with elastic (or any search service) is that ther
 
 As with most things you need to know what the user is trying to achieve before you can work on either.
 
-The first thing to do is determine what version of elastic you are working with. Either ask your friendly DevOps person or alternatively load the elastic HTTP endpoint (running locally it would be http://localhost:9200/ )in your browser of choice,
+The first thing to do is determine what version of elastic you are working with. Either ask your operations person who set elastic up or alternatively load the elastic HTTP endpoint (locally it would be http://localhost:9200/) in your browser of choice,
 
 {{<highlight json>}}
 {
@@ -54,7 +54,7 @@ Option two is to download and run elastic on your machine natively. I have tried
 
 ## Communication
 
-The easiest way to communicate with elastic search is though restful HTTP requests. I personally found it easiest to do this when testing and trying ideas using Postman https://www.getpostman.com/ Once I had things working I converted them into code which made appropiate restful GET/POST/PUT/DELETE requests. CURL would work just as well for this, however I found that Postman's ability to control headers with dropdowns and saving of requests useful.
+The easiest way to communicate with elastic search is though restful HTTP requests. I personally found it easiest to do this when testing and trying ideas using Postman https://www.getpostman.com/ Once I had things working I converted them into code which made appropriate restful GET/POST/PUT/DELETE requests. CURL would work just as well for this, however I found that Postman's ability to control headers with drop-downs and saving of requests useful.
 
 There are many different API wrappers for Elastic written for different languages, however I humbly suggest that you avoid them. The reasons being,
 
@@ -188,6 +188,8 @@ To set the mapping you need to PUT the above to `http://localhost:9200/film/` wh
 }
 {{</highlight>}}
 
+There are ways to add dynamic mappings where elastic will guess the type, but generally I found this more problematic then its worth. Explicit is always better then implicit when it comes to code in my opinion.
+
 ## Searching
 
 Almost everyone puts some "magic" on top of the queries, where the magic is trying to modify the users query to produce the intended result. Its worth keeping in mind that any search program at heart is a big dumb string matching algorithm with some ranking on top. The true value from search is knowing the data, knowing that the user is trying to archive and tweaking both the index and the queries to help achieve this goal.
@@ -232,7 +234,7 @@ The result will be a search for `keanu` over the fields `person.name` `fact` and
 
 Things to note. This query is by default an AND search. This means adding additional terms will reduce the number of results. You can of course change this to OR if that is your requirement.
 
-### Multiple Fields
+## Searching Multiple Fields
 
 If you are searching across multiple fields the terms you are searching for need to be in all of them.
 
@@ -435,8 +437,54 @@ When run against an index with the mapping setup you will get back in your respo
 
 Which is a sum of each of the unique keys based on the field you specified. You can have multiple aggregation types if you have multiple facets, with each having the key of the name you set in your aggregation request.
 
+Once you have the facet you can then filter results down to just those containing it. You can do this like the below example that will filter down to a any document where the type is set to "Actor".
 
-TODO how to actually use the result of the above to filter a search down
+```
+POST: http://localhost:9200/film/actor/_search
+TYPE: application/json
+```
+{{<highlight json>}}
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "query_string": {
+            "query": "keanu",
+            "default_operator": "AND",
+            "fields": [
+              "person.name",
+              "fact",
+              "person.citizenship",
+              "_everything"
+            ]
+          }
+        }
+      ],
+      "filter": {
+        "bool": {
+          "must": [
+            {
+              "term": {
+                "type": "Actor"
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "aggregations": {
+    "type": {
+      "terms": {
+        "field": "type",
+        "min_doc_count": 0
+      }
+    }
+  }
+}
+{{</highlight>}}
+
 
 
 ## Size / Pages
@@ -571,7 +619,9 @@ Given our sample document we can change the sorting to be based on the date fiel
 }
 {{</highlight>}}
 
-The above will order by the DOB field descending. Where the DOB is the same it will then rank based on score and then finally the document id. Doing it like this ensures that you have a stable sort order for your results.
+The above will order by the DOB field in ascending order. Where the DOB is the same it will then rank based on score and then finally the document id. Doing it like this ensures that you have a stable sort order for your results.
+
+To sort descending replace `asc` with `desc`.
 
 If you sort based on a date field and its mapping ignores malformed values then documents which break the format will appear at the bottom of the results irrespective of which way you sort the document. For example, if you have two documents indexed with the first document having a proper date and another document with an empty one then sorting descending or ascending will have the document with the proper date appear as the first result in the list.
 
@@ -590,7 +640,7 @@ Keeping in mind that edits to documents or adding new ones potentially influence
 
 ## Caching
 
-You can have elastic cache search results internally by adding `?request_cache=true` to the end of your search queries. As far as I am aware there is no penalty to this as elastic will expire the cache based on document changes. It is also useful to have this on as it will help smooth out results for the same search term done repeatedly.
+You can have elastic cache search results internally by adding `?request_cache=true` to the end of your search queries. As far as I am aware there is no penalty to this as elastic will expire the cache on document changes. It is also useful to have this on as it will help smooth out results for the same search term done repeatedly.
 
 ## Explaining Ranking / Scoring / Relevance
 
@@ -742,3 +792,7 @@ Fuzzy or sloppy search. Will search for words within 2 characters edit distance 
 `keanu~1` 
 
 Fuzzy search within distance of 1 character. An example of using this would be `keanu~1 -keanu` which would find all misspellings of Keanu. The shorter the word the less effective this is and you should look at using ? wildcards instead.
+
+`"keanu reeves"~5`
+
+A proximity search which will search for the words keanu and reeves within 5 words of each other. In my experience elastic search tends to be "phrase heavy" which means that terms that are close together will bubble to the top of results anyway making this redundant as a search method generally.
