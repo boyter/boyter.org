@@ -3,7 +3,7 @@ title: Trimming the fat from a Golang binary
 date: 2019-01-06
 ---
 
-I have recently started work again on [searchcode server](https://searchcodeserver.com/) with the continued plan to upgrade searchcode.com to use the same code-base.
+I have recently started work again on [searchcode server](https://searchcodeserver.com/) with the continued plan to upgrade [searchcode](https://searchcode.com/) to use the same code-base.
 
 One big issue with this which I recently tweeted about was that Java has a decent well documented fast library for just about everything, with the exception of a good syntax highlighter like Pygments http://pygments.org/ or Chroma https://github.com/alecthomas/chroma 
 
@@ -11,9 +11,9 @@ It is however possible to use Pygments in Java using Jython http://pygments.org/
 
 However in my tests it was too slow to be usable, in particular Lisp programs caused it to take 10's of seconds to render, which is totally unacceptable for my performance requirements.
 
-I briefly considered writing my own implementation but quickly discarded this idea due to the amount of effort it would entail. As such I decided I would package in either a HTTP or command line implementation of a highlighter. I quickly discarded the idea of a command line as it could mean potentially hundreds of forking processes on searchcode.com and settled on using Go and Chroma.
+I briefly considered writing my own implementation but quickly discarded this idea due to the amount of effort it would entail. As such I decided I would package in either a HTTP or command line implementation of a highlighter. I quickly discarded the idea of a command line as it could mean potentially hundreds of forking processes on [searchcode](https://searchcode.com/) and settled on using Go and Chroma served over HTTP.
 
-A quick check showed that the problematic files when run through Chroma were processed in ~100ms which was a massive improvement over Pygments in Java which solved that performance issue.
+A quick check showed that the problematic files when run through Chroma were processed in ~100ms which was a massive improvement over Pygments in Java which solved that performance issue so there were no issues using it like this.
 
 Go is a pretty nice language. However the binary files it produces since they include everything are rather fat. My simple syntax highlighter https://github.com/boyter/searchcode-server-highlighter server was ~13 MB when built with the usual `go build` command. However it is possible to slim down Go binary if you want.
 
@@ -71,6 +71,6 @@ $ ls -lh searchcode-server-highlighter.exe*
 -rwxrwxrwx 1 bboyter bboyter 2.9M Jan  7 08:42 searchcode-server-highlighter.exe
 ```
 
-Will anyone notice this for searchcode? Honestly probably not, but its nice to try and at least save some disk space and download time where possible.
+Will anyone notice this for [searchcode](https://searchcode.com/)? Honestly probably not, but its nice to try and at least save some disk space and download time where possible.
 
 BTW I am not the only person to have written about this https://blog.filippo.io/shrink-your-go-binaries-with-this-one-weird-trick/ but its more here for my personal reference than anything else.
