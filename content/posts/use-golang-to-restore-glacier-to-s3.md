@@ -3,7 +3,7 @@ title: Use Golang to Restore Glacier to S3
 date: 2019-01-22
 ---
 
-I had a great deal of difficulty searching for an answer to this I have incldued it here to hopefully save someone else the effort.
+I had a great deal of difficulty searching for an answer to this I have included it here to hopefully save someone else the effort.
 
 How to make a S3 request to retrieve items that have transitioned into AWS Glacier from an S3 bucket using the Go AWS SDK API.
 
