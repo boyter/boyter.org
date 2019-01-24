@@ -45,5 +45,6 @@ In no particular order.
  - Beware of cute optimizations bearing gifts. Optimisations made to a fast fuzzy file matcher in Vim https://wincent.com/blog/optimization
  - Go code refactoring : the 23x performance hunt https://medium.com/@val_deleplace/go-code-refactoring-the-23x-performance-hunt-156746b522f7
  - Shameless self promotion but what I went through when building scc which is a code counter similar to cloc https://boyter.org/posts/sloc-cloc-code/
+ - Built for Speed: Custom Parser for Regex at Scale https://blog.scalyr.com/2018/08/custom-regex-parser/
 
 Will attempt to keep this list up to date as I find other content that really impresses me.
