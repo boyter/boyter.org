@@ -1,11 +1,11 @@
 ---
-title: How to start with Elastic Search in 2019
-date: 2028-12-10
+title: How to start with Elasticsearch in 2019
+date: 2029-02-15
 ---
 
-The below is aimed at developers who need to write a search interface which is backed by elastic search. If you need to perform basic searches across documents with facets then read on. It will not cover the setup or use of tools for elastic such as Kibana.
+The below is aimed at developers who need to write a search interface which is backed by Elasticsearch. If you need to perform basic searches across documents with facets then read on. It will not cover the setup or use of tools for elastic such as Kibana.
 
-The architect has decreed that for your next application you will use Elastic Search to provide a rich search experience. Your Operations/DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elastic search HTTP endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
+The architect has decreed that for your next application you will use Elasticsearch to provide a rich search experience. Your Operations/DevOp's person has spun up some instances with elastic, deployed a cluster or through some other means provided you an elasticsearch HTTP endpoint. Now what? The team is looking to you to provide some guidance, to get them started and set the direction.
 
 The below should be enough for anyone to get started with elastic, produce a modern search interface and know how to do most things. Anything beyond this should be fairly easy to pick up from the elastic documentation once you have this grounding.
 
@@ -48,13 +48,13 @@ docker pull docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.0
 docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -d docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.0
 ```
 
-The above will pull the OSS version of elastic and run it on port 9200 on your local machine which is the default Elastic Search port. Once started you can browse to http://localhost:9200/ and hopefully see the JSON like the above which we used to determine the version. If you need a different version you can find the docker images at https://www.docker.elastic.co/
+The above will pull the OSS version of elastic and run it on port 9200 on your local machine which is the default Elasticsearch port. Once started you can browse to http://localhost:9200/ and hopefully see the JSON like the above which we used to determine the version. If you need a different version you can find the docker images at https://www.docker.elastic.co/
 
 Option two is to download and run elastic on your machine natively. I have tried the various methods they list including package managers and the like. I found the the easiest and most reliable was download the zip file from https://www.elastic.co/downloads/elasticsearch and then run `bin/elasticsearch` or `bin\elasticsearch.bat`. After a time it should start and you can browse to http://localhost:9200/ to verify.
 
 ## Communication
 
-The easiest way to communicate with elastic search is though restful HTTP requests. I personally found it easiest to do this when testing and trying ideas using Postman https://www.getpostman.com/ Once I had things working I converted them into code which made appropriate restful GET/POST/PUT/DELETE requests. CURL would work just as well for this, however I found that Postman's ability to control headers with drop-downs and saving of requests useful.
+The easiest way to communicate with elasticsearch is though restful HTTP requests. I personally found it easiest to do this when testing and trying ideas using Postman https://www.getpostman.com/ Once I had things working I converted them into code which made appropriate restful GET/POST/PUT/DELETE requests. CURL would work just as well for this, however I found that Postman's ability to control headers with drop-downs and saving of requests useful.
 
 There are many different API wrappers for Elastic written for different languages, however I humbly suggest that you avoid them. The reasons being,
 
@@ -145,7 +145,7 @@ For the above you could POST our Keanu document to the index `film` and the type
 
 The above indicates that the document was added to the index film with the type actor and that Elastic has generated the unique ID for this document as being `xeB3nGcB5wabZ-h5JSJW`.
 
-> Don't use elastic as a primary data store. Use another document store for persistence and populate elastic using it.
+> Don't use elastic as a primary data store. Use another document store for persistence and populate elastic using it. Having a fast rebuild process is a good idea and using a highly durable data-store for your data such as S3 is an excellent backup solution.
 
 It is worth-while writing a robust way of populating elastic from your documents before doing anything else. This allows you to delete and rebuild the index at will allowing for rapid iteration. It also ensures that you have a way to rebuild everything should your elastic cluster die or have issues. For a smallish cluster of 6 nodes with 4 CPU's each you should be able to index over 1 million documents in under an hour.
 
@@ -198,7 +198,7 @@ There are ways to add dynamic mappings where elastic will guess the type, but ge
 
 Almost everyone puts some "magic" on top of the queries, where the magic is trying to modify the users query to produce the intended result. Its worth keeping in mind that any search program at heart is a big dumb string matching algorithm with some ranking on top. The true value from search is knowing the data, knowing that the user is trying to archive and tweaking both the index and the queries to help achieve this goal.
 
-> Searching for * will return all documents
+> Searching for * will return all documents limited to 10 by default
 
 To search across an index you have two options. 
 
@@ -206,7 +206,7 @@ For basic search across everything and return the most relevant documents a basi
 
 With the above you get all of the usual elastic syntax. Boolean searches `keanu AND reeves`, wildcards `kean*`, proximity `"keanu reeves"~2`, fuzzy search `kean~2` all work as you expect. You can target specific fields to search `person.name:keanu` or combine multiples of the above `person.name:kean~2 AND canadi*`. For cases where all you require is to present the information this might be enough. One thing to keep in mind however is that a search done like this will default to an OR search. This means each additional search term added to the query will increase the number or results which can seem counter intuitive.
 
-The other option is to post to the same endpoints using the elastic search syntax. This is more complex and involved but provides the option to perform facet/aggregations and as such is likely what you will need to do.
+The other option is to post to the same endpoints using the elasticsearch syntax. This is more complex and involved but provides the option to perform facet/aggregations and as such is likely what you will need to do.
 
 If craft the following HTTP requests and POST like the following,
 
@@ -640,7 +640,7 @@ To sort descending replace `asc` with `desc`.
 
 If you sort based on a date field and its mapping ignores malformed values then documents which break the format will appear at the bottom of the results irrespective of which way you sort the document. For example, if you have two documents indexed with the first document having a proper date and another document with an empty one then sorting descending or ascending will have the document with the proper date appear as the first result in the list.
 
-> Remember that scoring varies between nodes on the same cluster
+> Remember that scoring varies between shards on the same cluster
 
 Because of the above you may want to try to smooth out the scoring.
 
@@ -762,7 +762,7 @@ The response of which will include something like the following which is horribl
 
 ## Search Tips / Tricks
 
-Given the below document here are some searches you can use against it, and why you might want to do them. I do recommend checking https://www.cheatography.com/jelle/cheat-sheets/elasticsearch-query-string-syntax/ for a general purpose elastic search cheat sheet.
+Given the below document here are some searches you can use against it, and why you might want to do them. I do recommend checking https://www.cheatography.com/jelle/cheat-sheets/elasticsearch-query-string-syntax/ for a general purpose elasticsearch cheat sheet.
 
 {{<highlight json>}}
 {
@@ -815,4 +815,4 @@ Fuzzy search within distance of 1 character. An example of using this would be `
 
 `"keanu reeves"~5`
 
-A proximity search which will search for the words keanu and reeves within 5 words of each other. In my experience elastic search tends to be "phrase heavy" which means that terms that are close together will bubble to the top of results anyway making this redundant as a search method generally.
+A proximity search which will search for the words keanu and reeves within 5 words of each other. In my experience elasticsearch tends to be "phrase heavy" which means that terms that are close together will bubble to the top of results anyway making this redundant as a search method generally.
