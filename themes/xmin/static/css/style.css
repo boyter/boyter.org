@@ -34,6 +34,10 @@ pre code { background: none; }
 
 /* misc elements */
 img, iframe, video { max-width: 100%; }
+img[src*='#center'] { 
+    display: block;
+    margin: auto;
+}
 main { hyphens: auto; }
 blockquote {
   background: #f9f9f9;
