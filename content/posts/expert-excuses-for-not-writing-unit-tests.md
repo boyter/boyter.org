@@ -11,7 +11,7 @@ Anyway I did write some content, which I have cleaned up and included below.
 
 -----
 
-![Book Cover](/static/books/CeZu1YjUsAEfhcP.jpg)
+![Book Cover](/static/books/CeZu1YjUsAEfhcP.jpg#center)
 
 # Expert Excuses for Not Writing Unit Tests
 
