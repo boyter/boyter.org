@@ -3,6 +3,16 @@ title: Sloc Cloc and Code a Performance Update
 date: 2019-01-09
 ---
 
+**Update 2019-03-13**
+
+This is now part of a series of blog posts about `scc` Sloc Cloc and Code which has now been optimised to be the fastest code counter for almost every workload. Read more about it at the following links.
+
+ - [Sloc Cloc and Code - What happened on the way to faster Cloc 2018-04-16](https://boyter.org/posts/sloc-cloc-code/)
+ - [Sloc Cloc and Code Revisited - A focus on accuracy 2018-08-28](https://boyter.org/posts/sloc-cloc-code-revisited/)
+ - [Sloc Cloc and Code Revisited - Optimizing an already fast Go application 2018-09-19](https://boyter.org/posts/)sloc-cloc-code-performance/
+ - [Sloc Cloc and Code a Performance Update 2019-01-09](https://boyter.org/posts/sloc-cloc-code-performance-update/)
+
+
 I thought I had finished with my code counter Sloc Cloc and Code (AKA scc) https://github.com/boyter/scc/ for a while. The what I had hoped to be final blog post about it https://boyter.org/posts/sloc-cloc-code-performance/ however did mention that the building of the language features in it were a cause of slowdown,
 
 > The trade off of building the trie structures when scc starts does slow down the application for smaller repositories such as redis. That said a slowdown of only 10 ms is probably worth it. Keeping in mind on linux that ~15 ms of overhead is usually the process starting, and that most people will not notice the difference between 15 ms and 30 ms for this sort of application, I think its an acceptable trade.

@@ -3,6 +3,16 @@ title: Sloc Cloc and Code Revisited - A focus on accuracy
 date: 2018-08-28
 ---
 
+**Update 2019-03-13**
+
+This is now part of a series of blog posts about `scc` Sloc Cloc and Code which has now been optimised to be the fastest code counter for almost every workload. Read more about it at the following links.
+
+ - [Sloc Cloc and Code - What happened on the way to faster Cloc 2018-04-16](https://boyter.org/posts/sloc-cloc-code/)
+ - [Sloc Cloc and Code Revisited - A focus on accuracy 2018-08-28](https://boyter.org/posts/sloc-cloc-code-revisited/)
+ - [Sloc Cloc and Code Revisited - Optimizing an already fast Go application 2018-09-19](https://boyter.org/posts/)sloc-cloc-code-performance/
+ - [Sloc Cloc and Code a Performance Update 2019-01-09](https://boyter.org/posts/sloc-cloc-code-performance-update/)
+
+
 Two things prompted me to start looking at my code counter `scc` again. The first being the release of Go 1.11. New releases of compilers, libraries and tool-chains have a wonderful habit of making things go faster without you having to do anything other than recompile. In addition they often provide new methods which assist with this and are worth exploring.
 
 The other was that the author of `tokei` released a new update v8.0.0 and included a comparison to `scc` on the project page https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md
