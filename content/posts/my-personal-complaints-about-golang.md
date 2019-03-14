@@ -7,7 +7,7 @@ Go as a language is fairly decent. However because questions about why I have is
 
 ![Go Logo](/static/my-personal-complaints-about-golang/golang.png#center)
 
-For the record I have been using Go heavily for the last or so, writing command line applications, [scc](https://github.com/boyter/scc/), [lc](https://github.com/boyter/lc/) and API's. These include large scale API's for clients to a [syntax highlighter](https://github.com/boyter/searchcode-server-highlighter) that will be used in https://searchcode.com/ sometime soon.
+For the record I have been using Go heavily for the last year or so, writing command line applications, [scc](https://github.com/boyter/scc/), [lc](https://github.com/boyter/lc/) and API's. These include large scale API's for clients to a [syntax highlighter](https://github.com/boyter/searchcode-server-highlighter) that will be used in https://searchcode.com/ sometime soon.
 
 My criticisms in this are aimed exclusively at Go. I do however have complaints about every language I use. In fact the below quote is extremely applicable.
 
