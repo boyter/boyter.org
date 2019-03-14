@@ -1,9 +1,11 @@
 ---
-title: My Personal Complaints about Programming in Golang 
+title: My Personal Complaints about Programming in Go 
 date: 2019-03-14
 ---
 
 Go as a language is fairly decent. However because it tends to come up often enough on the company slack programming channel (see what I did there?) I figured id articulate it better here so I can just point people at it when they ask what my complaints are. 
+
+![Go Logo](/static/my-personal-complaints-about-golang/golang.png#center)
 
 For the record I have been using it heavily for the last or so, writing command line applications, [scc](https://github.com/boyter/scc/) [lc](https://github.com/boyter/lc/) and API's from large scale ones for clients to [syntax highlighers](https://github.com/boyter/searchcode-server-highlighter).
 
@@ -13,7 +15,7 @@ My crisitisms are not aimed exclusively at Go. I have complaints about every lan
 
 ### #1 The lack of functional programming
 
-This is probably my biggest pain point with Go. Going against the crowd I don't want generics, which I think would just add unnesscary complexity to most Go projects. What I want is some functional methods applied over the in-built slice and map in Go. Both of those types are already magic in the sense that they can hold any type.
+This is probably my biggest pain point with Go. Going against the crowd I don't want generics, which I think would just add unnecessary complexity to most Go projects. What I want is some functional methods applied over the in-built slice and map in Go. Both of those types are already magic in the sense that they can hold any type and are generic, which you cannot implement yourself in Go without using interface and then loosing all the safety and speed.
 
 For example consider the below. 
 
@@ -36,7 +38,7 @@ for _, first := range firstSlice {
 }
 {{</highlight>}}
 
-The above is one trivial way to solve this in Go. Lets compare it to the same logic in Java.
+The above is one trivial way to solve this in Go. Lets compare it to the same logic in Java using streams and functional programming.
 
 {{<highlight java>}}
 var existsBoth = firstList.stream()
@@ -44,7 +46,7 @@ var existsBoth = firstList.stream()
                 .collect(Collectors.toList());
 {{</highlight>}}
 
-Now the above does hide the algorithmic complexity of whats happening, but its far simpler to see what its actually doing. The intent of the code is obvious compared to the Go code its imitating. However whats even better about it is that adding addtional filters is trivial, so to do whats below we would need to add two more if conditions into the already nested for loops to achive this.
+Now the above does hide the algorithmic complexity of whats happening, but its far simpler to see what its actually doing. The intent of the code is obvious compared to the Go code it is replicating. What is really neat about it is that adding additional filters is trivial. To add additional filters to the Go example like the below example we would need to add two more if conditions into the already nested for loops.
 
 {{<highlight java>}}
 var existsBoth = firstList.stream()
@@ -54,17 +56,21 @@ var existsBoth = firstList.stream()
                 .collect(Collectors.toList());
 {{</highlight>}}
 
-There are projects which using `go generate` can achive some of the above for you, but without nice IDE support its clunky and more of a hassle over pulling out the loop above into its own method.
+There are projects which using `go generate` can achieve some of the above for you, but without nice IDE support its clunky and more of a hassle over pulling out the loop above into its own method.
 
-### #2 Channels
+### #2 Channels / Parallel Slice Processing
 
-Go channels are generally pretty great. They have some issues where you can easily block forever, but they arent about providing fearless concurrency. For reading files off a disk and throwing them down the line for processing they are great. What they are not so good for is processing slices.
+Go channels are generally pretty great. While they have some issues where you can block forever, they aren't about providing fearless concurrency (like rust) and with the race detector you can shake out these issues pretty easily. For streaming values where you don't know how many there are or when the end is they are an excellent choice. 
 
-Its pretty common in pretty much every other language that when you have a large list or slice you use parallel streams, parallel linq, rayon or multiprocessing to iterate over that list using all available CPU's. You apply them over your list and get back a list of processed elements.
+What they are not so good for is processing slices where you know the size up front and want to process them in parallel.
+
+![Go Logo](/static/my-personal-complaints-about-golang/multithreaded.png#center)
+
+Its pretty common in pretty much every other language that when you have a large list or slice you use parallel streams, parallel linq, rayon, multiprocessing or some other syntax to iterate over that list using all available CPU's. You apply them over your list and get back a list of processed elements. Only if there are enough elements or the function you are applying is complex it should be done more quickly for multi-core systems.
 
 However in Go its not obvious what you need to do to achieve something similar.
 
-One possible solution is to spawn a Go routine for each item in your slice. Because of the low overhead of Goroutines this is a valid strategy, to a point.
+One possible solution is to spawn a Go routine for each item in your slice. Because of the low overhead of go-routines this is a valid strategy, to a point.
 
 {{<highlight go>}}
 toProcess := []int{1,2,3,4,5,6,7,8,9}
@@ -84,30 +90,25 @@ fmt.Println(toProcess)
 
 The above will keep the order of the elements in the slice but lets assume this isn't a requirement in our case.
 
-The problem with the above firstly you need to use an old school for loop. Use a range and the above will not do what you expect, with the output being the same as the input. Another issue is adding a waitgroup and having to remember to increment and call done on it. This is additional overhead on the developer. Get it wrong and this program will not produce the right output, either nondeterministically or never finish. In addition if your list is very long you are going to spawn a goroutine for every single one. As I said before this is not an issue itself because go can do that without issue. What is going to be a problem is that each one of those goroutines is going to fight for a slice of the CPU. As such this is not going to be the most efficient way to perform this task. 
+The problem with the above firstly you need to use an old school for loop. Use a range and the above will not do what you expect, with the output being the same as the input. Another issue is adding a waitgroup and having to remember to increment and call done on it. This is additional overhead on the developer. Get it wrong and this program will not produce the right output, either nondeterministically or never finish. In addition if your list is very long you are going to spawn a go-routine for every single one. As I said before this is not an issue itself because go can do that without issue. What is going to be a problem is that each one of those go-routines is going to fight for a slice of the CPU. As such this is not going to be the most efficient way to perform this task. 
 
-What you probably really wanted to do was spawn a goroutine for each CPU and have them pick over the list processing it in turn. To do this in a Go centric way you need to build a channel then loop over the elements of your slice and have your functions read from that channel, then another channel which you read from. Lets have a look.
+What you probably wanted was to spawn a go-routine for each CPU and have them pick over the list processing it in turn. To do this in a Go centric way you need to build a channel then loop over the elements of your slice and have your functions read from that channel, then another channel which you read from. Lets have a look.
 
 {{<highlight go>}}
 toProcess := []int{1,2,3,4,5,6,7,8,9}
+var input = make(chan int, len(toProcess))
+
+for i, _ := range toProcess {
+	input <- i
+}
+close(input)
+
 var wg sync.WaitGroup
-var input = make(chan int, 5)
-
-wg.Add(1)
-go func(input []int, output chan int) {
-	for i, _ := range toProcess {
-		output <- i
-	}
-	close(output)
-	wg.Done()
-}(toProcess, input)
-
-
 for i := 0; i < runtime.NumCPU(); i++ {
 	wg.Add(1)
 	go func(input chan int, output []int) {
 		for j := range input {
-			toProcess[j] = someCalculation(j)
+			toProcess[j] = someCalculation(toProcess[j])
 		}
 		wg.Done()
 	}(input, toProcess)
@@ -117,9 +118,39 @@ wg.Wait()
 fmt.Println(toProcess)
 {{</highlight>}}
 
+The above creates a channel, and we then loop over our slice and put values into it. Then we spawn a go-routine for each CPU core that our OS reports and process that input, then we wait till its all done. A lot of code to digest.
 
+Its not even how you should do it really because if your slice is very large you probably don't want to have a channel with a buffer of the same length, so you should actually spawn another go-routine to loop the slice and put those values into the channel and when finished it closes the channel. I have removed this because it make the code much longer and I want to approximate the basic idea.
+
+Here is roughly the same thing in Java.
+
+{{<highlight java>}}
+var firstList = List.of(1,2,3,4,5,6,7,8,9);
+
+firstList = firstList.parallelStream()
+        .map(this::someSlowCalculation)
+        .collect(Collectors.toList());
+{{</highlight>}}
+
+Yes channels and streams are not equivalent. You could replicate more closely the Go logic using a queue which would be closer to a true comparison, but the intent here is not a 1 to 1 comparison. What we wanted was to process a slice/list using all our CPU cores.
+
+This of course is not an issue if `someSlowCalucation` is actually a method which calls out on the network or some other non CPU intensive task. In which case channels and go-routines are brilliant.
+
+This issue ties into #1. If Go had functional methods on top of the slice/map objects adding this functionality would be possible. Its also annoying because if Go had generics someone could write the above as a library like rust's rayon and everyone would benefit.
+
+Incidentally I believe this is holding Go back from any success in the data science field hence why Python is still king there. Go lacks expressiveness and power in numerical manipulation. The above are reasons why this is so.
 
 ### #3 Garbage Collector
 
-The Go garbage collector is a very solid piece of engineering. With every release the applications I work on tend to get 3% faster usually due to improvements in it. However prioritizes latency above all else. For API's and UI's this is a perfectly acceptable choice. It's also fine for anything with network calls which are going to be the bottleneck as well. The catch is that Go isn't any good for UI work (that I am aware of) and this choice really hurts you when you want as much throughput as possible. I ran into this as a major issue when working on [scc](https://github.com/boyter/scc/) which is a command line application which wants as much throughput as possible.
+The Go garbage collector is a very solid piece of engineering. With every release the applications I work on tend to get faster usually due to improvements in it. However prioritizes latency above all requirements. For API's and UI's this is a perfectly acceptable choice. It's also fine for anything with network calls which are going to be the bottleneck as well. 
+
+The catch is that Go isn't any good for UI work (no decent bindings exist that I am aware of) and this choice really hurts you when you want as much throughput as possible. I ran into this as a major issue when working on [scc](https://github.com/boyter/scc/) which is a command line application which is very CPU bound. It was such a problem I added logic in there to turn off the GC until it hits a threshold.
+
+![Go Logo](/static/my-personal-complaints-about-golang/throughput.png#center)
+
+The lack of control over the GC is frustrating at times. You learn to live with it, but there are times where it would be nice to say "Hey this code here, it really just needs to run as fast as possible, so if you could flip into throughput mode for a little while that would be great."
+
+I think this is becoming less true with the 1.12 release of Go where the GC looks to be improved yet again, however just turning the GC off and on is less control then I would like over it.
+
+
 
