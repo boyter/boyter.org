@@ -3,13 +3,13 @@ title: My Personal Complaints about Programming in Go
 date: 2019-03-14
 ---
 
-Go as a language is fairly decent. However because it tends to come up often enough on the company slack programming channel (see what I did there?) I figured id articulate it better here so I can just point people at it when they ask what my complaints are. 
+Go as a language is fairly decent. However because questions about why I have issues with tends to come up often enough on the company slack programming channel (see what I did there?) I figured I would write them down and put it here so I can point people at a link when they ask what my complaints are. 
 
 ![Go Logo](/static/my-personal-complaints-about-golang/golang.png#center)
 
-For the record I have been using it heavily for the last or so, writing command line applications, [scc](https://github.com/boyter/scc/) [lc](https://github.com/boyter/lc/) and API's from large scale ones for clients to [syntax highlighers](https://github.com/boyter/searchcode-server-highlighter).
+For the record I have been using Go heavily for the last or so, writing command line applications, [scc](https://github.com/boyter/scc/), [lc](https://github.com/boyter/lc/) and API's. These include large scale API's for clients to a [syntax highlighter](https://github.com/boyter/searchcode-server-highlighter) that will be used in https://searchcode.com/ sometime soon.
 
-My crisitisms are not aimed exclusively at Go. I have complaints about every language I use. In fact the below quote is extremely applicable here.
+My criticisms in this are aimed exclusively at Go. I do however have complaints about every language I use. In fact the below quote is extremely applicable.
 
 > "There are only two kinds of languages: the ones people complain about and the ones nobody uses.". - Bjarne Stroustrup,
 
@@ -46,7 +46,9 @@ var existsBoth = firstList.stream()
                 .collect(Collectors.toList());
 {{</highlight>}}
 
-Now the above does hide the algorithmic complexity of whats happening, but its far simpler to see what its actually doing. The intent of the code is obvious compared to the Go code it is replicating. What is really neat about it is that adding additional filters is trivial. To add additional filters to the Go example like the below example we would need to add two more if conditions into the already nested for loops.
+Now the above does hide the algorithmic complexity of whats happening, but its far simpler to see what its actually doing. I suspect it might be faster too because `contains` should return `true` the moment it finds a match whereas the Go code above continues the loop. 
+
+The intent of the code is obvious compared to the Go code it is replicating. What is really neat about it is that adding additional filters is also trivial. To add additional filters to the Go example like the below example we would need to add two more if conditions into the already nested for loops.
 
 {{<highlight java>}}
 var existsBoth = firstList.stream()
@@ -60,15 +62,17 @@ There are projects which using `go generate` can achieve some of the above for y
 
 ### #2 Channels / Parallel Slice Processing
 
-Go channels are generally pretty great. While they have some issues where you can block forever, they aren't about providing fearless concurrency (like rust) and with the race detector you can shake out these issues pretty easily. For streaming values where you don't know how many there are or when the end is they are an excellent choice. 
+Go channels are generally pretty neat. While they have some issues where you can block forever, but they aren't about providing fearless concurrency and with the race detector you can shake out these issues pretty easily. For streaming values where you don't know how many there are or when the end is, or if your method to process the values is not CPU bound they are an excellent choice. 
 
 What they are not so good for is processing slices where you know the size up front and want to process them in parallel.
 
-![Go Logo](/static/my-personal-complaints-about-golang/multithreaded.png#center)
+> Multi-threaded programming, theory and practice 
 
-Its pretty common in pretty much every other language that when you have a large list or slice you use parallel streams, parallel linq, rayon, multiprocessing or some other syntax to iterate over that list using all available CPU's. You apply them over your list and get back a list of processed elements. Only if there are enough elements or the function you are applying is complex it should be done more quickly for multi-core systems.
+![Multi-threaded programming, theory and practice](/static/my-personal-complaints-about-golang/multithreaded.png#center)
 
-However in Go its not obvious what you need to do to achieve something similar.
+Its pretty common in pretty much every other language that when you have a large list or slice you use parallel streams, parallel linq, rayon, multiprocessing or some other syntax to iterate over that list using all available CPU's. You apply them over your list and get back a list of processed elements. However if there are enough elements or the function you are applying is complex enough it should be done more quickly for multi-core systems.
+
+However in Go its not obvious what you need to do to achieve this.
 
 One possible solution is to spawn a Go routine for each item in your slice. Because of the low overhead of go-routines this is a valid strategy, to a point.
 
@@ -146,11 +150,46 @@ The Go garbage collector is a very solid piece of engineering. With every releas
 
 The catch is that Go isn't any good for UI work (no decent bindings exist that I am aware of) and this choice really hurts you when you want as much throughput as possible. I ran into this as a major issue when working on [scc](https://github.com/boyter/scc/) which is a command line application which is very CPU bound. It was such a problem I added logic in there to turn off the GC until it hits a threshold.
 
-![Go Logo](/static/my-personal-complaints-about-golang/throughput.png#center)
-
 The lack of control over the GC is frustrating at times. You learn to live with it, but there are times where it would be nice to say "Hey this code here, it really just needs to run as fast as possible, so if you could flip into throughput mode for a little while that would be great."
 
-I think this is becoming less true with the 1.12 release of Go where the GC looks to be improved yet again, however just turning the GC off and on is less control then I would like over it.
+![Lumberg Throughput](/static/my-personal-complaints-about-golang/throughput.png#center)
 
+I think this is becoming less true with the 1.12 release of Go where the GC looks to be improved yet again, however just turning the GC off and on is less control then I would like over it. It is something I should investigate again when I have the time.
 
+### #4 Error Handling
 
+I am not the only person with this complaint, but having to write,
+
+{{<highlight go>}}
+value, err := someFunc()
+if err != nil {
+	// Do something here
+}
+
+err = someOtherFunc(value)
+if err != nil {
+	// Do something here
+}
+{{</highlight>}}
+
+Is pretty tedious. Go does not even force you to handle the error either which some people suggest. You can explicitly ignore it (does this count as handling it?) with `_` but you can also just ignore it totally. For example I could rewrite the above like,
+
+{{<highlight go>}}
+value, _ := someFunc()
+
+someOtherFunc(value)
+{{</highlight>}}
+
+Now its pretty easy to see I am ignoring something returned from `someFunc` but `someOtherFunc(value)` also can return an error, and I am just totally ignoring it. No handling of this situation at all.
+
+To be honest I don't know the solution here. I do like the `?` operator in Rust to help avoid this though. V-Lang https://vlang.io/ looks like it might have some interesting solutions as well.
+
+Another idea would be Optional types and the removal of `nil`, although this is never going to happen in Go even with Go 2.0 as it would break backwards compatibility.
+
+### Conclusion
+
+Go is still a pretty decent language. If you told me to write an API, or some task that needs to make a lot of disk/network calls quickly it would still be my first pick. I'm actually at the point where its replacing Python for a lot of my throwaway tasks except data merging were the lack of functional programming is still painful enough to suffer the speed hit.
+
+Yes, the binary sizes could be smaller (some [compile flags and upx](https://boyter.org/posts/trimming-golang-binary-fat/) can solve this), I would like it to be faster in some areas, GOPATH wasn't great but also not as bad as everyone made out, the default unit-tests framework is missing a lot of functionality, mocking is a bit of a pain etc...
+
+Still its one of the more productive languages I have used. I will continue to use it, although I am hopeful that https://vlang.io/ will eventually be released and solve a lot of my complaints. Either that or Go 2.0, Nim or Rust. So many cool new languages to play around with these days. We developers really are spoiled.
