@@ -15,6 +15,8 @@ My criticisms in this are aimed exclusively at Go. I do however have complaints 
 
 ### #1 The lack of functional programming
 
+I am not a functional programming zealot. The first thing that comes to mind when I think of Lisp is a speech impediment.
+
 This is probably my biggest pain point with Go. Going against the crowd I don't want generics, which I think would just add unnecessary complexity to most Go projects. What I want is some functional methods applied over the in-built slice and map in Go. Both of those types are already magic in the sense that they can hold any type and are generic, which you cannot implement yourself in Go without using interface and then loosing all the safety and speed.
 
 For example consider the below. 
@@ -24,21 +26,16 @@ Given two slices of strings work out which ones exist in both and put it this in
 {{<highlight go>}}
 existsBoth := []string{}
 for _, first := range firstSlice {
-	inBoth := false
-
 	for _, second := range secondSlice {
 		if first == second {
-			inBoth = true
+			existsBoth = append(existsBoth, proxy)
+			break
 		}
-	}
-
-	if inBoth {
-		existsBoth = append(existsBoth, proxy)
 	}
 }
 {{</highlight>}}
 
-The above is one trivial way to solve this in Go. Lets compare it to the same logic in Java using streams and functional programming.
+The above is one trivial way to solve this in Go. There are other ways to solve the above by using maps, which would reduce the runtime, but lets assume we are slightly memory constrained, or that we don't have very large slices to process and the additional runtime isn't worth the complexity it would introduce. Lets compare it to the same logic in Java using streams and functional programming.
 
 {{<highlight java>}}
 var existsBoth = firstList.stream()
@@ -46,7 +43,7 @@ var existsBoth = firstList.stream()
                 .collect(Collectors.toList());
 {{</highlight>}}
 
-Now the above does hide the algorithmic complexity of whats happening, but its far simpler to see what its actually doing. I suspect it might be faster too because `contains` should return `true` the moment it finds a match whereas the Go code above continues the loop. 
+Now the above does hide the algorithmic complexity of whats happening, but its far simpler to see what its actually doing.
 
 The intent of the code is obvious compared to the Go code it is replicating. What is really neat about it is that adding additional filters is also trivial. To add additional filters to the Go example like the below example we would need to add two more if conditions into the already nested for loops.
 
@@ -80,7 +77,7 @@ One possible solution is to spawn a Go routine for each item in your slice. Beca
 toProcess := []int{1,2,3,4,5,6,7,8,9}
 var wg sync.WaitGroup
 
-for i := 0; i < len(toProcess); i++ {
+for i, _ := range toProcess {
 	wg.Add(1)
 	go func(j int) {
 		toProcess[j] = someSlowCalculation(toProcess[j])
@@ -94,9 +91,9 @@ fmt.Println(toProcess)
 
 The above will keep the order of the elements in the slice but lets assume this isn't a requirement in our case.
 
-The problem with the above firstly you need to use an old school for loop. Use a range and the above will not do what you expect, with the output being the same as the input. Another issue is adding a waitgroup and having to remember to increment and call done on it. This is additional overhead on the developer. Get it wrong and this program will not produce the right output, either nondeterministically or never finish. In addition if your list is very long you are going to spawn a go-routine for every single one. As I said before this is not an issue itself because go can do that without issue. What is going to be a problem is that each one of those go-routines is going to fight for a slice of the CPU. As such this is not going to be the most efficient way to perform this task. 
+The problem with the above firstly is adding a waitgroup and having to remember to increment and call done on it. This is additional overhead on the developer. Get it wrong and this program will not produce the right output, either nondeterministically or never finish. In addition if your list is very long you are going to spawn a go-routine for every single one. As I said before this is not an issue itself because go can do that without issue. What is going to be a problem is that each one of those go-routines is going to fight for a slice of the CPU. As such this is not going to be the most efficient way to perform this task.
 
-What you probably wanted was to spawn a go-routine for each CPU and have them pick over the list processing it in turn. To do this in a Go centric way you need to build a channel then loop over the elements of your slice and have your functions read from that channel, then another channel which you read from. Lets have a look.
+What you probably wanted was to spawn a go-routine for each CPU and have them pick over the list processing it in turn. The overhead of additional go-routines is small, but for a very tight loop is not trivial, and when I was working on [scc](https://github.com/boyter/scc/) it was something I ran into hence it is limited to a go-routine per core. To do this in a Go centric way you need to build a channel then loop over the elements of your slice and have your functions read from that channel, then another channel which you read from. Lets have a look.
 
 {{<highlight go>}}
 toProcess := []int{1,2,3,4,5,6,7,8,9}
@@ -112,7 +109,7 @@ for i := 0; i < runtime.NumCPU(); i++ {
 	wg.Add(1)
 	go func(input chan int, output []int) {
 		for j := range input {
-			toProcess[j] = someCalculation(toProcess[j])
+			toProcess[j] = someSlowCalculation(toProcess[j])
 		}
 		wg.Done()
 	}(input, toProcess)
@@ -148,7 +145,7 @@ Incidentally I believe this is holding Go back from any success in the data scie
 
 The Go garbage collector is a very solid piece of engineering. With every release the applications I work on tend to get faster usually due to improvements in it. However prioritizes latency above all requirements. For API's and UI's this is a perfectly acceptable choice. It's also fine for anything with network calls which are going to be the bottleneck as well. 
 
-The catch is that Go isn't any good for UI work (no decent bindings exist that I am aware of) and this choice really hurts you when you want as much throughput as possible. I ran into this as a major issue when working on [scc](https://github.com/boyter/scc/) which is a command line application which is very CPU bound. It was such a problem I added logic in there to turn off the GC until it hits a threshold.
+The catch is that Go isn't any good for UI work (no decent bindings exist that I am aware of) and this choice really hurts you when you want as much throughput as possible. I ran into this as a major issue when working on [scc](https://github.com/boyter/scc/) which is a command line application which is very CPU bound. It was such a problem I added logic in there to turn off the GC until it hits a threshold. However I could not just disable it because for some things it works on it would quickly run out of memory.
 
 The lack of control over the GC is frustrating at times. You learn to live with it, but there are times where it would be nice to say "Hey this code here, it really just needs to run as fast as possible, so if you could flip into throughput mode for a little while that would be great."
 
@@ -189,6 +186,8 @@ Another idea would be Optional types and the removal of `nil`, although this is 
 ### Conclusion
 
 Go is still a pretty decent language. If you told me to write an API, or some task that needs to make a lot of disk/network calls quickly it would still be my first pick. I'm actually at the point where its replacing Python for a lot of my throwaway tasks except data merging were the lack of functional programming is still painful enough to suffer the speed hit.
+
+Things like sensible comparison between strings `stringA == stringB` and compile errors if you try to do the same with slices are really nice things and keep the principle of least surprise unlike Java which I used in the above comparisons.
 
 Yes, the binary sizes could be smaller (some [compile flags and upx](https://boyter.org/posts/trimming-golang-binary-fat/) can solve this), I would like it to be faster in some areas, GOPATH wasn't great but also not as bad as everyone made out, the default unit-tests framework is missing a lot of functionality, mocking is a bit of a pain etc...
 
