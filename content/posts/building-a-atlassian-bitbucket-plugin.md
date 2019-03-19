@@ -48,5 +48,8 @@ https://developer.atlassian.com/server/bitbucket/how-tos/beginner-guide-to-bitbu
 
 https://developer.atlassian.com/server/bitbucket/tutorials-and-examples/decorating-the-user-account/
 
+If you follow this article, I suggest after creating the plugin to run `atlas-run` and get everything working. This will download a bunch of dependancies and ensures you are ready to rock and roll which you can confirm by browsing to http://localhost:7990/bitbucket/dashboard when it has finished starting.
+
+
 https://marketplace.atlassian.com/addons/app/bitbucket
 https://developer.atlassian.com/platform/marketplace/creating-a-marketplace-listing/
