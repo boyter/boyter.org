@@ -91,9 +91,9 @@ fmt.Println(toProcess)
 
 The above will keep the order of the elements in the slice but lets assume this isn't a requirement in our case.
 
-The problem with the above firstly is adding a waitgroup and having to remember to increment and call done on it. This is additional overhead on the developer. Get it wrong and this program will not produce the right output, either nondeterministically or never finish. In addition if your list is very long you are going to spawn a go-routine for every single one. As I said before this is not an issue itself because go can do that without issue. What is going to be a problem is that each one of those go-routines is going to fight for a slice of the CPU. As such this is not going to be the most efficient way to perform this task.
+One problem with the above is adding a waitgroup and having to remember to increment and call done on it. This is additional overhead on the developer. Get it wrong and this program will not produce the right output, either non-deterministically or never finish. In addition if your list is very long you are going to spawn a go-routine for every single one. As I said before this is not an issue itself because Go can do that without issue. What is going to be a problem is that each one of those go-routines is going to fight for a slice of the CPU. As such this is not going to be the most efficient way to perform this task.
 
-What you probably wanted was to spawn a go-routine for each CPU and have them pick over the list processing it in turn. The overhead of additional go-routines is small, but for a very tight loop is not trivial, and when I was working on [scc](https://github.com/boyter/scc/) it was something I ran into hence it is limited to a go-routine per core. To do this in a Go centric way you need to build a channel then loop over the elements of your slice and have your functions read from that channel, then another channel which you read from. Lets have a look.
+What you probably wanted was to spawn a go-routine for each CPU and have them pick over the list processing it in turn. The overhead of additional go-routines is small, but for a very tight loop is not trivial, and when I was working on [scc](https://github.com/boyter/scc/) it was something I ran into hence it is limited to a go-routine per core. To do this in a Go centric way you need to build a channel, then loop over the elements of your slice and have your functions read from that channel, then another channel which you write to, or update the slice directly. Lets have a look.
 
 {{<highlight go>}}
 toProcess := []int{1,2,3,4,5,6,7,8,9}
@@ -119,9 +119,9 @@ wg.Wait()
 fmt.Println(toProcess)
 {{</highlight>}}
 
-The above creates a channel, and we then loop over our slice and put values into it. Then we spawn a go-routine for each CPU core that our OS reports and process that input, then we wait till its all done. A lot of code to digest.
+The above creates a channel, and then loops over the slice and puts values in it. Then we spawn a go-routine for each CPU core that our OS reports and process that input channel, then we wait till its all done. It is a lot of code to digest.
 
-Its not even how you should do it really because if your slice is very large you probably don't want to have a channel with a buffer of the same length, so you should actually spawn another go-routine to loop the slice and put those values into the channel and when finished it closes the channel. I have removed this because it make the code much longer and I want to approximate the basic idea.
+Its not even how you should this really because if your slice is very large you probably don't want to have a channel with a buffer of the same length, so you should actually spawn another go-routine to loop the slice and put those values into the channel and when finished close the channel. I have removed this because it made the code much longer and I want to approximate the basic idea.
 
 Here is roughly the same thing in Java.
 
@@ -135,7 +135,7 @@ firstList = firstList.parallelStream()
 
 Yes channels and streams are not equivalent. You could replicate more closely the Go logic using a queue which would be closer to a true comparison, but the intent here is not a 1 to 1 comparison. What we wanted was to process a slice/list using all our CPU cores.
 
-This of course is not an issue if `someSlowCalucation` is actually a method which calls out on the network or some other non CPU intensive task. In which case channels and go-routines are brilliant.
+This of course is not an issue if `someSlowCalucation` is actually a method which calls out using the network or some other non CPU intensive task. In which case channels and go-routines are brilliant.
 
 This issue ties into #1. If Go had functional methods on top of the slice/map objects adding this functionality would be possible. Its also annoying because if Go had generics someone could write the above as a library like rust's rayon and everyone would benefit.
 
