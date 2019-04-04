@@ -27,9 +27,9 @@ As such the solution proposed was to use ffmpeg. It could pass through the file 
 
 ![Design](/static/media-clipping-using-ffmpeg-with-cache-eviction-2-random-for-disk-caching-at-scale/architecture.png#center)
 
-Since the solution called for using ffmpeg and dealing with very large files we designed around a resilient queue using SQS and small machines t3.small AWS instances with a large amount of disk space. The reason for t3 instances is the burstable network performance. The ffmpeg command as written does no transcoding so it actually uses very little CPU. The only real CPU usage in production is when the network bursts hence the choice of small instances. We have observed these instances bursting to 6 Gbps in production. The input files are stored in S3 and transfered to local disk and the clip when finished is pushed into S3 again.
+Since the solution called for using ffmpeg and dealing with very large files we designed around a resilient queue using SQS and small machines T3.small AWS instances with a large amount of disk space. The reason for T3 instances is the burst-able network performance. The ffmpeg command as written does no transcoding so it actually uses very little CPU. The only real CPU usage in production is when the network bursts hence the choice of small instances. We have observed these instances bursting to 6 Gbps in production. The input files are stored in S3 and transfered to local disk and the clip when finished is pushed into S3 again.
 
-It was a total guess as nothing like this had been implemented at the organisation before but we assumed that users would want to make multiple clips from the same file. As such it made sense to cache the files we downloaded. However this came with one issue, which is that because we attach local storage to the instances we need to have some way to clean up disk to ensure that we have enough space to download the original file, and to ensure we have enough space for the clip output.
+It was a total guess as nothing like this had been implemented at the organization before but we assumed that users would want to make multiple clips from the same file. As such it made sense to cache the files we downloaded. However this came with one issue, which is that because we attach local storage to the instances we need to have some way to clean up disk to ensure that we have enough space to download the original file, and to ensure we have enough space for the clip output.
 
 This was where the 2 random disk caching happened. Its also when I did a few fist pumps because I finally got to implement something I had always wanted to. The code for it is actually fairly simple,
 
@@ -84,4 +84,10 @@ func Free(directoryPath string) uint64 {
 }
 {{</highlight>}}
 
-The results of all of this
+The results of all of this? Well in production we currently have 8 running instances. They are busily processing away and I have included the interesting AWS metrics from monitoring. The metrics are taken over the last week and in that time about 1000 clips have been processed. The only reason for so many instances is to ensure that if a clip is requested it is processed as quickly as possible.
+
+We do have auto scaling on this based on the queue size but since the application was launched 8 has been more than enough instances as far as we can tell. It has never scaled out. Note that the credits never expire from these instances making me think we could possibly drop to smaller instances if required, but since the average cost for these instances is around $700 I doubt its worth the change. It seems like a better idea at this point would be to drop the number of instances from 8 to 4.
+
+![Clipper Stats](/static/media-clipping-using-ffmpeg-with-cache-eviction-2-random-for-disk-caching-at-scale/clipper-stats.png#center)
+
+The average time to process a clip is under 5 minutes so far. Most of the clips are being made from 300 GB files and from our logging the cache is working quite well and has saved over 200 S3 fetches. The instances being shared nothing will re-download files their neighbors have but the reality so far is that the system works well. I doubt we will need to optimize this further at this point, but it would be possible if the number of clips became exponential.
