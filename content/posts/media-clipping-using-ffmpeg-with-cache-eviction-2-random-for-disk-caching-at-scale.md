@@ -25,3 +25,63 @@ The reason this was undesirable is that the users can be quite picky about the f
 
 As such the solution proposed was to use ffmpeg. It could pass through the file preserving the container and all the other embedded metadata such as data streams. The actual solution implements two ffmpeg commands, the first trying to preserve all information and the second as a fallback in case of failure with the addition of stripping out data streams. The idea being that at least it worked, even if you lost some information and you can always download the full file as a albeit not ideal failsafe.
 
+![Design](/static/media-clipping-using-ffmpeg-with-cache-eviction-2-random-for-disk-caching-at-scale/architecture.png#center)
+
+Since the solution called for using ffmpeg and dealing with very large files we designed around a resilient queue using SQS and small machines t3.small AWS instances with a large amount of disk space. The reason for t3 instances is the burstable network performance. The ffmpeg command as written does no transcoding so it actually uses very little CPU. The only real CPU usage in production is when the network bursts hence the choice of small instances. We have observed these instances bursting to 6 Gbps in production. The input files are stored in S3 and transfered to local disk and the clip when finished is pushed into S3 again.
+
+It was a total guess as nothing like this had been implemented at the organisation before but we assumed that users would want to make multiple clips from the same file. As such it made sense to cache the files we downloaded. However this came with one issue, which is that because we attach local storage to the instances we need to have some way to clean up disk to ensure that we have enough space to download the original file, and to ensure we have enough space for the clip output.
+
+This was where the 2 random disk caching happened. Its also when I did a few fist pumps because I finally got to implement something I had always wanted to. The code for it is actually fairly simple,
+
+{{<highlight go>}}
+// Given a filePath, target size and required size this method will
+// delete files in that path until it has enough space, or there are
+// no files left to delete and return an error.
+// Uses the cheap but effective 2 random choice eviction algorithm for this
+func ClearSpace(directoryPath string, freeSpace uint64, requiredBytes uint64) error {
+	// Required to ensure that the random choice is appropriately random
+	rand.Seed(time.Now().Unix())
+
+	for freeSpace < requiredBytes {
+		// Get the files. The method does ioutil.ReadDir(directoryPath) and returns all files as a slice
+		fileList := GetFiles(directoryPath)
+
+		// If there are no more files to remove then we don't have enough space
+		if len(fileList) == 0 {
+			return errors.New("cannot free enough disk space")
+		}
+
+		// To make space pick two random elements from the list and then
+		// delete the oldest one
+		one := fileList[rand.Intn(len(fileList))]
+		two := fileList[rand.Intn(len(fileList))]
+
+		if one.ModTime().Nanosecond() <= two.ModTime().Nanosecond() {
+			os.Remove(path.Join(directoryPath, one.Name()))
+			freeSpace += uint64(one.Size())
+		} else {
+			os.Remove(path.Join(directoryPath, two.Name()))
+			freeSpace += uint64(two.Size())
+		}
+	}
+
+	return nil
+}
+{{</highlight>}}
+
+The only tricky part was determining the disk space itself which sadly is not possible in a cross platform way. The below achieves this but is POSIX only so it won't compile for Windows.
+
+{{<highlight go>}}
+// POSIX only and attempts to determine how much
+// free space is left on the device given a path
+func Free(directoryPath string) uint64 {
+	var stat syscall.Statfs_t
+
+	syscall.Statfs(directoryPath, &stat)
+
+	// Available blocks * size per block = available space in bytes
+	return stat.Bavail * uint64(stat.Bsize)
+}
+{{</highlight>}}
+
+The results of all of this
