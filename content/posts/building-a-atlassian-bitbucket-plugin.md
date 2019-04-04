@@ -1,6 +1,6 @@
 ---
 title: Building a Atlassian Bitbucket Plugin
-date: 2019-03-17
+date: 2029-03-17
 ---
 
 So I thought I would try to implement Sloc Cloc and Code into Atlassian's Bitbucket as a plugin. With the marketplace they have it seemed like it would be potentially a good source of mostly passive income. Plus because many developers find Java and Java 8 distasteful it seemed like a good market to get into compared to Wordpress for example.
