@@ -215,7 +215,47 @@ java FileThreadsProcess > /dev/null  69.20s user 29.03s system 329% cpu 29.842 t
 
 What the? Thats about twice as slow as the version which had a single thread processing the queue! The queue is being emptied faster which shouldn't block the reader but somehow its slower? That does not appear to make sense.
 
+My guess would be that either the Queue we are using is not very efficient or we are asking it to do too much. Lets look at a profile and see where the time is actually being spent before acting on that guess though. Thankfully I have YourKit profiler for Java (which I quite like) and took a profile of the process.
 
-However lets look at a profile and see where the time is actually being spent first. If its easy to improve our processing enough that a single core can keep up then we are done.
+![Profile](/static/file-read-challange/profile.jpg)
+
+Looking at that suggests that the `ArrayBlockingQueue` is actually taking up a huge amount of time. Since we already know that the two threads can keep up with the file read (on this machine) I decided to swap it out for a `LinkedTransferQueue` which is not bounded but should be faster to prove the theory.
+
+```
+$ time java FileThreadsProcess > /dev/null
+java FileThreadsProcess > /dev/null  66.50s user 23.95s system 419% cpu 21.563 total
+```
+
+The runtime dropped by almost 1/3 which proves that indeed the queue is now the bottleneck. At this point we have two options. The first is to find a faster queue implementation, and the second is to be more effective with how we use the queue. Since I wanted to stick to the native libraries I decided to be more effective with the queue.
+
+
 
 // INVESTIGATE THREAD SPAWNING COST HERE
+
+Remember how I said I ran the Go soluttion which Marcel claimed to be optimal? What if it was actually at a local optimum? From my investigation with [scc](https://boyter.org/posts/sloc-cloc-code/) I know that for large files memory maps can be a far more efficient way to process files.
+
+```
+$ time ./go-solution itcont.txt > /dev/null
+./go-solution itcont.txt > /dev/null  14.14s user 6.52s system 222% cpu 9.296 total
+```
+
+So given the above runtime is that actually optimal? Lets try using `wc` and `ripgrep` over the file to see how fast they can process the file.
+
+Asking `wc` to just count newlines should allow it to go about as fast as possible, and if we get ripgrep to invert match over everything it will match nothing but read the whole file. I know for a fact that for a single large file ripgrep will flip to memory maps, and I threw `wc` in there because I assume it would do the same.
+
+```
+$ hyperfine -i 'rg -v . itcont.txt' 'wc -l itcont.txt'
+Benchmark #1: rg -v . itcont.txt
+  Time (mean ± σ):      2.592 s ±  0.046 s    [User: 1.375 s, System: 1.216 s]
+  Range (min … max):    2.560 s …  2.624 s
+
+Benchmark #2: wc -l itcont.txt
+  Time (mean ± σ):      2.679 s ±  0.141 s    [User: 413.8 ms, System: 2262.7 ms]
+  Range (min … max):    2.579 s …  2.778 s
+```
+
+Looks like its actually possible to process the file in ~2.6 seconds on my laptop and indeed Marcel hit a local optimum.
+
+Time to learn how to memory map a file in Java.
+
+https://howtodoinjava.com/java7/nio/memory-mapped-files-mappedbytebuffer/
