@@ -128,3 +128,94 @@ for (var key : count.keySet()) {
     }
 }
 {{</highlight>}}
+
+With that implemented a quick test to see how much this has impacted the performance.
+
+```
+$ time java FileProcess > /dev/null
+java FileProcess > /dev/null  99.38s user 15.53s system 245% cpu 46.893 total
+```
+
+Ouch. Quite a lot. It makes sense though because we added processing of the lines, rather than just reading them. With the file consisting of 21,627,188 lines it means its taking 0.00000212695 seconds to process each line which is about 2100 nanoseconds. 
+
+Using Go, what would happen is to pump those lines into a channel and process them using some Go routines. As mentioned we can do the same in Java using a Queue and some threads. To begin with though I thought it would be worthwhile to try with one thread processing a queue just to see if we get any gains.
+
+For the queue I picked the obvious ArrayBlockingQueue. The thing about Java when doing this is that you need to have a poison value which you put onto the queue when finished to let the threads know to finish processing. Since I was using strings I just chose the string `quit` to achieve this. I then put the line processing into a runnable task lambda and was ready to try processing.
+
+With the task configured and running the loop becomes like the below,
+
+{{<highlight java>}}
+processor.start();
+try (BufferedReader b = Files.newBufferedReader(Path.of("itcont.txt"))) {
+    var readLine = "";
+    while ((readLine = b.readLine()) != null) {
+        lineCount++;
+        queue.offer(readLine);
+    }
+    queue.offer(poison);
+}
+processor.join();
+{{</highlight>}}
+
+I than ran the above to see what gain if any was delivered.
+
+```
+$ time java FileThreadProcess > /dev/null
+java FileThreadProcess > /dev/null  48.36s user 16.91s system 346% cpu 18.862 total
+```
+
+A massive improvement over the single threaded process. However its still slower than the time to read from disk without doing any processing.
+
+With the above reading of the file should be only blocked by how quickly the background thread can process the queue. One way to check this is by printing out the queue length every now and then by adding a modulus check of the lineCount and a println.
+
+{{<highlight java>}}
+if (lineCount % 100000 == 0) {
+    System.out.println(queue.size());
+}
+{{</highlight>}}
+
+The result of which showed the following,
+
+```
+974
+987
+984
+992
+960
+885
+996
+```
+
+Suggesting that the single thread was unable to keep up with the reading off disk. A reasonable guess at this point would be to spawn another thread. Doing so is faily trivial with some copy paste, but we also need to make all of the shared data structures thread safe. 
+
+{{<highlight java>}}
+var names = Collections.synchronizedList(new ArrayList<String>());
+var firstNames = Collections.synchronizedList(new ArrayList<String>());
+var donations = Collections.synchronizedMap(new HashMap<String, Integer>());
+{{</highlight>}}
+
+With that done I added another thread and ran the process and got the following output.
+
+```
+96
+0
+4
+0
+11
+12
+1
+```
+
+Which suggests that 2 threads processing the queue is enough to keep up with the disk. Now to try it out,
+
+```
+$ time java FileThreadsProcess > /dev/null
+java FileThreadsProcess > /dev/null  69.20s user 29.03s system 329% cpu 29.842 total
+```
+
+What the? Thats about twice as slow as the version which had a single thread processing the queue! The queue is being emptied faster which shouldn't block the reader but somehow its slower? That does not appear to make sense.
+
+
+However lets look at a profile and see where the time is actually being spent first. If its easy to improve our processing enough that a single core can keep up then we are done.
+
+// INVESTIGATE THREAD SPAWNING COST HERE
