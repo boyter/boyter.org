@@ -3,15 +3,15 @@ title: Processing Large Files – Java, Go and 'hitting the wall'
 date: 2019-04-07
 ---
 
-
-https://marcellanz.com/post/file-read-challenge/
 https://itnext.io/using-java-to-read-really-really-large-files-a6f8a3f44649
+https://stuartmarks.wordpress.com/2019/01/11/processing-large-files-in-java/
+https://marcellanz.com/post/file-read-challenge/
 
 Whenever I see a post
 
 While I don't like solving arbitary company made "programming tests" when doing interviews https://boyter.org/2016/09/companies-recruiting/ whenever I see a post comparing Go to Java where Java is trounced in performance gets my attention. Unless its a very short lived command line application where JVM startup is a problem or some super optimised Go solution in my experience so far Java should generally be faster. 
 
-I had a look through Marcel's solution compared to Paige and it was fairly obvious that the Go solution was going to be faster since it made a good use of Go routines and channels.
+I had a look through Marcel's solution compared to Paige and Stuart's and it was fairly obvious that the Go solution was going to be faster since it made a good use of Go routines and channels.
 
 Which made me think. While I understand that Go channels are effectivly a BufferedQueue (with size of 1 in the case of unbuffered) with some synatic sugar, I had never actually tried writing Java using that technique. Processing a very large file with one thread reading and other threads processing is pretty much the textbook solution to solve this problem and as such Go's concurrency plays very nicely into this.
 
@@ -217,7 +217,7 @@ What the? Thats about twice as slow as the version which had a single thread pro
 
 My guess would be that either the Queue we are using is not very efficient or we are asking it to do too much. Lets look at a profile and see where the time is actually being spent before acting on that guess though. Thankfully I have YourKit profiler for Java (which I quite like) and took a profile of the process.
 
-![Profile](/static/file-read-challange/profile.jpg)
+![Profile](/static/file-read-challange/profile.jpg#center)
 
 Looking at that suggests that the `ArrayBlockingQueue` is actually taking up a huge amount of time. Since we already know that the two threads can keep up with the file read (on this machine) I decided to swap it out for a `LinkedTransferQueue` which is not bounded but should be faster to prove the theory.
 
@@ -226,7 +226,15 @@ $ time java FileThreadsProcess > /dev/null
 java FileThreadsProcess > /dev/null  66.50s user 23.95s system 419% cpu 21.563 total
 ```
 
-The runtime dropped by almost 1/3 which proves that indeed the queue is now the bottleneck. At this point we have two options. The first is to find a faster queue implementation, and the second is to be more effective with how we use the queue. Since I wanted to stick to the native libraries I decided to be more effective with the queue.
+The runtime dropped by almost 1/3 which proves that indeed the queue is now the bottleneck. At this point we have two options. The first is to find a faster queue implementation, and the second is to be more effective with how we use the queue. Since I wanted to stick to the native libraries I decided to be more effective with the queue. However the slowness of the queue in Java is will known hence projects like [Disruptor](https://lmax-exchange.github.io/disruptor/) existing. You can see the latency cost of the ArrayBlockingQueue in the latency chart they supply.
+
+![Profile](/static/file-read-challange/latency-histogram.png#center)
+
+Seeing that the queue has 256 ns of latency fits in well with the numbers we had when running multiple threads and explains why it was actually slower. It also suggests that if we can solve this problem a single thread might be fast enough to keep up with the file read.
+
+To reduce the latency one easy solution is to batch the lines together into lists and then have the worker thread process those. It means less calls to the queue. If there is 256 ns of latency per call, batching them into chunks of 10,000 lines is going to save 2 ms of processing time. Given there are ~2100 chunks in the file that works out to be about 4.2 seconds of saved processing time. We can then tweak the size of the batch to see what is optimal for this task.
+
+
 
 
 
@@ -256,6 +264,13 @@ Benchmark #2: wc -l itcont.txt
 
 Looks like its actually possible to process the file in ~2.6 seconds on my laptop and indeed Marcel hit a local optimum.
 
-Time to learn how to memory map a file in Java.
+Time to learn how to memory map a file in Java. However that quickly is bunk because it turns out Java's memory map implementation is stuck in 1995 and so you cannot map a file larger than 2 GB. However... http://nyeggen.com/post/2014-05-18-memory-mapping-%3E2gb-of-data-in-java/
 
 https://howtodoinjava.com/java7/nio/memory-mapped-files-mappedbytebuffer/
+
+https://stackoverflow.com/questions/41324192/why-is-bufferedreader-read-much-slower-than-readline
+
+Doing a lot of concurrency and notice a lot of activity in your syncronised hash map? Try swapping it out `Collections.synchronizedMap(new HashMap<String, Integer>());` for `new ConcurrentHashMap<String, Integer>();` 
+
+
+So rather than implement the full problem I wanted to explore can I get Java close to the runtime of the Go application, assuming I cut them down to do something very similar.
