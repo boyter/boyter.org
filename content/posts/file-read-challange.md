@@ -274,3 +274,8 @@ Doing a lot of concurrency and notice a lot of activity in your syncronised hash
 
 
 So rather than implement the full problem I wanted to explore can I get Java close to the runtime of the Go application, assuming I cut them down to do something very similar.
+
+
+http://www.mapdb.org/blog/mmap_files_alloc_and_jvm_crash/
+https://news.ycombinator.com/item?id=3428357
+http://vanillajava.blogspot.com/2011/12/using-memory-mapped-file-for-huge.html
