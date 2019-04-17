@@ -49,9 +49,9 @@ _Conformance_
   
 Conformance testing verifies that software conforms to specified standards. An example would checking a compiler or interpreter to see if it will work as expect against the language standards.
 
-Compatibility
+_Compatibility_
   
-: Checks that software is compatible with other software on a system. Examples would be checking the Windows version, Java runtime version or that other software to be interfaced with have the appropriate API hooks.
+Checks that software is compatible with other software on a system. Examples would be checking the Windows version, Java runtime version or that other software to be interfaced with have the appropriate API hooks.
 
 _Destructive_
   
@@ -65,7 +65,7 @@ _Functional_
   
 Functional tests generally consist of stories focused around the users ability to perform actions or use cases checking if functionality works. An example would be "can the user save the document with changes".
 
-Installation
+_Installation_
   
 Ensures that software is installed correctly and works as expected on a new piece of hardware or system. Commonly seen after software has been installed as a post check.
 
