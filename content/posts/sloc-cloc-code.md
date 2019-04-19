@@ -11,7 +11,7 @@ This is now part of a series of blog posts about `scc` Sloc Cloc and Code which 
 
  - [Sloc Cloc and Code - What happened on the way to faster Cloc 2018-04-16](https://boyter.org/posts/sloc-cloc-code/)
  - [Sloc Cloc and Code Revisited - A focus on accuracy 2018-08-28](https://boyter.org/posts/sloc-cloc-code-revisited/)
- - [Sloc Cloc and Code Revisited - Optimizing an already fast Go application 2018-09-19](https://boyter.org/posts/)sloc-cloc-code-performance/
+ - [Sloc Cloc and Code Revisited - Optimizing an already fast Go application 2018-09-19](https://boyter.org/posts/sloc-cloc-code-performance/)
  - [Sloc Cloc and Code a Performance Update 2019-01-09](https://boyter.org/posts/sloc-cloc-code-performance-update/)
 
 **TL/DR**
