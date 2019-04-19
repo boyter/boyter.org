@@ -47,5 +47,6 @@ In no particular order.
  - Shameless self promotion but what I went through when building scc which is a code counter similar to cloc https://boyter.org/posts/sloc-cloc-code/
  - Built for Speed: Custom Parser for Regex at Scale https://blog.scalyr.com/2018/08/custom-regex-parser/
  - Gallery of Processor Cache Effects http://igoro.com/archive/gallery-of-processor-cache-effects/
+ - Making the obvious code fast https://jackmott.github.io/programming/2016/07/22/making-obvious-fast.html with interesting HN comments https://news.ycombinator.com/item?id=19680595
 
 Will attempt to keep this list up to date as I find other content that really impresses me.
