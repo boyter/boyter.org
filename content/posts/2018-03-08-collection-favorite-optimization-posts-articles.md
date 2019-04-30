@@ -49,5 +49,6 @@ In no particular order.
  - Gallery of Processor Cache Effects http://igoro.com/archive/gallery-of-processor-cache-effects/
  - Making the obvious code fast https://jackmott.github.io/programming/2016/07/22/making-obvious-fast.html with interesting HN comments https://news.ycombinator.com/item?id=19680595
  - Optimizing M3: How Uber Halved Our Metrics Ingestion Latency by (Briefly) Forking the Go Compiler https://eng.uber.com/optimizing-m3/ https://news.ycombinator.com/item?id=19692451
+ - Linux Load Averages: Solving the Mystery http://www.brendangregg.com/blog/2017-08-08/linux-load-averages.html
 
 Will attempt to keep this list up to date as I find other content that really impresses me.
