@@ -1,6 +1,6 @@
 ---
 title: Processing Large Files – Java, Go and 'hitting the wall'
-date: 2029-04-07
+date: 2019-05-07
 ---
 
 https://itnext.io/using-java-to-read-really-really-large-files-a6f8a3f44649
@@ -24,7 +24,33 @@ $ time ./go-solution itcont.txt > /dev/null
 ./go-solution itcont.txt > /dev/null  14.14s user 6.52s system 222% cpu 9.296 total
 ```
 
-Which gives me a time to chase.
+My first thought was to question is this actually an optimal time? I know from playing with memory mapped files with [scc](https://boyter.org/posts/sloc-cloc-code/) that if the file is large such as the one in this case there are massive wins to be gained using them. Turns out that `ripgrep` also uses memory mapped files, so we can use it to see how fast you can actually read the file.
+
+Asking `wc` to just count newlines should allow it to go about as fast as possible, and if we get ripgrep to invert match over everything it will match nothing but read the whole file. I know for a fact that for a single large file ripgrep will flip to memory maps, and I threw `wc` in there because I assume it would do the same.
+
+```
+$ hyperfine -i 'rg -v . itcont.txt' 'wc -l itcont.txt'
+Benchmark #1: rg -v . itcont.txt
+  Time (mean ± σ):      2.592 s ±  0.046 s    [User: 1.375 s, System: 1.216 s]
+  Range (min … max):    2.560 s …  2.624 s
+
+Benchmark #2: wc -l itcont.txt
+  Time (mean ± σ):      2.679 s ±  0.141 s    [User: 413.8 ms, System: 2262.7 ms]
+  Range (min … max):    2.579 s …  2.778 s
+```
+
+The above is a stupid thing to ask ripgrep to do, which is match everything but invert so nothing matches, but it should read every byte in the file. Turns out Marcel's solution is not as optimal as he would have believed. One catch however is that there is no easy way to match ripgrep or wc's implementation using Java. The reason is that memory mapped files in Java don't really work. The Java standard library maps to a ByteBuffer which is limited to 2^31-1 bytes which meants it won't work on a file over 2 GB in size. You can abstract over this to map larger files, but I am not in the mood to put that much effort into a toy problem.
+
+Some futher reading on that,
+
+http://nyeggen.com/post/2014-05-18-memory-mapping-%3E2gb-of-data-in-java/
+https://howtodoinjava.com/java7/nio/memory-mapped-files-mappedbytebuffer/
+https://stackoverflow.com/questions/41324192/why-is-bufferedreader-read-much-slower-than-readline
+http://www.mapdb.org/blog/mmap_files_alloc_and_jvm_crash/
+https://news.ycombinator.com/item?id=3428357
+http://vanillajava.blogspot.com/2011/12/using-memory-mapped-file-for-huge.html
+
+So that said, lets see if we can get close to the time of the "optimal" Go soluthon.
 
 The first thing to do is create a simple Java application which reads through the file. This is to give some baseline performance of file reading in Java and I would hope is about the same as the Go code. A very simple way to do this is include below.
 
@@ -57,7 +83,7 @@ $ time java FileRead > /dev/null
 java FileRead > /dev/null  6.11s user 3.69s system 106% cpu 9.221 total
 ```
 
-The same result as the Go. This indicates that the Go code as mentioned by Marcel is indeed bottlenecked by the disk and not by the CPU. So long as when processing we don't Go below this number we know we have an optimial solution.
+The same result as the Go. This indicates that the Go code as mentioned by Marcel is indeed bottlenecked by how its reading from the disk and not by the CPU. So long as when processing we don't Go below this number we know we have an equally optimial solution.
 
 So with that done I quickly implemented the requirements which are,
 
@@ -66,69 +92,6 @@ So with that done I quickly implemented the requirements which are,
  - Notice that the 5th column contains a form of date. Count how many donations occurred in each month and print out the results.
  - Notice that the 8th column contains a person’s name. Create an array with each first name. Identify the most common first name in the data and how many times it occurs.
 
-The number of lines in the file is fairly easy and I already did it with the `lineCount`. Saving the names is also easy,
-
-{{<highlight java>}}
-var names = new ArrayList<String>();
-
-var split = readLine.split("\\|");
-names.add(split[7]);
-{{</highlight>}}
-
-To get the donations is also fairly simple. Create a HashMap with the date as the key.
-
-{{<highlight java>}}
-var donations = new HashMap<String, Integer>();
-
-var ym = split[4].substring(0, 6);
-if (!donations.containsKey(ym)) {
-    donations.put(ym, 0);
-} else {
-    donations.put(ym, donations.get(ym) + 1);
-}
-{{</highlight>}}
-
-Getting first names is a little more work. Looking though the file though it turns out that the names are formatted fairly well. The obvious answer to this problem is use a regular expression... which means now you have two problems. My preference is to avoid regular expressions generally where possible because they can be slow and a pain to debug. Because the names were formatted I decided to iterate the characters till we hit the first space. Then whatever follows is the name till we hit another space.
-
-Not the prettiest code, but it should be fast enough to not have to worry about it being a major bottleneck.
-
-{{<highlight java>}}
-var firstNames = new ArrayList<String>();
-
-var inName = false;
-var sb = new StringBuilder();
-
-// To get the first name loop to the first space, then keep going till the end or the next space
-for (var x : split[7].toCharArray()) {
-    if (x == ' ') {
-        if (inName) {
-            break;
-        }
-        inName = true;
-    } else {
-        if (inName) {
-            sb.append(x);
-        }
-    }
-}
-firstNames.add(sb.toString());
-{{</highlight>}}
-
-The last thing to implement is the most common first name. While the other checks can happen inside the core loop itself this one can only be run after processing. In the interests of keeping it simple I elected to use parallel streamps after all the names are collected rather than implement while processing. It still requires a single loop over the aggregations.
-
-{{<highlight java>}}
-var count = firstNames.parallelStream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-
-var bestCount = 0L;
-var bestName = "";
-for (var key : count.keySet()) {
-    if (count.get(key) > bestCount) {
-        bestCount = count.get(key);
-        bestName = key;
-    }
-}
-{{</highlight>}}
-
 With that implemented a quick test to see how much this has impacted the performance.
 
 ```
@@ -136,17 +99,17 @@ $ time java FileProcess > /dev/null
 java FileProcess > /dev/null  99.38s user 15.53s system 245% cpu 46.893 total
 ```
 
-Ouch. Quite a lot. It makes sense though because we added processing of the lines, rather than just reading them. With the file consisting of 21,627,188 lines it means its taking 0.00000212695 seconds to process each line which is about 2100 nanoseconds. 
+Quite a lot. It makes sense though because we added processing of the lines, rather than just reading them. With the file consisting of 21,627,188 lines it means its taking 0.00000212695 seconds to process each line which is about 2100 nanoseconds. 
 
 Using Go, what would happen is to pump those lines into a channel and process them using some Go routines. As mentioned we can do the same in Java using a Queue and some threads. To begin with though I thought it would be worthwhile to try with one thread processing a queue just to see if we get any gains.
 
-For the queue I picked the obvious ArrayBlockingQueue. The thing about Java when doing this is that you need to have a poison value which you put onto the queue when finished to let the threads know to finish processing. Since I was using strings I just chose the string `quit` to achieve this. I then put the line processing into a runnable task lambda and was ready to try processing.
+To implement a Go channel like structure in Java you need a thread safe queue which when you want to close you add a poison value which tells the processing threads to quit.
 
 With the task configured and running the loop becomes like the below,
 
 {{<highlight java>}}
 processor.start();
-try (BufferedReader b = Files.newBufferedReader(Path.of("itcont.txt"))) {
+try (var b = Files.newBufferedReader(Path.of("itcont.txt"))) {
     var readLine = "";
     while ((readLine = b.readLine()) != null) {
         lineCount++;
@@ -191,8 +154,10 @@ Suggesting that the single thread was unable to keep up with the reading off dis
 {{<highlight java>}}
 var names = Collections.synchronizedList(new ArrayList<String>());
 var firstNames = Collections.synchronizedList(new ArrayList<String>());
-var donations = Collections.synchronizedMap(new HashMap<String, Integer>());
+var donations = new ConcurrentHashMap<String, Integer>();
 {{</highlight>}}
+
+In the above a ConcurrentHashMap is much faster than a syncronised map as it has smarter locking under the hood.
 
 With that done I added another thread and ran the process and got the following output.
 
@@ -226,56 +191,77 @@ $ time java FileThreadsProcess > /dev/null
 java FileThreadsProcess > /dev/null  66.50s user 23.95s system 419% cpu 21.563 total
 ```
 
-The runtime dropped by almost 1/3 which proves that indeed the queue is now the bottleneck. At this point we have two options. The first is to find a faster queue implementation, and the second is to be more effective with how we use the queue. Since I wanted to stick to the native libraries I decided to be more effective with the queue. However the slowness of the queue in Java is will known hence projects like [Disruptor](https://lmax-exchange.github.io/disruptor/) existing. You can see the latency cost of the ArrayBlockingQueue in the latency chart they supply.
+The runtime dropped by almost 1/3 which proves that indeed the queue is now the bottleneck. At this point we have two options. The first is to find a faster queue implementation, and the second is to be more effective with how we use the queue. Since I wanted to stick to the native libraries I decided to be more effective with the queue. The overhead of the queues in Java are will known hence projects like [Disruptor](https://lmax-exchange.github.io/disruptor/) existing. You can see the latency cost of the ArrayBlockingQueue in the latency chart they supply.
 
 ![Profile](/static/file-read-challange/latency-histogram.png#center)
 
-Seeing that the queue has 256 ns of latency fits in well with the numbers we had when running multiple threads and explains why it was actually slower. It also suggests that if we can solve this problem a single thread might be fast enough to keep up with the file read.
+Seeing that the queue has 256 ns of latency fits in well with the numbers we had when running multiple threads and explains why it was actually slower.
 
-To reduce the latency one easy solution is to batch the lines together into lists and then have the worker thread process those. It means less calls to the queue. If there is 256 ns of latency per call, batching them into chunks of 10,000 lines is going to save 2 ms of processing time. Given there are ~2100 chunks in the file that works out to be about 4.2 seconds of saved processing time. We can then tweak the size of the batch to see what is optimal for this task.
+Since we aren't looking to swap out the queue implementation lets make it more efficient. To reduce the latency one easy solution is to batch the lines together into lists and then have the worker thread process those. It means less calls to the queue. If there is 256 ns of latency per call, batching them into chunks of 10,000 lines is going to save 2 ms of processing time. Given there are approx 2100 chunks in the file that works out to be about 4.2 seconds of saved processing time. We can then tweak the size of the batch to see what is optimal for this task.
 
+So with the above done we end up with something like the below,
 
+{{<highlight java>}}
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+public class FileReadChallange {
 
+    private String FILE_NAME = "itcont.txt";
+    private int WORKERS = 2;
+    private int BATCH_SIZE = 50000;
+    private String POISON = "quit";
+    private ArrayBlockingQueue<ArrayList<String>> queue = new ArrayBlockingQueue<>(1000);
+    private int lineCount = 0;
+    private List<String> names = Collections.synchronizedList(new ArrayList<String>());
+    private List<String> firstNames = Collections.synchronizedList(new ArrayList<String>());
+    private Map<String, Integer> donations = new ConcurrentHashMap<String, Integer>();
 
-// INVESTIGATE THREAD SPAWNING COST HERE
+    public static void main(String[] args) throws IOException, InterruptedException {
+        var m = new FileReadChallange();
+        m.run();
+    }
 
-Remember how I said I ran the Go soluttion which Marcel claimed to be optimal? What if it was actually at a local optimum? From my investigation with [scc](https://boyter.org/posts/sloc-cloc-code/) I know that for large files memory maps can be a far more efficient way to process files.
+    public void run() throws IOException, InterruptedException {
+        var threads = new ArrayList<Thread>(this.WORKERS);
+        for (int i = 0; i < this.WORKERS; i++) {
+            var processor = new Thread(this::processLines);
+            processor.start();
+            threads.add(processor);
+        }
 
-```
-$ time ./go-solution itcont.txt > /dev/null
-./go-solution itcont.txt > /dev/null  14.14s user 6.52s system 222% cpu 9.296 total
-```
+        try (var b = Files.newBufferedReader(Path.of(this.FILE_NAME))) {
+            var readLine = "";
+            var lines = new ArrayList<String>();
 
-So given the above runtime is that actually optimal? Lets try using `wc` and `ripgrep` over the file to see how fast they can process the file.
+            while ((readLine = b.readLine()) != null) {
+                this.lineCount++;
+                lines.add(readLine);
 
-Asking `wc` to just count newlines should allow it to go about as fast as possible, and if we get ripgrep to invert match over everything it will match nothing but read the whole file. I know for a fact that for a single large file ripgrep will flip to memory maps, and I threw `wc` in there because I assume it would do the same.
+                if (this.lineCount % this.BATCH_SIZE == 0) {
+                    this.queue.offer(lines);
+                    lines = new ArrayList<>();
+                }
+            }
 
-```
-$ hyperfine -i 'rg -v . itcont.txt' 'wc -l itcont.txt'
-Benchmark #1: rg -v . itcont.txt
-  Time (mean ± σ):      2.592 s ±  0.046 s    [User: 1.375 s, System: 1.216 s]
-  Range (min … max):    2.560 s …  2.624 s
+            var poisonList = new ArrayList<String>();
+            poisonList.add(POISON);
+            for (int i = 0; i < this.WORKERS; i++) {
+                this.queue.offer(poisonList);
+            }
+        }
 
-Benchmark #2: wc -l itcont.txt
-  Time (mean ± σ):      2.679 s ±  0.141 s    [User: 413.8 ms, System: 2262.7 ms]
-  Range (min … max):    2.579 s …  2.778 s
-```
-
-Looks like its actually possible to process the file in ~2.6 seconds on my laptop and indeed Marcel hit a local optimum.
-
-Time to learn how to memory map a file in Java. However that quickly is bunk because it turns out Java's memory map implementation is stuck in 1995 and so you cannot map a file larger than 2 GB. However... http://nyeggen.com/post/2014-05-18-memory-mapping-%3E2gb-of-data-in-java/
-
-https://howtodoinjava.com/java7/nio/memory-mapped-files-mappedbytebuffer/
-
-https://stackoverflow.com/questions/41324192/why-is-bufferedreader-read-much-slower-than-readline
-
-Doing a lot of concurrency and notice a lot of activity in your syncronised hash map? Try swapping it out `Collections.synchronizedMap(new HashMap<String, Integer>());` for `new ConcurrentHashMap<String, Integer>();` 
-
-
-So rather than implement the full problem I wanted to explore can I get Java close to the runtime of the Go application, assuming I cut them down to do something very similar.
-
-
-http://www.mapdb.org/blog/mmap_files_alloc_and_jvm_crash/
-https://news.ycombinator.com/item?id=3428357
-http://vanillajava.blogspot.com/2011/12/using-memory-mapped-file-for-huge.html
+        for (var processor : threads) {
+            processor.join();
+        }
+    }
+}
+{{</highlight>}}
