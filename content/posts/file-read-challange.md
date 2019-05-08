@@ -3,30 +3,31 @@ title: Processing Large Files – Java, Go and 'hitting the wall'
 date: 2019-05-07
 ---
 
-https://itnext.io/using-java-to-read-really-really-large-files-a6f8a3f44649
-https://stuartmarks.wordpress.com/2019/01/11/processing-large-files-in-java/
-https://marcellanz.com/post/file-read-challenge/
+It started with this chain of blog posts, 
 
-Whenever I see a post
+[Using Java to Read Really, Really Large Files](https://itnext.io/using-java-to-read-really-really-large-files-a6f8a3f44649) -> 
+[Processing Large Files in Java](https://stuartmarks.wordpress.com/2019/01/11/processing-large-files-in-java/) -> [Processing Large Files – Java, Go and 'hitting the wall'](https://marcellanz.com/post/file-read-challenge/)
 
-While I don't like solving arbitary company made "programming tests" when doing interviews https://boyter.org/2016/09/companies-recruiting/ whenever I see a post comparing Go to Java where Java is trounced in performance gets my attention. Unless its a very short lived command line application where JVM startup is a problem or some super optimised Go solution in my experience so far Java should generally be faster. 
+I thought after reading them I would add to the chain.
+
+While I don't like solving arbitrary company made "programming tests" when doing interviews https://boyter.org/2016/09/companies-recruiting/ whenever I see a post comparing Go to Java where Java is trounced in performance gets my attention. Unless its a very short lived command line application where JVM startup is a problem or some super optimized Go solution in my experience so far Java should generally be slightly faster. The computer language benchmarks tend to show the same result so its not a flight of fancy for me.
 
 I had a look through Marcel's solution compared to Paige and Stuart's and it was fairly obvious that the Go solution was going to be faster since it made a good use of Go routines and channels.
 
-Which made me think. While I understand that Go channels are effectivly a BufferedQueue (with size of 1 in the case of unbuffered) with some synatic sugar, I had never actually tried writing Java using that technique. Processing a very large file with one thread reading and other threads processing is pretty much the textbook solution to solve this problem and as such Go's concurrency plays very nicely into this.
+Which made me think. While I understand that Go channels are effectively a BufferedQueue (with size of 1 in the case of unbuffered) with some synatic sugar, I had never actually tried writing Java using that technique. Processing a very large file with one thread reading and other threads processing is pretty much the textbook solution to solve this problem and as such Go's concurrency plays very nicely into this.
 
 Since I didn't have any experience with a direct Go to Java comparison I figured it would be a good thing to play around with.
 
-I took a copy of Marcel's optimal Go solution, pulled down the sample set and tried it out. The sample set linked https://www.fec.gov/files/bulk-downloads/2018/indiv18.zip when unziped needed to be concaternated together into the file `itcont.txt` which when done was about 4 GB in size at time of writing. I then compiled the optimal solution and ran it.
+I took a copy of Marcel's optimal Go solution, pulled down the sample set and tried it out. The sample set linked https://www.fec.gov/files/bulk-downloads/2018/indiv18.zip when un-zipped needed to be concatenated together into the file `itcont.txt` which when done was about 4 GB in size at time of writing. This was larger than what the other posts were working with so I then compiled the optimal solution and ran it.
 
 ```
 $ time ./go-solution itcont.txt > /dev/null
 ./go-solution itcont.txt > /dev/null  14.14s user 6.52s system 222% cpu 9.296 total
 ```
 
-My first thought was to question is this actually an optimal time? I know from playing with memory mapped files with [scc](https://boyter.org/posts/sloc-cloc-code/) that if the file is large such as the one in this case there are massive wins to be gained using them. Turns out that `ripgrep` also uses memory mapped files, so we can use it to see how fast you can actually read the file.
+My first thought was is this actually an optimal time? I know from playing with memory mapped files with [scc](https://boyter.org/posts/sloc-cloc-code/) that if the file is large such as the one in this case there are massive wins to be gained using them. Turns out that `ripgrep` uses memory mapped files, so we can use it to see how fast you can actually read the file.
 
-Asking `wc` to just count newlines should allow it to go about as fast as possible, and if we get ripgrep to invert match over everything it will match nothing but read the whole file. I know for a fact that for a single large file ripgrep will flip to memory maps, and I threw `wc` in there because I assume it would do the same.
+Asking `wc` to just count newlines should also allow it to go about as fast as possible, and if we get ripgrep to invert match over everything it will match nothing but read the whole file. I know for a fact that for a single large file `ripgrep` will flip to memory maps, and I threw `wc` in there because I assume it would do the same.
 
 ```
 $ hyperfine -i 'rg -v . itcont.txt' 'wc -l itcont.txt'
@@ -39,18 +40,18 @@ Benchmark #2: wc -l itcont.txt
   Range (min … max):    2.579 s …  2.778 s
 ```
 
-The above is a stupid thing to ask ripgrep to do, which is match everything but invert so nothing matches, but it should read every byte in the file. Turns out Marcel's solution is not as optimal as he would have believed. One catch however is that there is no easy way to match ripgrep or wc's implementation using Java. The reason is that memory mapped files in Java don't really work. The Java standard library maps to a ByteBuffer which is limited to 2^31-1 bytes which meants it won't work on a file over 2 GB in size. You can abstract over this to map larger files, but I am not in the mood to put that much effort into a toy problem.
+The above is a stupid thing to ask `ripgrep` to do, which is match everything but invert so nothing matches, but it should read every byte in the file. Turns out Marcel's solution is not as optimal as he would have believed. One catch however is that there is no easy way to match `ripgrep` or `wc`'s implementation using Java. The reason is that memory mapped files in Java don't really work. The Java standard library maps to a ByteBuffer which is limited to 2^31-1 bytes which means it won't work on a file over 2 GB in size. You can abstract over this to map larger files, but I am not in the mood to put that much effort into a toy problem.
 
-Some futher reading on that,
+Some further reading on the issue,
 
-http://nyeggen.com/post/2014-05-18-memory-mapping-%3E2gb-of-data-in-java/
-https://howtodoinjava.com/java7/nio/memory-mapped-files-mappedbytebuffer/
-https://stackoverflow.com/questions/41324192/why-is-bufferedreader-read-much-slower-than-readline
-http://www.mapdb.org/blog/mmap_files_alloc_and_jvm_crash/
-https://news.ycombinator.com/item?id=3428357
-http://vanillajava.blogspot.com/2011/12/using-memory-mapped-file-for-huge.html
+ - http://nyeggen.com/post/2014-05-18-memory-mapping-%3E2gb-of-data-in-java/
+ - https://howtodoinjava.com/java7/nio/memory-mapped-files-mappedbytebuffer/
+ - https://stackoverflow.com/questions/41324192/why-is-bufferedreader-read-much-slower-than-readline
+ - http://www.mapdb.org/blog/mmap_files_alloc_and_jvm_crash/
+ - https://news.ycombinator.com/item?id=3428357
+ - http://vanillajava.blogspot.com/2011/12/using-memory-mapped-file-for-huge.html
 
-So that said, lets see if we can get close to the time of the "optimal" Go soluthon.
+So that said, lets see if we can get close to the time of the "optimal" Go solution.
 
 The first thing to do is create a simple Java application which reads through the file. This is to give some baseline performance of file reading in Java and I would hope is about the same as the Go code. A very simple way to do this is include below.
 
@@ -120,7 +121,7 @@ try (var b = Files.newBufferedReader(Path.of("itcont.txt"))) {
 processor.join();
 {{</highlight>}}
 
-I than ran the above to see what gain if any was delivered.
+I than ran the above to see what gain, if any, was delivered.
 
 ```
 $ time java FileThreadProcess > /dev/null
@@ -180,11 +181,7 @@ java FileThreadsProcess > /dev/null  69.20s user 29.03s system 329% cpu 29.842 t
 
 What the? Thats about twice as slow as the version which had a single thread processing the queue! The queue is being emptied faster which shouldn't block the reader but somehow its slower? That does not appear to make sense.
 
-My guess would be that either the Queue we are using is not very efficient or we are asking it to do too much. Lets look at a profile and see where the time is actually being spent before acting on that guess though. Thankfully I have YourKit profiler for Java (which I quite like) and took a profile of the process.
-
-![Profile](/static/file-read-challange/profile.jpg#center)
-
-Looking at that suggests that the `ArrayBlockingQueue` is actually taking up a huge amount of time. Since we already know that the two threads can keep up with the file read (on this machine) I decided to swap it out for a `LinkedTransferQueue` which is not bounded but should be faster to prove the theory.
+My guess would be that either the Queue we are using is not very efficient or we are asking it to do too much. Since we already know that the two threads can keep up with the file read (on this machine) I decided to swap it out for a `LinkedTransferQueue` which is not bounded but should be faster due to less locks to prove the theory.
 
 ```
 $ time java FileThreadsProcess > /dev/null
@@ -195,11 +192,11 @@ The runtime dropped by almost 1/3 which proves that indeed the queue is now the 
 
 ![Profile](/static/file-read-challange/latency-histogram.png#center)
 
-Seeing that the queue has 256 ns of latency fits in well with the numbers we had when running multiple threads and explains why it was actually slower.
+Seeing that the queue has 256 ns of latency fits in well with the numbers we had when running multiple threads and explains why it was actually slower as we were doing two calls to the queue per line.
 
-Since we aren't looking to swap out the queue implementation lets make it more efficient. To reduce the latency one easy solution is to batch the lines together into lists and then have the worker thread process those. It means less calls to the queue. If there is 256 ns of latency per call, batching them into chunks of 10,000 lines is going to save 2 ms of processing time. Given there are approx 2100 chunks in the file that works out to be about 4.2 seconds of saved processing time. We can then tweak the size of the batch to see what is optimal for this task.
+Since I wasn't looking to swap out the queue implementation I tried to make it more efficient. To reduce the latency in this case one easy solution is to batch the lines together into lists and then have the worker thread process those. It means less calls to the queue. With 256 ns of latency per call, batching them into chunks of 10,000 lines is going to save 2 ms of processing time. Given there are about 2100 chunks in the file at this size that works out to be about 4.2 seconds of saved processing time. We can then tweak the size of the batch to see what is optimal for this task.
 
-So with the above done we end up with something like the below,
+So with the above done we end up with something like the below with the processing removed for brevity,
 
 {{<highlight java>}}
 import java.io.IOException;
@@ -263,5 +260,67 @@ public class FileReadChallange {
             processor.join();
         }
     }
+
+    private void processLines() {
+        try {
+            while (true) {
+                var lines = this.queue.take();
+
+                if (lines.size() == 1 && lines.get(0).equals(POISON)) {
+                    return;
+                }
+
+                for (var line : lines) {
+                    var split = line.split("\\|", 9);
+
+                    this.names.add(split[7]);
+
+                    var ym = split[4].substring(0, 6);
+                    if (this.donations.containsKey(ym)) {
+                        this.donations.put(ym, this.donations.get(ym) + 1);
+                    } else {
+                        this.donations.put(ym, 0);
+                    }
+
+                    this.firstNames.add(this.extractFirstName(split[7]));
+                }
+            }
+        } catch (InterruptedException ignored) {
+        }
+    }
+
+    private String extractFirstName(String line) {
+        var inName = false;
+        var sb = new StringBuilder();
+
+        // To get the first name loop to the first space, then keep going till the end or the next space
+        for (var c : line.toCharArray()) {
+            if (c == ' ') {
+                if (inName) {
+                    return sb.toString();
+                }
+
+                inName = !inName;
+            } else {
+                if (inName) {
+                    sb.append(c);
+                }
+            }
+        }
+        return sb.toString();
+    }
 }
 {{</highlight>}}
+
+And when I ran it locally,
+
+```
+$ time java FileReadChallange
+java FileReadChallange  48.25s user 20.45s system 412% cpu 16.647 total
+```
+
+Still not as optimal as the Go solution but much better than where I started. 
+
+Knowing that no matter what I did at this point it still was not going to be the optimal solution due to the state of memory mapped files I lost interest. However I did find it a good exercise to implement Go like concurrency in Java. Given a little more effort I am confident I could match the Go time, however it would feel like a hollow achievement knowing that the true processing time could be.
+
+Maybe one of these days I will find a good memory map implementation for Java and revisit it. Either that or I will continue to work with Rust or try things out using Zig or V Lang.
