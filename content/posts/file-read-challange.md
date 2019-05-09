@@ -319,8 +319,12 @@ $ time java FileReadChallange
 java FileReadChallange  48.25s user 20.45s system 412% cpu 16.647 total
 ```
 
-Still not as optimal as the Go solution but much better than where I started. 
+Still not as optimal as the Go solution but much better than where it started.
 
 Knowing that no matter what I did at this point it still was not going to be the optimal solution due to the state of memory mapped files I lost interest. However I did find it a good exercise to implement Go like concurrency in Java. Given a little more effort I am confident I could match the Go time, however it would feel like a hollow achievement knowing that the true processing time could be.
 
+Some people have correctly pointed out that the solution is not thread safe. I never bothered fixing it due to having given up due to the lack of access to OS primitives such as a proper mmap. In short, if you need to process large files off the disk as quickly as possible Java is probably not the right choice. There are a bunch of optimizations that could be included in the above code to drop the runtime as is though.
+
 Maybe one of these days I will find a good memory map implementation for Java and revisit it. Either that or I will continue to work with Rust or try things out using Zig or V Lang.
+
+EDIT - As predicted someone did come along and throw together a Rust implementation which using memory mapped files is much faster https://github.com/arirahikkala/donationcount
