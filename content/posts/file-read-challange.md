@@ -277,6 +277,7 @@ public class FileReadChallange {
 
                     var ym = split[4].substring(0, 6);
                     if (this.donations.containsKey(ym)) {
+                        // NB this is not thread safe! Didn't bother fixing
                         this.donations.put(ym, this.donations.get(ym) + 1);
                     } else {
                         this.donations.put(ym, 0);
