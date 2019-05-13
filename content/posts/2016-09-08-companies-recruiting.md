@@ -49,7 +49,7 @@ finally
 {
     return 0;
 }
-{{</highlight>}}}
+{{</highlight>}}
 
 The best interview process I have been with to date was actually the Microsoft one for a intern role many many moons ago. It involved several hours of interviews with different individuals discussing different technology roles to try and ascertain the best fit.
 
