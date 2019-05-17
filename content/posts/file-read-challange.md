@@ -328,4 +328,4 @@ Some people have correctly pointed out that the solution is not thread safe. I n
 
 Maybe one of these days I will find a good memory map implementation for Java and revisit it. Either that or I will continue to work with Rust or try things out using Zig or V Lang.
 
-EDIT - As predicted someone did come along and throw together a Rust implementation which using memory mapped files is much faster https://github.com/arirahikkala/donationcount
+EDIT - As predicted someone did come along and throw together a Rust implementation which using memory mapped files is much faster https://github.com/arirahikkala/donationcount and Davide has improved on the Java version using Futures https://gist.github.com/dfa1/65ae63ca3f10a72e57885add52c48b4f to lower the runtime to ~10 seconds bringing it in line with the Go version.
