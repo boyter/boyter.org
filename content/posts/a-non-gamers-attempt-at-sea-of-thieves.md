@@ -11,7 +11,7 @@ I love how little hand holding the game has. Want to find the treasure? Here's w
 
 Sailing up to the island I almost crashed into it. It was more luck than anything else that I dropped the anchor which brought my ship to a cleat and wood creaking stop just short of some nasty rocks. Jump out, and marvel at the pristine beach full of snakes which promptly poisoned me. Of course my treasure island also happens to be enormous and it took me a good 15 minutes to work out how to get where the treasure was actually located.
 
-So after eventually working out where to dig and then figuring out how to actually dig it up I had my chest shouldered. Running back to the ship while pausing to dispatch some pesky skeletons that apparently were the guardians of the chest I make it back to the ship. I then promptly sail back whence I came to pick up my reward. Park my ship next to another one using a slightly different pontoon, because hey "disputes are settled at sea" after all and I am just here to unload my goods.
+So after eventually working out where to dig and then figuring out how to actually dig it up I had my chest shouldered. Running back to the ship while pausing to dispatch some pesky skeletons that apparently were the guardians of the chest, I make it back to the ship. I then promptly sailed back whence I came to pick up my reward. Park my ship next to another one using a slightly different pontoon, because hey "disputes are settled at sea" after all and I am just here to unload my goods.
 
 I shoulder the chest, march to the disreputable looking buyer and just as I am about get my hands on some well earned doubloons, fade to black screen as I get shot in the back.
 
@@ -25,7 +25,7 @@ Oh hell no! Not on my watch.
 
 I am not a good sniper in any game. When I played CS it was the weapon I was worst at. As such my first 2 shots missed. However just as he unfurled the sail my next shot's aim was true and BAM! Mr StealShips is dead. However my ship is now slowly sailing away by itself. I hurl myself down into the water screaming "Not on my watch bitch!". However the ship is moving faster than I can swim.
 
-With evil delight I swam over to MrSoonToBeShipless's ship, raise the anchor, and sail off after mine. He apparently had set mine on a circular course, so I was able to intercept, set MrSoonToBeShipless's ship to aim at some rocks, jump across and sail off with my original ship. I watch through the telescope as MrSoonToBeShipless's ship I stole flounders on a shoal, then rocks and starts taking on water and sinking. Thinking yes, there is justice, while muttering to nobody "Take that sucker!".
+With evil delight I swam over to MrSoonToBeShipless's ship, raise the anchor, and sail off after mine. He apparently had set mine on a circular course, so I was able to intercept, set MrSoonToBeShipless's ship to aim at some rocks, jump across and sail off with my original ship. I watch through the telescope as MrSoonToBeShipless's ship I stole flounders on a shoal, then crashes on some rocks and starts taking on water and sinking. Thinking yes, there is justice, while muttering to nobody "Take that sucker!".
 
 I then promptly sailed into some black sea that held the Kracken and was promptly eaten and sunk.
 
