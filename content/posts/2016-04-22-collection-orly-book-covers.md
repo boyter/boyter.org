@@ -91,3 +91,8 @@ EDIT - I actually did write some content for it https://boyter.org/posts/expert-
 ![Book Cover](/static/books/rust1.png)
 ![Book Cover](/static/books/rust2.png)
 ![Book Cover](/static/books/waf.png)
+![Book Cover](/static/books/new1.jpg)
+![Book Cover](/static/books/new2.jpg)
+![Book Cover](/static/books/new3.png)
+![Book Cover](/static/books/new4.jpeg)
+![Book Cover](/static/books/new5.png)
