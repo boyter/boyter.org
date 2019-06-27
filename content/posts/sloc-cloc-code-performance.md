@@ -11,6 +11,8 @@ This is now part of a series of blog posts about `scc` Sloc Cloc and Code which 
  - [Sloc Cloc and Code Revisited - A focus on accuracy 2018-08-28](https://boyter.org/posts/sloc-cloc-code-revisited/)
  - [Sloc Cloc and Code Revisited - Optimizing an already fast Go application 2018-09-19](https://boyter.org/posts/sloc-cloc-code-performance/)
  - [Sloc Cloc and Code a Performance Update 2019-01-09](https://boyter.org/posts/sloc-cloc-code-performance-update/)
+ - [Sloc Cloc and Code Badges for Github/Bitbucket/Gitlab](https://boyter.org/posts/sloc-cloc-code-badges/)
+
 
 
 I don't want to make any false claims about the impact of `scc` and the blog post about it https://boyter.org/posts/sloc-cloc-code/ but following its release both `tokei` and `loc` were updated with impressive performance improvements. In addition a new tool `polyglot` http://blog.vmchale.com/article/polyglot-comparisons was released which also claimed performance as its main feature. Lastly the tool `gocloc` https://github.com/hhatto/gocloc appears to be getting updates as well. All good stuff.

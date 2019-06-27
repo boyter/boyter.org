@@ -11,6 +11,7 @@ This is now part of a series of blog posts about `scc` Sloc Cloc and Code which 
  - [Sloc Cloc and Code Revisited - A focus on accuracy 2018-08-28](https://boyter.org/posts/sloc-cloc-code-revisited/)
  - [Sloc Cloc and Code Revisited - Optimizing an already fast Go application 2018-09-19](https://boyter.org/posts/sloc-cloc-code-performance/)
  - [Sloc Cloc and Code a Performance Update 2019-01-09](https://boyter.org/posts/sloc-cloc-code-performance-update/)
+ - [Sloc Cloc and Code Badges for Github/Bitbucket/Gitlab](https://boyter.org/posts/sloc-cloc-code-badges/)
 
 
 Two things prompted me to start looking at my code counter `scc` again. The first being the release of Go 1.11. New releases of compilers, libraries and tool-chains have a wonderful habit of making things go faster without you having to do anything other than recompile. In addition they often provide new methods which assist with this and are worth exploring.

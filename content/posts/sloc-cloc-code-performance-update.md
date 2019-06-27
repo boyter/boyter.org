@@ -11,6 +11,8 @@ This is now part of a series of blog posts about `scc` Sloc Cloc and Code which 
  - [Sloc Cloc and Code Revisited - A focus on accuracy 2018-08-28](https://boyter.org/posts/sloc-cloc-code-revisited/)
  - [Sloc Cloc and Code Revisited - Optimizing an already fast Go application 2018-09-19](https://boyter.org/posts/sloc-cloc-code-performance/)
  - [Sloc Cloc and Code a Performance Update 2019-01-09](https://boyter.org/posts/sloc-cloc-code-performance-update/)
+ - [Sloc Cloc and Code Badges for Github/Bitbucket/Gitlab](https://boyter.org/posts/sloc-cloc-code-badges/)
+
 
 
 I thought I had finished with my code counter Sloc Cloc and Code (AKA scc) https://github.com/boyter/scc/ for a while. The what I had hoped to be final blog post about it https://boyter.org/posts/sloc-cloc-code-performance/ however did mention that the building of the language features in it were a cause of slowdown,
