@@ -1,0 +1,25 @@
+---
+title: An informal survey of 12 million git projects from Github Bitbucket and Gitlab
+date: 2019-07-11
+---
+
+Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index 
+
+
+Since I have searchcode.com I already have a collection of 7,000,000 projects I thought why not try processing them. First step was to export the list from it. Turns out it was more like 12 million, and I should probably update the page to reflect that.
+
+So now I have 12 million or so git repositories which I need to download and process.
+
+Since I already had the badge code working in lambda, I write about 15 lines of python to clean the format and make a request to the endpoint using multiprocessing. 
+
+The problem with the above which worked brilliantly was firstly cost, and secondly with a 30 second timeout it couldn't process large repositories fast enough. I knew going in that this was not going to be the most cost effective solution but you never know till you try. After processing 1 million or so the cost was about $60 and since I didn't want a $600 AWS bill I decided to rethink my solution.
+
+Since I was already in AWS the cool answer would be to dump the messages into SQS and farm out to multiple EC2 instances for processing. However I always belived in http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html and it was only 12 million messages.
+
+Because I run searchcode.com fairly lean it has a heap of spare CPU. The frontend varnish box for instance is doing the square root of zero most of the time.
+
+I didn't quite taco bell the solution. What I did do was write a simple Go program to spin up 32 goroutines which read from a channel (like SQS you see) then spawned git and scc before writing the file into S3. Actually I wrote a Python solution at first, but having to install the pip dependancies didn't appeal to me and it keep breaking in odd ways so I chose to rewrite in Go.
+
+Running this on the box produced the following sort of metrics in htop.
+
+![Load](/static/an-informal-survey/1.png)
