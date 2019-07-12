@@ -5,7 +5,7 @@ date: 2019-06-10
 
 A long weekend just recently passed in NSW Australia. With a larger than normal amount of time on my hands I decided to try out the game Sea of Thieves. Ignoring the fact that the NBN rollout here has ruined my ADSL2+ which has gone from a 18-19 Mbps connection to 3 Mbps and that it took 24 hours to download, what follows is probably one of the more memorable gaming experiences I have ever had.
 
-![Monaro](/static/sea-of-thieves.jpg#center)
+![logo](/static/sea-of-thieves.jpg#center)
 
 Started by reading the "Pirate Code" in the tavern you spawn in which includes the prophetic line "Disputes are settled at sea". After learning how to load up my ship with wood, food and cannonballs I manage to get a find buried treasure quest, and set sail. After fighting the controls for a while and being gob-smacked at how beautiful the ocean effects areI eventually found the deserted isle that contained my hidden gold. 
 
@@ -33,4 +33,4 @@ I then promptly sailed into some black sea that held the Kracken and was promptl
 
 Good times.
 
-![Monaro](/static/sea-of-thieves.png#center)
+![sea of thieves](/static/sea-of-thieves.png#center)
