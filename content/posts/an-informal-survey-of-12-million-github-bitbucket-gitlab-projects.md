@@ -67,8 +67,35 @@ What languages on average have the largest files?
 
 Do projects that have less files have larger files?
 
+### What are the most common filenames?
 
+What filenames are most common across all code-bases ignoring extension and case?
 
+| file-name | count |
+| -------- | ----- |
+| index | 9,400 |
+| jquery | 9,167 |
+| readme | 7,749 |
+| makefile | 6,136 |
+| lang | 6,119 |
+| \__init__ | 4,313 |
+| package | 3,955 |
+| license | 3,739 | 
+| main | 3,634 |
+| config | 2,863 |
+
+### How many repositories are missing a license?
+
+This is an interesting one. Which repositories have an explicit license file somewhere? Not that the lack of a license file does not mean that the project has none, it might exist within the README for example but considering that the flow for most new repositories ask if you want to setup a license this surprised me.
+
+| has license | count |
+| ----------- | ----- |
+| yes | 864 |
+| no | 4619 |
+
+![scc-data process load](/static/an-informal-survey/hasLicense.png#center)
+
+[Chart Link](https://jsfiddle.net/mscvtgd4/)
 
 
 ## If you got this far thank you and please read my sales pitch!
