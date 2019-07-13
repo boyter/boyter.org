@@ -52,6 +52,24 @@ How many files are in each repository? That is, do most projects have a few file
 
 ![scc-data process load](/static/an-informal-survey/filesPerProject.png#center)
 
+### How many lines of code (LOC) are in a typical file per language?
+
+What languages on average have the largest files?
+
+| Language | Average (LOC) |
+|---|---|
+| Java | 65 |
+| PHP | 33 |
+| C | 15 |
+| Go | 6 |
+
+### Do projects with few files have large files?
+
+Do projects that have less files have larger files?
+
+
+
+
 
 ## If you got this far thank you and please read my sales pitch!
 
