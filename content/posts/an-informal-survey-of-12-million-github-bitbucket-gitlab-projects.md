@@ -84,7 +84,9 @@ What filenames are most common across all code-bases ignoring extension and case
 | main | 3,634 |
 | config | 2,863 |
 
-### How many repositories are missing a license?
+### Whats the average size of those index pages?
+
+### How many repositories appear to be missing a license?
 
 This is an interesting one. Which repositories have an explicit license file somewhere? Not that the lack of a license file does not mean that the project has none, it might exist within the README for example but considering that the flow for most new repositories ask if you want to setup a license this surprised me.
 
@@ -96,6 +98,26 @@ This is an interesting one. Which repositories have an explicit license file som
 ![scc-data process load](/static/an-informal-survey/hasLicense.png#center)
 
 [Chart Link](https://jsfiddle.net/mscvtgd4/)
+
+### Which languages have the most comments?
+
+### How many projects use multiple .gitignore files?
+
+### Whats the largest file for each language?
+
+### How many "pure" projects
+
+That is projects that have 1 language in them.
+
+### Projects without javascript?
+
+### Projects with typescript and not javascript
+
+### Anyone using coffeescript and typescript?
+
+### The most complex code is written in what language?
+
+### Whats the most complex file?
 
 
 ## If you got this far thank you and please read my sales pitch!
