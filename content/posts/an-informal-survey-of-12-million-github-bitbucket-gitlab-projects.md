@@ -119,6 +119,10 @@ That is projects that have 1 language in them.
 
 ### Whats the most complex file?
 
+### Whats the most complex file in each language?
+
+### Whats the most complex file weighted against lines?
+
 
 ## If you got this far thank you and please read my sales pitch!
 
