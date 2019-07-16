@@ -123,7 +123,24 @@ That is projects that have 1 language in them.
 
 ### Whats the most complex file weighted against lines?
 
+### What's the typical path length, broken up by language
+
+### YAML or YML?
+
+The debate can finally be ended.
+
+| extension | count |
+| ----------- | ----- |
+| yaml | 975 |
+| yml | 3712 |
+
+### Who comments most-to-least, by language (95th percentile)
+
+
+
+
 
 ## If you got this far thank you and please read my sales pitch!
+
 
 I am working on a tool that helps manager types analyze code looking for size, flaws etc... You put in some code and it will tell you how maintainable it is and what skills you need to maintain it. Useful for determining if you should buy or maintain some codebase.
