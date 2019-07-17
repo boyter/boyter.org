@@ -140,6 +140,10 @@ The debate can finally be ended.
 ### Whats the most commented file?
 
 
+### Java Factory
+
+### Java FactoryFactory
+
 ## If you got this far thank you and please read my sales pitch!
 
 
