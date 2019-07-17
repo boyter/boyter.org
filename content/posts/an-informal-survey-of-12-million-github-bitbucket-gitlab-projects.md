@@ -111,7 +111,11 @@ This is an interesting one. Which repositories have an explicit license file som
 
 ### How many projects use multiple .gitignore files?
 
-### Which language has the biggest potty mouth?
+### Which language developers have potty mouth?
+
+This is less than an exact science. Picking up cursing/swearing or offensive terms using filenames is never going to be effective. If you do a simple contains you pick up all sorts or normal files such as `assemble.sh` and such. So to produce the following I pulled a list of curse words, then check if any files in each project start with one of those values followed by a period. This would mean a file named `gangbang.java` would be picked up while `assemble.sh` would not.
+
+While not accuate at all it is incredibly fun to see what this produces.
 
 ### Top 20 longest files in lines per language
 
