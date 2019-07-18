@@ -50,15 +50,21 @@ One idea was to dump the data into a large SQL database. However this means proc
 
 Seeing as I produced the JSON using spare compute, why not process the results the same way? So I did. Which means 
 
-### How many files in a repository
+So with that done, what I needed was a collection of questions to answer, which are included below.
 
-Start with a simple one. How many files are in a repository? Do most projects have a few files in them, or many? By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 15 or more files and plot it out.
+### How many files in a repository?
+
+Start with a simple one. How many files are in an average repository? Do most projects have a few files in them, or many? By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 15 or more files and plot it out.
 
 ![scc-data process load](/static/an-informal-survey/filesPerProject.png#center)
 
 As you would expect most repositories have less than 100 files in them. However what about plotting this by percentile?
 
 TODO check the above
+
+### How many files in a repository per language?
+
+An extension of the above, but broken down by language.
 
 ### How many lines of code (LOC) are in a typical file per language?
 
@@ -94,6 +100,8 @@ What filenames are most common across all code-bases ignoring extension and case
 
 ### Whats the average size of those index pages?
 
+We know that the most common filenames, but what about knowing 
+
 ### How many repositories appear to be missing a license?
 
 This is an interesting one. Which repositories have an explicit license file somewhere? Not that the lack of a license file does not mean that the project has none, it might exist within the README for example but considering that the flow for most new repositories ask if you want to setup a license this surprised me.
@@ -110,6 +118,12 @@ This is an interesting one. Which repositories have an explicit license file som
 ### Which languages have the most comments?
 
 ### How many projects use multiple .gitignore files?
+
+How many projects use multiple gitignore files? How many have none?
+
+![scc-data process load](/static/an-informal-survey/gitignorePerProject.png#center)
+
+As you would expect the majority of projects have either 0 or 1 gitignore file. However a lot more than I would have suspected have more.
 
 ### Which language developers have potty mouth?
 
