@@ -217,7 +217,7 @@ Given that you can either dump all the files you need in a single directory, or 
 
 Sometime back on the company slack there was a "discussion" with many dying on one hill or the other over should you use .yaml or .yml
 
-The debate can finally(?) be ended. Although I suspect some will still prefer to die on their hill.
+The debate can finally(?) be ended. Although I suspect some still prefer the hill.
 
 | extension | count |
 | ----------- | ----- |
