@@ -230,6 +230,9 @@ The debate can finally(?) be ended. Although I suspect some still prefer the hil
 ### Whats the most commented file?
 
 
+### Upper lower or mixed case?
+
+
 ### Java Factories
 
 Another one that came up in the internal company slack when looking through some old Java code. I thought why not add a check for any Java code that has Factory, FactoryFactory and FactoryFactoryFactory and lets see how many factory classes are out there.
