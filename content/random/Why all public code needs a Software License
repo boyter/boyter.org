@@ -1,0 +1,22 @@
+Why all public code needs a Software License
+
+
+https://blog.codinghorror.com/pick-a-license-any-license/
+https://en.wikipedia.org/wiki/Public_domain
+https://www.infoworld.com/article/2839560/open-source-software/sticking-a-license-on-everything.html
+https://opensource.stackexchange.com/questions/5736/sqlite-is-illegal-in-germany-really
+https://opensource.stackexchange.com/questions/1371/how-can-i-place-software-in-the-public-domain
+
+TLDR If you do not explicitly indicate a software license, then you have declared an implicit copyright without explaining how others can use it.
+
+Most jurisdictions have some concept that is more or less similar to public domain. 
+
+Only some countries allow to explicitly assign a work to public domain, this is not possible in Germany and Australia by contrast. So in many jurisdictions a work only becomes public domain, if the time for exclusive rights expire, which can be 70 years after the authors death.
+
+
+"Having no license at all" is not at all the same thing as being in the public domain.
+
+
+
+
+Generally it is better to not public domain code but instead put it under a permissive license like MIT if that is your intention.

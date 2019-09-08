@@ -1,0 +1,35 @@
+What is Machine Learning
+
+"A machine learning algorithm walks into a bar. Asked what it wants it replies 'Whatever everone else is having'"
+
+The above is joke about how machine learning works but like all good jokes there is an element of truth to it.
+
+Machine learning is a tool for producing models that can make predictions on input. It just happens as well to be a process of solving problems that are traditionally hard for a computer or human to solve usually within a narrow niche.
+
+An example of this would be identifying nudity within photos in order to block it or predicting stock market patterns.
+
+The reason this is hard is because computers are not good answering fuzzy questions such as "Is this a picture of a cat".
+
+What you do is feed thousands to millions of examples into the computer telling it what the expected outcome should be. This process is known as training and the data you use is the training set. It eventually is able to spot patterns and is able to given the example tell you what the output is.
+
+You then try it on examples which you know what the expected outcome should be but which the computer has not previously seen. This is the verification step and the data set is the verification set.
+
+If it is able to guess the unseen data with some degree of accuracy that has been set such as 99% then you can say that the algorithm has learnt how to solve the problem.
+
+One of the issues however is learning to tweak the input to produce a good output. For our example of spotting nudity in photos, it may be adventagous to greyscale the image before processing it.
+
+Having a fast feedback loop that allows you to try multiple things and is one of the most important parts of process.
+
+However one big issue is with the result. The solution is a black box. In some way comparable to a bee hive. You can observe how individual bee's act to produce honey but there is no real way to comprehend the whole system working together. Its far easier to observe the result.
+
+This raises some interesting ethical dilemmas. Since nobody can comprehend how it works can you rely on the output? 
+
+Take for example calculating car insurance premiums. Traditionally you would slice personal factors such as age, gender, number of accidents in the last 3 years, hours driven per day and use that to work out if they pay a higer premium or not. This is relatively easy to understand and explain to someone wanting to know how their premium was caluclated and could be done using tools such as Excel. 
+
+With machine learning you can feed even more imformation into the system. What car the person drives, what were the last 3 cars they drove, who are their friends and what were their premiums, do they have subscriptions to car magazines, do they like Top Gear, were they born in the country, were their parents born in the county.
+
+However what happens when you start feeding more imformation into the model. All of a sudden it may produce undesired outputs, such disovering a link between those not born in the country and a higher incidence of having an accident. Does this mean you should increase the premuims for those in this situation? What about if it finds a link between higher accidents and those of Asian descent? Is your computer suddenly racist?
+
+So what are the advantages of machine learning then? Things such as image recognition is one such example, but voice processing is another with Siri, Google Now, Alexa and Cortana being good examples of applied machine learning. Reccomendation engines such as the one that Netflix uses is another example and implemented correctly for online purchases can yield far greater conversion rates for new and existing customers. Other examples of its use may be in predicting machine part failures based on previous history or fraud detection based on existing patterns.
+
+Machine learning is a tool for producing models that can make predictions on input. It can be powerful and effective but is also hard to comprehend or predict. Analytics expert Thomas H. Davenport wrote in The Wall Street Journal "Humans can typically create one or two good models a week; machine learning can create thousands of models a week."

@@ -1,0 +1,7 @@
+2017 Retrospective
+
+With the previous year over its always nice to look back and think about what happened, both the good and the bad and try to make some sense of it.
+
+The year started with a new job. I moved from being a developer at Ninemsn (now Nine) to more of a consultant role. I rolled straight into a project for a large enterprise company where I was involved with setting up an API that initally would be consumed by a mobile application but with the idea that eventually it would be consumed by over websites built using whatever technology was requested, in this case most likely Java backend websites with React frontend components.
+
+This is something I had worked on a lot at Nine. 
