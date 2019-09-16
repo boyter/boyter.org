@@ -62,7 +62,9 @@ Starting with a simple one. How many files are in an average repository? Do most
 
 As you would expect most repositories have less than 100 files in them. However what about plotting this by percentile?
 
-TODO check the above
+![scc-data process percentile](/static/an-informal-survey/filesPerProjectPercentile.png)
+
+Note the X-axis is lines of code and is logarithmic. Turns out the vast majority of projects have less than 1000 files in them.
 
 ### How many files in a repository per language?
 
@@ -129,9 +131,19 @@ As you would expect the majority of projects have either 0 or 1 gitignore file. 
 
 ### Which language developers have potty mouth?
 
-This is less than an exact science. Picking up cursing/swearing or offensive terms using filenames is never going to be effective. If you do a simple contains you pick up all sorts or normal files such as `assemble.sh` and such. So to produce the following I pulled a list of curse words, then check if any files in each project start with one of those values followed by a period. This would mean a file named `gangbang.java` would be picked up while `assemble.sh` would not.
+This is less than an exact science. Picking up cursing/swearing or offensive terms using filenames is never going to be effective. If you do a simple string contains test you pick up all sorts or normal files such as `assemble.sh` and such. So to produce the following I pulled a list of curse words, then check if any files in each project start with one of those values followed by a period. This would mean a file named `gangbang.java` would be picked up while `assemble.sh` would not. 
 
-While not accuate at all it is incredibly fun to see what this produces.
+The list I used contained some leet speak such as `b00bs` and `b1tch`.
+
+While not accuate at all and it misses all manner of things it is incredibly fun to see what this produces.
+
+| language | filename curse count |
+| -------- | ----------- |
+| C | 5 |
+| C Header | 2 |
+| C# | 1 |
+| Dart | 1 |
+| Groovy | 3 |
 
 ### Top 20 longest files in lines per language
 
