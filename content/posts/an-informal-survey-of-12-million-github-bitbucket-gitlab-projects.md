@@ -20,7 +20,7 @@ In this post I am looking at all the code I downloaded and processed using `scc`
 
 ## Methodology
 
-Since I have searchcode.com I already have a collection of 7,000,000 projects across git, mercurial, subversion and such and I thought why not try processing them? The first step was to export the list from it. A simple export and it turns out it I actually have 12 million git repositories that I am tracking, and I should probably update the page to reflect that.
+Since I run searchcode.com I already have a collection of over 7,000,000 projects across git, mercurial, subversion and such. So why not try processing them? Working with git is pretty easy so I limited myself to that and exported the list. Turns out I actually have 12 million git repositories being tracked, and I should probably update the page to reflect that.
 
 So now I have 12 million or so git repositories which I need to download and process.
 
@@ -30,13 +30,13 @@ With the badge code working in AWS using lambda, I took the exported list and wr
 
 This worked brilliantly. However the problem with the above was firstly the cost, and secondly because lambda behind API-Gateway/ALB has a 30 second timeout it couldn't process large repositories fast enough. I knew going in that this was not going to be the most cost effective solution but it could have been close to $100 which would have been fine. After processing 1 million or so the cost was about $60 and since I didn't want a $700 AWS bill I decided to rethink my solution.
 
-Since I was already in AWS the cool answer would be to dump the messages into SQS and pull from this queue into multiple EC2 instances for processing, and scale out like crazy. However I always believed in [taco bell programming](http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html) and as it was only 12 million messages I opted to implement a simpler solution.
+Since I was already in AWS the cool answer would be to dump the messages into SQS and pull from this queue into multiple EC2 instances for processing, and scale out like crazy. However I always believed in [taco bell programming](http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html) and as it was only 12 million repositories I opted to implement a simpler solution.
 
-Running locally was out due to the abysmal state of internet in Australia. However I run searchcode.com fairly lean and efficiently. As such it usually has a lot of spare compute. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
+Running locally was out due to the abysmal state of internet in Australia. However I do run searchcode.com fairly lean. As such it usually has a lot of spare compute. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
 
-I didn't quite taco bell the solution using bash and gnu tools. What I did was write a simple [Go program](https://github.com/boyter/scc-data/blob/master/process/main.go) to spin up 32 go-routines which read from a channel (like SQS as it turns out) then spawned `git` and `scc` subprocesses before writing the JSON output into S3. I actually wrote a Python solution at first, but having to install the pip dependencies on my clean varnish box seemed like a bad idea and it keep breaking in odd ways which I didn't feel like debugging.
+I didn't quite taco bell the solution using bash and gnu tools. What I did was write a simple [Go program](https://github.com/boyter/scc-data/blob/master/process/main.go) to spin up 32 go-routines which read from a channel (like SQS but not distributed) then spawned `git` and `scc` subprocesses before writing the JSON output into S3. I actually wrote a Python solution at first, but having to install the pip dependencies on my clean varnish box seemed like a bad idea and it keep breaking in odd ways which I didn't feel like debugging.
 
-Running this on the box produced the following sort of metrics in htop.
+Running this on the box produced the following sort of metrics in htop, which is a sign that everything was working as expected.
 
 ![scc-data process load](/static/an-informal-survey/1.png#center)
 
@@ -44,17 +44,19 @@ Running this on the box produced the following sort of metrics in htop.
 
 Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index I thought I would steal some of the format they provided. However this raised another question. How does one process 10 million JSON files in an S3 bucket?
 
-The first thought was AWS Athena. But since it's going to cost about $2.50 USD per query to query the amount of data I had another ponder.
+The first thought was AWS Athena. But since it's going to cost about $2.50 USD *per query* with the amount of data I had I looked for an alturnative.
 
-One idea was to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it perhaps multiple times. This feels wasteful because we could just process the data as we read it once.
+One idea was to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it perhaps multiple times. This feels wasteful because we could just process the data as we read it.
 
-Seeing as I produced the JSON using spare compute, why not process the results the same way? So I did. Which means 
+Seeing as I produced the JSON using spare compute, why not process the results the same way? Of course there is one issue with this. Pulling 1 TB of data out of S3 is going to cost a lot. In the event the program crashes thats going to be annoying. So I wanted to pull all the files down locally. However you really do not want to store lots of little files on disk in a single directory. It sucks for runtime performance and filesystems don't like it much.
 
-So with that done, what I needed was a collection of questions to answer, which are included below.
+My answer to this being to pull them into a tar file and then process that. Another [Go program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file and done.
+
+With that done, what I needed was a collection of questions to answer. So I crowdsourced my work collegues and came up with some of my own. The result of which is included below.
 
 ### How many files in a repository?
 
-Start with a simple one. How many files are in an average repository? Do most projects have a few files in them, or many? By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 15 or more files and plot it out.
+Starting with a simple one. How many files are in an average repository? Do most projects have a few files in them, or many? By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 12 or however many files it has and plot it out.
 
 ![scc-data process load](/static/an-informal-survey/filesPerProject.png#center)
 
