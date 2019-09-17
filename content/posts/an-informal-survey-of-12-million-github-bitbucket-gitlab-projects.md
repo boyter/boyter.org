@@ -211,17 +211,163 @@ TODO ensure the above is correct
 
 ### Projects with TypeScript but not JavaScript
 
+Ah the modern world. But for projects that use TypeScipt how many are using TypeScript exclusively?
+
+Of the 4317 projects using TypeScript only 17 use it without any JavaScript.
+
+Have to admit, I am a little suprised by that number. While I understand mixing the two is fairly common I would have thought there would be more projects using the new hotness. This may however be mostly down to the projects I was able to pull though and a refreshed project list with newer projects may help.
+
 ### Anyone using CoffeeScript and TypeScript?
 
+3 projects. 
+
+The less said about this the better. I have a feeling some TypeScript developers are dry heaving at the very thought.
+
 ### The most complex code is written in what language?
+
+The complexity estimate isn't really directly comparable between languages. Pulling from the README
+
+> The complexity estimate is really just a number that is only comparable to files in the same language. It should not be used to compare languages directly without weighting them. The reason for this is that its calculated by looking for branch and loop statements in the code and incrementing a counter for that file.
+
+However like the curse/potty mouth check its fun so lets do it anyway.
 
 ### Whats the most complex file?
 
 ### Whats the most complex file in each language?
 
+Sorted by the complexity estimate.
+
+| language | filename | complexity |
+| -------- | -------- | ----- |
+| JavaScript | worker-xquery.js | 17988 |
+| Java | ClientService.java | 16956 |
+| PHP | mpdf.php | 10882 |
+| C | sqlite3.c | 8516 |
+| Autoconf | Makefile.in | 6737 |
+| Python | ClientService.py | 6566 |
+| C++ | Player.cpp | 6375 |
+| Perl | ClientService.pm | 4744 |
+| C# | ApplicationBuilder.cs | 2687 |
+| SQL | pbbteen_db.sql | 2338 |
+| C Header | ClientService.h | 1938 |
+| Batch | cpanm.bat | 1732 |
+| SystemVerilog | multiplier_32b.v | 1507 |
+| C++ Header | function_equal_50.hpp | 1225 |
+| Objective C | RegexKitLite.m | 1219 |
+| R | CIDE.R | 1163 |
+| Shell | ltmain.sh | 1151 |
+| Lua | Actor.lua | 1147 |
+| Assembly | CIDE.S | 1057 |
+| ActionScript | ListBase.as | 1041 |
+| Ruby | markdown.rb | 998 |
+| Vim Script | netrw.vim | 993 |
+| Makefile | snort.mak | 926 |
+| Specman e | CIDE.E | 711 |
+| TypeScript | mumble_nb_NO.ts | 581 |
+| TeX | snort_manual.tex | 533 |
+| TCL | testutils.tcl | 426 |
+| FORTRAN Legacy | GLMnet.F | 404 |
+| Objective C++ | GBAEmulationViewController.mm | 389 |
+| VHDL | test.vhd | 385 |
+| Emacs Lisp | js2-mode.el | 384 |
+| Visual Basic for Applications | IEEEtran.cls | 374 |
+| Org | devdraw.org | 332 |
+| Groovy | CompletedQuestionnaireService.groovy | 307 |
+| CMake | cotire.cmake | 296 |
+| Expect | gdb.exp | 288 |
+| Haxe | Scene.hx | 269 |
+| Smarty Template | Makefile.tpl | 200 |
+| CoffeeScript | QR.coffee | 196 |
+| Swift | VistaThingViewController.swift | 195 |
+| Razor | RangeHelper.cshtml | 194 |
+| Processing | LightController.pde | 186 |
+| Module-Definition | set.def | 185 |
+| Go | user.go | 178 |
+| Boo | texinfo.tex | 150 |
+| Julia | string.jl | 141 |
+| JavaServer Pages | diff.jsp | 140 |
+| Korn Shell | common.ksh | 137 |
+| BASH | git-completion.bash | 134 |
+| Puppet | vhost.pp | 124 |
+| Wolfram | tutor.nb | 120 |
+| Scala | sc | 118 |
+| D | operator_overloading.d | 105 |
+| Lisp | swank.lisp | 101 |
+| Rust | vector.rs | 94 |
+| Forth | zfs.fth | 88 |
+| FORTRAN Modern | zmlrpc.f90 | 82 |
+| Nim | example.nim | 80 |
+| GLSL | target_fbo.frag | 71 |
+| OCaml | format.ml | 71 |
+| ASP | ckeditor.asp | 70 |
+| Sass | _mixins.scss | 65 |
+| Twig Template | _systemCheckSection.twig | 58 |
+| Standard ML (SML) | hw1.sml | 53 |
+| Xtend | DslValidator.xtend | 53 |
+| ASP.NET | FlexModule.aspx | 52 |
+| Ada | terminal_interface-curses-forms.adb | 52 |
+| Brainfuck | hello.bf | 51 |
+| Powershell | EntityFramework.psm1 | 51 |
+| Mustache | components.mustache | 50 |
+| Cython | polyglot2_inner.pyx | 50 |
+| Zsh | .zshrc | 46 |
+| Prolog | BerkeleyDB.pod.P | 42 |
+| Rakefile | databases.rake | 35 |
+| JSX | tree-node.jsx | 34 |
+| Stylus | gradients.styl | 34 |
+| Scons | sconscript | 31 |
+| sed | pvcheck.sed | 30 |
+| Haskell | Scheduled.hs | 30 |
+| Jade | home.jade | 29 |
+| AutoHotKey | key.ahk | 29 |
+| Vala | TicTacToeBoard.vala | 27 |
+| Mako | layout.mako | 26 |
+| C Shell | distscript.csh | 24 |
+| Fragment Shader File | example_ColorBars.fsh | 24 |
+| Game Maker Language | iso-box.gml | 24 |
+| Cabal | hubble.cabal | 21 |
+| Bazel | README.build | 20 |
+| Fish | brew_fish_completion.fish | 20 |
+| F# | fs | 20 |
+| Ruby HTML | class.rhtml | 19 |
+| Dockerfile | Dockerfile | 19 |
+| Erlang | wf_tags.erl | 19 |
+| Gherkin Specification | yield.feature | 18 |
+| QML | MainWindow.qml | 18 |
+| Elixir | chap05_test.exs | 17 |
+| Dart | clock.dart | 16 |
+| Clojure | genclass.clj | 13 |
+| Pascal | test.pas | 12 |
+| Freemarker Template | pageTag.ftl | 12 |
+| Handlebars | handlebars | 11 |
+| IDL | libxl_types.idl | 9 |
+| Monkey C | kmm_msgs.mc | 8 |
+| Modula3 | mg | 8 |
+| Protocol Buffers | alert.proto | 7 |
+| TypeScript Typings | dx.all.d.ts | 7 |
+| Alloy | ALS | 7 |
+| Visual Basic | frmAutomatic_v3.vb | 6 |
+| Kotlin | example.kt | 5 |
+| COBOL | example.cob | 5 |
+| CSS | iehacks.css | 5 |
+| MSBuild | SocialGame.Services.csproj | 4 |
+| Unreal Script | int.uc | 4 |
+| V | v | 3 |
+| SKILL | base.il | 3 |
+| Stata | do | 2 |
+| Bitbake | main.bb | 2 |
+| Elm | ati-tbl.elm | 2 |
+| Scheme | swank-kawa.scm | 2 |
+| SVG | dice_clt.svg | 2 |
+| Closure Template | config-template.soy | 2 |
+| LD Script | u-boot.lds | 1 |
+| Ceylon | example.ceylon | 1 |
+| XAML | SettingsWindow.xaml | 1 |
+| Coq | libavformat.v | 1 |
+
 ### Whats the most complex file weighted against lines?
 
-This sounds good in practice, but in reality... anything minified or with no newlines skews the results making this one effectively pointless.
+This sounds good in practice, but in reality... anything minified or with no newlines skews the results making this one effectively pointless. As such I have not included this calculation.
 
 ### What's the typical path length, broken up by language
 
