@@ -3,7 +3,9 @@ title: An informal survey of 12 million git projects from Github, Bitbucket and 
 date: 2019-07-11
 ---
 
-The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) counts lines of code, comments and makes a guess at how complex some code is. The latter is something you need a good sample size to make use of. So I thought I would try running it at all the source code I could get my hands on. 
+The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) counts lines of code, comments and makes a guess at how complex some code is. The latter is something you need a good sample size to make use of. So I thought I would try running it at all the source code I could get my hands on.
+
+However if I am going to run it over all that code anyway I may as well try to get some interesting numbers out of it.
 
 In this post I am looking at all the code I downloaded and processed using `scc`. The data set I looked at includes,
 
@@ -18,9 +20,11 @@ In this post I am looking at all the code I downloaded and processed using `scc`
  - **10,330,300** estimated complexity 
  - **6,325** Bitbucket repositories
 
+It took over 24 hours to process the results and took about 5 weeks to download and run `scc` over the repositories.
+
 ## Methodology
 
-Since I run searchcode.com I already have a collection of over 7,000,000 projects across git, mercurial, subversion and such. So why not try processing them? Working with git is pretty easy so I limited myself to that and exported the list. Turns out I actually have 12 million git repositories being tracked, and I should probably update the page to reflect that.
+Since I run [searchcode.com](https://searchcode.com/) I already have a collection of over 7,000,000 projects across git, mercurial, subversion and such. So why not try processing them? Working with git is usually the easiest solution so I ignored mercurial and subversion and exported the list of git projects. Turns out I actually have 12 million git repositories being tracked, and I should probably update the page to reflect that.
 
 So now I have 12 million or so git repositories which I need to download and process.
 
@@ -89,6 +93,8 @@ Do projects that have less files have larger files?
 
 What filenames are most common across all code-bases ignoring extension and case?
 
+Had you asked me before I started I would have said, readme, main, index, license. Thankfully the results reflect my thoughts pretty well.
+
 | file-name | count |
 | -------- | ----- |
 | index | 9,400 |
@@ -133,7 +139,7 @@ As you would expect the majority of projects have either 0 or 1 gitignore file. 
 
 This is less than an exact science. Picking up cursing/swearing or offensive terms using filenames is never going to be effective. If you do a simple string contains test you pick up all sorts or normal files such as `assemble.sh` and such. So to produce the following I pulled a list of curse words, then check if any files in each project start with one of those values followed by a period. This would mean a file named `gangbang.java` would be picked up while `assemble.sh` would not. 
 
-The list I used contained some leet speak such as `b00bs` and `b1tch`.
+The list I used contained some leet speak such as `b00bs` and `b1tch` to try and catch more interesting.
 
 While not accuate at all and it misses all manner of things it is incredibly fun to see what this produces.
 
@@ -375,7 +381,7 @@ Given that you can either dump all the files you need in a single directory, or 
 
 ### YAML or YML?
 
-Sometime back on the company slack there was a "discussion" with many dying on one hill or the other over should you use .yaml or .yml
+Sometime back on the company slack there was a "discussion" with many dying on one hill or the other over the use of .yaml or .yml
 
 The debate can finally(?) be ended. Although I suspect some still prefer the hill.
 
@@ -391,6 +397,15 @@ The debate can finally(?) be ended. Although I suspect some still prefer the hil
 
 
 ### Upper lower or mixed case?
+
+What case style is used on filenames? This includes the extension so you would expect it to be mostly mixed case.
+
+
+| style | count |
+| ----- | ----- |
+| Mixed | 4322 |
+| Lower | 1 |
+| Upper | 11 |
 
 
 ### Java Factories
