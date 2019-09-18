@@ -48,15 +48,15 @@ Running this on the box produced the following sort of metrics in htop, which is
 
 Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index I thought I would steal some of the format they provided. However this raised another question. How does one process 10 million JSON files in an S3 bucket?
 
-The first thought was AWS Athena. But since it's going to cost about $2.50 USD *per query* with the amount of data I had I looked for an alturnative.
+The first thought was AWS Athena. But since it's going to cost about $2.50 USD *per query* with the amount of data I had I looked for an alternative.
 
 One idea was to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it perhaps multiple times. This feels wasteful because we could just process the data as we read it.
 
-Seeing as I produced the JSON using spare compute, why not process the results the same way? Of course there is one issue with this. Pulling 1 TB of data out of S3 is going to cost a lot. In the event the program crashes thats going to be annoying. So I wanted to pull all the files down locally. However you really do not want to store lots of little files on disk in a single directory. It sucks for runtime performance and filesystems don't like it much.
+Seeing as I produced the JSON using spare compute, why not process the results the same way? Of course there is one issue with this. Pulling 1 TB of data out of S3 is going to cost a lot. In the event the program crashes thats going to be annoying. So I wanted to pull all the files down locally. However you really do not want to store lots of little files on disk in a single directory. It sucks for runtime performance and file-systems don't like it much.
 
 My answer to this being to pull them into a tar file and then process that. Another [Go program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file and done.
 
-With that done, what I needed was a collection of questions to answer. So I crowdsourced my work collegues and came up with some of my own. The result of which is included below.
+With that done, what I needed was a collection of questions to answer. So I crowd-sourced my work colleagues and came up with some of my own. The result of which is included below.
 
 ### How many files in a repository?
 
@@ -68,7 +68,7 @@ As you would expect most repositories have less than 100 files in them. However 
 
 ![scc-data process percentile](/static/an-informal-survey/filesPerProjectPercentile.png)
 
-Note the X-axis is lines of code and is logarithmic. Turns out the vast majority of projects have less than 1000 files in them.
+Note the X-axis is lines of code and is logarithmic. Turns out the vast majority of projects have less than 1000 files in them. While 90% of them have less than 300 files.
 
 ### How many files in a repository per language?
 
@@ -135,13 +135,13 @@ How many projects use multiple gitignore files? How many have none?
 
 As you would expect the majority of projects have either 0 or 1 gitignore file. However a lot more than I would have suspected have more.
 
-### Which language developers have potty mouth?
+### Which language developers have the biggest potty mouth?
 
-This is less than an exact science. Picking up cursing/swearing or offensive terms using filenames is never going to be effective. If you do a simple string contains test you pick up all sorts or normal files such as `assemble.sh` and such. So to produce the following I pulled a list of curse words, then check if any files in each project start with one of those values followed by a period. This would mean a file named `gangbang.java` would be picked up while `assemble.sh` would not. 
+This is less than an exact science. Picking up cursing/swearing or offensive terms using filenames is never going to be effective. If you do a simple string contains test you pick up all sorts or normal files such as `assemble.sh` and such. So to produce the following I pulled a list of curse words, then checked if any files in each project start with one of those values followed by a period. This would mean a file named `gangbang.java` would be picked up while `assemble.sh` would not. 
 
-The list I used contained some leet speak such as `b00bs` and `b1tch` to try and catch more interesting.
+The list I used contained some leet speak such as `b00bs` and `b1tch` to try and catch out the most interesting cases.
 
-While not accuate at all and it misses all manner of things it is incredibly fun to see what this produces.
+While not accurate at all and it misses all manner of things it is incredibly fun to see what this produces.
 
 | language | filename curse count |
 | -------- | ----------- |
@@ -150,6 +150,15 @@ While not accuate at all and it misses all manner of things it is incredibly fun
 | C# | 1 |
 | Dart | 1 |
 | Groovy | 3 |
+
+Interesting! Those naught C developers! However what I really want to know is what are the most commonly used curse words.
+
+| word | count |
+| ---- | ----- |
+| anal | 4 |
+| ass | 4 |
+| knob | 4 |
+
 
 ### Top 20 longest files in lines per language
 
@@ -217,11 +226,11 @@ TODO ensure the above is correct
 
 ### Projects with TypeScript but not JavaScript
 
-Ah the modern world. But for projects that use TypeScipt how many are using TypeScript exclusively?
+Ah the modern world of TypeScript. But for projects that are using TypeScipt how many are using TypeScript exclusively?
 
 Of the 4317 projects using TypeScript only 17 use it without any JavaScript.
 
-Have to admit, I am a little suprised by that number. While I understand mixing the two is fairly common I would have thought there would be more projects using the new hotness. This may however be mostly down to the projects I was able to pull though and a refreshed project list with newer projects may help.
+Have to admit, I am a little surprised by that number. While I understand mixing the two is fairly common I would have thought there would be more projects using the new hotness. This may however be mostly down to the projects I was able to pull though and a refreshed project list with newer projects may help.
 
 ### Anyone using CoffeeScript and TypeScript?
 
@@ -400,13 +409,21 @@ The debate can finally(?) be ended. Although I suspect some still prefer the hil
 
 What case style is used on filenames? This includes the extension so you would expect it to be mostly mixed case.
 
-
 | style | count |
 | ----- | ----- |
 | Mixed | 4322 |
 | Lower | 1 |
 | Upper | 11 |
 
+Which of course is not very interesting. What about if we ignore the file extension?
+
+| style | count |
+| ----- | ----- |
+| Mixed | 4005 |
+| Lower | 214 |
+| Upper | 103 |
+
+What I would have expected really, mostly mixed, followed by lower and then upper.
 
 ### Java Factories
 
