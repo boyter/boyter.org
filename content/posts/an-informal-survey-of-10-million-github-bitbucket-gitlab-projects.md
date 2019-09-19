@@ -108,6 +108,8 @@ Had you asked me before I started I would have said, readme, main, index, licens
 | main | 3,634 |
 | config | 2,863 |
 
+Note that due to memory constraints I had to make this process slightly lossy. Every 100 or so projects checked if a filename had < 10 counts it was dropped from the list. It shouldn't happen that often but its possible the counts may be out by some amount of they were very spare names at the start of the process before becoming common.
+
 ### Whats the average size of those index pages?
 
 We know that the most common filenames, but what about knowing 
@@ -402,7 +404,7 @@ Sorted by the complexity estimate.
 
 ### Whats the most complex file weighted against lines?
 
-This sounds good in practice, but in reality... anything minified or with no newlines skews the results making this one effectively pointless. As such I have not included this calculation.
+This sounds good in practice, but in reality... anything minified or with no newlines skews the results making this one effectively pointless. As such I have not included this calculation. I have however created an issue inside `scc` to support detection of minified code so it can be removed from the calculation results https://github.com/boyter/scc/issues/91
 
 ### What's the typical path length, broken up by language
 
