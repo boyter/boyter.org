@@ -1,5 +1,5 @@
 ---
-title: An informal survey of 12 million git projects from Github, Bitbucket and Gitlab
+title: An informal survey of 10 million git projects from Github, Bitbucket and Gitlab
 date: 2019-07-11
 ---
 
@@ -9,18 +9,18 @@ However if I am going to run it over all that code anyway I may as well try to g
 
 In this post I am looking at all the code I downloaded and processed using `scc`. The data set I looked at includes,
 
- - **5,483** repositories
- - **842** empty repositories
- - **28,529** files
- - **7,069,681,918** bytes
- - **168,603,755** lines
- - **129,411,063** code lines
- - **16,584,855** blank lines
- - **22,607,837** comment lines
- - **10,330,300** estimated complexity 
- - **6,325** Bitbucket repositories
+ - **9,100,083** repositories
+ - **884,968** empty repositories with no files
+ - **58,389,641** files
+ - **40,736,530,379,778** bytes
+ - **1,086,723,618,560** lines
+ - **816,822,273,469** code lines
+ - **124,382,152,510** blank lines
+ - **145,519,192,581** comment lines 
+ - **71,884,867,919** complexity count
+ - **83,407** seconds to process
 
-It took over 24 hours to process the results and took about 5 weeks to download and run `scc` over the repositories.
+It took just under a day to process the results and about 5 weeks to download and run `scc` over all of the repositories.
 
 ## Methodology
 
@@ -114,12 +114,12 @@ We know that the most common filenames, but what about knowing
 
 ### How many repositories appear to be missing a license?
 
-This is an interesting one. Which repositories have an explicit license file somewhere? Not that the lack of a license file does not mean that the project has none, it might exist within the README for example but considering that the flow for most new repositories ask if you want to setup a license this surprised me.
+This is an interesting one. Which repositories have an explicit license file somewhere? Not that the lack of a license file does not mean that the project has none, it might exist within the README for example.
 
 | has license | count |
 | ----------- | ----- |
-| yes | 864 |
-| no | 4619 |
+| yes | 6,502,753 |
+| no | 2,597,330 |
 
 ![scc-data process load](/static/an-informal-survey/hasLicense.png#center)
 
@@ -151,7 +151,7 @@ While not accurate at all and it misses all manner of things it is incredibly fu
 | Dart | 1 |
 | Groovy | 3 |
 
-Interesting! Those naught C developers! However what I really want to know is what are the most commonly used curse words.
+Interesting! Those naughty C developers! However what I really want to know is what are the most commonly used curse words. Lets see collectively how dirty a mind we have.
 
 | word | count |
 | ---- | ----- |
@@ -160,34 +160,54 @@ Interesting! Those naught C developers! However what I really want to know is wh
 | knob | 4 |
 
 
-### Top 20 longest files in lines per language
+### Top 40 longest files in lines per language
 
-As you would probably expect Plain Text, SQL, XML and CSV take the top positions of this one, seeing as they usually contain metadata, database dumps and the like.
+As you would probably expect Plain Text, SQL, XML, JSON and CSV take the top positions of this one, seeing as they usually contain metadata, database dumps and the like.
 
-TODO ADD LINK TO FILE
+Limited to 40 because at some point there is only a hello world example or such available and the result is not very interesting.
 
 | language | filename | lines |
 | -------- | -------- | ----- |
-| Plain Text | largeT.txt | 1000000 |
-| SQL | f100.sql | 815560 |
-| XML | orderdetails_rand_20000.xml | 480011 |
-| CSV | real-ckjm.csv | 346438 |
-| Python | qrc_resources_rc.py | 212466 |
-| C | sqlite3.c | 131068 |
+| JSON | model.json | 11313134 |
+| Sass | large_empty.scss | 10000000 |
+| CSV | return_data_sp500.csv | 6486577 |
+| Plain Text | bgramPickle.txt | 5264667 |
+| SQL | V1_08.12.2014.13.44__T_ADDRESS_DATA.sql | 914442 |
+| XML | 13.xml | 463337 |
+| SVG | membres-publications.svg | 444080 |
+| C Header | firmware_nautilus_2_0-3006x_nscd.h | 417297 |
+| JavaScript | mandreel.js | 277403 |
+| C | sqlite3.c | 141343 |
+| PHP | Players.php | 131168 |
+| Java | ClientService.java | 121051 |
 | HTML | benchmark.html | 111608 |
-| C Header | banana.h | 96704 |
-| JavaScript | sencha-touch-all-debug.js | 85550 |
-| Game Maker Language | polblogs.gml | 85304 |
-| Patch | 0014-import-compat-headers.patch | 82118 |
-| PHP | en.php | 68830 |
-| YAML | pgts.yaml | 62356 |
-| Autoconf | B-large-practice.in | 51847 |
-| Objective C | TrialData000_1347_03_04_2013.m | 48539 |
-| Perl | Grammar.pm | 47955 |
-| SVG | Milky set.svg | 35002 |
-| JSON | khanhist_aligned.json | 29626 |
-| C++ | vmetst_v7.cpp | 25618 |
-| Assembly | fpsp.S | 24785 |
+| Patch | klips.patch | 111156 |
+| Perl | Language_Codes.pm | 97190 |
+| Assembly | CIDE.S | 94241 |
+| Prolog | CIDE.P | 68311 |
+| C++ | LuaCocos2d.cpp | 67887 |
+| Autoconf | Makefile.in | 52450 |
+| HEX | ipw2100-1.3.fw.hex | 26149 |
+| Python | ClientService.py | 25602 |
+| C# | Reference.cs | 23985 |
+| CSS | xenon.css | 22560 |
+| Lua | weaponfactorytweakdata.lua | 21229 |
+| TeX | xenapi-datamodel.tex | 20245 |
+| LaTeX | TeXbyTopic.tex | 19093 |
+| Intel HEX | bnx2x-e2-7.2.51.0.fw.ihex | 18459 |
+| Ruby | markdown.rb | 15961 |
+| Happy | gram.y | 14004 |
+| SystemVerilog | multiplier_32b.v | 13932 |
+| Emacs Lisp | color-theme-library.el | 13539 |
+| ASP.NET | AdminService_14.asmx | 13234 |
+| Batch | cpanm.bat | 12633 |
+| Shell | ltmain.sh | 11030 |
+| m4 | aclocal.m4 | 10027 |
+| Makefile | snort.mak | 9996 |
+| Vim Script | netrw.vim | 9858 |
+| ActionScript | ListBase.as | 9397 |
+| gitignore | .gitignore | 9066 |
+| TypeScript | mumble_de.ts | 9013 |
 
 ### Whats the largest file for each language?
 
