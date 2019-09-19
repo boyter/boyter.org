@@ -131,7 +131,7 @@ This is an interesting one. Which repositories have an explicit license file som
 
 ### How many projects use multiple .gitignore files?
 
-How many projects use multiple gitignore files? How many have none?
+Some may not know this but it is possible to have multiple .gitignore files in a git project. Given that fact how many projects use multiple .gitignore files? While we are looking how many have none?
 
 ![scc-data process load](/static/an-informal-survey/gitignorePerProject.png#center)
 
