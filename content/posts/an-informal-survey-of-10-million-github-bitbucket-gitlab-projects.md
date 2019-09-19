@@ -10,7 +10,7 @@ However if I am going to run it over all that code anyway I may as well try to g
 In this post I am looking at all the code I downloaded and processed using `scc`. The data set I looked at includes,
 
  - **9,100,083** repositories
- - **884,968** empty repositories with no files
+ - **884,968** empty repositories (those with no files)
  - **58,389,641** files
  - **40,736,530,379,778** bytes
  - **1,086,723,618,560** lines
@@ -34,29 +34,29 @@ With the badge code working in AWS using lambda, I took the exported list and wr
 
 This worked brilliantly. However the problem with the above was firstly the cost, and secondly because lambda behind API-Gateway/ALB has a 30 second timeout it couldn't process large repositories fast enough. I knew going in that this was not going to be the most cost effective solution but it could have been close to $100 which would have been fine. After processing 1 million or so the cost was about $60 and since I didn't want a $700 AWS bill I decided to rethink my solution.
 
-Since I was already in AWS the cool answer would be to dump the messages into SQS and pull from this queue into multiple EC2 instances for processing, and scale out like crazy. However I always believed in [taco bell programming](http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html) and as it was only 12 million repositories I opted to implement a simpler solution.
+Since I was already in AWS the hip solution would be to dump the messages into SQS and pull from this queue into EC2 instances or fargate for processing. Then scale out like crazy. However despite working in AWS in my day job I have always believed in [taco bell programming](http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html) and as it was only 12 million repositories I opted to implement a simpler solution.
 
-Running locally was out due to the abysmal state of internet in Australia. However I do run searchcode.com fairly lean. As such it usually has a lot of spare compute. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
+Running this computation locally was out due to the abysmal state of the internet in Australia. However I do run searchcode.com fairly lean. As such it usually has a lot of spare compute. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
 
-I didn't quite taco bell the solution using bash and gnu tools. What I did was write a simple [Go program](https://github.com/boyter/scc-data/blob/master/process/main.go) to spin up 32 go-routines which read from a channel (like SQS but not distributed) then spawned `git` and `scc` subprocesses before writing the JSON output into S3. I actually wrote a Python solution at first, but having to install the pip dependencies on my clean varnish box seemed like a bad idea and it keep breaking in odd ways which I didn't feel like debugging.
+I didn't quite taco bell program the solution using bash and gnu tools. What I did was write a simple [Go program](https://github.com/boyter/scc-data/blob/master/process/main.go) to spin up 32 go-routines which read from a channel then spawned `git` and `scc` subprocesses before writing the JSON output into S3. I actually wrote a Python solution at first, but having to install the pip dependencies on my clean varnish box seemed like a bad idea and it keep breaking in odd ways which I didn't feel like debugging.
 
-Running this on the box produced the following sort of metrics in htop, which is a sign that everything was working as expected.
+Running this on the box produced the following sort of metrics in htop, and the multiple git/scc processes running suggested that everything was working as expected, which I confirmed by looking at the results in S3.
 
 ![scc-data process load](/static/an-informal-survey/1.png#center)
 
 ## Results
 
-Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index I thought I would steal some of the format they provided. However this raised another question. How does one process 10 million JSON files in an S3 bucket?
+Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index I thought I would steal some of the format of that post. However this raised another question. How does one process 10 million JSON files in an S3 bucket?
 
-The first thought was AWS Athena. But since it's going to cost about $2.50 USD *per query* with the amount of data I had I looked for an alternative.
+The first thought was AWS Athena. But since it's going to cost about $2.50 USD **per query** with the amount of data I had I looked for an alternative.
 
 One idea was to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it perhaps multiple times. This feels wasteful because we could just process the data as we read it.
 
-Seeing as I produced the JSON using spare compute, why not process the results the same way? Of course there is one issue with this. Pulling 1 TB of data out of S3 is going to cost a lot. In the event the program crashes thats going to be annoying. So I wanted to pull all the files down locally. However you really do not want to store lots of little files on disk in a single directory. It sucks for runtime performance and file-systems don't like it much.
+Seeing as I produced the JSON using spare compute, why not process the results the same way? Of course there is one issue with this. Pulling 1 TB of data out of S3 is going to cost a lot. In the event the program crashes thats going to be annoying. So I wanted to pull all the files down locally. One issue with this is that you really do not want to store lots of little files on disk in a single directory. It sucks for runtime performance and file-systems don't like it.
 
-My answer to this being to pull them into a tar file and then process that. Another [Go program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file and done.
+My answer to this was to pull them into a tar file and then process that. Another [Go program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file and done.
 
-With that done, what I needed was a collection of questions to answer. So I crowd-sourced my work colleagues and came up with some of my own. The result of which is included below.
+With that done, what I needed was a collection of questions to answer. I crowd-sourced my work colleagues and came up with some of my own. The result of which is included below.
 
 ### How many files in a repository?
 
@@ -108,15 +108,15 @@ Had you asked me before I started I would have said, readme, main, index, licens
 | main | 3,634 |
 | config | 2,863 |
 
-Note that due to memory constraints I had to make this process slightly lossy. Every 100 or so projects checked if a filename had < 10 counts it was dropped from the list. It shouldn't happen that often but its possible the counts may be out by some amount of they were very spare names at the start of the process before becoming common.
+Note that due to memory constraints I had to make this process slightly lossy. Every 100 projects checked I would check the map and if an identified filename had < 10 counts it was dropped from the list. It could come back for the next run and if there was > 10 at this point it would remain. It shouldn't happen that often but it is possible the counts may be out by some amount if some common name appeared sparsely in the first batch of repositories before becoming common. In short they are not absolute numbers but should be close enough.
 
 ### Whats the average size of those index pages?
 
-We know that the most common filenames, but what about knowing 
+We know that the most common filenames, but what about knowing whats the average size of them? Annoyingly this meant running the above first and then taking the output and reprocessing.
 
 ### How many repositories appear to be missing a license?
 
-This is an interesting one. Which repositories have an explicit license file somewhere? Not that the lack of a license file does not mean that the project has none, it might exist within the README for example.
+This is an interesting one. Which repositories have an explicit license file somewhere? Not that the lack of a license file does not mean that the project has none, it might exist within the README for example or be indicated through SPDX comment tags.
 
 | has license | count |
 | ----------- | ----- |
@@ -166,7 +166,7 @@ Interesting! Those naughty C developers! However what I really want to know is w
 
 As you would probably expect Plain Text, SQL, XML, JSON and CSV take the top positions of this one, seeing as they usually contain metadata, database dumps and the like.
 
-Limited to 40 because at some point there is only a hello world example or such available and the result is not very interesting.
+Limited to 40 because at some point there is only a hello world example or such available and the result is not very interesting. It is not suprising to see that someone has checked in `sqlite3.c` somewhere but I would be a little worried about that 25k line Python file and that 9k line TypeScript monster.
 
 | language | filename | lines |
 | -------- | -------- | ----- |
@@ -213,7 +213,7 @@ Limited to 40 because at some point there is only a hello world example or such 
 
 ### Whats the largest file for each language?
 
-Across all the languages we looked at whats the largest file by number of bytes for each one?
+Across all the languages we looked at whats the largest file by number of bytes for each one? This means ignoring newlines and the like so its closer to finding checked in data files, which is less interesting but still pretty neat.
 
 | language | filename | bytes |
 | -------- | -------- | ----- |
@@ -240,9 +240,9 @@ Across all the languages we looked at whats the largest file by number of bytes 
 
 ### How many "pure" projects
 
-That is projects that have 1 language in them. Of course that would not be very interesting, so lets see what the spread is. Turns out most languages have fewer than 20 languages in them with most in the less than 10 bracket.
+That is projects that have 1 language in them. Of course that would not be very interesting by itself, so lets see what the spread is. Turns out most projects have fewer than 20 languages in them with most in the less than 10 bracket.
 
-TODO ensure the above is correct
+Of course pure projects might only have one programming language, but have lots of supporting other formats such as markdown, json, yml, css, .gitignore and the like. It's probably reasonable to assume that any project with less than 5 languages is "pure" and as it turns out is the majority.
 
 ![scc-data pure projects](/static/an-informal-survey/languagesPerProject.png#center)
 
@@ -250,7 +250,12 @@ TODO ensure the above is correct
 
 Ah the modern world of TypeScript. But for projects that are using TypeScipt how many are using TypeScript exclusively?
 
-Of the 4317 projects using TypeScript only 17 use it without any JavaScript.
+Of the 4,317 projects identified using TypeScript only 17 use it without any JavaScript.
+
+| using typescript | pure typescript |
+| ---------------- | --------------- |
+| 4317 | 17 |
+
 
 Have to admit, I am a little surprised by that number. While I understand mixing the two is fairly common I would have thought there would be more projects using the new hotness. This may however be mostly down to the projects I was able to pull though and a refreshed project list with newer projects may help.
 
@@ -258,7 +263,7 @@ Have to admit, I am a little surprised by that number. While I understand mixing
 
 3 projects. 
 
-The less said about this the better. I have a feeling some TypeScript developers are dry heaving at the very thought.
+The less said about this the better. I have a feeling some TypeScript developers are dry heaving at the very thought. If its any comfort I suspect most of them are things like scc which uses examples of all languages for testing purposes.
 
 ### The most complex code is written in what language?
 
@@ -267,8 +272,6 @@ The complexity estimate isn't really directly comparable between languages. Pull
 > The complexity estimate is really just a number that is only comparable to files in the same language. It should not be used to compare languages directly without weighting them. The reason for this is that its calculated by looking for branch and loop statements in the code and incrementing a counter for that file.
 
 However like the curse/potty mouth check its fun so lets do it anyway.
-
-### Whats the most complex file?
 
 ### Whats the most complex file in each language?
 
@@ -449,7 +452,7 @@ What I would have expected really, mostly mixed, followed by lower and then uppe
 
 ### Java Factories
 
-Another one that came up in the internal company slack when looking through some old Java code. I thought why not add a check for any Java code that has Factory, FactoryFactory and FactoryFactoryFactory and lets see how many factory classes are out there.
+Another one that came up in the internal company slack when looking through some old Java code. I thought why not add a check for any Java code that has Factory, FactoryFactory or FactoryFactoryFactory and lets see how many factories are out there.
 
 | type | count | percent |
 | ---- | ----- | ------- |
@@ -458,9 +461,11 @@ Another one that came up in the internal company slack when looking through some
 | factoryfactory | 2 | 0.001|
 | factoryfactoryfactory | 1 | 0.001 |
 
-TODO update the above
 
-## If you got this far thank you and please read my sales pitch!
+## So why bother?
 
+Well I can take some of this information and plug it into searchcode.com, scc. It's potentially very useful to know how your project compares to others out there. Besides it was a fun way to spend a few days coding.
 
-I am working on a tool that helps manager types analyze code looking for size, flaws etc... You put in some code and it will tell you how maintainable it is and what skills you need to maintain it. Useful for determining if you should buy or maintain some codebase.
+In addition I am working on a tool that helps senior developer or manager types analyze code looking for size, flaws etc... Assuming you have to watch multiple repositories. You put in some code and it will tell you how maintainable it is and what skills you need to maintain it. Useful for determining if you should buy or maintain some code-base and getting an overview of what your development team is producing.
+
+I should probably put an email sign up for that here at some point to gather interest for that.
