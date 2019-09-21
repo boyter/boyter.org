@@ -147,20 +147,53 @@ While not accurate at all and it misses all manner of things it is incredibly fu
 
 | language | filename curse count |
 | -------- | ----------- |
-| C | 5 |
-| C Header | 2 |
-| C# | 1 |
-| Dart | 1 |
-| Groovy | 3 |
+| C Header | 7660 |
+| Java | 7023 |
+| C | 6897 |
+| PHP | 5713 |
+| JavaScript | 4306 |
+| HTML | 3560 |
+| Ruby | 3121 |
+| JSON | 1598 |
+| C++ | 1543 |
+| Dart | 1533 |
+| Rust | 1504 |
+| Go Template | 1500 |
+| SVG | 1234 |
+| XML | 1212 |
+| JavaServer Pages | 1037 |
+| Python | 1092 |
 
-Interesting! Those naughty C developers! However what I really want to know is what are the most commonly used curse words. Lets see collectively how dirty a mind we have.
+Interesting! Those naughty C developers! However we should probably weight this against how much code exists. Which produces the following,
+
+
+However what I really want to know is what are the most commonly used curse words. Lets see collectively how dirty a mind we have. A few of the top ones I could see being legitimate names, but the majority would certainly produce few comments in a PR if not a raised eyebrow.
 
 | word | count |
 | ---- | ----- |
-| anal | 4 |
-| ass | 4 |
-| knob | 4 |
-
+| ass | 11358 |
+| knob | 10368 |
+| balls | 8001 |
+| xxx | 7205
+| sex | 5021 |
+| nob | 3385 |
+| pawn | 2919 |
+| hell | 2819 |
+| crap | 1112 |
+| anal | 950 |
+| snatch | 885 |
+| fuck | 572 |
+| poop | 510 |
+| cox | 476 |
+| shit | 383 |
+| lust | 367 |
+| butt | 265 |
+| bum | 151 |
+| bugger | 132 |
+| pron | 121 |
+| cum | 118 |
+| cok | 112 |
+| damn | 105 |
 
 ### Top 40 longest files in lines per language
 
@@ -456,11 +489,12 @@ Another one that came up in the internal company slack when looking through some
 
 | type | count | percent |
 | ---- | ----- | ------- |
-| not factory | 49110 | 99 |
-| factory | 533 | 0.91 |
-| factoryfactory | 2 | 0.001|
-| factoryfactoryfactory | 1 | 0.001 |
+| not factory | 271375574 | 99 |
+| factory | 5695568 | 2.09% |
+| factoryfactory | 25316 | 0.009% |
+| factoryfactoryfactory | 0 | 0% |
 
+So slightly over 2% of all the Java code that I checked appeared to be a factory or factoryfactory. Thankfully there are no factoryfactoryfactories and perhaps that joke can finally die (although I am sure at least one non-ironic one exist somewhere).
 
 ## So why bother?
 
