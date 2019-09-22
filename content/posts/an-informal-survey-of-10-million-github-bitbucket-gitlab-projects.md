@@ -72,13 +72,21 @@ From the three sources, github, bitbucket and gitlab how many projects came from
 
 On to the real stats. Lets start with a simple one. How many files are in an average repository? Do most projects have a few files in them, or many? By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 12 or however many files it has and plot it out.
 
-![scc-data process load](/static/an-informal-survey/filesPerProject.png#center)
+![scc-data files per project](/static/an-informal-survey/filesPerProject.png#center)
 
-As you would expect most repositories have less than 100 files in them. However what about plotting this by percentile?
+The X-axis in this case being buckets of the count of files, and Y-axis being the count of projects with that many files. This is limited to projects with less than 1000 files because the plot looks like empty with a thin smear on the left side.
 
-![scc-data process percentile](/static/an-informal-survey/filesPerProjectPercentile.png)
+As you would expect most repositories have less than 200 files in them. However what about plotting this by percentile?
 
-Note the X-axis is lines of code and is logarithmic. Turns out the vast majority of projects have less than 1000 files in them. While 90% of them have less than 300 files.
+![scc-data files per project percentile](/static/an-informal-survey/filesPerProjectPercentile.png)
+
+Note the X-axis is logarithmic. Turns out the vast majority of projects have less than 1,000 files in them. While 90% of them have less than 300 files. Projects with 0 files are ignored.
+
+However lets just to the above for the first 95th percentile so its actually worth looking at.
+
+![scc-data files per project 95th](/static/an-informal-survey/filesPerProjectPercentile95.png)
+
+Most projects have less than 100 files in them and 85% have less than 200. If you want to plot this yourself and do a better job than I here is a link to the raw data [filesPerProject.json](/static/an-informal-survey/filesPerProject.json).
 
 ### How many files in a repository per language?
 
@@ -211,6 +219,8 @@ However what I really want to know is what are the most commonly used curse word
 As you would probably expect Plain Text, SQL, XML, JSON and CSV take the top positions of this one, seeing as they usually contain metadata, database dumps and the like.
 
 Limited to 40 because at some point there is only a hello world example or such available and the result is not very interesting. It is not suprising to see that someone has checked in `sqlite3.c` somewhere but I would be a little worried about that 25k line Python file and that 9k line TypeScript monster.
+
+https://github.com/donsheehy/barcode/blob/master/spiral_4D_2k_dim4_standard_rips_threshold0_625_log.m
 
 | language | filename | lines |
 | -------- | -------- | ----- |
@@ -480,17 +490,17 @@ What case style is used on filenames? This includes the extension so you would e
 
 | style | count |
 | ----- | ----- |
-| Mixed | 9,094,732 |
-| Lower | 2,476 |
-| Upper | 2,875 |
+| mixed | 9,094,732 |
+| lower | 2,476 |
+| upper | 2,875 |
 
 Which of course is not very interesting because generally file extensions are lowercase. What about if we ignore the file extension?
 
 | style | count |
 | ----- | ----- |
-| Mixed | 8,104,053 |
-| Lower | 347,458 |
-| Upper | 614,922 |
+| mixed | 8,104,053 |
+| lower | 347,458 |
+| upper | 614,922 |
 
 Not what I would have expected. Mostly mixed is normal, but I would have thought lower would be more popular.
 
@@ -500,17 +510,17 @@ Another one that came up in the internal company slack when looking through some
 
 | type | count | percent |
 | ---- | ----- | ------- |
-| not factory | 271375574 | 99 |
-| factory | 5695568 | 2.09% |
-| factoryfactory | 25316 | 0.009% |
+| not factory | 271,375,574 | 97.9% |
+| factory | 5,695,568 | 2.09% |
+| factoryfactory | 25,316 | 0.009% |
 | factoryfactoryfactory | 0 | 0% |
 
-So slightly over 2% of all the Java code that I checked appeared to be a factory or factoryfactory. Thankfully there are no factoryfactoryfactories and perhaps that joke can finally die (although I am sure at least one non-ironic one exist somewhere).
+So slightly over 2% of all the Java code that I checked appeared to be a factory or factoryfactory. Thankfully there are no factoryfactoryfactories and perhaps that joke can finally die, although I am sure at least one non-ironic one exist somewhere in some Java 5 monolith that makes more money every day than I will see over my entire working life.
 
 ## So why bother?
 
-Well I can take some of this information and plug it into searchcode.com, scc. It's potentially very useful to know how your project compares to others out there. Besides it was a fun way to spend a few days coding.
+Well I can take some of this information and plug it into searchcode.com, scc. It's potentially very useful to know how your project compares to others out there. Besides it was a fun way to spend a few days solving some interesting problems.
 
-In addition I am working on a tool that helps senior developer or manager types analyze code looking for size, flaws etc... Assuming you have to watch multiple repositories. You put in some code and it will tell you how maintainable it is and what skills you need to maintain it. Useful for determining if you should buy or maintain some code-base and getting an overview of what your development team is producing.
+In addition I am working on a tool that helps senior-developer or manager types analyze code looking for size, flaws etc... Assuming you have to watch multiple repositories. You put in some code and it will tell you how maintainable it is and what skills you need to maintain it. Useful for determining if you should buy or maintain some code-base and getting an overview of what your development team is producing. Something like AWS Macie but for code is the angle I am thinking. It's something I need for my day job currently.
 
 I should probably put an email sign up for that here at some point to gather interest for that.
