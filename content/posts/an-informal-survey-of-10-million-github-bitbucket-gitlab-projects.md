@@ -58,9 +58,19 @@ My answer to this was to pull them into a tar file and then process that. Anothe
 
 With that done, what I needed was a collection of questions to answer. I crowd-sourced my work colleagues and came up with some of my own. The result of which is included below.
 
+### Data Sources
+
+From the three sources, github, bitbucket and gitlab how many projects came from each?
+
+| source | count |
+| ------ | ----- |
+| github | 9,680,111 |
+| bitbucket | 248,217 |
+| gitlab | 56,722 |
+
 ### How many files in a repository?
 
-Starting with a simple one. How many files are in an average repository? Do most projects have a few files in them, or many? By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 12 or however many files it has and plot it out.
+On to the real stats. Lets start with a simple one. How many files are in an average repository? Do most projects have a few files in them, or many? By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 12 or however many files it has and plot it out.
 
 ![scc-data process load](/static/an-informal-survey/filesPerProject.png#center)
 
@@ -166,6 +176,7 @@ While not accurate at all and it misses all manner of things it is incredibly fu
 
 Interesting! Those naughty C developers! However we should probably weight this against how much code exists. Which produces the following,
 
+ADD WEIGHTED BY LANGUAGE COUNT HERE
 
 However what I really want to know is what are the most commonly used curse words. Lets see collectively how dirty a mind we have. A few of the top ones I could see being legitimate names, but the majority would certainly produce few comments in a PR if not a raised eyebrow.
 
@@ -283,18 +294,18 @@ Of course pure projects might only have one programming language, but have lots 
 
 Ah the modern world of TypeScript. But for projects that are using TypeScipt how many are using TypeScript exclusively?
 
-Of the 4,317 projects identified using TypeScript only 17 use it without any JavaScript.
-
-| using typescript | pure typescript |
-| ---------------- | --------------- |
-| 4317 | 17 |
+| pure TypeScript projects |
+| --------------- |
+| 27,026 projects |
 
 
-Have to admit, I am a little surprised by that number. While I understand mixing the two is fairly common I would have thought there would be more projects using the new hotness. This may however be mostly down to the projects I was able to pull though and a refreshed project list with newer projects may help.
+Have to admit, I am a little surprised by that number. While I understand mixing JavaScript with TypeScript is fairly common I would have thought there would be more projects using the new hotness. This may however be mostly down to the projects I was able to pull though and a refreshed project list with newer projects may help.
 
 ### Anyone using CoffeeScript and TypeScript?
 
-3 projects. 
+| TypeScript and CoffeeScript |
+| --------------- |
+| 7,849 projects |
 
 The less said about this the better. I have a feeling some TypeScript developers are dry heaving at the very thought. If its any comfort I suspect most of them are things like scc which uses examples of all languages for testing purposes.
 
@@ -450,12 +461,12 @@ Given that you can either dump all the files you need in a single directory, or 
 
 Sometime back on the company slack there was a "discussion" with many dying on one hill or the other over the use of .yaml or .yml
 
-The debate can finally(?) be ended. Although I suspect some still prefer the hill.
+The debate can finally(?) be ended. Although I suspect some still prefer their hill.
 
 | extension | count |
 | ----------- | ----- |
-| yaml | 975 |
-| yml | 3712 |
+| yaml | 3,572,609 |
+| yml | 14,076,349 |
 
 ### Who comments most-to-least, by language (95th percentile)
 
@@ -469,23 +480,23 @@ What case style is used on filenames? This includes the extension so you would e
 
 | style | count |
 | ----- | ----- |
-| Mixed | 4322 |
-| Lower | 1 |
-| Upper | 11 |
+| Mixed | 9,094,732 |
+| Lower | 2,476 |
+| Upper | 2,875 |
 
-Which of course is not very interesting. What about if we ignore the file extension?
+Which of course is not very interesting because generally file extensions are lowercase. What about if we ignore the file extension?
 
 | style | count |
 | ----- | ----- |
-| Mixed | 4005 |
-| Lower | 214 |
-| Upper | 103 |
+| Mixed | 8,104,053 |
+| Lower | 347,458 |
+| Upper | 614,922 |
 
-What I would have expected really, mostly mixed, followed by lower and then upper.
+Not what I would have expected. Mostly mixed is normal, but I would have thought lower would be more popular.
 
 ### Java Factories
 
-Another one that came up in the internal company slack when looking through some old Java code. I thought why not add a check for any Java code that has Factory, FactoryFactory or FactoryFactoryFactory and lets see how many factories are out there.
+Another one that came up in the internal company slack when looking through some old Java code. I thought why not add a check for any Java code that has Factory, FactoryFactory or FactoryFactoryFactory in the name. The idea being to see how many factories are out there.
 
 | type | count | percent |
 | ---- | ----- | ------- |
