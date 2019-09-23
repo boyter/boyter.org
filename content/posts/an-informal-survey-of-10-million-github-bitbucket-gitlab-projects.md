@@ -88,6 +88,253 @@ However lets just to the above for the first 95th percentile so its actually wor
 
 Most projects have less than 100 files in them and 85% have less than 200. If you want to plot this yourself and do a better job than I here is a link to the raw data [filesPerProject.json](/static/an-informal-survey/filesPerProject.json).
 
+### Whats the breakdown per language?
+
+That is, how many files of each language did we process starting with a visual indication.
+
+![scc-data language breakdown](/static/an-informal-survey/countProjectsPerLanguage.png)
+
+The full list is included below.
+
+| language | file count |
+| -------- | ----- |
+| Markdown | 6,041,849 |
+| gitignore | 5,471,254 |
+| Plain Text | 3,553,325 |
+| JavaScript | 3,408,921 |
+| HTML | 3,397,596 |
+| CSS | 3,037,754 |
+| License | 2,597,330 |
+| XML | 2,218,846 |
+| JSON | 1,903,569 |
+| YAML | 1,860,523 |
+| Python | 1,424,505 |
+| Shell | 1,395,199 |
+| Ruby | 1,386,599 |
+| Java | 1,319,091 |
+| C Header | 1,259,519 |
+| Makefile | 1,215,586 |
+| Rakefile | 1,006,022 |
+| PHP | 992,617 |
+| Properties File | 909,631 |
+| SVG | 804,946 |
+| C | 791,773 |
+| C++ | 715,269 |
+| Batch | 645,442 |
+| Sass | 535,341 |
+| Autoconf | 505,347 |
+| Objective C | 503,932 |
+| CoffeeScript | 435,133 |
+| SQL | 413,739 |
+| Perl | 390,775 |
+| C# | 380,841 |
+| ReStructuredText | 356,922 |
+| MSBuild | 354,212 |
+| LESS | 281,286 |
+| CSV | 275,143 |
+| C++ Header | 199,245 |
+| CMake | 173,482 |
+| Patch | 169,078 |
+| Assembly | 165,587 |
+| XML Schema | 148,511 |
+| m4 | 147,204 |
+| JavaServer Pages | 142,605 |
+| Vim Script | 134,156 |
+| Scala | 132,454 |
+| Objective C++ | 127,797 |
+| Gradle | 126,899 |
+| Module-Definition | 120,181 |
+| Bazel | 114,842 |
+| R | 113,770 |
+| ASP.NET | 111,431 |
+| Go Template | 111,263 |
+| Document Type Definition | 109,710 |
+| Gherkin Specification | 107,187 |
+| Smarty Template | 106,668 |
+| Jade | 105,903 |
+| Happy | 105,631 |
+| Emacs Lisp | 105,620 |
+| Prolog | 102,792 |
+| Go | 99,093 |
+| Lua | 98,232 |
+| BASH | 95,931 |
+| D | 94,400 |
+| ActionScript | 93,066 |
+| TeX | 84,841 |
+| Powershell | 80,347 |
+| AWK | 79,870 |
+| Groovy | 75,796 |
+| LEX | 75,335 |
+| nuspec | 72,478 |
+| sed | 70,454 |
+| Puppet | 67,732 |
+| Org | 67,703 |
+| Clojure | 67,145 |
+| XAML | 65,135 |
+| TypeScript | 62,556 |
+| Systemd | 58,197 |
+| Haskell | 58,162 |
+| XCode Config | 57,173 |
+| Boo | 55,318 |
+| LaTeX | 55,093 |
+| Zsh | 55,044 |
+| Stylus | 54,412 |
+| Razor | 54,102 |
+| Handlebars | 51,893 |
+| Erlang | 49,475 |
+| HEX | 46,442 |
+| Protocol Buffers | 45,254 |
+| Mustache | 44,633 |
+| ASP | 43,114 |
+| Extensible Stylesheet Language Transformations | 42,664 |
+| Twig Template | 42,273 |
+| Processing | 41,277 |
+| Dockerfile | 39,664 |
+| Swig | 37,539 |
+| LD Script | 36,307 |
+| FORTRAN Legacy | 35,889 |
+| Scons | 35,373 |
+| Scheme | 34,982 |
+| Alex | 34,221 |
+| TCL | 33,766 |
+| Android Interface Definition Language | 33,000 |
+| Ruby HTML | 32,645 |
+| Device Tree | 31,918 |
+| Expect | 30,249 |
+| Cabal | 30,109 |
+| Unreal Script | 29,113 |
+| Pascal | 28,439 |
+| GLSL | 28,417 |
+| Intel HEX | 27,504 |
+| Alloy | 27,142 |
+| Freemarker Template | 26,456 |
+| IDL | 26,079 |
+| Visual Basic for Applications | 26,061 |
+| Macromedia eXtensible Markup Language | 24,949 |
+| F# | 24,373 |
+| Cython | 23,858 |
+| Jupyter | 23,577 |
+| Forth | 22,108 |
+| Visual Basic | 21,909 |
+| Lisp | 21,242 |
+| OCaml | 20,216 |
+| Rust | 19,286 |
+| Fish | 18,079 |
+| Monkey C | 17,753 |
+| Ada | 17,253 |
+| SAS | 17,031 |
+| Dart | 16,447 |
+| TypeScript Typings | 16,263 |
+| SystemVerilog | 15,541 |
+| Thrift | 15,390 |
+| C Shell | 14,904 |
+| Fragment Shader File | 14,572 |
+| Vertex Shader File | 14,312 |
+| QML | 13,709 |
+| ColdFusion | 13,441 |
+| Elixir | 12,716 |
+| Haxe | 12,404 |
+| Jinja | 12,274 |
+| JSX | 12,194 |
+| Specman e | 12,071 |
+| FORTRAN Modern | 11,460 |
+| PKGBUILD | 11,398 |
+| ignore | 11,287 |
+| Mako | 10,846 |
+| TOML | 10,444 |
+| SKILL | 10,048 |
+| AsciiDoc | 9,868 |
+| Swift | 9,679 |
+| BuildStream | 9,198 |
+| ColdFusion CFScript | 8,614 |
+| Stata | 8,296 |
+| Creole | 8,030 |
+| Basic | 7,751 |
+| V | 7,560 |
+| VHDL | 7,368 |
+| Julia | 7,070 |
+| ClojureScript | 7,018 |
+| Closure Template | 6,269 |
+| AutoHotKey | 5,938 |
+| Wolfram | 5,764 |
+| Docker ignore | 5,555 |
+| Korn Shell | 5,541 |
+| Arvo | 5,364 |
+| Coq | 5,068 |
+| SRecode Template | 5,019 |
+| Game Maker Language | 4,557 |
+| Nix | 4,216 |
+| Vala | 4,110 |
+| COBOL | 3,946 |
+| Varnish Configuration | 3,882 |
+| Kotlin | 3,683 |
+| Bitbake | 3,645 |
+| GDScript | 3,189 |
+| Standard ML (SML) | 3,143 |
+| Jenkins Buildfile | 2,822 |
+| Xtend | 2,791 |
+| ABAP | 2,381 |
+| Modula3 | 2,376 |
+| Nim | 2,273 |
+| Verilog | 2,013 |
+| Elm | 1,849 |
+| Brainfuck | 1,794 |
+| Ur/Web | 1,741 |
+| Opalang | 1,367 |
+| GN | 1,342 |
+| TaskPaper | 1,330 |
+| Ceylon | 1,265 |
+| Crystal | 1,259 |
+| Agda | 1,182 |
+| Vue | 1,139 |
+| LOLCODE | 1,101 |
+| Hamlet | 1,071 |
+| Robot Framework | 1,062 |
+| MUMPS | 940 |
+| Emacs Dev Env | 937 |
+| Cargo Lock | 905 |
+| Flow9 | 839 |
+| Idris | 804 |
+| Julius | 765 |
+| Oz | 764 |
+| Q# | 695 |
+| Lucius | 627 |
+| Meson | 617 |
+| F* | 614 |
+| ATS | 492 |
+| PSL Assertion | 483 |
+| Bitbucket Pipeline | 418 |
+| PureScript | 370 |
+| Report Definition Language | 313 |
+| Isabelle | 296 |
+| JAI | 286 |
+| MQL4 | 271 |
+| Ur/Web Project | 261 |
+| Alchemist | 250 |
+| Cassius | 213 |
+| Softbridge Basic | 207 |
+| MQL Header | 167 |
+| JSONL | 146 |
+| Lean | 104 |
+| Spice Netlist | 100 |
+| Madlang | 97 |
+| Luna | 91 |
+| Pony | 86 |
+| MQL5 | 46 |
+| Wren | 33 |
+| Just | 30 |
+| QCL | 27 |
+| Zig | 21 |
+| SPDX | 20 |
+| Futhark | 16 |
+| Dhall | 15 |
+| FIDL | 14 |
+| Bosque | 14 |
+| Janet | 13 |
+| Game Maker Project | 6 |
+| Polly | 6 |
+| Verilog Args File | 2
+
 ### How many files in a repository per language?
 
 An extension of the above, but broken down by language.
@@ -115,16 +362,56 @@ Had you asked me before I started I would have said, readme, main, index, licens
 
 | file-name | count |
 | -------- | ----- |
-| index | 9,400 |
-| jquery | 9,167 |
-| readme | 7,749 |
-| makefile | 6,136 |
-| lang | 6,119 |
-| \__init__ | 4,313 |
-| package | 3,955 |
-| license | 3,739 | 
-| main | 3,634 |
-| config | 2,863 |
+| makefile | 59141098 |
+| index | 33962093 |
+| readme | 22964539 |
+| jquery | 20015171 |
+| main | 12308009 |
+| package | 10975828 |
+| license | 10441647 |
+| \__init__ | 10193245 |
+| strings | 8414494 |
+| android | 7915225 |
+| config | 7391812 |
+| default | 5563255 |
+| build | 5510598 |
+| setup | 5291751 |
+| test | 5282106 |
+| irq | 4914052 |
+| 15 | 4295032 |
+| country | 4274451 |
+| pom | 4054543 |
+| io | 3642747 |
+| system | 3629821 |
+| common | 3629698 |
+| gpio | 3622587 |
+| core | 3571098 |
+| module | 3549789 |
+| init | 3378919 |
+| dma | 3301536 |
+| bootstrap | 3162859 |
+| application | 3000210 |
+| time | 2928715 |
+| cmakelists | 2907539 |
+| plugin | 2881206 |
+| base | 2805340 |
+| s15 | 2733747 |
+| androidmanifest | 2727041 |
+| cache | 2695345 |
+| debug | 2687902 |
+| file | 2629406 |
+| app | 2588208 |
+| version | 2580288 |
+| assemblyinfo | 2485708 |
+| exception | 2471403 |
+| project | 2432361 |
+| util | 2412138 |
+| user | 2343408 |
+| clock | 2283091 |
+| timex | 2280225 |
+| pci | 2231228 |
+| style | 2226920 |
+| styles | 2212127 |
 
 Note that due to memory constraints I had to make this process slightly lossy. Every 100 projects checked I would check the map and if an identified filename had < 10 counts it was dropped from the list. It could come back for the next run and if there was > 10 at this point it would remain. It shouldn't happen that often but it is possible the counts may be out by some amount if some common name appeared sparsely in the first batch of repositories before becoming common. In short they are not absolute numbers but should be close enough.
 
@@ -141,9 +428,7 @@ This is an interesting one. Which repositories have an explicit license file som
 | yes | 6,502,753 |
 | no | 2,597,330 |
 
-![scc-data process load](/static/an-informal-survey/hasLicense.png#center)
-
-[Chart Link](https://jsfiddle.net/mscvtgd4/)
+![scc-data license count](/static/an-informal-survey/hasLicense.png#center)
 
 ### Which languages have the most comments?
 
@@ -307,7 +592,6 @@ Ah the modern world of TypeScript. But for projects that are using TypeScipt how
 | pure TypeScript projects |
 | --------------- |
 | 27,026 projects |
-
 
 Have to admit, I am a little surprised by that number. While I understand mixing JavaScript with TypeScript is fairly common I would have thought there would be more projects using the new hotness. This may however be mostly down to the projects I was able to pull though and a refreshed project list with newer projects may help.
 
