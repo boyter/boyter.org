@@ -1,6 +1,6 @@
 ---
 title: searchcode client - command line code search
-date: 2019-07-25
+date: 2029-07-25
 ---
 
 A new tool.

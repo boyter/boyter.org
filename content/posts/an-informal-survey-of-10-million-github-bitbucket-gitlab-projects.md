@@ -1,6 +1,6 @@
 ---
 title: An informal survey of 10 million git projects from Github, Bitbucket and Gitlab
-date: 2019-07-11
+date: 2029-07-11
 ---
 
 The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) counts lines of code, comments and makes a guess at how complex some code is. The latter is something you need a good sample size to make use of. So I thought I would try running it at all the source code I could get my hands on.
@@ -90,7 +90,7 @@ Most projects have less than 100 files in them and 85% have less than 200. If yo
 
 ### Whats the breakdown per language?
 
-That is, how many files of each language did we process starting with a visual indication.
+That is, how many files of each language did we process starting with a visual indication. This gives a quick view of what languages are most commonly used. Somewhat unsurprisingly the most common languages are markdown, .gitignore and plain text. 
 
 ![scc-data language breakdown](/static/an-informal-survey/countProjectsPerLanguage.png)
 
@@ -450,22 +450,22 @@ While not accurate at all and it misses all manner of things it is incredibly fu
 
 | language | filename curse count |
 | -------- | ----------- |
-| C Header | 7660 |
-| Java | 7023 |
-| C | 6897 |
-| PHP | 5713 |
-| JavaScript | 4306 |
-| HTML | 3560 |
-| Ruby | 3121 |
-| JSON | 1598 |
-| C++ | 1543 |
-| Dart | 1533 |
-| Rust | 1504 |
-| Go Template | 1500 |
-| SVG | 1234 |
-| XML | 1212 |
-| JavaServer Pages | 1037 |
-| Python | 1092 |
+| C Header | 7,660 |
+| Java | 7,023 |
+| C | 6,897 |
+| PHP | 5,713 |
+| JavaScript | 4,306 |
+| HTML | 3,560 |
+| Ruby | 3,121 |
+| JSON | 1,598 |
+| C++ | 1,543 |
+| Dart | 1,533 |
+| Rust | 1,504 |
+| Go Template | 1,500 |
+| SVG | 1,234 |
+| XML | 1,212 |
+| JavaServer Pages | 1,037 |
+| Python | 1,092 |
 
 Interesting! Those naughty C developers! However we should probably weight this against how much code exists. Which produces the following,
 
@@ -475,15 +475,15 @@ However what I really want to know is what are the most commonly used curse word
 
 | word | count |
 | ---- | ----- |
-| ass | 11358 |
-| knob | 10368 |
-| balls | 8001 |
-| xxx | 7205
-| sex | 5021 |
-| nob | 3385 |
-| pawn | 2919 |
-| hell | 2819 |
-| crap | 1112 |
+| ass | 11,358 |
+| knob | 10,368 |
+| balls | 8,001 |
+| xxx | 7,205
+| sex | 5,021 |
+| nob | 3,385 |
+| pawn | 2,919 |
+| hell | 2,819 |
+| crap | 1,112 |
 | anal | 950 |
 | snatch | 885 |
 | fuck | 572 |
