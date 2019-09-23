@@ -78,21 +78,17 @@ On to the real questions. Lets start with a simple one. How many files are in an
 
 The X-axis in this case being buckets of the count of files, and Y-axis being the count of projects with that many files. This is limited to projects with less than 1000 files because the plot looks like empty with a thin smear on the left side if you include all the outliers.
 
-As you would expect most repositories have less than 200 files in them. However what about plotting this by percentile?
+As it turns out most repositories have less than 200 files in them. 
 
-![scc-data files per project percentile](/static/an-informal-survey/filesPerProjectPercentile.png)
-
-Note the X-axis is logarithmic. Turns out the vast majority of projects have less than 1,000 files in them. While 90% of them have less than 300 files. Projects with 0 files are ignored.
-
-However lets plot the above for the 95th percentile so its actually worth looking at.
+However what about plotting this by percentile, or more specifically by 95th percentile so its actually worth looking at? Turns out the vast majority of projects have less than 1,000 files in them. While 90% of them have less than 300 files and 85% have less than 200.
 
 ![scc-data files per project 95th](/static/an-informal-survey/filesPerProjectPercentile95.png)
 
-Most projects have less than 100 files in them and 85% have less than 200. This feels about right based on the majority of projects I have worked with personally. If you want to plot this yourself and do a better job than I here is a link to the raw data [filesPerProject.json](/static/an-informal-survey/filesPerProject.json).
+If you want to plot this yourself and do a better job than I here is a link to the raw data [filesPerProject.json](/static/an-informal-survey/filesPerProject.json).
 
 ### Whats the project breakdown per language?
 
-This means if we see any Java file in a project we increment the Java count by one and for the second file do nothing. This gives a quick view of what languages are most commonly used. Somewhat unsurprisingly the most common languages are markdown, .gitignore and plain text.
+This means if we see any Java file in a project we increment the Java count by one and for the second file do nothing. This gives a quick view of what languages are most commonly used. Unsurprisingly the most common languages are markdown, .gitignore and plain text.
 
 Markdown is the most commonly used language in any project and included in just over 6 million projects which is about 2/3 of the entire project set. This makes sense since almost all projects include a README.md which is displayed in HTML on all sources.
 
@@ -360,7 +356,9 @@ Do projects that have less files have larger files?
 
 What filenames are most common across all code-bases ignoring extension and case?
 
-Had you asked me before I started this I would have said, README, main, index, license. Thankfully the results reflect my thoughts pretty well. Although there are a lot of interesting ones in there. I have no idea why so many projects contain a file called `15` or `s15`.
+Had you asked me before I started this I would have said, README, main, index, license. Thankfully the results reflect my thoughts pretty well. Although there are a lot of interesting ones in there. I have no idea why so many projects contain a file called `15` or `s15`. 
+
+The makefile being the most common surprised me a little, but then I remembered that it is used a lot in many new JavaScript projects, and with that being among the most common projects makes a lot of sense. That said it still seems that jQuery is king and reports of its death are greatly exaggerated.
 
 | file-name | count |
 | -------- | ----- |
@@ -417,7 +415,7 @@ Had you asked me before I started this I would have said, README, main, index, l
 
 Note that due to memory constraints I had to make this process slightly lossy. Every 100 projects checked I would check the map and if an identified filename had < 10 counts it was dropped from the list. It could come back for the next run and if there was > 10 at this point it would remain. It shouldn't happen that often but it is possible the counts may be out by some amount if some common name appeared sparsely in the first batch of repositories before becoming common. In short they are not absolute numbers but should be close enough.
 
-Yes I know I could have used a trie structure to "compress" the space and gotten absolute numbers. I didn't feel like writing one. I am however curious enough to try this out at a later date to see how much compression we can get out of it.
+I could have used a trie structure to "compress" the space and gotten absolute numbers. I didn't feel like writing one. I am however curious enough to try this out at a later date to see how much compression we can get out of it.
 
 ### Whats the average size of those index pages?
 
@@ -1430,7 +1428,13 @@ So slightly over 2% of all the Java code that I checked appeared to be a factory
 
 ## Future ideas
 
-Id love to do some analysis of tabs vs spaces. Scanning for things like AKIA keys and the like would be pretty neat as well. Id also love to expand out the bitbucket and gitlab coverage and get it broken down via each to see if groups of developers from different camps hang out in different areas.
+Id love to do some analysis of tabs vs spaces. Scanning for things like AWS AKIA keys and the like would be pretty neat as well. Id also love to expand out the bitbucket and gitlab coverage and get it broken down via each to see if groups of developers from different camps hang out in different areas.
+
+Shortcomings id love to overcome in the above if I decide to do this again.
+
+ - Keeping the URL properly in the metadata somewhere. Using a filename to store this was a bad idea as it was lossy and means it can be hard to identify the file source and location.
+ - Not bother with S3. There is little point to pay the bandwidth cost when I was only using it for storage. Better to just stuff into the tar file from the beginning.
+ - Invest some time in learning some tool to help with plotting and charting of results.
 
 ## So why bother?
 
