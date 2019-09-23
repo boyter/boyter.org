@@ -1,6 +1,6 @@
 ---
 title: An informal survey of 10 million git projects from Github, Bitbucket and Gitlab
-date: 2029-07-11
+date: 2019-09-20
 ---
 
 The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) counts lines of code, comments and makes a guess at how complex some code is. The latter is something you need a good sample size to make use of. So I thought I would try running it at all the source code I could get my hands on.
