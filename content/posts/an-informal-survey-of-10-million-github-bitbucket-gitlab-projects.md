@@ -11,7 +11,7 @@ In this post I am looking at all the code I downloaded and processed using `scc`
 
  - **9,100,083** repositories
  - **884,968** empty repositories (those with no files)
- - **58,389,641** file looked at in all repositories
+ - **58,389,641** files processed
  - **40,736,530,379,778** bytes processed (40 TB)
  - **1,086,723,618,560** lines processed
  - **816,822,273,469** code lines identified
@@ -20,8 +20,18 @@ In this post I am looking at all the code I downloaded and processed using `scc`
  - **71,884,867,919** complexity count according to scc rules
  - **177,938** seconds to process 1TB of JSON (49 hours)
 
-It took about 5 weeks to download and run `scc` over all of the repositories collecting all of the data. It took just over 49 hours to crunch and process the results.
+It took about 5 weeks to download and run `scc` over all of the repositories collecting all of the data. It took just over 49 hours to crunch and process the results each of the processor which happened about 3 times in total.
 
+## Quicklinks
+
+ - [Methodology](#methodology)
+ - [Results](#results)
+ - [Data Sources](#data-sources)
+ - [How many files in a repository?](#how-many-files-in-a-repository)
+ - [Whats the project breakdown per language?](#whats-the-project-breakdown-per-language)
+ - [What are the most common filenames?](#what-are-the-most-common-filenames)
+ - [How many repositories appear to be missing a license?](#how-many-repositories-appear-to-be-missing-a-license)
+ 
 ## Methodology
 
 Since I run [searchcode.com](https://searchcode.com/) I already have a collection of over 7,000,000 projects across git, mercurial, subversion and such. So why not try processing them? Working with git is usually the easiest solution so I ignored mercurial and subversion and exported the list of git projects. Turns out I actually have 12 million git repositories being tracked, and I should probably update the page to reflect that.
@@ -440,7 +450,7 @@ This is an interesting one. Which repositories have an explicit license file som
 
 Some may not know this but it is possible to have multiple .gitignore files in a git project. Given that fact how many projects use multiple .gitignore files? While we are looking how many have none?
 
-// **TODO** find that repository with 25,794 gitignores
+// **TODO** this is totally wrong, redo
 
 What I did find that was interesting was one project that has 25,794 .gitignore files in its repository. The next highest was 2,547. I have no idea what is going on there.
 
@@ -513,7 +523,7 @@ Note that some of the more offensive words in the list did have matching filenam
 
 ### Longest files in lines per language
 
-As you would probably expect Plain Text, SQL, XML, JSON and CSV take the top positions of this one, seeing as they usually contain metadata, database dumps and the like.
+As you would probably expect Plain Text, SQL, XML, JSON and CSV take the top positions of this one, seeing as they usually contain meta-data, database dumps and the like.
 
 Limited to 40 because at some point there is only a hello world example or such available and the result is not very interesting. It is not surprising to see that someone has checked in `sqlite3.c` somewhere but I would be a little worried about that 3,064,594 line Python file and that 1,997,637 line TypeScript monster.
 
@@ -1050,7 +1060,7 @@ Ah the modern world of TypeScript. But for projects that are using TypeScipt how
 | --------------- |
 | 27,026 projects |
 
-Have to admit, I am a little surprised by that number. While I understand mixing JavaScript with TypeScript is fairly common I would have thought there would be more projects using the new hotness. This may however be mostly down to the projects I was able to pull though and a refreshed project list with newer projects may help.
+Have to admit, I am a little surprised by that number. While I understand mixing JavaScript with TypeScript is fairly common I would have thought there would be more projects using the new hotness. This may however be mostly down to the projects I was able to pull though and I suspect a refreshed project list with newer projects would change this number drastically.
 
 ### Anyone using CoffeeScript and TypeScript?
 
@@ -1067,6 +1077,8 @@ The complexity estimate isn't really directly comparable between languages. Pull
 > The complexity estimate is really just a number that is only comparable to files in the same language. It should not be used to compare languages directly without weighting them. The reason for this is that its calculated by looking for branch and loop statements in the code and incrementing a counter for that file.
 
 However like the curse/potty mouth check its fun so lets do it anyway. However to make this fair it really needs to be weighted based on the number of code lines to ensure it is closer to being a fair comparison.
+
+
 
 
 ### Whats the most complex file in each language?
@@ -1209,15 +1221,166 @@ Some of these files are absolute monsters. For example consider the most complex
 
 This sounds good in practice, but in reality... anything minified or with no newlines skews the results making this one effectively pointless. As such I have not included this calculation. I have however created an issue inside `scc` to support detection of minified code so it can be removed from the calculation results https://github.com/boyter/scc/issues/91
 
+### Whats the most commented file in each language?
+
+Whats the most commented file in each language? I have no idea what sort of information you can get out of this that might be useful but it is interesting to have a look.
+
+**NB** Some of the links below MAY not translate 100% due to throwing away some information when I created the files. Most should work, but a few you may need to mangle the URL to resolve.
+
+| language | filename | comment lines |
+| -------- | -------- | ------- |
+| C | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.C">CIDE.C</a> | 84255 |
+| Prolog | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.P">CIDE.P</a> | 68004 |
+| JavaScript | <a href="https://bitbucket.com/3x0dv5/ao2sm/src/master/WebContent/extjs/ext-all-debug-w-comments.js">ext-all-debug-w-comments.js</a> | 57173 |
+| D | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.D">CIDE.D</a> | 52202 |
+| Objective C | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.M">CIDE.M</a> | 44141 |
+| Swig | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.I">CIDE.I</a> | 37235 |
+| C Header | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.H">CIDE.H</a> | 30417 |
+| LEX | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.L">CIDE.L</a> | 28723 |
+| C++ | <a href="https://bitbucket.com/-elmer-/plinkseq/src/master/lib/r8lib.cpp">r8lib.cpp</a> | 22641 |
+| XML | <a href="https://bitbucket.com/a_hassala/projet-informatique/src/master/data/haarcascades/haarcascade_frontalface_alt_tree.xml">haarcascade_frontalface_alt_tree.xml</a> | 17027 |
+| SystemVerilog | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.V">CIDE.V</a> | 13391 |
+| Java | <a href="https://bitbucket.com/_dev_/shards-of-destiny/src/master/worldserver/src/main/java/com/l2jfree/gameserver/network/SystemMessageId.java">SystemMessageId.java</a> | 12331 |
+| PHP | <a href="https://bitbucket.com/4nn3ck/myeclipse4php/src/master/configuration/org.eclipse.osgi/bundles/322/1/.cp/Resources/language/php5.4/standard.php">standard.php</a> | 10168 |
+| C# | <a href="https://bitbucket.com/acrotech/dotspatialpcl/src/master/Trunk/DotSpatial.Plugins.Taudem/Hydrology.cs">Hydrology.cs</a> | 4674 |
+| ActionScript | <a href="https://bitbucket.com/abhi8600/demo/src/master/AnyChart/Original/AnyChartSource_6_0_11/build/utils/flex/frameworks/projects/framework/src/mx/core/UIComponent.as">UIComponent.as</a> | 4468 |
+| Ruby | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/aws-sdk-1.11.3/lib/aws/ec2/client.rb">client.rb</a> | 3805 |
+| HTML | <a href="https://bitbucket.com/_thc_/asc2013/src/master/cokolino-html/war/com.podravka.cokolino.GwtDefinition/FA7CBF71A4805DCDA38517C976AE86E9.cache.html">FA7CBF71A4805DCDA38517C976AE86E9.cache.html</a> | 3712 |
+| Autoconf | <a href="https://bitbucket.com/14farresa/projecte_esin/src/master/jp_public_terminal.in">jp_public_terminal.in</a> | 3690 |
+| SQL | <a href="https://bitbucket.com/10bicsehali/blesk/src/master/structure.sql">structure.sql</a> | 3431 |
+| TeX | <a href="https://bitbucket.com/act-lab/r2code/src/master/Python-2.7.5/Modules/_ctypes/libffi/texinfo.tex">texinfo.tex</a> | 3208 |
+| Pascal | <a href="https://bitbucket.com/5665tm/mytools/src/master/ConEmuFar/PluginSDK/Headers.pas/PluginW.pas">PluginW.pas</a> | 3141 |
+| LaTeX | <a href="https://bitbucket.com/a3217055/illumos-joyent/src/master/usr/src/grub/grub-0.97/docs/texinfo.tex">texinfo.tex</a> | 2464 |
+| CSS | <a href="https://bitbucket.com/activey/reactor/src/master/reactor-transport-websockets-jetty/src/main/resources/static/css/semantic.css">semantic.css</a> | 2364 |
+| Perl | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/perl/vendor/lib/DateTime.pm">DateTime.pm</a> | 2217 |
+| Emacs Lisp | <a href="https://bitbucket.com/4ourbit/prefs/src/master/.emacs.d/emacs-goodies-el/folding.el">folding.el</a> | 2107 |
+| Visual Basic | <a href="https://bitbucket.com/acrotech/dotspatialpcl/src/master/Trunk/DotSpatial.Plugins.Taudem.Port/frmAutomatic_v3.vb">frmAutomatic_v3.vb</a> | 2053 |
+| m4 | <a href="https://bitbucket.com/2ion/libqueue/src/master/aclocal.m4">aclocal.m4</a> | 2009 |
+| Shell | <a href="https://bitbucket.com/1120436joaopacheco/irudroid-technologies-lapr5/src/master/WalkMaze/lib/freetype-2.5.5/builds/unix/ltmain.sh">ltmain.sh</a> | 1935 |
+| C++ Header | <a href="https://bitbucket.com/3togo/python-tesseract/src/master/vs2008/includes/opencv2/core/core.hpp">core.hpp</a> | 1869 |
+| ASP.NET | <a href="https://bitbucket.com/5665tm/nyancatrainbowshot/src/master/NyanCat_Data/Mono/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx">DefaultWsdlHelpGenerator.aspx</a> | 1677 |
+| CMake | <a href="https://bitbucket.com/acoustid/chromaprint/src/master/Doxyfile.cmake">Doxyfile.cmake</a> | 1611 |
+| FORTRAN Legacy | <a href="https://bitbucket.com/adam_qc/petsc/src/master/src/contrib/fun3d/comp/user.F">user.F</a> | 1531 |
+| TCL | <a href="https://bitbucket.com/achyutreddy24/abdevweb/src/master/dist/tcl/tcl8.6/clock.tcl">clock.tcl</a> | 1323 |
+| Sass | <a href="https://bitbucket.com/aadonskoy/helpdesk/src/master/app/assets/stylesheets/foundation_and_overrides.scss">foundation_and_overrides.scss</a> | 1150 |
+| XAML | <a href="https://bitbucket.com/achadee/graphics-project/src/master/Common/StandardStyles.xaml">StandardStyles.xaml</a> | 1054 |
+| Python | <a href="https://bitbucket.com/__rvalle__/openerp-7/src/master/openobject-server/openerp/addons/resource/faces/task.py">task.py</a> | 1016 |
+| Thrift | <a href="https://bitbucket.com/abioy/hypertable/src/master/src/cc/ThriftBroker/Client.thrift">Client.thrift</a> | 906 |
+| Lisp | <a href="https://bitbucket.com/acgt/dotemacs/src/master/packs/programming/lib/slime-2013-04-05/xref.lisp">xref.lisp</a> | 904 |
+| TypeScript Typings | <a href="https://bitbucket.com/12110201/12110201/src/master/webit/webit/Scripts/devexpress-web-14.1/ts/jquery.d.ts">jquery.d.ts</a> | 770 |
+| LESS | <a href="https://bitbucket.com/6artisans/tlapse/src/master/app/assets/stylesheets/custom_bootstrap/variables.less">variables.less</a> | 642 |
+| Assembly | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/gdb/sim/testsuite/sim/h8300/shlr.s">shlr.s</a> | 588 |
+| Expect | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/gdb/gdb/testsuite/lib/gdb.exp">gdb.exp</a> | 542 |
+| Powershell | <a href="https://bitbucket.com/1110245danielagrams/arqsi2/src/master/IDEIMusic/packages/EntityFramework.6.1.1/tools/EntityFramework.psm1">EntityFramework.psm1</a> | 506 |
+| Makefile | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/lib/pwlib/src/ptlib/unix/Makefile">Makefile</a> | 481 |
+| YAML | <a href="https://bitbucket.com/aadonskoy/rubycas-server/src/master/config/config.example.yml">config.example.yml</a> | 464 |
+| Properties File | <a href="https://bitbucket.com/act-lab/r2code/src/master/jsr308-langtools/src/share/classes/com/sun/tools/javac/resources/compiler.properties">compiler.properties</a> | 458 |
+| Haskell | <a href="https://bitbucket.com/acgt/polyeuler/src/master/ProjectEuler.hs">ProjectEuler.hs</a> | 444 |
+| Scheme | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/boot-9.scm">boot-9.scm</a> | 439 |
+| Haxe | <a href="https://bitbucket.com/adag_dot_me/7drts/src/master/src/com/haxepunk/HXP.hx">HXP.hx</a> | 437 |
+| GLSL | <a href="https://bitbucket.com/0player/t-engine4/src/master/game/modules/tome/data/gfx/shaders/full_fbo.frag">full_fbo.frag</a> | 427 |
+| Lua | <a href="https://bitbucket.com/0player/t-engine4/src/master/game/modules/tome/class/interface/PlayerExplore.lua">PlayerExplore.lua</a> | 419 |
+| VHDL | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/bundle/ctags58/Test/test.vhd">test.vhd</a> | 396 |
+| COBOL | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.cob">example.cob</a> | 390 |
+| MSBuild | <a href="https://bitbucket.com/3f/_systemdatasqlite/src/master/SQLite.NET.Settings.targets">SQLite.NET.Settings.targets</a> | 386 |
+| Processing | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/realtime/src/acquisition/openbci/java/src/OpenBCI_GUI.pde">OpenBCI_GUI.pde</a> | 384 |
+| ASP | <a href="https://bitbucket.com/abel-pacara/beta_masprospectos/src/master/admin/ckeditor/ckeditor.asp">ckeditor.asp</a> | 347 |
+| Protocol Buffers | <a href="https://bitbucket.com/abex/abex-mumble/src/master/src/murmur/MurmurRPC.proto">MurmurRPC.proto</a> | 339 |
+| CoffeeScript | <a href="https://bitbucket.com/abhayathapa/interesting/src/master/app/assets/javascripts/gmaps4rails/gmaps4rails.googlemaps.js.coffee">gmaps4rails.googlemaps.js.coffee</a> | 339 |
+| FORTRAN Modern | <a href="https://bitbucket.com/adam_qc/petsc/src/master/src/snes/examples/tutorials/ex5f90t.F90">ex5f90t.F90</a> | 330 |
+| Groovy | <a href="https://bitbucket.com/4s/ot-70-opentele-server/src/master/grails-app/conf/Config.groovy">Config.groovy</a> | 309 |
+| AWK | <a href="https://bitbucket.com/achase55/gba4ios/src/master/emu-ex-plus-alpha/imagine/bundle/all/src/libpng/libpng-1.6.2/scripts/options.awk">options.awk</a> | 284 |
+| R | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/MercuryMail/RESOURCE/wpm-lmtt.r">wpm-lmtt.r</a> | 284 |
+| Ada | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/lib/ncurses/ncurses-5.7/Ada95/src/terminal_interface-curses-forms.adb">terminal_interface-curses-forms.adb</a> | 278 |
+| Objective C++ | <a href="https://bitbucket.com/aaalexx/gamejam2013/src/master/cocos2d-x-2.1.5/cocos2dx/platform/mac/CCImage.mm">CCImage.mm</a> | 262 |
+| Korn Shell | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/lib/brand/shared/zone/common.ksh">common.ksh</a> | 253 |
+| Boo | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/external/dmlt/external/gpstuff/SuiteSparse/AMD/Doc/AMD_UserGuide.tex">AMD_UserGuide.tex</a> | 253 |
+| Clojure | <a href="https://bitbucket.com/acgt/polyeuler/src/master/euler.clj">euler.clj</a> | 227 |
+| Android Interface Definition Language | <a href="https://bitbucket.com/abhinavgupta2812/dynamix-framework/src/master/src/org/ambientdynamix/api/application/IDynamixFacade.aidl">IDynamixFacade.aidl</a> | 225 |
+| Batch | <a href="https://bitbucket.com/abhi8600/demo/src/master/BuildsAndReleases/deployment/deploy_acorn_noftp.bat">deploy_acorn_noftp.bat</a> | 224 |
+| Razor | <a href="https://bitbucket.com/aburias/moolahsense/src/master/MoolahConnectnew/Views/Admin/_LoanRequestMoolahCoreEdit.cshtml">_LoanRequestMoolahCoreEdit.cshtml</a> | 220 |
+| OCaml | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/format.ml">format.ml</a> | 218 |
+| BASH | <a href="https://bitbucket.com/aborrmann/dotfiles/src/master/.git-completion.bash">.git-completion.bash</a> | 188 |
+| TypeScript | <a href="https://bitbucket.com/0x3044/php-examples/src/master/public/typescript/form/form.ts">form.ts</a> | 186 |
+| Stylus | <a href="https://bitbucket.com/abihf/chsj/src/master/themes/chsj/source/css/_base/normalize.styl">normalize.styl</a> | 186 |
+| Puppet | <a href="https://bitbucket.com/acdtprn/proj-case-prototyping-boilerplate/src/master/puphpet/puppet/modules/puppi/manifests/project/maven.pp">maven.pp</a> | 186 |
+| Scala | <a href="https://bitbucket.com/adam_novak/sequence-graphs/src/master/scala/SparkUtil.scala">SparkUtil.scala</a> | 175 |
+| Module-Definition | <a href="https://bitbucket.com/act-lab/r2code/src/master/Python-2.7.5/PC/os2emx/python27.def">python27.def</a> | 174 |
+| SVG | <a href="https://bitbucket.com/0mid/fsusiam/src/master/talks/1-central-limit-thm/pictures/dice_clt.svg">dice_clt.svg</a> | 166 |
+| Device Tree | <a href="https://bitbucket.com/abhisit/firefly-rk3288-kernel/src/master/arch/arm/boot/dts/rk3288-box.dts">rk3288-box.dts</a> | 164 |
+| Monkey C | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/ntp/ports/winnt/libntp/messages.mc">messages.mc</a> | 134 |
+| Zsh | <a href="https://bitbucket.com/abrookins/dotfiles/src/master/.zshrc">.zshrc</a> | 120 |
+| Basic | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/unzip/windll/vb/vbunzip.bas">vbunzip.bas</a> | 119 |
+| Erlang | <a href="https://bitbucket.com/a12n/calendar_ext/src/master/src/internal/iso8601_datetime.erl">iso8601_datetime.erl</a> | 113 |
+| Gherkin Specification | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/cucumber-1.3.8/legacy_features/wire_protocol.feature">wire_protocol.feature</a> | 112 |
+| Nim | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.nim">example.nim</a> | 109 |
+| gitignore | <a href="https://bitbucket.com/aagraz/blwebsocketsserver/src/master/.gitignore">.gitignore</a> | 105 |
+| JavaServer Pages | <a href="https://bitbucket.com/abhi8600/demo/src/master/SalesforceConnector_28_0/WebContent/axis2-web/HappyAxis.jsp">HappyAxis.jsp</a> | 103 |
+| Unreal Script | <a href="https://bitbucket.com/___________chenjuensheng/android_kernel_samsung_n1/src/master/drivers/net/ixp2000/ixp2400_rx.uc">ixp2400_rx.uc</a> | 98 |
+| Bazel | <a href="https://bitbucket.com/4ptiv4/picasso-kernel_at100/src/master/scripts/Makefile.build">Makefile.build</a> | 93 |
+| Go | <a href="https://bitbucket.com/200bg/aquilo-server/src/master/aquilo/csrf/csrf.go">csrf.go</a> | 87 |
+| Vala | <a href="https://bitbucket.com/17twenty/colourl/src/master/main.vala">main.vala</a> | 73 |
+| Rust | <a href="https://bitbucket.com/abhijeetbhagat/rusqlite/src/master/src/sqlite_test.rs">sqlite_test.rs</a> | 73 |
+| QML | <a href="https://bitbucket.com/4s/4sdcdemo/src/master/QtProjects/DemoHtmlIntegration/Gateway/4SDC2QtWebKit/webBrowser.qml">webBrowser.qml</a> | 71 |
+| Swift | <a href="https://bitbucket.com/abutenko/simplechat/src/master/SimpleChat/BuddiesViewModel.swift">BuddiesViewModel.swift</a> | 67 |
+| SKILL | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/uts/intel/amd64/ml/amd64.il">amd64.il</a> | 67 |
+| Org | <a href="https://bitbucket.com/acue/unified-sessions-manager/src/master/trunk/ctys/plugins/VMs/XEN/network-bridge.org">network-bridge.org</a> | 64 |
+| sed | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/lib/ncurses/ncurses-5.7/man/manlinks.sed">manlinks.sed</a> | 63 |
+| Rakefile | <a href="https://bitbucket.com/3ign0n/3ign0nbitbucketorg/src/master/src/Rakefile">Rakefile</a> | 59 |
+| C Shell | <a href="https://bitbucket.com/aakef/cci/src/master/config/distscript.csh">distscript.csh</a> | 56 |
+| Standard ML (SML) | <a href="https://bitbucket.com/_nkhalasi/proglang-2013-homework/src/master/hw7/hw7.sml">hw7.sml</a> | 52 |
+| Smarty Template | <a href="https://bitbucket.com/aaryadewa/simpleresponsivetheme/src/master/themes/simpleresponsivetheme/authentication.tpl">authentication.tpl</a> | 52 |
+| Dockerfile | <a href="https://bitbucket.com/abrad450/samm/src/master/.docker/Dockerfile">Dockerfile</a> | 46 |
+| Xtend | <a href="https://bitbucket.com/3m45t3r/dsl/src/master/main/at.tuwien.dsg.dsl/src/at/tuwien/dsg/jvmmodel/DslJvmModelInferrer.xtend">DslJvmModelInferrer.xtend</a> | 45 |
+| Specman e | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/bundle/ctags58/Eiffel/tag_file.e">tag_file.e</a> | 43 |
+| Julia | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/string.jl">string.jl</a> | 43 |
+| LD Script | <a href="https://bitbucket.com/accelecon/u-boot/src/master/board/gaisler/gr_xc3s_1500/u-boot.lds">u-boot.lds</a> | 40 |
+| AutoHotKey | <a href="https://bitbucket.com/5665tm/mytools/src/master/AutoHotkey/key.ahk">key.ahk</a> | 38 |
+| IDL | <a href="https://bitbucket.com/53454e4f4a/vs2/src/master/Koordinator/monitor.idl">monitor.idl</a> | 30 |
+| F# | <a href="https://bitbucket.com/abred/btf-renderer/src/master/data/shader/btf.fs">btf.fs</a> | 29 |
+| Elixir | <a href="https://bitbucket.com/0x0me/elixir_fp_book/src/master/chap10/lib/chap10.ex">chap10.ex</a> | 28 |
+| Scons | <a href="https://bitbucket.com/abhisit/firefly-rk3288-kernel/src/master/drivers/gpu/arm/midgard/sconscript">sconscript</a> | 27 |
+| XCode Config | <a href="https://bitbucket.com/365plus/api/src/master/FacebookSDK v4/Samples/Configurations/Project.xcconfig">Project.xcconfig</a> | 26 |
+| BuildStream | <a href="https://bitbucket.com/adam_0/300/src/master/IEEEannot.bst">IEEEannot.bst</a> | 25 |
+| Gradle | <a href="https://bitbucket.com/aalmiray/javafx-gradle/src/master/samples/FullyExpressed/build.gradle">build.gradle</a> | 24 |
+| Mako | <a href="https://bitbucket.com/50onred/sqlalchemy/src/master/doc/build/templates/layout.mako">layout.mako</a> | 19 |
+| Fish | <a href="https://bitbucket.com/ac109158/django-portfolio/src/master/bin/activate.fish">activate.fish</a> | 19 |
+| Cython | <a href="https://bitbucket.com/abosamoor/polyglot2/src/master/polyglot2/polyglot2_inner.pyx">polyglot2_inner.pyx</a> | 19 |
+| Dart | <a href="https://bitbucket.com/adam8810/chrome-app-samples/src/master/dart/dart/balls.dart">balls.dart</a> | 18 |
+| Kotlin | <a href="https://bitbucket.com/adamansky/adamanskybitbucketorg/src/master/kotlin/src/ru/nsu/Lambda.kt">Lambda.kt</a> | 16 |
+| Handlebars | <a href="https://bitbucket.com/adam_paterson/blog/src/master/content/themes/cedar/partials/footer.hbs">footer.hbs</a> | 16 |
+| Closure Template | <a href="https://bitbucket.com/13threbellion/spotify-plugin-for-stash/src/master/src/main/resources/spotify/widget/track-selector/track-selector.soy">track-selector.soy</a> | 15 |
+| V | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/bundle/ctags58/Test/bug1111214.v">bug1111214.v</a> | 14 |
+| nuspec | <a href="https://bitbucket.com/acrotech/dotspatialpcl/src/master/Branches- Obsolete/Topology_NTS/Nuget_DotSpatialCore.nuspec">Nuget_DotSpatialCore.nuspec</a> | 14 |
+| Modula3 | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/perl/t/lib/warnings/mg">mg</a> | 11 |
+| Fragment Shader File | <a href="https://bitbucket.com/adamfallon/maply/src/master/GoogleMaps.framework/Versions/A/Resources/GoogleMaps.bundle/GMSCoreResources.bundle/HybridRoadShader.fsh">HybridRoadShader.fsh</a> | 11 |
+| Ruby HTML | <a href="https://bitbucket.com/aalmacin/rails-learning/src/master/blog/path/ruby/2.0.0/gems/sdoc-0.4.1/lib/rdoc/generator/template/sdoc/_context.rhtml">_context.rhtml</a> | 8 |
+| Stata | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/external/dmlt/external/gpstuff/SuiteSparse/UMFPACK/Tcov/DO">DO</a> | 8 |
+| Jade | <a href="https://bitbucket.com/200bg/aquilo-server/src/master/html/src/index.jade">index.jade</a> | 8 |
+| Cabal | <a href="https://bitbucket.com/3noch/hubble/src/master/hubble.cabal">hubble.cabal</a> | 6 |
+| Bitbucket Pipeline | <a href="https://bitbucket.com/0x0me/sdsget/src/master/bitbucket-pipelines.yml">bitbucket-pipelines.yml</a> | 5 |
+| JSX | <a href="https://bitbucket.com/8hoursdo/rui/src/master/src/lib/components/button.jsx">button.jsx</a> | 5 |
+| SAS | <a href="https://bitbucket.com/a3955269/unlockfs/src/master/libjpegtwrp/jconfig.sas">jconfig.sas</a> | 4 |
+| Elm | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/man/src/util/ati-tbl.elm">ati-tbl.elm</a> | 4 |
+| Mustache | <a href="https://bitbucket.com/4lejandrito/cv-bootstrap/src/master/docs/templates/pages/scaffolding.mustache">scaffolding.mustache</a> | 4 |
+| GN | <a href="https://bitbucket.com/aakef/cci/src/master/README.ctp.gni">README.ctp.gni</a> | 2 |
+| Vertex Shader File | <a href="https://bitbucket.com/aaalexx/gamejam2013/src/master/cocos2d-x-2.1.5/samples/Javascript/Shared/tests/res/Shaders/example_ColorBars.vsh">example_ColorBars.vsh</a> | 2 |
+| Bitbake | <a href="https://bitbucket.com/17twenty/meta-feabhas/src/master/meta-feabhas/recipes-feabhas/images/feabhas-image.bb">feabhas-image.bb</a> | 2 |
+| Emacs Dev Env | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/realtime/src/buffer/java/bufferserver/Project.ede">Project.ede</a> | 2 |
+| ColdFusion | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/demo.cfm">demo.cfm</a> | 1 |
+| Forth | <a href="https://bitbucket.com/a9group/workspace/src/master/Workspace/menu.fr">menu.fr</a> | 1 |
+
 ### What's the typical path length, broken up by language
 
 Given that you can either dump all the files you need in a single directory, or span them out using file paths whats the typical path length and number of directories?
+
+
 
 ### YAML or YML?
 
 Sometime back on the company slack there was a "discussion" with many dying on one hill or the other over the use of .yaml or .yml
 
-The debate can finally(?) be ended. Although I suspect some still prefer their hill.
+The debate can finally(?) be ended. Although I suspect some will still prefer to die on their chosen hill.
 
 | extension | count |
 | ----------- | ----- |
@@ -1225,10 +1388,6 @@ The debate can finally(?) be ended. Although I suspect some still prefer their h
 | yml | 14,076,349 |
 
 ### Who comments most-to-least, by language (95th percentile)
-
-
-### Whats the most commented file?
-
 
 ### Upper lower or mixed case?
 
@@ -1273,6 +1432,7 @@ Shortcomings id love to overcome in the above if I decide to do this again.
  - Not bother with S3. There is little point to pay the bandwidth cost when I was only using it for storage. Better to just stuff into the tar file from the beginning.
  - Invest some time in learning some tool to help with plotting and charting of results.
  - Use a trie or some other data type to keep a full count of filenames rather than the slightly lossy approach I used.
+ - Add an option to scc to check the type of the file based on keywords as examples such as https://bitbucket.org/abellnets/hrossparser/src/master/xml_files/CIDE.C was picked up as being a C file despite obviously being HTML when the content is inspected. To be fair all code counters I tried seem to make this mistake.
 
 ## So why bother?
 
@@ -1281,3 +1441,7 @@ Well I can take some of this information and plug it into searchcode.com, scc. I
 In addition I am working on a tool that helps senior-developer or manager types analyze code looking for size, flaws etc... Assuming you have to watch multiple repositories. You put in some code and it will tell you how maintainable it is and what skills you need to maintain it. Useful for determining if you should buy or maintain some code-base and getting an overview of what your development team is producing. Something like AWS Macie but for code is the angle I am thinking. It's something I need for my day job currently.
 
 I should probably put an email sign up for that here at some point to gather interest for that.
+
+## Raw / Processed Files
+
+I have included a link to the processed files for those who wish to do their own analysis and corrections. If someone wants to host the raw files to allow others to download them which is 83 GB as a gzip file let me know and I can arrange the handover and link here.
