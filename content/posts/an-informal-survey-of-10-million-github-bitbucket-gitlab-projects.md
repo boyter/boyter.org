@@ -66,11 +66,11 @@ One idea raised was to dump the data into a large SQL database. However this mea
 
 Seeing as I produced the JSON using spare compute, I thought why not process the results the same way? Of course there is one issue with this. Pulling 1 TB of data out of S3 is going to cost a lot. In the event the program crashes that is going to be annoying. To reduce costs I wanted to pull all the files down locally and save them for further processing. Handy tip, you really do not want to store lots of little files on disk in a single directory. It sucks for runtime performance and file-systems don't like it.
 
-My answer to this was to pull the files down then store them in a tar file. I could then process that file over and over. Another **very ugly** [Go program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file and I could rerun my questions without having to trawl S3 over and over. I didn't bother with go-routines for this code because I didn't want to max out my server so this limits it to 1 core, and because I didn't want to ensure it was thread-safe.
+My answer to this was another simple [Go program](https://github.com/boyter/scc-data/blob/master/scc-tar/main.go) to pull the files down from S3 then store them in a tar file. I could then process that file over and over. The process itself is done though **very ugly** [program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file so I could re-run my questions without having to trawl S3 over and over. I didn't bother with go-routines for this code for two reasons. The first was that I didn't want to max out my server so this limits it to 1 core. The second being I didn't want to ensure it was thread-safe.
 
 With that done, what I needed was a collection of questions to answer. I used the slack brains trust again and crowd-sourced my work colleagues while I came up with some ideas of my own. The result of this mind meld is included below.
 
-You can find all the code I used to process the JSON including that which pulled it down locally and the ugly python script I used to mangle it into something useful here https://github.com/boyter/scc-data Please don't comment on it, I know the code is ugly and it is something I wrote as a throwaway and I am unlikely to ever read again.
+You can find all the code I used to process the JSON including that which pulled it down locally and the [ugly python script](https://github.com/boyter/scc-data/blob/master/convert_json.py) I used to mangle it into something useful here https://github.com/boyter/scc-data Please don't comment on it, I know the code is ugly and it is something I wrote as a throwaway and I am unlikely to ever look at it again.
 
 ### Data Sources
 
@@ -354,14 +354,251 @@ An extension of the above, but averaged over however many files are in each lang
 
 ### How many lines of code are in a typical file per language?
 
-I suppose you could also look at this as what languages on average have the largest files?
+I suppose you could also look at this as what languages on average have the largest files? Using the average/mean for this pushes the results out to stupidly high numbers. This is because things like sqlite.c for example is joined to make a single file, but nobody ever works on that single large file (I hope!).
 
-| Language | Average (LOC) |
-|---|---|
-| Java | 65 |
-| PHP | 33 |
-| C | 15 |
-| Go | 6 |
+So I tried this out using the median value and there are still some definitions with stupidly high numbers such as Bosque and JavaScript. 
+
+So why not have both? I modified the average value as a comparison but with it ignoring files over 5000 lines and included it and the median.
+
+| language | mean < 5000 | median |
+| -------- | ----------- | ------ |
+| ABAP | 139 | 36 |
+| ASP | 513 | 170 |
+| ASP.NET | 315 | 148 |
+| ATS | 945 | 1411 |
+| AWK | 431 | 774 |
+| ActionScript | 950 | 2676 |
+| Ada | 1179 | 13 |
+| Agda | 466 | 89 |
+| Alchemist | 1040 | 1463 |
+| Alex | 479 | 204 |
+| Alloy | 72 | 66 |
+| Android Interface Definition Language | 119 | 190 |
+| Arvo | 257 | 1508 |
+| AsciiDoc | 519 | 1724 |
+| Assembly | 993 | 225 |
+| AutoHotKey | 360 | 23 |
+| Autoconf | 495 | 144 |
+| BASH | 425 | 26 |
+| Basic | 476 | 847 |
+| Batch | 178 | 208 |
+| Bazel | 226 | 20 |
+| Bitbake | 436 | 10 |
+| Bitbucket Pipeline | 19 | 13 |
+| Boo | 898 | 924 |
+| Bosque | 58 | 199238 |
+| Brainfuck | 141 | 177 |
+| BuildStream | 1955 | 2384 |
+| C | 1052 | 5774 |
+| C Header | 869 | 126460 |
+| C Shell | 128 | 77 |
+| C# | 1215 | 1138 |
+| C++ | 1166 | 232 |
+| C++ Header | 838 | 125 |
+| CMake | 750 | 15 |
+| COBOL | 422 | 24 |
+| CSS | 729 | 103 |
+| CSV | 411 | 12 |
+| Cabal | 116 | 13 |
+| Cargo Lock | 814 | 686 |
+| Cassius | 124 | 634 |
+| Ceylon | 207 | 15 |
+| Clojure | 521 | 19 |
+| ClojureScript | 504 | 195 |
+| Closure Template | 343 | 75 |
+| CoffeeScript | 342 | 168 |
+| ColdFusion | 686 | 5 |
+| ColdFusion CFScript | 1231 | 1829 |
+| Coq | 560 | 29250 |
+| Creole | 85 | 20 |
+| Crystal | 973 | 119 |
+| Cython | 853 | 1738 |
+| D | 397 | 10 |
+| Dart | 583 | 500 |
+| Device Tree | 739 | 44002 |
+| Dhall | 124 | 99 |
+| Docker ignore | 10 | 2 |
+| Dockerfile | 76 | 17 |
+| Document Type Definition | 522 | 1202 |
+| Elixir | 402 | 192 |
+| Elm | 438 | 121 |
+| Emacs Dev Env | 646 | 755 |
+| Emacs Lisp | 653 | 15 |
+| Erlang | 930 | 203 |
+| Expect | 419 | 195 |
+| Extensible Stylesheet Language Transformations | 442 | 600 |
+| F# | 384 | 64 |
+| F* | 335 | 65 |
+| FIDL | 655 | 1502 |
+| FORTRAN Legacy | 277 | 1925 |
+| FORTRAN Modern | 636 | 244 |
+| Fish | 168 | 74 |
+| Flow9 | 368 | 32 |
+| Forth | 256 | 62 |
+| Fragment Shader File | 309 | 11 |
+| Freemarker Template | 522 | 20 |
+| Futhark | 175 | 257 |
+| GDScript | 401 | 1 |
+| GLSL | 380 | 29 |
+| GN | 950 | 8866 |
+| Game Maker Language | 710 | 516 |
+| Game Maker Project | 1290 | 374 |
+| Gherkin Specification | 516 | 2386 |
+| Go | 780 | 558 |
+| Go Template | 411 | 25342 |
+| Gradle | 228 | 22 |
+| Groovy | 734 | 13 |
+| HEX | 1002 | 17208 |
+| HTML | 556 | 1814 |
+| Hamlet | 220 | 70 |
+| Handlebars | 506 | 3162 |
+| Happy | 1617 | 0 |
+| Haskell | 656 | 17 |
+| Haxe | 865 | 9607 |
+| IDL | 386 | 210 |
+| Idris | 285 | 42 |
+| Intel HEX | 1256 | 106650 |
+| Isabelle | 792 | 1736 |
+| JAI | 268 | 41 |
+| JSON | 289 | 39 |
+| JSONL | 43 | 2 |
+| JSX | 393 | 24 |
+| Jade | 299 | 192 |
+| Janet | 508 | 32 |
+| Java | 1165 | 697 |
+| JavaScript | 894 | 73979 |
+| JavaServer Pages | 644 | 924 |
+| Jenkins Buildfile | 79 | 6 |
+| Jinja | 465 | 3914 |
+| Julia | 539 | 1031 |
+| Julius | 113 | 12 |
+| Jupyter | 1361 | 688 |
+| Just | 62 | 72 |
+| Korn Shell | 427 | 776 |
+| Kotlin | 554 | 169 |
+| LD Script | 521 | 439 |
+| LESS | 1086 | 17 |
+| LEX | 1014 | 214 |
+| LOLCODE | 129 | 4 |
+| LaTeX | 895 | 7482 |
+| Lean | 181 | 9 |
+| License | 266 | 20 |
+| Lisp | 746 | 1201 |
+| Lua | 820 | 559 |
+| Lucius | 284 | 445 |
+| Luna | 85 | 48 |
+| MQL Header | 793 | 10337 |
+| MQL4 | 799 | 3168 |
+| MQL5 | 384 | 631 |
+| MSBuild | 558 | 160 |
+| MUMPS | 924 | 98191 |
+| Macromedia eXtensible Markup Language | 500 | 20 |
+| Madlang | 368 | 340 |
+| Makefile | 309 | 20 |
+| Mako | 269 | 243 |
+| Markdown | 206 | 10 |
+| Meson | 546 | 205 |
+| Modula3 | 162 | 17 |
+| Module-Definition | 489 | 7 |
+| Monkey C | 140 | 28 |
+| Mustache | 298 | 8083 |
+| Nim | 352 | 3 |
+| Nix | 240 | 78 |
+| OCaml | 718 | 68 |
+| Objective C | 1111 | 17103 |
+| Objective C++ | 903 | 244 |
+| Opalang | 151 | 29 |
+| Org | 523 | 24 |
+| Oz | 360 | 7132 |
+| PHP | 964 | 14660 |
+| PKGBUILD | 131 | 19 |
+| PSL Assertion | 149 | 108 |
+| Pascal | 1044 | 497 |
+| Patch | 676 | 12 |
+| Perl | 762 | 11 |
+| Plain Text | 352 | 841 |
+| Polly | 12 | 26 |
+| Pony | 338 | 42488 |
+| Powershell | 652 | 199 |
+| Processing | 800 | 903 |
+| Prolog | 282 | 6 |
+| Properties File | 184 | 18 |
+| Protocol Buffers | 576 | 8080 |
+| Puppet | 499 | 660 |
+| PureScript | 598 | 363 |
+| Python | 879 | 258 |
+| Q# | 475 | 5417 |
+| QCL | 548 | 3 |
+| QML | 815 | 6067 |
+| R | 566 | 20 |
+| Rakefile | 122 | 7 |
+| Razor | 713 | 1842 |
+| ReStructuredText | 735 | 5049 |
+| Report Definition Language | 1389 | 34337 |
+| Robot Framework | 292 | 115 |
+| Ruby | 739 | 4942 |
+| Ruby HTML | 326 | 192 |
+| Rust | 1007 | 4 |
+| SAS | 233 | 65 |
+| SKILL | 526 | 123 |
+| SPDX | 1242 | 379 |
+| SQL | 466 | 143 |
+| SRecode Template | 796 | 534 |
+| SVG | 796 | 1538 |
+| Sass | 682 | 14653 |
+| Scala | 612 | 661 |
+| Scheme | 566 | 6 |
+| Scons | 545 | 6042 |
+| Shell | 304 | 4 |
+| Smarty Template | 392 | 15 |
+| Softbridge Basic | 2067 | 3 |
+| Specman e | 127 | 0 |
+| Spice Netlist | 906 | 1465 |
+| Standard ML (SML) | 478 | 75 |
+| Stata | 200 | 12 |
+| Stylus | 505 | 214 |
+| Swift | 683 | 663 |
+| Swig | 1031 | 4540 |
+| SystemVerilog | 563 | 830 |
+| Systemd | 127 | 26 |
+| TCL | 774 | 42396 |
+| TOML | 100 | 17 |
+| TaskPaper | 37 | 7 |
+| TeX | 804 | 905 |
+| Thrift | 545 | 329 |
+| Twig Template | 713 | 9907 |
+| TypeScript | 461 | 10 |
+| TypeScript Typings | 1465 | 236866 |
+| Unreal Script | 795 | 927 |
+| Ur/Web | 429 | 848 |
+| Ur/Web Project | 33 | 26 |
+| V | 704 | 5711 |
+| VHDL | 952 | 1452 |
+| Vala | 603 | 2 |
+| Varnish Configuration | 203 | 77 |
+| Verilog | 198 | 2 |
+| Verilog Args File | 456 | 481 |
+| Vertex Shader File | 168 | 74 |
+| Vim Script | 555 | 25 |
+| Visual Basic | 738 | 1050 |
+| Visual Basic for Applications | 979 | 936 |
+| Vue | 732 | 242 |
+| Wolfram | 940 | 973 |
+| Wren | 358 | 279258 |
+| XAML | 703 | 24 |
+| XCode Config | 200 | 11 |
+| XML | 605 | 1033 |
+| XML Schema | 1008 | 248 |
+| Xtend | 710 | 120 |
+| YAML | 165 | 47327 |
+| Zig | 188 | 724 |
+| Zsh | 300 | 9 |
+| gitignore | 33 | 3 |
+| ignore | 6 | 2 |
+| m4 | 959 | 807 |
+| nuspec | 187 | 193 |
+| sed | 82 | 33 |
+
 
 ### What are the most common filenames?
 
