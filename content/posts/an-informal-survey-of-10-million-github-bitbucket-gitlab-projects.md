@@ -3,24 +3,24 @@ title: An informal survey of 10 million git projects from Github, Bitbucket and 
 date: 2019-09-20
 ---
 
-The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) counts lines of code, comments and makes a guess at how complex some code is. The latter is something you need a good sample size to make use of. So I thought I would try running it at all the source code I could get my hands on.
+The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) (and now supported by many excellent people) counts lines of code, comments and make a complexity estimate for files inside a code repository. The latter is something you need a good sample size to make good use of. Otherwise what does "This file has complexity 10" tell you? So I thought I would try running it at all the source code I could get my hands on.
 
 However if I am going to run it over all that code which is going to be expensive computationally I may as well try to get some interesting numbers out of it. As such I decided to record everything as I went and produce this post.
 
-In this post I am looking at all the code I downloaded and processed using `scc`. The data set I looked at includes,
+In short I downloaded and processed a lot of code using `scc`. The data set I looked at includes,
 
- - **9,100,083** repositories
+ - **9,985,051** total repositories
+ - **9,100,083** repositories with at least 1 known file
  - **884,968** empty repositories (those with no files)
- - **58,389,641** files processed
+ - **58,389,641** files in all repositories
  - **40,736,530,379,778** bytes processed (40 TB)
- - **1,086,723,618,560** lines processed
+ - **1,086,723,618,560** lines identified
  - **816,822,273,469** code lines identified
  - **124,382,152,510** blank lines identified
  - **145,519,192,581** comment lines identified
  - **71,884,867,919** complexity count according to scc rules
- - **177,938** seconds to process 1TB of JSON (49 hours)
 
-It took about 5 weeks to download and run `scc` over all of the repositories collecting all of the data. It took just over 49 hours to crunch and process the results each of the processor which happened about 3 times in total.
+It took about 5 weeks to download and run `scc` over all of the repositories collecting all of the data. It took just over 49 hours to crunch and process the results which was just over 1TB of JSON.
 
 ## Quicklinks
 
@@ -1438,7 +1438,7 @@ Shortcomings id love to overcome in the above if I decide to do this again.
 
 Well I can take some of this information and plug it into searchcode.com, scc. It's potentially very useful to know how your project compares to others out there. Besides it was a fun way to spend a few days solving some interesting problems.
 
-In addition I am working on a tool that helps senior-developer or manager types analyze code looking for size, flaws etc... Assuming you have to watch multiple repositories. You put in some code and it will tell you how maintainable it is and what skills you need to maintain it. Useful for determining if you should buy or maintain some code-base and getting an overview of what your development team is producing. Something like AWS Macie but for code is the angle I am thinking. It's something I need for my day job currently.
+In addition I am working on a tool that helps senior-developer or manager types analyze code looking for size, flaws etc... Assuming you have to watch multiple repositories. You put in some code and it will tell you how maintainable it is and what skills you need to maintain it. Useful for determining if you should buy or maintain some code-base and getting an overview of what your development team is producing. Something like AWS Macie but for code is the angle I am thinking. It's something I need for my day job and I suspect others may find use in it, or at least thats the theory.
 
 I should probably put an email sign up for that here at some point to gather interest for that.
 
