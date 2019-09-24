@@ -1,5 +1,5 @@
 ---
-title: An informal survey of 10 million git projects from Github, Bitbucket and Gitlab
+title: Downloading and Processing 40 TB of code from 10 million git projects using a dedicated server and Goroutines
 date: 2019-09-20
 ---
 
@@ -46,9 +46,9 @@ This worked brilliantly. However the problem with the above was firstly the cost
 
 Since I was already in AWS the hip solution would be to dump the messages into SQS and pull from this queue into EC2 instances or fargate for processing. Then scale out like crazy. However despite working in AWS in my day job I have always believed in [taco bell programming](http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html) and as it was only 12 million repositories I opted to implement a simpler solution.
 
-Running this computation locally was out due to the abysmal state of the internet in Australia. However I do run [searchcode.com](https://searchcode.com/) fairly lean. As such it usually has a lot of spare compute. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
+Running this computation locally was out due to the abysmal state of the internet in Australia. However I do run [searchcode.com](https://searchcode.com/) fairly lean using dedicated servers from Hetzner. As such it usually has a lot of spare compute. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
 
-I didn't quite taco bell program the solution using bash and gnu tools. What I did was write a simple [Go program](https://github.com/boyter/scc-data/blob/master/process/main.go) to spin up 32 go-routines which read from a channel then spawned `git` and `scc` subprocesses before writing the JSON output into S3. I actually wrote a Python solution at first, but having to install the pip dependencies on my clean varnish box seemed like a bad idea and it keep breaking in odd ways which I didn't feel like debugging.
+I didn't quite taco bell program the solution using bash and gnu tools. What I did was write a simple [Go program](https://github.com/boyter/scc-data/blob/master/process/main.go) to spin up 32 go-routines which read from a channel, spawned `git` and `scc` subprocesses before writing the JSON output into S3. I actually wrote a Python solution at first, but having to install the pip dependencies on my clean varnish box seemed like a bad idea and it keep breaking in odd ways which I didn't feel like debugging.
 
 Running this on the box produced the following sort of metrics in htop, and the multiple git/scc processes running suggested that everything was working as expected, which I confirmed by looking at the results in S3.
 
@@ -60,15 +60,17 @@ Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHu
 
 The first thought I had was AWS Athena. But since it's going to cost about $2.50 USD **per query** with the amount of data I had I quickly looked for an alternative.
 
-I posted the question on the company slack because hey why should I solve every issue by myself.
+I posted the question on the company slack because why should I solve every issue alone.
 
-One idea raised was to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it multiple times. This feels wasteful because we could just process the data as we read it. I also was worried about building a database this large and then adding the indexes to ensure things run quickly enough.
+One idea raised was to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it multiple times. This feels wasteful because we could just process the data as we read it. I also was worried about building a database this large. As with just data it would be over 1 TB in size without indexes.
 
-Seeing as I produced the JSON using spare compute, I thought why not process the results the same way? Of course there is one issue with this. Pulling 1 TB of data out of S3 is going to cost a lot. In the event the program crashes thats going to be annoying. I wanted to pull all the files down locally. One issue with this is that you really do not want to store lots of little files on disk in a single directory. It sucks for runtime performance and file-systems don't like it.
+Seeing as I produced the JSON using spare compute, I thought why not process the results the same way? Of course there is one issue with this. Pulling 1 TB of data out of S3 is going to cost a lot. In the event the program crashes that is going to be annoying. To reduce costs I wanted to pull all the files down locally and save them for further processing. Handy tip, you really do not want to store lots of little files on disk in a single directory. It sucks for runtime performance and file-systems don't like it.
 
-My answer to this was to pull them into a tar file and then process that. Another **very ugly** [Go program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file and I could rerun my questions without having to trawl S3 over and over.
+My answer to this was to pull the files down then store them in a tar file. I could then process that file over and over. Another **very ugly** [Go program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file and I could rerun my questions without having to trawl S3 over and over. I didn't bother with go-routines for this code because I didn't want to max out my server so this limits it to 1 core, and because I didn't want to ensure it was thread-safe.
 
 With that done, what I needed was a collection of questions to answer. I used the slack brains trust again and crowd-sourced my work colleagues while I came up with some ideas of my own. The result of this mind meld is included below.
+
+You can find all the code I used to process the JSON including that which pulled it down locally and the ugly python script I used to mangle it into something useful here https://github.com/boyter/scc-data Please don't comment on it, I know the code is ugly and it is something I wrote as a throwaway and I am unlikely to ever read again.
 
 ### Data Sources
 
@@ -79,6 +81,8 @@ From the three sources, github, bitbucket and gitlab how many projects came from
 | github | 9,680,111 |
 | bitbucket | 248,217 |
 | gitlab | 56,722 |
+
+Sorry to the GitHub/Bitbucket/GitLab teams if you read this. If this caused any issues for you (I doubt it) I will shout you a refreshing beverage of your choice should we ever meet.
 
 ### How many files in a repository?
 
@@ -345,11 +349,12 @@ The full list is included below.
 
 ### How many files in a repository per language?
 
-An extension of the above, but broken down by language.
+An extension of the above, but averaged over however many files are in each language. So of projects that contain java how many java files exist in that project, and on average what does that work out to be?
 
-### How many lines of code (LOC) are in a typical file per language?
 
-What languages on average have the largest files?
+### How many lines of code are in a typical file per language?
+
+I suppose you could also look at this as what languages on average have the largest files?
 
 | Language | Average (LOC) |
 |---|---|
@@ -357,10 +362,6 @@ What languages on average have the largest files?
 | PHP | 33 |
 | C | 15 |
 | Go | 6 |
-
-### Do projects with few files have large files?
-
-Do projects that have less files have larger files?
 
 ### What are the most common filenames?
 
