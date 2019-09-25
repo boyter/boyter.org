@@ -1,5 +1,5 @@
 ---
-title: Downloading and Processing 40 TB of code from 10 million git projects using a dedicated server and Goroutines
+title: Downloading and processing 40 TB of code from 10 million git projects using a dedicated server and Goroutines
 date: 2019-09-20
 ---
 
@@ -46,7 +46,7 @@ This worked brilliantly. However the problem with the above was firstly the cost
 
 Since I was already in AWS the hip solution would be to dump the messages into SQS and pull from this queue into EC2 instances or fargate for processing. Then scale out like crazy. However despite working in AWS in my day job I have always believed in [taco bell programming](http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html) and as it was only 12 million repositories I opted to implement a simpler solution.
 
-Running this computation locally was out due to the abysmal state of the internet in Australia. However I do run [searchcode.com](https://searchcode.com/) fairly lean using dedicated servers from Hetzner. As such it usually has a lot of spare compute. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
+Running this computation locally was out due to the abysmal state of the internet in Australia. However I do run [searchcode.com](https://searchcode.com/) fairly lean using dedicated servers from Hetzner. These boxes are quite powerful, i7 Quad Core 32 GB RAM machines. As such they usually has a lot of spare compute based on how I use them. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
 
 I didn't quite taco bell program the solution using bash and gnu tools. What I did was write a simple [Go program](https://github.com/boyter/scc-data/blob/master/process/main.go) to spin up 32 go-routines which read from a channel, spawned `git` and `scc` subprocesses before writing the JSON output into S3. I actually wrote a Python solution at first, but having to install the pip dependencies on my clean varnish box seemed like a bad idea and it keep breaking in odd ways which I didn't feel like debugging.
 
@@ -354,7 +354,7 @@ An extension of the above, but averaged over however many files are in each lang
 
 ### How many lines of code are in a typical file per language?
 
-I suppose you could also look at this as what languages on average have the largest files? Using the average/mean for this pushes the results out to stupidly high numbers. This is because things like sqlite.c for example is joined to make a single file, but nobody ever works on that single large file (I hope!).
+I suppose you could also look at this as what languages on average have the largest files? However to avoid that I have sorted by name because its not a content. Using the average/mean for this pushes the results out to stupidly high numbers. This is because things like sqlite.c for example is joined to make a single file, but nobody ever works on that single large file (I hope!).
 
 So I tried this out using the median value and there are still some definitions with stupidly high numbers such as Bosque and JavaScript. 
 
@@ -365,17 +365,17 @@ So why not have both? I modified the average value as a comparison but with it i
 | ABAP | 139 | 36 |
 | ASP | 513 | 170 |
 | ASP.NET | 315 | 148 |
-| ATS | 945 | 1411 |
+| ATS | 945 | 1,411 |
 | AWK | 431 | 774 |
-| ActionScript | 950 | 2676 |
-| Ada | 1179 | 13 |
+| ActionScript | 950 | 2,676 |
+| Ada | 1,179 | 13 |
 | Agda | 466 | 89 |
-| Alchemist | 1040 | 1463 |
+| Alchemist | 1,040 | 1,463 |
 | Alex | 479 | 204 |
 | Alloy | 72 | 66 |
 | Android Interface Definition Language | 119 | 190 |
-| Arvo | 257 | 1508 |
-| AsciiDoc | 519 | 1724 |
+| Arvo | 257 | 1,508 |
+| AsciiDoc | 519 | 1,724 |
 | Assembly | 993 | 225 |
 | AutoHotKey | 360 | 23 |
 | Autoconf | 495 | 144 |
@@ -386,14 +386,14 @@ So why not have both? I modified the average value as a comparison but with it i
 | Bitbake | 436 | 10 |
 | Bitbucket Pipeline | 19 | 13 |
 | Boo | 898 | 924 |
-| Bosque | 58 | 199238 |
+| Bosque | 58 | 199,238 |
 | Brainfuck | 141 | 177 |
-| BuildStream | 1955 | 2384 |
-| C | 1052 | 5774 |
-| C Header | 869 | 126460 |
+| BuildStream | 1,955 | 2,384 |
+| C | 1,052 | 5,774 |
+| C Header | 869 | 126,460 |
 | C Shell | 128 | 77 |
-| C# | 1215 | 1138 |
-| C++ | 1166 | 232 |
+| C# | 1,215 | 1,138 |
+| C++ | 1,166 | 232 |
 | C++ Header | 838 | 125 |
 | CMake | 750 | 15 |
 | COBOL | 422 | 24 |
@@ -408,18 +408,18 @@ So why not have both? I modified the average value as a comparison but with it i
 | Closure Template | 343 | 75 |
 | CoffeeScript | 342 | 168 |
 | ColdFusion | 686 | 5 |
-| ColdFusion CFScript | 1231 | 1829 |
-| Coq | 560 | 29250 |
+| ColdFusion CFScript | 1,231 | 1,829 |
+| Coq | 560 | 29,250 |
 | Creole | 85 | 20 |
 | Crystal | 973 | 119 |
-| Cython | 853 | 1738 |
+| Cython | 853 | 1,738 |
 | D | 397 | 10 |
 | Dart | 583 | 500 |
-| Device Tree | 739 | 44002 |
+| Device Tree | 739 | 44,002 |
 | Dhall | 124 | 99 |
 | Docker ignore | 10 | 2 |
 | Dockerfile | 76 | 17 |
-| Document Type Definition | 522 | 1202 |
+| Document Type Definition | 522 | 1,202 |
 | Elixir | 402 | 192 |
 | Elm | 438 | 121 |
 | Emacs Dev Env | 646 | 755 |
@@ -429,8 +429,8 @@ So why not have both? I modified the average value as a comparison but with it i
 | Extensible Stylesheet Language Transformations | 442 | 600 |
 | F# | 384 | 64 |
 | F* | 335 | 65 |
-| FIDL | 655 | 1502 |
-| FORTRAN Legacy | 277 | 1925 |
+| FIDL | 655 | 1,502 |
+| FORTRAN Legacy | 277 | 1,925 |
 | FORTRAN Modern | 636 | 244 |
 | Fish | 168 | 74 |
 | Flow9 | 368 | 32 |
@@ -440,58 +440,58 @@ So why not have both? I modified the average value as a comparison but with it i
 | Futhark | 175 | 257 |
 | GDScript | 401 | 1 |
 | GLSL | 380 | 29 |
-| GN | 950 | 8866 |
+| GN | 950 | 8,866 |
 | Game Maker Language | 710 | 516 |
-| Game Maker Project | 1290 | 374 |
-| Gherkin Specification | 516 | 2386 |
+| Game Maker Project | 1,290 | 374 |
+| Gherkin Specification | 516 | 2,386 |
 | Go | 780 | 558 |
-| Go Template | 411 | 25342 |
+| Go Template | 411 | 25,342 |
 | Gradle | 228 | 22 |
 | Groovy | 734 | 13 |
-| HEX | 1002 | 17208 |
-| HTML | 556 | 1814 |
+| HEX | 1,002 | 17,208 |
+| HTML | 556 | 1,814 |
 | Hamlet | 220 | 70 |
-| Handlebars | 506 | 3162 |
-| Happy | 1617 | 0 |
+| Handlebars | 506 | 3,162 |
+| Happy | 1,617 | 0 |
 | Haskell | 656 | 17 |
-| Haxe | 865 | 9607 |
+| Haxe | 865 | 9,607 |
 | IDL | 386 | 210 |
 | Idris | 285 | 42 |
-| Intel HEX | 1256 | 106650 |
-| Isabelle | 792 | 1736 |
+| Intel HEX | 1,256 | 106,650 |
+| Isabelle | 792 | 1,736 |
 | JAI | 268 | 41 |
 | JSON | 289 | 39 |
 | JSONL | 43 | 2 |
 | JSX | 393 | 24 |
 | Jade | 299 | 192 |
 | Janet | 508 | 32 |
-| Java | 1165 | 697 |
-| JavaScript | 894 | 73979 |
+| Java | 1,165 | 697 |
+| JavaScript | 894 | 73,979 |
 | JavaServer Pages | 644 | 924 |
 | Jenkins Buildfile | 79 | 6 |
-| Jinja | 465 | 3914 |
-| Julia | 539 | 1031 |
+| Jinja | 465 | 3,914 |
+| Julia | 539 | 1,031 |
 | Julius | 113 | 12 |
-| Jupyter | 1361 | 688 |
+| Jupyter | 1,361 | 688 |
 | Just | 62 | 72 |
 | Korn Shell | 427 | 776 |
 | Kotlin | 554 | 169 |
 | LD Script | 521 | 439 |
-| LESS | 1086 | 17 |
-| LEX | 1014 | 214 |
+| LESS | 1,086 | 17 |
+| LEX | 1,014 | 214 |
 | LOLCODE | 129 | 4 |
-| LaTeX | 895 | 7482 |
+| LaTeX | 895 | 7,482 |
 | Lean | 181 | 9 |
 | License | 266 | 20 |
-| Lisp | 746 | 1201 |
+| Lisp | 746 | 1,201 |
 | Lua | 820 | 559 |
 | Lucius | 284 | 445 |
 | Luna | 85 | 48 |
-| MQL Header | 793 | 10337 |
-| MQL4 | 799 | 3168 |
+| MQL Header | 793 | 10,337 |
+| MQL4 | 799 | 3,168 |
 | MQL5 | 384 | 631 |
 | MSBuild | 558 | 160 |
-| MUMPS | 924 | 98191 |
+| MUMPS | 924 | 98,191 |
 | Macromedia eXtensible Markup Language | 500 | 20 |
 | Madlang | 368 | 340 |
 | Makefile | 309 | 20 |
@@ -501,96 +501,96 @@ So why not have both? I modified the average value as a comparison but with it i
 | Modula3 | 162 | 17 |
 | Module-Definition | 489 | 7 |
 | Monkey C | 140 | 28 |
-| Mustache | 298 | 8083 |
+| Mustache | 298 | 8,083 |
 | Nim | 352 | 3 |
 | Nix | 240 | 78 |
 | OCaml | 718 | 68 |
-| Objective C | 1111 | 17103 |
+| Objective C | 1,111 | 17,103 |
 | Objective C++ | 903 | 244 |
 | Opalang | 151 | 29 |
 | Org | 523 | 24 |
-| Oz | 360 | 7132 |
-| PHP | 964 | 14660 |
+| Oz | 360 | 7,132 |
+| PHP | 964 | 14,660 |
 | PKGBUILD | 131 | 19 |
 | PSL Assertion | 149 | 108 |
-| Pascal | 1044 | 497 |
+| Pascal | 1,044 | 497 |
 | Patch | 676 | 12 |
 | Perl | 762 | 11 |
 | Plain Text | 352 | 841 |
 | Polly | 12 | 26 |
-| Pony | 338 | 42488 |
+| Pony | 338 | 42,488 |
 | Powershell | 652 | 199 |
 | Processing | 800 | 903 |
 | Prolog | 282 | 6 |
 | Properties File | 184 | 18 |
-| Protocol Buffers | 576 | 8080 |
+| Protocol Buffers | 576 | 8,080 |
 | Puppet | 499 | 660 |
 | PureScript | 598 | 363 |
 | Python | 879 | 258 |
-| Q# | 475 | 5417 |
+| Q# | 475 | 5,417 |
 | QCL | 548 | 3 |
-| QML | 815 | 6067 |
+| QML | 815 | 6,067 |
 | R | 566 | 20 |
 | Rakefile | 122 | 7 |
-| Razor | 713 | 1842 |
-| ReStructuredText | 735 | 5049 |
-| Report Definition Language | 1389 | 34337 |
+| Razor | 713 | 1,842 |
+| ReStructuredText | 735 | 5,049 |
+| Report Definition Language | 1,389 | 34,337 |
 | Robot Framework | 292 | 115 |
-| Ruby | 739 | 4942 |
+| Ruby | 739 | 4,942 |
 | Ruby HTML | 326 | 192 |
-| Rust | 1007 | 4 |
+| Rust | 1,007 | 4 |
 | SAS | 233 | 65 |
 | SKILL | 526 | 123 |
-| SPDX | 1242 | 379 |
+| SPDX | 1,242 | 379 |
 | SQL | 466 | 143 |
 | SRecode Template | 796 | 534 |
-| SVG | 796 | 1538 |
-| Sass | 682 | 14653 |
+| SVG | 796 | 1,538 |
+| Sass | 682 | 14,653 |
 | Scala | 612 | 661 |
 | Scheme | 566 | 6 |
-| Scons | 545 | 6042 |
+| Scons | 545 | 6,042 |
 | Shell | 304 | 4 |
 | Smarty Template | 392 | 15 |
-| Softbridge Basic | 2067 | 3 |
+| Softbridge Basic | 2,067 | 3 |
 | Specman e | 127 | 0 |
-| Spice Netlist | 906 | 1465 |
+| Spice Netlist | 906 | 1,465 |
 | Standard ML (SML) | 478 | 75 |
 | Stata | 200 | 12 |
 | Stylus | 505 | 214 |
 | Swift | 683 | 663 |
-| Swig | 1031 | 4540 |
+| Swig | 1,031 | 4,540 |
 | SystemVerilog | 563 | 830 |
 | Systemd | 127 | 26 |
-| TCL | 774 | 42396 |
+| TCL | 774 | 42,396 |
 | TOML | 100 | 17 |
 | TaskPaper | 37 | 7 |
 | TeX | 804 | 905 |
 | Thrift | 545 | 329 |
-| Twig Template | 713 | 9907 |
+| Twig Template | 713 | 9,907 |
 | TypeScript | 461 | 10 |
-| TypeScript Typings | 1465 | 236866 |
+| TypeScript Typings | 1,465 | 236,866 |
 | Unreal Script | 795 | 927 |
 | Ur/Web | 429 | 848 |
 | Ur/Web Project | 33 | 26 |
-| V | 704 | 5711 |
-| VHDL | 952 | 1452 |
+| V | 704 | 5,711 |
+| VHDL | 952 | 1,452 |
 | Vala | 603 | 2 |
 | Varnish Configuration | 203 | 77 |
 | Verilog | 198 | 2 |
 | Verilog Args File | 456 | 481 |
 | Vertex Shader File | 168 | 74 |
 | Vim Script | 555 | 25 |
-| Visual Basic | 738 | 1050 |
+| Visual Basic | 738 | 1,050 |
 | Visual Basic for Applications | 979 | 936 |
 | Vue | 732 | 242 |
 | Wolfram | 940 | 973 |
-| Wren | 358 | 279258 |
+| Wren | 358 | 279,258 |
 | XAML | 703 | 24 |
 | XCode Config | 200 | 11 |
-| XML | 605 | 1033 |
-| XML Schema | 1008 | 248 |
+| XML | 605 | 1,033 |
+| XML Schema | 1,008 | 248 |
 | Xtend | 710 | 120 |
-| YAML | 165 | 47327 |
+| YAML | 165 | 47,327 |
 | Zig | 188 | 724 |
 | Zsh | 300 | 9 |
 | gitignore | 33 | 3 |
@@ -598,7 +598,6 @@ So why not have both? I modified the average value as a comparison but with it i
 | m4 | 959 | 807 |
 | nuspec | 187 | 193 |
 | sed | 82 | 33 |
-
 
 ### What are the most common filenames?
 
@@ -675,8 +674,8 @@ This is an interesting one. Which repositories have an explicit license file som
 
 | has license | count |
 | ----------- | ----- |
-| yes | 6,502,753 |
-| no | 2,597,330 |
+| no | 6,502,753 |
+| yes | 2,597,330 |
 
 ![scc-data license count](/static/an-informal-survey/hasLicense.png#center)
 
