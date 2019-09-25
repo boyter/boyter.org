@@ -3,7 +3,7 @@ title: Downloading and processing 40 TB of code from 10 million git projects usi
 date: 2019-09-20
 ---
 
-The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) (and now supported by many excellent people) counts lines of code, comments and make a complexity estimate for files inside a code repository. The latter is something you need a good sample size to make good use of. Otherwise what does "This file has complexity 10" tell you? So I thought I would try running it at all the source code I could get my hands on.
+The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) (and now modified and supported by many excellent people) counts lines of code, comments and make a complexity estimate for files inside a code repository. The latter is something you need a good sample size to make good use of. Otherwise what does "This file has complexity 10" tell you? So I thought I would try running it at all the source code I could get my hands on.
 
 However if I am going to run it over all that code which is going to be expensive computationally I may as well try to get some interesting numbers out of it. As such I decided to record everything as I went and produce this post.
 
@@ -38,15 +38,55 @@ Since I run [searchcode.com](https://searchcode.com/) I already have a collectio
 
 So now I have 12 million or so git repositories which I need to download and process.
 
-A while back I wrote code to create github badges using `scc` https://boyter.org/posts/sloc-cloc-code-badges/ and since part of that included caching the results, I modified it slightly to cache the results into S3.
+When you run `scc` you can choose to have it output the results in JSON and optionally saving this file to disk like so ` scc --format json --output myfile.json main.go` the results of which look like the following,
 
-With the badge code working in AWS using lambda, I took the exported list and wrote about 15 lines of python to clean the format and make a request to the endpoint. I threw in some python multiprocessing to fork 32 processes to churn through them. 
+{{<highlight json>}}
+[
+  {
+    "Blank": 115,
+    "Bytes": 0,
+    "Code": 423,
+    "Comment": 30,
+    "Complexity": 40,
+    "Count": 1,
+    "Files": [
+      {
+        "Binary": false,
+        "Blank": 115,
+        "Bytes": 20396,
+        "Callback": null,
+        "Code": 423,
+        "Comment": 30,
+        "Complexity": 40,
+        "Content": null,
+        "Extension": "go",
+        "Filename": "main.go",
+        "Hash": null,
+        "Language": "Go",
+        "Lines": 568,
+        "Location": "main.go",
+        "PossibleLanguages": [
+          "Go"
+        ],
+        "WeightedComplexity": 0
+      }
+    ],
+    "Lines": 568,
+    "Name": "Go",
+    "WeightedComplexity": 0
+  }
+]
+{{</highlight>}}
 
-This worked brilliantly. However the problem with the above was firstly the cost, and secondly because lambda behind API-Gateway/ALB has a 30 second timeout it couldn't process large repositories fast enough. I knew going in that this was not going to be the most cost effective solution but it could have been close to $100 which would have been fine. After processing 1 million or so the cost was about $60 and since I didn't want a $700 AWS bill I decided to rethink my solution.
+A while back I wrote code to create github badges using `scc` https://boyter.org/posts/sloc-cloc-code-badges/ and since part of that included caching the results, I modified it slightly to cache the results into S3. This in effect was saving the above JSON as a file.
 
-Since I was already in AWS the hip solution would be to dump the messages into SQS and pull from this queue into EC2 instances or fargate for processing. Then scale out like crazy. However despite working in AWS in my day job I have always believed in [taco bell programming](http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html) and as it was only 12 million repositories I opted to implement a simpler solution.
+With the badge code working in AWS using lambda, I took the exported list and wrote about 15 lines of python to clean the format and make a request to the endpoint. I threw in some python multiprocessing to fork 32 processes to call the endpoint reasonably quickly. 
 
-Running this computation locally was out due to the abysmal state of the internet in Australia. However I do run [searchcode.com](https://searchcode.com/) fairly lean using dedicated servers from Hetzner. These boxes are quite powerful, i7 Quad Core 32 GB RAM machines. As such they usually has a lot of spare compute based on how I use them. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
+This worked brilliantly. However the problem with the above was firstly the cost, and secondly because lambda behind API-Gateway/ALB has a 30 second timeout it couldn't process large repositories fast enough. I knew going in that this was not going to be the most cost effective solution but it could have been close to $100 which would have been fine. After processing 1 million or so the cost was about $60 and since I didn't want a $700 AWS bill I decided to rethink my solution. Keep in mind that was mostly storage and CPU, or what was needed to collect this information. Assuming I processed or exported the data it was going to increase the cost considerably.
+
+Since I was already in AWS the hip solution would be to dump the url's as messages into SQS and pull from it using EC2 instances or fargate for processing. Then scale out like crazy. However despite working in AWS in my day job I have always believed in [taco bell programming](http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html) and as it was only 12 million repositories I opted to implement a simpler (cheaper) solution.
+
+Running this computation locally was out due to the abysmal state of the internet in Australia. However I do run [searchcode.com](https://searchcode.com/) fairly lean using dedicated servers from Hetzner. These boxes are quite powerful, i7 Quad Core 32 GB RAM machines often with 2 TB of disk space (usually unused). As such they usually has a lot of spare compute based on how I use them. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
 
 I didn't quite taco bell program the solution using bash and gnu tools. What I did was write a simple [Go program](https://github.com/boyter/scc-data/blob/master/process/main.go) to spin up 32 go-routines which read from a channel, spawned `git` and `scc` subprocesses before writing the JSON output into S3. I actually wrote a Python solution at first, but having to install the pip dependencies on my clean varnish box seemed like a bad idea and it keep breaking in odd ways which I didn't feel like debugging.
 
@@ -56,21 +96,23 @@ Running this on the box produced the following sort of metrics in htop, and the 
 
 ## Results
 
-Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index I thought I would steal the format of that post with regards to how I wanted to present the information. However this raised another question. How does one process 10 million JSON files in an S3 bucket?
+Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index I thought I would steal the format of that post with regards to how I wanted to present the information. However this raised another question. How does one process 10 million JSON files taking up just over 1 TB of disk space in an S3 bucket? 
 
-The first thought I had was AWS Athena. But since it's going to cost about $2.50 USD **per query** with the amount of data I had I quickly looked for an alternative.
+The first thought I had was AWS Athena. But since it's going to cost something like $2.50 USD **per query** for that dataset I quickly looked for an alternative. That said if you kept the data there and processed it infrequently this might still work out to be the cheapest solution.
 
-I posted the question on the company slack because why should I solve every issue alone.
+I posted the question on the company slack because why should I solve issues alone.
 
-One idea raised was to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it multiple times. This feels wasteful because we could just process the data as we read it. I also was worried about building a database this large. As with just data it would be over 1 TB in size without indexes.
+One idea raised was to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it multiple times. Plus the structure of the data meant having a few tables which means foreign keys and indexes to ensure some level of performance. This feels wasteful because we could just process the data as we read it once off. I was also worried about building a database this large. With just data it would be over 1 TB in size before adding indexes.
 
 Seeing as I produced the JSON using spare compute, I thought why not process the results the same way? Of course there is one issue with this. Pulling 1 TB of data out of S3 is going to cost a lot. In the event the program crashes that is going to be annoying. To reduce costs I wanted to pull all the files down locally and save them for further processing. Handy tip, you really do not want to store lots of little files on disk in a single directory. It sucks for runtime performance and file-systems don't like it.
 
-My answer to this was another simple [Go program](https://github.com/boyter/scc-data/blob/master/scc-tar/main.go) to pull the files down from S3 then store them in a tar file. I could then process that file over and over. The process itself is done though **very ugly** [program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file so I could re-run my questions without having to trawl S3 over and over. I didn't bother with go-routines for this code for two reasons. The first was that I didn't want to max out my server so this limits it to 1 core. The second being I didn't want to ensure it was thread-safe.
+My answer to this was another simple [go program](https://github.com/boyter/scc-data/blob/master/scc-tar/main.go) to pull the files down from S3 then store them in a tar file. I could then process that file over and over. The process itself is done though **very ugly** [go program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file so I could re-run my questions without having to trawl S3 over and over. I didn't bother with go-routines for this code for two reasons. The first was that I didn't want to max out my server, so this limits it to a single core for the hard CPU work. The second being I didn't want to ensure it was thread-safe.
 
 With that done, what I needed was a collection of questions to answer. I used the slack brains trust again and crowd-sourced my work colleagues while I came up with some ideas of my own. The result of this mind meld is included below.
 
-You can find all the code I used to process the JSON including that which pulled it down locally and the [ugly python script](https://github.com/boyter/scc-data/blob/master/convert_json.py) I used to mangle it into something useful here https://github.com/boyter/scc-data Please don't comment on it, I know the code is ugly and it is something I wrote as a throwaway and I am unlikely to ever look at it again.
+You can find all the code I used to process the JSON including that which pulled it down locally and the [ugly python script](https://github.com/boyter/scc-data/blob/master/convert_json.py) I used to mangle it into something useful for this post https://github.com/boyter/scc-data Please don't comment on it, I know the code is ugly and it is something I wrote as a throwaway as I am unlikely to ever look at it again. 
+
+If you do want to review code I have written to be read by others have a look at the [source of scc](https://github.com/boyter/scc/).
 
 ### Data Sources
 
@@ -108,7 +150,7 @@ Markdown the most commonly used language in any project is included in just over
 
 The full list is included below.
 
-[skip table to next](#how-many-files-in-a-repository-per-language)
+[skip table to next section](#how-many-files-in-a-repository-per-language)
 
 | language | project count |
 | -------- | ----- |
@@ -351,18 +393,208 @@ The full list is included below.
 
 ### How many files in a repository per language?
 
-An extension of the above, but averaged over however many files are in each language. So of projects that contain java how many java files exist in that project, and on average what does that work out to be?
+An extension of the above, but averaged over however many files are in each language per repository. So for projects that contain java, how many java files exist in that project, and on average for all projects how many files is that?
+
+You can use this to see if a project is larger or smaller than usual for your language of choice.
+
+[skip table to next section](#how-many-lines-of-code-are-in-a-typical-file-per-language)
+
+| language | average file count |
+| -------- | ------------------ |
+| ASP | 1 |
+| ASP.NET | 9 |
+| AWK | 189 |
+| ActionScript | 69 |
+| Ada | 61 |
+| Alex | 406 |
+| Alloy | 1 |
+| Android Interface Definition Language | 147 |
+| Arvo | 1 |
+| AsciiDoc | 3 |
+| Assembly | 1274 |
+| AutoHotKey | 2 |
+| Autoconf | 892 |
+| BASH | 20 |
+| Basic | 2 |
+| Batch | 73 |
+| Bazel | 6 |
+| Bitbake | 1 |
+| Bitbucket Pipeline | 1 |
+| Boo | 1 |
+| Brainfuck | 1 |
+| BuildStream | 1 |
+| C | 13249 |
+| C Header | 10961 |
+| C Shell | 1 |
+| C# | 2118 |
+| C++ | 478 |
+| C++ Header | 76 |
+| CMake | 22 |
+| COBOL | 1 |
+| CSS | 124 |
+| CSV | 54 |
+| Cabal | 1 |
+| Ceylon | 1 |
+| Clojure | 5 |
+| Closure Template | 1 |
+| CoffeeScript | 6 |
+| ColdFusion | 61 |
+| Coq | 5 |
+| Creole | 2 |
+| Cython | 2 |
+| D | 25 |
+| Dart | 2 |
+| Device Tree | 125 |
+| Docker ignore | 1 |
+| Dockerfile | 1 |
+| Document Type Definition | 5 |
+| Elixir | 7 |
+| Elm | 2 |
+| Emacs Dev Env | 1 |
+| Emacs Lisp | 12 |
+| Erlang | 2 |
+| Expect | 286 |
+| Extensible Stylesheet Language Transformations | 1 |
+| F# | 5 |
+| F* | 17 |
+| FORTRAN Legacy | 13 |
+| FORTRAN Modern | 18 |
+| Fish | 1 |
+| Flow9 | 1 |
+| Forth | 30 |
+| Fragment Shader File | 5 |
+| Freemarker Template | 1 |
+| GDScript | 1 |
+| GLSL | 13 |
+| GN | 1 |
+| Game Maker Language | 11 |
+| Gherkin Specification | 37 |
+| Go | 6 |
+| Go Template | 31 |
+| Gradle | 2 |
+| Groovy | 95 |
+| HEX | 15 |
+| HTML | 646 |
+| Handlebars | 6 |
+| Happy | 26 |
+| Haskell | 1 |
+| Haxe | 55 |
+| IDL | 1 |
+| Intel HEX | 86 |
+| JSON | 116 |
+| JSX | 6 |
+| Jade | 7 |
+| Java | 2758 |
+| JavaScript | 492 |
+| JavaServer Pages | 13 |
+| Jenkins Buildfile | 1 |
+| Julia | 1 |
+| Jupyter | 3 |
+| Korn Shell | 53 |
+| Kotlin | 4 |
+| LD Script | 12 |
+| LESS | 21 |
+| LEX | 17 |
+| LOLCODE | 1 |
+| LaTeX | 171 |
+| License | 167 |
+| Lisp | 41 |
+| Lua | 18 |
+| MSBuild | 166 |
+| Macromedia eXtensible Markup Language | 85 |
+| Makefile | 1432 |
+| Mako | 2 |
+| Markdown | 113 |
+| Modula3 | 1 |
+| Module-Definition | 91 |
+| Monkey C | 4 |
+| Mustache | 5 |
+| Nim | 2 |
+| OCaml | 25 |
+| Objective C | 23 |
+| Objective C++ | 1 |
+| Opalang | 1 |
+| Org | 11 |
+| PHP | 1467 |
+| PKGBUILD | 3392 |
+| PSL Assertion | 1 |
+| Pascal | 4 |
+| Patch | 60 |
+| Perl | 530 |
+| Plain Text | 1194 |
+| Powershell | 5 |
+| Processing | 2 |
+| Prolog | 22 |
+| Properties File | 45 |
+| Protocol Buffers | 4 |
+| Puppet | 179 |
+| Python | 1120 |
+| QML | 19 |
+| R | 2 |
+| Rakefile | 18 |
+| Razor | 23 |
+| ReStructuredText | 243 |
+| Ruby | 617 |
+| Ruby HTML | 19 |
+| Rust | 7 |
+| SAS | 2 |
+| SKILL | 7 |
+| SQL | 36 |
+| SVG | 27 |
+| Sass | 234 |
+| Scala | 1 |
+| Scheme | 9 |
+| Scons | 2 |
+| Shell | 800 |
+| Smarty Template | 18 |
+| Specman e | 1 |
+| Standard ML (SML) | 5 |
+| Stata | 1 |
+| Stylus | 10 |
+| Swift | 3 |
+| Swig | 11 |
+| SystemVerilog | 8 |
+| Systemd | 92 |
+| TCL | 137 |
+| TeX | 42 |
+| Thrift | 1 |
+| Twig Template | 200 |
+| TypeScript | 3 |
+| TypeScript Typings | 32 |
+| Unreal Script | 3 |
+| Ur/Web | 1 |
+| V | 1 |
+| VHDL | 8 |
+| Vala | 2 |
+| Varnish Configuration | 1 |
+| Vertex Shader File | 4 |
+| Vim Script | 1 |
+| Visual Basic | 93 |
+| Visual Basic for Applications | 2 |
+| Wolfram | 1 |
+| XAML | 4 |
+| XCode Config | 3 |
+| XML | 269 |
+| XML Schema | 6 |
+| Xtend | 5 |
+| YAML | 76 |
+| Zsh | 1 |
+| gitignore | 32 |
+| ignore | 1 |
+| m4 | 209 |
+| nuspec | 73 |
+| sed | 38 |
 
 
 ### How many lines of code are in a typical file per language?
 
-I suppose you could also look at this as what languages on average have the largest files? However to avoid that I have sorted by name because its not a content. Using the average/mean for this pushes the results out to stupidly high numbers. This is because things like sqlite.c for example is joined to make a single file, but nobody ever works on that single large file (I hope!).
+I suppose you could also look at this as what languages on average have the largest files? Using the average/mean for this pushes the results out to stupidly high numbers. This is because projects such as sqlite.c which is included in many projects is joined from many files into one, but nobody ever works on that single large file (I hope!).
 
-So I tried this out using the median value and there are still some definitions with stupidly high numbers such as Bosque and JavaScript. 
+So I calculated this using the median value. Even so there are still some definitions with stupidly high numbers such as Bosque and JavaScript. 
 
-So why not have both? I modified the average value as a comparison but with it ignoring files over 5000 lines and included it and the median.
+So I figured why not have both? I did one small change based on the suggestion of [Darrell](https://www.packtpub.com/au/big-data-and-business-intelligence/hands-deep-learning-go) (Kablamo's resident and most excellent data scientist) and modified the average value to ignore files over 5000 lines to remove the outliers.
 
-[skip table to next](#what-are-the-most-common-filenames)
+[skip table to next section](#what-are-the-most-common-filenames)
 
 | language | mean < 5000 | median |
 | -------- | ----------- | ------ |
@@ -664,17 +896,17 @@ The makefile being the most common surprised me a little, but then I remembered 
 | style | 2,226,920 |
 | styles | 2,212,127 |
 
-Note that due to memory constraints I had to make this process slightly lossy. Every 100 projects checked I would check the map and if an identified filename had < 10 counts it was dropped from the list. It could come back for the next run and if there was > 10 at this point it would remain. It shouldn't happen that often but it is possible the counts may be out by some amount if some common name appeared sparsely in the first batch of repositories before becoming common. In short they are not absolute numbers but should be close enough.
+Note that due to memory constraints I made this process slightly lossy. Every 100 projects checked I would check the map and if an identified filename had < 10 counts it was dropped from the list. It could come back for the next run and if there was > 10 at this point it would remain. It shouldn't happen that often but it is possible the counts may be out by some amount if some common name appeared sparsely in the first batch of repositories before becoming common. In short they are not absolute numbers but should be close enough.
 
-I could have used a trie structure to "compress" the space and gotten absolute numbers for this, but I didn't feel like writing one and just abused the map slightly to save memory and achieve my goal. I am however curious enough to try this out at a later date to see how much compression we can get out of it.
+I could have used a trie structure to "compress" the space and gotten absolute numbers for this, but I didn't feel like writing one and just abused the map slightly to save enough memory and achieve my goal. I am however curious enough to try this out at a later date to see how a trie would perform.
 
 ### Whats the average size of those index pages?
 
-We know that the most common filenames, but what about knowing whats the average size of them? Annoyingly this meant running the above first and then taking the output and reprocessing.
+We know that the most common filenames, but what about knowing whats the average size of them? Annoyingly this meant running the above first and then taking the output of the first run and reprocessing. This explains why I had to run the processor a few times as mentioned in the opening paragraphs.
 
 ### How many repositories appear to be missing a license?
 
-This is an interesting one. Which repositories have an explicit license file somewhere? Note that the lack of a license file does not mean that the project has none, as it might exist within the README or be indicated through SPDX comment tags in-line.
+This is an interesting one. Which repositories have an explicit license file somewhere? Note that the lack of a license file here does not mean that the project has none, as it might exist within the README or be indicated through SPDX comment tags in-line. it just means that `scc` could not find an explicit license file using its own criteria which at time of writing means a file ignoring case named "license", "licence", "copying", "copying3", "unlicense", "unlicence", "license-mit", "licence-mit" or "copyright".
 
 Sadly it appears that the vast majority of repositories are missing a license. I would argue that all software should have a license for a variety of reasons but here is [someone elses take](https://www.infoworld.com/article/2839560/sticking-a-license-on-everything.html) on that.
 
@@ -705,11 +937,11 @@ This was really not what I expected. I would have guessed most projects had eith
 
 ### Which language developers have the biggest potty mouth?
 
-This is less than an exact science. Picking up cursing/swearing or offensive terms using filenames is never going to be effective. If you do a simple string contains test you pick up all sorts or normal files such as `assemble.sh` and such. So to produce the following I pulled a list of curse words, then checked if any files in each project start with one of those values followed by a period. This would mean a file named `gangbang.java` would be picked up while `assemble.sh` would not. 
+Working this out is not an exact science. It falls into the NLP class of problems really. Picking up cursing/swearing or offensive terms using filenames from a defined list is never going to be effective. If you do a simple string contains test you pick up all sorts or normal files such as `assemble.sh` and such. So to produce the following I pulled a list of curse words, then checked if any files in each project start with one of those values followed by a period. This would mean a file named `gangbang.java` would be picked up while `assemble.sh` would not. However this is going to miss all sorts of cases such as `pu55syg4rgle.java` and other such crude names.
 
-The list I used contained some leet speak such as `b00bs` and `b1tch` to try and catch out the most interesting cases. The full list is [here](/static/an-informal-survey/curse.txt). 
+The list I used contained some leet speak such as `b00bs` and `b1tch` to try and catch some of the most interesting cases. The full list is [here](/static/an-informal-survey/curse.txt).
 
-While not accurate at all as it misses all manner of things it is incredibly fun to see what this produces. So lets start with a list of which languages have the most curse words.
+While not accurate at all as mentioned it is incredibly fun to see what this produces. So lets start with a list of which languages have the most curse words.
 
 | language | filename curse count |
 | -------- | ----------- |
@@ -734,7 +966,7 @@ Interesting! Those naughty C developers! However we should probably weight this 
 
 // TODO ADD WEIGHTED BY LANGUAGE COUNT HERE
 
-However what I really want to know is what are the most commonly used curse words. Lets see collectively how dirty a mind we have. A few of the top ones I could see being legitimate names, but the majority would certainly produce few comments in a PR if not a raised eyebrow.
+However what I really want to know is what are the most commonly used curse words. Lets see collectively how dirty a mind we have. A few of the top ones I could see being legitimate names (if you squint), but the majority would certainly produce few comments in a PR and raised eyebrow.
 
 | word | count |
 | ---- | ----- |
@@ -762,9 +994,9 @@ However what I really want to know is what are the most commonly used curse word
 | cok | 112 |
 | damn | 105 |
 
-Note that some of the more offensive words in the list did have matching filenames which I find rather shocking considering what they were. I am hoping that those files only exist for testing allow/deny lists and the like.
+Note that some of the more offensive words in the list did have matching filenames which I find rather shocking considering what they were. Thankfully they were not very common and didn't make my list above which was limited to those which had counts over 100. I am hoping that those files only exist for testing allow/deny lists and such.
 
-### Longest files in lines per language
+### Longest files by lines per language
 
 As you would probably expect Plain Text, SQL, XML, JSON and CSV take the top positions of this one, seeing as they usually contain meta-data, database dumps and the like.
 
@@ -772,7 +1004,7 @@ Limited to 40 because at some point there is only a hello world example or such 
 
 **NB** Some of the links below MAY not translate 100% due to throwing away some information when I created the files. Most should work, but a few you may need to mangle the URL to resolve.
 
-[skip table to next](#whats-the-largest-file-for-each-language)
+[skip table to next section](#whats-the-largest-file-for-each-language)
 
 | language | filename | lines |
 | -------- | -------- | ----- |
@@ -966,7 +1198,7 @@ Across all the languages we looked at whats the largest file by number of bytes 
 
 **NB** Some of the links below MAY not translate 100% due to throwing away some information when I created the files. Most should work, but a few you may need to mangle the URL to resolve.
 
-[skip table to next](#whats-the-most-complex-file-in-each-language)
+[skip table to next section](#whats-the-most-complex-file-in-each-language)
 
 | language | filename | bytes |
 | -------- | -------- | ----- |
@@ -1158,11 +1390,11 @@ Across all the languages we looked at whats the largest file by number of bytes 
 
 Once again these values are not directly comparable to each other, but it is interesting to see what is considered the most complex in each language.
 
-Some of these files are absolute monsters. For example consider the most complex C++ file [COLLADASaxFWLColladaParserAutoGen15PrivateValidation.cpp](https://github.com/KhronosGroup/OpenCOLLADA/blob/master/COLLADASaxFrameworkLoader/src/generated15/COLLADASaxFWLColladaParserAutoGen15PrivateValidation.cpp) which is 28.3 MB of compiler hell (and thankfully appears to be a generated file). 
+Some of these files are absolute monsters. For example consider one of the most complex C++ files I found [COLLADASaxFWLColladaParserAutoGen15PrivateValidation.cpp](https://github.com/KhronosGroup/OpenCOLLADA/blob/master/COLLADASaxFrameworkLoader/src/generated15/COLLADASaxFWLColladaParserAutoGen15PrivateValidation.cpp) which is 28.3 MB of compiler hell (and thankfully appears to be generated).
 
 **NB** Some of the links below MAY not translate 100% due to throwing away some information when I created the files. Most should work, but a few you may need to mangle the URL to resolve.
 
-[skip table to next](#whats-the-most-complex-file-weighted-against-lines)
+[skip table to next section](#whats-the-most-complex-file-weighted-against-lines)
 
 | language | filename | complexity |
 | -------- | -------- | ----- |
@@ -1304,7 +1536,7 @@ Whats the most commented file in each language? I have no idea what sort of info
 
 **NB** Some of the links below MAY not translate 100% due to throwing away some information when I created the files. Most should work, but a few you may need to mangle the URL to resolve.
 
-[skip table to next](#how-many-pure-projects)
+[skip table to next section](#how-many-pure-projects)
 
 | language | filename | comment lines |
 | -------- | -------- | ------- |
@@ -1451,19 +1683,19 @@ Whats the most commented file in each language? I have no idea what sort of info
 
 ### How many "pure" projects
 
-That is projects that have 1 language in them. Of course that would not be very interesting by itself, so lets see what the spread is. Turns out most projects have fewer than 25 languages in them with most in the less than 10 bracket.
+Assuming you define pure to mean a project that has 1 language in it. Of course that would not be very interesting by itself, so lets see what the spread is. As it turns out most projects have fewer than 25 languages in them with most in the less than 10 bracket.
 
 The peak in the below graph is for 4 languages.
 
-Of course pure projects might only have one programming language, but have lots of supporting other formats such as markdown, json, yml, css, .gitignore and the like. It's probably reasonable to assume that any project with less than 5 languages is "pure" and as it turns out is just over half the total data set. Of course your definition of purity might be different to mine.
+Of course pure projects might only have one programming language, but have lots of supporting other formats such as markdown, json, yml, css, .gitignore which are picked up by scc. It's probably reasonable to assume that any project with less than 5 languages is "pure" (for some level of purity) and as it turns out is just over half the total data set. Of course your definition of purity might be different to mine so feel free to adjust to whatever number you like.
 
-There is an odd bump around the 35 language's count though for some reason. I have no reasonable explanation as to why this might be the case.
+What suprises me is an odd bump around 34-35 languages. I have no reasonable explanation as to why this might be the case and it probably warrents some investigation.
 
 ![scc-data pure projects](/static/an-informal-survey/languagesPerProject.png#center)
 
 The full list of results is included below.
 
-[skip table to next](#projects-with-typescript-but-not-javascript)
+[skip table to next section](#projects-with-typescript-but-not-javascript)
 
 | language count | project count |
 | -------------- | ------------- |
@@ -1691,9 +1923,9 @@ Shortcomings id love to overcome in the above if I decide to do this again.
 
 ## So why bother?
 
-Well I can take some of this information and plug it into searchcode.com, scc. As was the stated goal it is potentially very useful to know how your project compares to others. Besides it was a fun way to spend a few days solving some interesting problems.
+Well I can take some of this information and plug it into searchcode.com and scc even if just as some useful data points. The stated goal was pretty much this and it is potentially very useful to know how your project compares to others. Besides it was a fun way to spend a few days solving some interesting problems.
 
-In addition I am working on a tool that helps senior-developer or manager types analyze code looking for size, flaws etc... Assuming you have to watch multiple repositories. You put in some code and it will tell you how maintainable it is and what skills you need to maintain it. Useful for determining if you should buy or maintain some code-base and getting an overview of what your development team is producing. Something like AWS Macie but for code is the angle I am thinking. It's something I need for my day job and I suspect others may find use in it, or at least thats the theory.
+In addition, I am working on a tool that helps senior-developer or manager types analyze code looking for languages, large files, flaws etc... with the assumption you have to watch multiple repositories. You put in some code and it will tell you how maintainable it is and what skills you need to maintain it. Useful for determining if you should buy or maintain some code-base and getting an overview of what your development team is producing. Should in theory help teams scale through shared resources. Something like AWS Macie but for code is the angle I am working with. It's something I need for my day job and I suspect others may find use in it, or at least thats the theory.
 
 I should probably put an email sign up for that here at some point to gather interest for that.
 
