@@ -1,5 +1,5 @@
 ---
-title: Downloading and processing 40 TB of code from 10 million git projects using a dedicated server and Goroutines
+title: Downloading and processing 40 TB of code from 10 million git projects using a dedicated server Goroutines for under $100
 date: 2019-09-20
 ---
 
@@ -115,6 +115,25 @@ With that done, what I needed was a collection of questions to answer. I used th
 You can find all the code I used to process the JSON including that which pulled it down locally and the [ugly python script](https://github.com/boyter/scc-data/blob/master/convert_json.py) I used to mangle it into something useful for this post https://github.com/boyter/scc-data Please don't comment on it, I know the code is ugly and it is something I wrote as a throwaway as I am unlikely to ever look at it again. 
 
 If you do want to review code I have written to be read by others have a look at the [source of scc](https://github.com/boyter/scc/).
+
+
+## Cost
+
+I spent about $60 in compute while trialling lambda. I have not looked at the S3 storage cost yet but it should be close to $25. However this is not including the transfer costs which I am yet to see what are. Please note I cleared the bucket when I was finished with it so this is not an ongoing cost for me.
+
+However I chose not to use AWS in the end. So what's the cost?
+
+In my case the cost would be free as I used "free compute" left over from searchcode. Not everyone has compute lying around however. So what if I were to do this from scratch.
+
+It could be done for 73€ using the cheapest new dedicated server from Hetzner https://www.hetzner.com/dedicated-rootserver However that cost includes a new server setup fee. If you are willing to wait a little and poke around on their auction house https://www.hetzner.com/sb you can find much cheaper servers with no setup fee at all. For example at time of writing I found the below machine which would be perfect for this.
+
+![hetzner server](/static/an-informal-survey/hetzner.png#center)
+
+Best part for me though? You can get the VAT removed if you are outside the EU. So give yourself an additional 10% discount on top if you are in this situation.
+
+So were someone to do this from scratch using the same method I eventually went with it would cost under $100 USD to redo the same calculations, and more likely under $50 if you can be a little patient.
+
+If I were to use a gzipped tar file in my analysis (which isn't that hard to do really) I could even do 10x the repositories on the same machine as the resulting file would still be small enough to fit on the same hard disk. Going much larger however is going to require some amount of sharding. Still its safe to say that you could redo the entire processing I did or a larger scale one for the same cost.
 
 ### Data Sources
 
