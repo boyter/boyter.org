@@ -3,6 +3,12 @@ title: Downloading and processing 40 TB of code from 10 million git projects usi
 date: 2019-09-20
 ---
 
+
+<link rel="stylesheet" href="/static/an-informal-survey/jquery.dataTables.min.css" />
+<script src="/static/an-informal-survey/jquery-3.1.1.min.js"></script>
+<script src="/static/an-informal-survey/jquery.dataTables.min.js"></script>
+<script src="/static/an-informal-survey/table.js"></script>
+
 The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) (and now modified and supported by many excellent people) counts lines of code, comments and make a complexity estimate for files inside a code repository. The latter is something you need a good sample size to make good use of. Otherwise what does "This file has complexity 10" tell you? So I thought I would try running it at all the source code I could get my hands on.
 
 However if I am going to run it over all that code which is going to be expensive computationally I may as well try to get some interesting numbers out of it. As such I decided to record everything as I went and produce this post.
@@ -159,7 +165,7 @@ The X-axis in this case being buckets of the count of files, and Y-axis being th
 
 As it turns out most repositories have less than 200 files in them. 
 
-However what about plotting this by percentile, or more specifically by 95th percentile so its actually worth looking at? Turns out the vast majority of projects have less than 1,000 files in them. While 90% of them have less than 300 files and 85% have less than 200.
+However what about plotting this by percentile, or more specifically by 95th percentile so its actually worth looking at? Turns out the vast majority 95% of projects have less than 1,000 files in them. While 90% of them have less than 300 files and 85% have less than 200.
 
 ![scc-data files per project 95th](/static/an-informal-survey/filesPerProjectPercentile95.png)
 
@@ -864,7 +870,7 @@ What filenames are most common across all code-bases ignoring extension and case
 
 Had you asked me before I started this I would have said, README, main, index, license. Thankfully the results reflect my thoughts pretty well. Although there are a lot of interesting ones in there. I have no idea why so many projects contain a file called `15` or `s15`. 
 
-The makefile being the most common surprised me a little, but then I remembered that it is used a lot in many new JavaScript projects, and with that being among the most common projects makes a lot of sense. That said it still seems that jQuery is king and reports of its death are greatly exaggerated.
+The makefile being the most common surprised me a little, but then I remembered it is used in many new JavaScript projects. Another interesting thing to note is that it appears jQuery is still king and reports of its death are greatly exaggerated.
 
 | file-name | count |
 | -------- | ----- |
@@ -922,10 +928,6 @@ The makefile being the most common surprised me a little, but then I remembered 
 Note that due to memory constraints I made this process slightly lossy. Every 100 projects checked I would check the map and if an identified filename had < 10 counts it was dropped from the list. It could come back for the next run and if there was > 10 at this point it would remain. It shouldn't happen that often but it is possible the counts may be out by some amount if some common name appeared sparsely in the first batch of repositories before becoming common. In short they are not absolute numbers but should be close enough.
 
 I could have used a trie structure to "compress" the space and gotten absolute numbers for this, but I didn't feel like writing one and just abused the map slightly to save enough memory and achieve my goal. I am however curious enough to try this out at a later date to see how a trie would perform.
-
-### Whats the average size of those index pages?
-
-We know that the most common filenames, but what about knowing whats the average size of them? Annoyingly this meant running the above first and then taking the output of the first run and reprocessing. This explains why I had to run the processor a few times as mentioned in the opening paragraphs.
 
 ### How many repositories appear to be missing a license?
 
@@ -985,9 +987,9 @@ While not accurate at all as mentioned it is incredibly fun to see what this pro
 | Python | 1,092 | 0.00119138129893% |
 | JavaServer Pages | 1,037 | 0.0215440542669% |
 
-Interesting! My first thought was "those naughty C developers!" but as it turns out while they have a high count they write so much code it probably isn't that big a deal. However pretty clearly Dart developers have an axe to grind!
+Interesting! My first thought was "those naughty C developers!" but as it turns out while they have a high count they write so much code it probably isn't that big a deal. However pretty clearly Dart developers have an axe to grind! If you know someone coding in Dart you may want to go offer them a hug.
 
-However what I also want to know is what are the most commonly used curse words. Lets see collectively how dirty a mind we have. A few of the top ones I could see being legitimate names (if you squint), but the majority would certainly produce few comments in a PR and raised eyebrow.
+I also want to know what are the most commonly used curse words. Lets see how dirty a mind we have collectively. A few of the top ones I could see being legitimate names (if you squint), but the majority would certainly produce few comments in a PR and a raised eyebrow.
 
 | word | count |
 | ---- | ----- |
@@ -1029,383 +1031,242 @@ Limited to 40 because at some point there is only a hello world example or such 
 
 | language | filename | lines |
 | -------- | -------- | ----- |
-| JSON | <a href="https://bitbucket.com/_thc_/bcc-40/src/master/base/model.json">model.json</a> | 11313134 |
+| Plain Text | <a href="https://github.com/igorshing/flow/blob/master/data/1366100696temp.txt">1366100696temp.txt</a> | 347671811 |
+| PHP | <a href="https://github.com/aadityajs/keylinkz/blob/master/file/log/phpfox_error_log_04_04_12_3d4b11f6ee2a89fd5ace87c910cee04b.php">phpfox_error_log_04_04_12_3d4b11f6ee2a89fd5ace87c910cee04b.php</a> | 121930973 |
+| HTML | <a href="https://github.com/vanbug/codes/blob/master/yo.html">yo.html</a> | 54596752 |
+| LEX | <a href="https://github.com/phoenixiizero/snes9x-3d/blob/master/gtk/l">l</a> | 39743785 |
+| XML | <a href="https://bitbucket.com/mellson/dblp-statistics/src/master/SBDM Exercise 2/dblp.xml">dblp.xml</a> | 39445222 |
+| Autoconf | <a href="https://github.com/rubusch/usi-compilers/blob/master/082__compiler/testsrepo/04while/21-t2.in">21-t2.in</a> | 33526784 |
+| CSV | <a href="https://github.com/allisonbmccoy/smart-summarization/blob/master/knowledgebases/ontology.csv">ontology.csv</a> | 31946031 |
+| Prolog | <a href="https://github.com/jrvalcourt/salary-prediction/blob/master/temp/top500_full.p">top500_full.p</a> | 22428770 |
+| JavaScript | <a href="https://bitbucket.com/eternum/rails-facebook-webgl/src/master/app/assets/three/mirus.js">mirus.js</a> | 22023354 |
+| JSON | <a href="https://github.com/nicknisi/safeomaha-data/blob/master/formatted_data/douglasCountyVoterRegistration.json">douglasCountyVoterRegistration.json</a> | 21104668 |
+| Game Maker Language | <a href="https://github.com/shajain/i590project/blob/master/lgEvans/lg.gml">lg.gml</a> | 13302632 |
+| C Header | <a href="https://github.com/alinefr/netcat-cpi-kernel-module/blob/master/tracks/trk6data.h">trk6data.h</a> | 13025371 |
+| Objective C++ | <a href="https://bitbucket.com/vanghdi/yelp/src/master/data/yelp/review-1.mm">review-1.mm</a> | 12788052 |
+| SQL | <a href="https://github.com/rigidus/bzzr/blob/master/newdump.sql">newdump.sql</a> | 11595909 |
+| Patch | <a href="https://github.com/lnava/cs411g1/blob/master/clook_iosched-team01.patch">clook_iosched-team01.patch</a> | 10982879 |
+| YAML | <a href="https://github.com/cclausen/communtu/blob/master/db/data.yml">data.yml</a> | 10764489 |
+| SVG | <a href="https://github.com/ruby-gnome2/ruby-gnome2/blob/master/rsvg2/test/tmp/large-file.svg">large-file.svg</a> | 10485763 |
 | Sass | <a href="https://bitbucket.com/abegarcia/lifyember/src/master/node_modules/node-sass/libsass/sass-spec/spec/benchmarks/large_empty.scss">large_empty.scss</a> | 10000000 |
-| CSV | <a href="https://bitbucket.com/abduljehangir/ecse499/src/master/sp500data/code_and_processed_data/fundamentals/return_data_sp500.csv">return_data_sp500.csv</a> | 6486577 |
-| Plain Text | <a href="https://bitbucket.com/abdullah38rcc/bci-virtual-keyboard/src/master/binspell/shuffle_alternate/bgramPickle.txt">bgramPickle.txt</a> | 5264667 |
-| SQL | <a href="https://bitbucket.com/a--i/osmp/src/master/server/osmp-database-hsqldb/src/main/resources/db/migration/V1_08.12.2014.13.44__T_ADDRESS_DATA.sql">V1_08.12.2014.13.44__T_ADDRESS_DATA.sql</a> | 914442 |
-| XML | <a href="https://bitbucket.com/adakoda/android_403_gnexus_frameworks_base/src/master/api/13.xml">13.xml</a> | 463337 |
-| SVG | <a href="https://bitbucket.com/abdelba/mattlink/src/master/extras/design/uses-cases/membres-publications.svg">membres-publications.svg</a> | 444080 |
-| C Header | <a href="https://bitbucket.com/abhisit/firefly-rk3288-kernel/src/master/drivers/media/rkdtv/DIBCom1009XH-IN3362/Firmware/firmware_nautilus_2_0-3006x_nscd.h">firmware_nautilus_2_0-3006x_nscd.h</a> | 417297 |
-| JavaScript | <a href="https://bitbucket.com/53454e4f4a/nashorn-engine/src/master/Octane Benchmarks/mandreel.js">mandreel.js</a> | 277403 |
-| C | <a href="https://bitbucket.com/-elmer-/plinkseq/src/master/R/Rplinkseq/src/sqlite3.c">sqlite3.c</a> | 141343 |
-| PHP | <a href="https://bitbucket.com/______moizl________/bol-leaks/src/master/Player/Players.php">Players.php</a> | 131168 |
-| Java | <a href="https://bitbucket.com/abioy/hypertable/src/master/src/gen-java/org/hypertable/thriftgen/ClientService.java">ClientService.java</a> | 121051 |
-| HTML | <a href="https://bitbucket.com/_ariel/chat/src/master/node_modules/socket.io/node_modules/socket.io-client/node_modules/active-x-obfuscator/node_modules/zeparser/benchmark.html">benchmark.html</a> | 111608 |
-| Patch | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/openswan/patches/kernel/2.6.16/klips.patch">klips.patch</a> | 111156 |
-| Perl | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/perl/lib/Locale/Codes/Language_Codes.pm">Language_Codes.pm</a> | 97190 |
-| Assembly | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.S">CIDE.S</a> | 94241 |
-| Prolog | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.P">CIDE.P</a> | 68311 |
-| C++ | <a href="https://bitbucket.com/aaalexx/gamejam2013/src/master/cocos2d-x-2.1.5/scripting/lua/cocos2dx_support/LuaCocos2d.cpp">LuaCocos2d.cpp</a> | 67887 |
-| Autoconf | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/gdb/Makefile.in">Makefile.in</a> | 52450 |
-| D | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.D">CIDE.D</a> | 52353 |
-| Objective C | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.M">CIDE.M</a> | 44283 |
-| R | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.R">CIDE.R</a> | 40155 |
-| Swig | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.I">CIDE.I</a> | 37382 |
-| FORTRAN Legacy | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.F">CIDE.F</a> | 36476 |
-| Specman e | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.E">CIDE.E</a> | 34043 |
-| LEX | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.L">CIDE.L</a> | 28886 |
-| HEX | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/uts/common/io/ipw/fw-ipw2100/ipw2100-1.3.fw.hex">ipw2100-1.3.fw.hex</a> | 26149 |
-| Python | <a href="https://bitbucket.com/abioy/hypertable/src/master/src/py/ThriftClient/gen-py/hyperthrift/gen/ClientService.py">ClientService.py</a> | 25602 |
-| C# | <a href="https://bitbucket.com/45north/cx-developer-tutorials/src/master/Defect POC/SOAP.Account.PasswordReset/SOAP.Account.PasswordReset/Service References/RNT.SOAP/Reference.cs">Reference.cs</a> | 23985 |
-| CSS | <a href="https://bitbucket.com/12110201/12110201/src/master/webit/webit/Content/xenon.css">xenon.css</a> | 22560 |
-| Lua | <a href="https://bitbucket.com/420munk/pd2_lua/src/master/lib/tweak_data/weaponfactorytweakdata.lua">weaponfactorytweakdata.lua</a> | 21229 |
-| TeX | <a href="https://bitbucket.com/ace0/xen-restore-information/src/master/docs/xen-api/xenapi-datamodel.tex">xenapi-datamodel.tex</a> | 20245 |
-| LaTeX | <a href="https://bitbucket.com/40123204/40123204bitbucket/src/master/cdwp/tex_by_topic/TeXbyTopic.tex">TeXbyTopic.tex</a> | 19093 |
-| Intel HEX | <a href="https://bitbucket.com/ace0/linux-restore-support/src/master/firmware/bnx2x/bnx2x-e2-7.2.51.0.fw.ihex">bnx2x-e2-7.2.51.0.fw.ihex</a> | 18459 |
-| Ruby | <a href="https://bitbucket.com/aalmacin/rails-learning/src/master/blog/path/ruby/2.0.0/gems/rdoc-4.1.2/lib/rdoc/markdown.rb">markdown.rb</a> | 15961 |
-| Happy | <a href="https://bitbucket.com/acclivitynyc/postgresql/src/master/src/backend/parser/gram.y">gram.y</a> | 14004 |
-| SystemVerilog | <a href="https://bitbucket.com/act-lab/axbench_old/src/master/hardware/circuits/inversek/rtl/multiplier_32b.v">multiplier_32b.v</a> | 13932 |
-| Emacs Lisp | <a href="https://bitbucket.com/4ourbit/prefs/src/master/.emacs.d/emacs-goodies-el/color-theme-library.el">color-theme-library.el</a> | 13539 |
-| ASP.NET | <a href="https://bitbucket.com/abhi8600/demo/src/master/SourceAdmin/.wsdl/general/AdminService_14.asmx">AdminService_14.asmx</a> | 13234 |
-| Batch | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/perl/bin/cpanm.bat">cpanm.bat</a> | 12633 |
-| Shell | <a href="https://bitbucket.com/1120436joaopacheco/irudroid-technologies-lapr5/src/master/WalkMaze/lib/freetype-2.5.5/builds/unix/ltmain.sh">ltmain.sh</a> | 11030 |
-| m4 | <a href="https://bitbucket.com/2ion/libqueue/src/master/aclocal.m4">aclocal.m4</a> | 10027 |
-| Makefile | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/snort/src/win32/WIN32-Prj/snort.mak">snort.mak</a> | 9996 |
-| Vim Script | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/autoload/netrw.vim">netrw.vim</a> | 9858 |
-| ActionScript | <a href="https://bitbucket.com/abhi8600/demo/src/master/AnyChart/Original/AnyChartSource_6_0_11/build/utils/flex/frameworks/projects/framework/src/mx/controls/listClasses/ListBase.as">ListBase.as</a> | 9397 |
-| gitignore | <a href="https://bitbucket.com/a3217055/illumos-joyent/src/master/.gitignore">.gitignore</a> | 9066 |
-| TypeScript | <a href="https://bitbucket.com/abex/abex-mumble/src/master/src/mumble/mumble_de.ts">mumble_de.ts</a> | 9013 |
-| VHDL | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/bundle/ctags58/Test/test.vhd">test.vhd</a> | 8174 |
-| Boo | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/grub/grub-0.97/docs/texinfo.tex">texinfo.tex</a> | 7086 |
-| Go Template | <a href="https://bitbucket.com/accelecon/linux-uclinux-dist/src/master/Documentation/DocBook/writing-an-alsa-driver.tmpl">writing-an-alsa-driver.tmpl</a> | 6229 |
-| C++ Header | <a href="https://bitbucket.com/achase55/gba4ios/src/master/emu-ex-plus-alpha/imagine/bundle/darwin-iOS/include/boost/phoenix/bind/preprocessed/bind_member_function_50.hpp">bind_member_function_50.hpp</a> | 6033 |
-| Jupyter | <a href="https://bitbucket.com/aabtzu/mlnfl/src/master/mlnfl-nfl2.ipynb">mlnfl-nfl2.ipynb</a> | 5819 |
-| Markdown | <a href="https://bitbucket.com/abhayagiri/reflections/src/master/manuscripts/markdown/vol2-talks.md">vol2-talks.md</a> | 5520 |
-| ReStructuredText | <a href="https://bitbucket.com/50onred/sqlalchemy/src/master/doc/build/changelog/changelog_06.rst">changelog_06.rst</a> | 5412 |
-| Visual Basic for Applications | <a href="https://bitbucket.com/2014vleadinterns/amulya/src/master/Eucalyptus/paper/IEEEtran.cls">IEEEtran.cls</a> | 4929 |
-| MSBuild | <a href="https://bitbucket.com/0908nooaey/becit-traning/src/master/Template.Metronic/Template.Metronic.csproj">Template.Metronic.csproj</a> | 4882 |
-| Alex | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/gdb/gdb/ChangeLog-3.x">ChangeLog-3.x</a> | 4838 |
-| Forth | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/apache/manual/mod/core.html.fr">core.html.fr</a> | 4803 |
-| YAML | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/aws-sdk-1.28.1/lib/aws/api_config/EC2-2013-10-01.yml">EC2-2013-10-01.yml</a> | 4710 |
-| TCL | <a href="https://bitbucket.com/achyutreddy24/abdevweb/src/master/dist/tcl/tcl8.6/clock.tcl">clock.tcl</a> | 4573 |
-| Pascal | <a href="https://bitbucket.com/5665tm/mytools/src/master/ConEmuFar/PluginSDK/Headers.pas/PluginW.pas">PluginW.pas</a> | 4347 |
-| Document Type Definition | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/man/src/util/solbookv2/solbook.dtd">solbook.dtd</a> | 4296 |
-| Visual Basic | <a href="https://bitbucket.com/acrotech/dotspatialpcl/src/master/Trunk/DotSpatial.Plugins.Taudem.Port/frmAutomatic_v3.vb">frmAutomatic_v3.vb</a> | 4294 |
-| Coq | <a href="https://bitbucket.com/abrzoska/bachelortheory/src/master/redsvd/svd.V">svd.V</a> | 4260 |
-| Macromedia eXtensible Markup Language | <a href="https://bitbucket.com/abhi8600/demo/src/master/SourceAdmin/src/RealtimeAdmin.mxml">RealtimeAdmin.mxml</a> | 4057 |
-| LESS | <a href="https://bitbucket.com/10chars/wordpress-application-angular/src/master/node_modules/gulp-less/node_modules/less/benchmark/benchmark.less">benchmark.less</a> | 3979 |
-| Properties File | <a href="https://bitbucket.com/acgt/bitmate/src/master/azureus2/src/org/gudy/azureus2/internat/MessagesBundle.properties">MessagesBundle.properties</a> | 3878 |
-| Lisp | <a href="https://bitbucket.com/acgt/dotemacs/src/master/packs/clojure/lib/slime/swank.lisp">swank.lisp</a> | 3863 |
-| CMake | <a href="https://bitbucket.com/02jandal/multilaunch/src/master/cmake/cotire.cmake">cotire.cmake</a> | 3626 |
-| COBOL | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.cob">example.cob</a> | 3556 |
-| TypeScript Typings | <a href="https://bitbucket.com/12110201/12110201/src/master/webit/webit/Scripts/devexpress-web-14.1/ts/dx.all.d.ts">dx.all.d.ts</a> | 3137 |
-| Objective C++ | <a href="https://bitbucket.com/achase55/gba4ios/src/master/GBA4iOS/GBAEmulationViewController.mm">GBAEmulationViewController.mm</a> | 2849 |
-| BASH | <a href="https://bitbucket.com/a_alfredo/vagrant-instance/src/master/modules/development/files/home/git-completion.bash">git-completion.bash</a> | 2826 |
-| Expect | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/lib/libkrb5/tests/dejagnu/config/default.exp">default.exp</a> | 2817 |
-| Device Tree | <a href="https://bitbucket.com/abhisit/firefly-rk3288-kernel/src/master/arch/arm/boot/dts/rk3288-clocks.dtsi">rk3288-clocks.dtsi</a> | 2781 |
-| XML Schema | <a href="https://bitbucket.com/aburias/moolahsense/src/master/MoolahConnectnew/NLog.xsd">NLog.xsd</a> | 2657 |
-| BuildStream | <a href="https://bitbucket.com/adam_0/300/src/master/IEEEannot.bst">IEEEannot.bst</a> | 2626 |
-| Haxe | <a href="https://bitbucket.com/ace0/xen-restore-information/src/master/tools/qemu-xen/qemu-options.hx">qemu-options.hx</a> | 2604 |
-| Mustache | <a href="https://bitbucket.com/4lejandrito/cv-bootstrap/src/master/docs/templates/pages/components.mustache">components.mustache</a> | 2505 |
-| Groovy | <a href="https://bitbucket.com/4s/ot-70-opentele-server/src/master/grails-app/migrations/1_0_baseline.groovy">1_0_baseline.groovy</a> | 2351 |
-| Scheme | <a href="https://bitbucket.com/acgt/dotemacs/src/master/packs/programming/lib/slime-2013-04-05/contrib/swank-kawa.scm">swank-kawa.scm</a> | 2342 |
-| Module-Definition | <a href="https://bitbucket.com/_1126/humble/src/master/tufte-common.def">tufte-common.def</a> | 1872 |
-| XAML | <a href="https://bitbucket.com/achadee/graphics-project/src/master/obj/Debug/Common/StandardStyles.xaml">StandardStyles.xaml</a> | 1830 |
-| Org | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/microwin/src/engine/devdraw.org">devdraw.org</a> | 1748 |
-| Smarty Template | <a href="https://bitbucket.com/adam_onodi/uclinux-lpcboard/src/master/user/gdb/Makefile.tpl">Makefile.tpl</a> | 1730 |
-| Stata | <a href="https://bitbucket.com/0532/google-hosts/src/master/scripts/hosts.do">hosts.do</a> | 1485 |
-| AWK | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/mysql/bdb/dist/gen_rpc.awk">gen_rpc.awk</a> | 1482 |
-| Thrift | <a href="https://bitbucket.com/abioy/hypertable/src/master/src/cc/ThriftBroker/Client.thrift">Client.thrift</a> | 1362 |
-| Razor | <a href="https://bitbucket.com/aburias/moolahsense/src/master/MoolahConnectnew/Views/Admin/_UserVerification.cshtml">_UserVerification.cshtml</a> | 1339 |
-| Processing | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/realtime/src/acquisition/openbci/java/src/OpenBCI_GUI.pde">OpenBCI_GUI.pde</a> | 1327 |
-| F* | <a href="https://bitbucket.com/achyutreddy24/abdevweb/src/master/IMGT-Human_IGHV+IGKV+IGLV_F+ORF_AA.fst">IMGT-Human_IGHV+IGKV+IGLV_F+ORF_AA.fst</a> | 1325 |
-| Korn Shell | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/itutools/itu.ksh">itu.ksh</a> | 1245 |
-| OCaml | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/format.ml">format.ml</a> | 1213 |
-| Powershell | <a href="https://bitbucket.com/1110245danielagrams/arqsi2/src/master/IDEIMusic/packages/EntityFramework.6.1.1/tools/EntityFramework.psm1">EntityFramework.psm1</a> | 1168 |
-| CoffeeScript | <a href="https://bitbucket.com/adamfallon/4chan-x/src/master/src/Posting/QR.coffee">QR.coffee</a> | 1162 |
-| Ada | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/lib/ncurses/ncurses-5.7/Ada95/src/terminal_interface-curses-forms.adb">terminal_interface-curses-forms.adb</a> | 1161 |
-| Scala | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/ser/scripts/sc">sc</a> | 1097 |
-| Stylus | <a href="https://bitbucket.com/abornasdinamic/rovi/src/master/src/Dinamic/Rovi/FrontendBundle/Resources/public/css/main.styl">main.styl</a> | 1086 |
-| License | <a href="https://bitbucket.com/acharyarajiv/resume_on_java/src/master/target/Resume-1.0-SNAPSHOT/WEB-INF/lib/apache-tomcat-7.0.30-embed/LICENSE">LICENSE</a> | 1050 |
-| Julia | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/string.jl">string.jl</a> | 1031 |
-| Nim | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.nim">example.nim</a> | 1010 |
-| Wolfram | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/tutor/tutor.nb">tutor.nb</a> | 973 |
-| ASP | <a href="https://bitbucket.com/abel-pacara/beta_masprospectos/src/master/admin/ckeditor/ckeditor.asp">ckeditor.asp</a> | 955 |
-| Erlang | <a href="https://bitbucket.com/5ht/n2o/src/master/src/mochijson2.erl">mochijson2.erl</a> | 889 |
-| Haskell | <a href="https://bitbucket.com/acgt/polyeuler/src/master/ProjectEuler.hs">ProjectEuler.hs</a> | 887 |
-| JavaServer Pages | <a href="https://bitbucket.com/aaronhujun/test/src/master/src/main/webapp/WEB-INF/views/views/loanmonitor.jsp">loanmonitor.jsp</a> | 880 |
-| Rust | <a href="https://bitbucket.com/adakoda/android_403_gnexus_frameworks_base/src/master/tests/RenderScriptTests/PerfTest/src/com/android/perftest/rsbench.rs">rsbench.rs</a> | 873 |
-| PSL Assertion | <a href="https://bitbucket.com/abdulhamid/integrated-genome-browser/src/master/core/genometryImpl/src/test/resources/data/server/A_thaliana/A_thaliana_TAIR8/mRNA1.mm.psl">mRNA1.mm.psl</a> | 861 |
-| Handlebars | <a href="https://bitbucket.com/73group/frames/src/master/app/views/editor/templates/editor.hbs">editor.hbs</a> | 850 |
-| Protocol Buffers | <a href="https://bitbucket.com/abex/abex-mumble/src/master/src/murmur/MurmurRPC.proto">MurmurRPC.proto</a> | 823 |
-| Puppet | <a href="https://bitbucket.com/acdtprn/proj-case-prototyping-boilerplate/src/master/puphpet/puppet/modules/puppi/manifests/project/maven.pp">maven.pp</a> | 814 |
-| Swift | <a href="https://bitbucket.com/ac4lt/vistathing/src/master/VistaThing/VistaThingViewController.swift">VistaThingViewController.swift</a> | 812 |
-| FORTRAN Modern | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/zmlrpc.f90">zmlrpc.f90</a> | 798 |
-| Systemd | <a href="https://bitbucket.com/ace0/xen-restore-information/src/master/tools/qemu-xen-traditional/Makefile.target">Makefile.target</a> | 762 |
-| Xtend | <a href="https://bitbucket.com/3m45t3r/dsl/src/master/main/at.tuwien.dsg.dsl.tests/src/at/tuwien/dsg/dsl/tests/parser/LittleJilParserTest.xtend">LittleJilParserTest.xtend</a> | 714 |
-| Go | <a href="https://bitbucket.com/200bg/aquilo-server/src/master/aquilo/data/user.go">user.go</a> | 660 |
-| Rakefile | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/activerecord-3.2.13/lib/active_record/railties/databases.rake">databases.rake</a> | 658 |
-| PKGBUILD | <a href="https://bitbucket.com/11doctorwhocanada/arch-packages/src/master/kdeplasma-addons/trunk/PKGBUILD">PKGBUILD</a> | 648 |
-| Zsh | <a href="https://bitbucket.com/abrookins/dotfiles/src/master/.zshrc">.zshrc</a> | 624 |
-| Gherkin Specification | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/cucumber-1.3.8/legacy_features/cucumber_cli.feature">cucumber_cli.feature</a> | 584 |
-| Extensible Stylesheet Language Transformations | <a href="https://bitbucket.com/aagraz/vrtoolkit/src/master/doc/generation_tools/doxyclean/object2html.xslt">object2html.xslt</a> | 582 |
-| Ruby HTML | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.rhtml">example.rhtml</a> | 561 |
-| V | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/troff/troff.d/tmac.d/v">v</a> | 552 |
-| GLSL | <a href="https://bitbucket.com/0player/t-engine4/src/master/game/modules/tome/data/gfx/shaders/firearcs.frag">firearcs.frag</a> | 547 |
-| Monkey C | <a href="https://bitbucket.com/abhi8600/demo/src/master/SMI/3rdparty/minnesota/DTake.mc">DTake.mc</a> | 533 |
-| Clojure | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/genclass.clj">genclass.clj</a> | 510 |
-| IDL | <a href="https://bitbucket.com/ace0/xen-restore-information/src/master/tools/libxl/libxl_types.idl">libxl_types.idl</a> | 504 |
-| Twig Template | <a href="https://bitbucket.com/abdosagadir/annurestos/src/master/vendor/symfony/symfony/src/Symfony/Bundle/WebProfilerBundle/Resources/views/Collector/time.html.twig">time.html.twig</a> | 494 |
-| Bazel | <a href="https://bitbucket.com/abhisit/firefly-rk3288-kernel/src/master/scripts/Makefile.build">Makefile.build</a> | 479 |
-| Basic | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/unzip/windll/vb/vbunzip.bas">vbunzip.bas</a> | 466 |
-| sed | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/mysql/bdb/rpc_server/db_server_proc.sed">db_server_proc.sed</a> | 418 |
-| Unreal Script | <a href="https://bitbucket.com/___________chenjuensheng/android_kernel_samsung_n1/src/master/drivers/net/ixp2000/ixp2400_rx.uc">ixp2400_rx.uc</a> | 408 |
-| Cython | <a href="https://bitbucket.com/-elmer-/plinkseq/src/master/py/pyplinkseq/pyplinkseq.pyx">pyplinkseq.pyx</a> | 380 |
-| Android Interface Definition Language | <a href="https://bitbucket.com/adakoda/android_403_gnexus_frameworks_base/src/master/core/java/android/content/pm/IPackageManager.aidl">IPackageManager.aidl</a> | 367 |
-| Game Maker Language | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/man/src/util/ati-eqn1.gml">ati-eqn1.gml</a> | 366 |
-| Elixir | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example_elixir.ex">example_elixir.ex</a> | 363 |
-| Vala | <a href="https://bitbucket.com/17twenty/colourl/src/master/main.vala">main.vala</a> | 362 |
-| Gradle | <a href="https://bitbucket.com/10chars/wordpress-application-angular/src/master/node_modules/gulp-less/node_modules/less/build.gradle">build.gradle</a> | 347 |
-| QML | <a href="https://bitbucket.com/4s/4sdcdemo/src/master/QtProjects/DemoHtmlIntegration/SettingsDialog.qml">SettingsDialog.qml</a> | 336 |
-| Standard ML (SML) | <a href="https://bitbucket.com/_nkhalasi/proglang-2013-homework/src/master/hw1/hw1_test.sml">hw1_test.sml</a> | 310 |
-| SAS | <a href="https://bitbucket.com/a3955269/unlockfs/src/master/libjpegtwrp/makefile.sas">makefile.sas</a> | 252 |
-| F# | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/lib/libast/common/features/fs">fs</a> | 237 |
-| SKILL | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/uts/intel/amd64/ml/amd64.il">amd64.il</a> | 231 |
-| JSX | <a href="https://bitbucket.com/8hoursdo/rui/src/master/src/lib/components/tree-node.jsx">tree-node.jsx</a> | 228 |
-| Mako | <a href="https://bitbucket.com/50onred/sqlalchemy/src/master/doc/build/templates/layout.mako">layout.mako</a> | 225 |
-| AutoHotKey | <a href="https://bitbucket.com/5665tm/mytools/src/master/AutoHotkey/key.ahk">key.ahk</a> | 206 |
-| Elm | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/man/src/util/cals-tbl.elm">cals-tbl.elm</a> | 204 |
-| LD Script | <a href="https://bitbucket.com/accelecon/linux-stable/src/master/arch/m68k/kernel/vmlinux-nommu.lds">vmlinux-nommu.lds</a> | 195 |
-| AsciiDoc | <a href="https://bitbucket.com/_tamim_/archibus/src/master/README.adoc">README.adoc</a> | 192 |
-| Scons | <a href="https://bitbucket.com/abuffer/soundcustomizer/src/master/sconstruct">sconstruct</a> | 190 |
-| C Shell | <a href="https://bitbucket.com/aakef/cci/src/master/config/distscript.csh">distscript.csh</a> | 185 |
-| Jade | <a href="https://bitbucket.com/abhishekdelta/beamos/src/master/beamserv/node_modules/everyauth/example/views/home.jade">home.jade</a> | 181 |
-| Dart | <a href="https://bitbucket.com/adam8810/chrome-app-samples/src/master/dart/dart/balls.dart">balls.dart</a> | 176 |
-| Fish | <a href="https://bitbucket.com/aagraz/homebrew/src/master/Library/Contributions/brew_fish_completion.fish">brew_fish_completion.fish</a> | 173 |
-| Dockerfile | <a href="https://bitbucket.com/abrad450/samm/src/master/.docker/Dockerfile">Dockerfile</a> | 161 |
-| Arvo | <a href="https://bitbucket.com/adam_novak/sequence-graphs/src/master/avro/sequencegraph.avdl">sequencegraph.avdl</a> | 139 |
-| Cabal | <a href="https://bitbucket.com/abailly/capital-match-infra/src/master/propellor.cabal">propellor.cabal</a> | 139 |
-| Freemarker Template | <a href="https://bitbucket.com/618lf/tmt-base/src/master/base-webapp-tab/src/main/webapp/WEB-INF/template/article/search.ftl">search.ftl</a> | 126 |
-| GN | <a href="https://bitbucket.com/aakef/cci/src/master/README.ctp.gni">README.ctp.gni</a> | 125 |
-| Varnish Configuration | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/nokogiri-1.6.0/ext/nokogiri/tmp/i686-apple-darwin11/ports/libxml2/2.8.0/libxml2-2.8.0/win32/wince/libxml2.vcl">libxml2.vcl</a> | 122 |
-| Jenkins Buildfile | <a href="https://bitbucket.com/abenity/postal-code-library/src/master/Jenkinsfile">Jenkinsfile</a> | 85 |
-| nuspec | <a href="https://bitbucket.com/acgt/opserver/src/master/packages/BookSleeve.1.3.38/BookSleeve.1.3.38.nuspec">BookSleeve.1.3.38.nuspec</a> | 71 |
-| XCode Config | <a href="https://bitbucket.com/365plus/api/src/master/FacebookSDK v4/Samples/Configurations/Project.xcconfig">Project.xcconfig</a> | 69 |
-| LOLCODE | <a href="https://bitbucket.com/53454e4f4a/ba/src/master/tex/main.lol">main.lol</a> | 66 |
-| Alloy | <a href="https://bitbucket.com/4ptiv4/picasso-kernel_at100/src/master/Documentation/sound/oss/ALS">ALS</a> | 66 |
-| Bitbake | <a href="https://bitbucket.com/38zeros/power-meter/src/master/yocto/38z/38z.bb">38z.bb</a> | 62 |
-| Modula3 | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/perl/t/lib/warnings/mg">mg</a> | 57 |
-| Closure Template | <a href="https://bitbucket.com/13threbellion/spotify-plugin-for-stash/src/master/src/main/resources/spotify/feature/player/spotify-player.soy">spotify-player.soy</a> | 52 |
-| Kotlin | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.kt">example.kt</a> | 47 |
-| Fragment Shader File | <a href="https://bitbucket.com/adamfallon/bigdata/src/master/BigData/GPUImage/examples/iOS/ColorObjectTracking/ColorObjectTracking/PositionColor.fsh">PositionColor.fsh</a> | 45 |
-| ColdFusion | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/demo.cfm">demo.cfm</a> | 38 |
-| Ceylon | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.ceylon">example.ceylon</a> | 33 |
-| Flow9 | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/snort/doc/README.flow">README.flow</a> | 32 |
-| Brainfuck | <a href="https://bitbucket.com/_1126/humble/src/master/code/hello.bf">hello.bf</a> | 21 |
-| ignore | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/rsync/.ignore">.ignore</a> | 19 |
-| Vertex Shader File | <a href="https://bitbucket.com/aaalexx/gamejam2013/src/master/cocos2d-x-2.1.5/samples/Javascript/Shared/tests/res/Shaders/example_ColorBars.vsh">example_ColorBars.vsh</a> | 18 |
-| GDScript | <a href="https://bitbucket.com/aadeshnpn/espeak/src/master/phsource/vowelcharts/gd">gd</a> | 14 |
-| Bitbucket Pipeline | <a href="https://bitbucket.com/adam_qc/petsc/src/master/bitbucket-pipelines.yml">bitbucket-pipelines.yml</a> | 14 |
-| Emacs Dev Env | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/realtime/src/buffer/java/bufferserver/Project.ede">Project.ede</a> | 13 |
-| Opalang | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/test.opa">test.opa</a> | 10 |
-| Ur/Web | <a href="https://bitbucket.com/aadeshnpn/espeak/src/master/espeak-data/voices/test/ur">ur</a> | 5 |
-| Docker ignore | <a href="https://bitbucket.com/abdulcordoba/retocid/src/master/docker/retocid_mezz/.dockerignore">.dockerignore</a> | 3 |
-| Creole | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/sinatra-1.3.4/test/views/hello.creole">hello.creole</a> | 1 |
-
-### Whats the largest file for each language?
-
-Across all the languages we looked at whats the largest file by number of bytes for each one? This means ignoring newlines and the like so its closer to finding checked in data files, which is less interesting but still pretty neat.
-
-**NB** Some of the links below MAY not translate 100% due to throwing away some information when I created the files. Most should work, but a few you may need to mangle the URL to resolve.
-
-[skip table to next section](#whats-the-most-complex-file-in-each-language)
-
-| language | filename | bytes |
-| -------- | -------- | ----- |
-| JSON | <a href="https://bitbucket.com/abram/bugparty/src/master/tests/big_data.json">big_data.json</a> | 182692471 |
-| SQL | <a href="https://bitbucket.com/______moizl________/bol-leaks/src/master/bolForum.sql">bolForum.sql</a> | 182610866 |
-| CSV | <a href="https://bitbucket.com/0im/mgdb-mobile/src/master/ServerSide/JUNE-2014-DATA/dstable.csv">dstable.csv</a> | 174972747 |
-| Plain Text | <a href="https://bitbucket.com/abarysevich/java-experiments/src/master/Graphs/stronglyConnectedComponents/SCC.txt">SCC.txt</a> | 72653481 |
-| CSS | <a href="https://bitbucket.com/adam_bear/cellular/src/master/subcellular/sass/icons/icons-svg-data.css">icons-svg-data.css</a> | 24870305 |
-| PHP | <a href="https://bitbucket.com/______moizl________/bol-leaks/src/master/Player/Players.php">Players.php</a> | 22976108 |
-| SVG | <a href="https://bitbucket.com/abdelba/mattlink/src/master/extras/design/uses-cases/membres-publications.svg">membres-publications.svg</a> | 22514559 |
-| XML | <a href="https://bitbucket.com/abtekk/gaia/src/master/keyboard/dictionaries/hu_wordlist.xml">hu_wordlist.xml</a> | 15062952 |
-| Sass | <a href="https://bitbucket.com/abegarcia/lifyember/src/master/node_modules/node-sass/libsass/sass-spec/spec/benchmarks/large_empty.scss">large_empty.scss</a> | 10000000 |
-| HTML | <a href="https://bitbucket.com/_ariel/chat/src/master/node_modules/socket.io/node_modules/socket.io-client/node_modules/active-x-obfuscator/node_modules/zeparser/benchmark.html">benchmark.html</a> | 8062524 |
-| Assembly | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.S">CIDE.S</a> | 6605737 |
-| C Header | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/uts/common/sys/fibre-channel/fca/emlxs/fw_lpe11002.h">fw_lpe11002.h</a> | 5794337 |
-| C | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.C">CIDE.C</a> | 5785777 |
-| JavaScript | <a href="https://bitbucket.com/3x0dv5/ao2sm/src/master/WebContent/extjs/ext-all-dev.js">ext-all-dev.js</a> | 5386270 |
-| Prolog | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.P">CIDE.P</a> | 4948259 |
-| Java | <a href="https://bitbucket.com/abioy/hypertable/src/master/src/gen-java/org/hypertable/thriftgen/ClientService.java">ClientService.java</a> | 4101939 |
-| Patch | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/openswan/patches/kernel/2.6.16/klips.patch">klips.patch</a> | 3594619 |
-| D | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.D">CIDE.D</a> | 3529597 |
-| Objective C | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.M">CIDE.M</a> | 3141049 |
-| Jupyter | <a href="https://bitbucket.com/abosamoor/data_science_course/src/master/ScientificPython.ipynb">ScientificPython.ipynb</a> | 3100608 |
-| R | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.R">CIDE.R</a> | 2802622 |
-| FORTRAN Legacy | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.F">CIDE.F</a> | 2560639 |
-| Swig | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.I">CIDE.I</a> | 2514921 |
-| Specman e | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.E">CIDE.E</a> | 2417432 |
-| C++ Header | <a href="https://bitbucket.com/achase55/gba4ios/src/master/emu-ex-plus-alpha/imagine/bundle/darwin-iOS/include/boost/typeof/vector200.hpp">vector200.hpp</a> | 2234682 |
-| C++ | <a href="https://bitbucket.com/aaalexx/gamejam2013/src/master/cocos2d-x-2.1.5/scripting/lua/cocos2dx_support/LuaCocos2d.cpp">LuaCocos2d.cpp</a> | 2151167 |
-| LEX | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.L">CIDE.L</a> | 2086700 |
-| Autoconf | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/gdb/Makefile.in">Makefile.in</a> | 1678085 |
-| Python | <a href="https://bitbucket.com/3togo/python-tesseract/src/master/src/get-pip.py">get-pip.py</a> | 1563245 |
-| Perl | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/perl/lib/Locale/Codes/Language_Codes.pm">Language_Codes.pm</a> | 1543893 |
-| HEX | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/uts/common/io/ipw/fw-ipw2100/ipw2100-1.3.fw.hex">ipw2100-1.3.fw.hex</a> | 1255140 |
-| SystemVerilog | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.V">CIDE.V</a> | 999600 |
-| C# | <a href="https://bitbucket.com/45north/cx-developer-tutorials/src/master/Defect POC/SOAP.Account.PasswordReset/SOAP.Account.PasswordReset/Service References/RNT.SOAP/Reference.cs">Reference.cs</a> | 975402 |
-| Intel HEX | <a href="https://bitbucket.com/ace0/linux-restore-support/src/master/firmware/bnx2x/bnx2x-e2-7.2.51.0.fw.ihex">bnx2x-e2-7.2.51.0.fw.ihex</a> | 830511 |
-| Emacs Lisp | <a href="https://bitbucket.com/4ourbit/prefs/src/master/.emacs.d/emacs-goodies-el/color-theme-library.el">color-theme-library.el</a> | 797868 |
-| LaTeX | <a href="https://bitbucket.com/40123204/40123204bitbucket/src/master/cdwp/tex_by_topic/TeXbyTopic.tex">TeXbyTopic.tex</a> | 675074 |
-| Properties File | <a href="https://bitbucket.com/acgt/bitmate/src/master/azureus2/src/org/gudy/azureus2/internat/MessagesBundle_bg_BG.properties">MessagesBundle_bg_BG.properties</a> | 673506 |
-| Lua | <a href="https://bitbucket.com/420munk/pd2_lua/src/master/lib/tweak_data/weaponfactorytweakdata.lua">weaponfactorytweakdata.lua</a> | 644230 |
-| Makefile | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/net-snmp/agent/mibgroup/Makefile">Makefile</a> | 622258 |
-| Ruby | <a href="https://bitbucket.com/aalmacin/rails-learning/src/master/blog/path/ruby/2.0.0/gems/mail-2.6.1/lib/mail/parsers/ragel/ruby/machines/address_lists_machine.rb">address_lists_machine.rb</a> | 570805 |
-| ASP.NET | <a href="https://bitbucket.com/abhi8600/demo/src/master/SourceAdmin/.wsdl/general/AdminService_14.asmx">AdminService_14.asmx</a> | 557879 |
-| TypeScript | <a href="https://bitbucket.com/abex/abex-mumble/src/master/src/mumble/mumble_ru.ts">mumble_ru.ts</a> | 443885 |
-| Coq | <a href="https://bitbucket.com/abrzoska/bachelortheory/src/master/redsvd/svd.V">svd.V</a> | 430260 |
-| Vim Script | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/autoload/netrw.vim">netrw.vim</a> | 417636 |
-| TeX | <a href="https://bitbucket.com/ace0/xen-restore-information/src/master/docs/xen-api/xenapi-datamodel.tex">xenapi-datamodel.tex</a> | 410587 |
-| MSBuild | <a href="https://bitbucket.com/0908nooaey/becit-traning/src/master/Template.Metronic/Template.Metronic.csproj">Template.Metronic.csproj</a> | 397925 |
-| Happy | <a href="https://bitbucket.com/acclivitynyc/postgresql/src/master/src/backend/parser/gram.y">gram.y</a> | 375897 |
-| gitignore | <a href="https://bitbucket.com/a3217055/illumos-joyent/src/master/.gitignore">.gitignore</a> | 373198 |
-| Batch | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/perl/bin/cpanm.bat">cpanm.bat</a> | 367293 |
-| m4 | <a href="https://bitbucket.com/2ion/libqueue/src/master/aclocal.m4">aclocal.m4</a> | 360820 |
-| Shell | <a href="https://bitbucket.com/1120436joaopacheco/irudroid-technologies-lapr5/src/master/WalkMaze/lib/freetype-2.5.5/builds/unix/ltmain.sh">ltmain.sh</a> | 321214 |
-| Markdown | <a href="https://bitbucket.com/abhayagiri/reflections/src/master/manuscripts/markdown/vol2-talks.md">vol2-talks.md</a> | 319691 |
-| ActionScript | <a href="https://bitbucket.com/abhi8600/demo/src/master/AnyChart/Original/AnyChartSource_6_0_11/build/utils/flex/frameworks/projects/framework/src/mx/controls/listClasses/ListBase.as">ListBase.as</a> | 317139 |
-| Groovy | <a href="https://bitbucket.com/4s/ot-70-opentele-server/src/master/grails-app/conf/BootStrap.groovy">BootStrap.groovy</a> | 273089 |
-| Forth | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/apache/manual/mod/core.html.fr">core.html.fr</a> | 271345 |
-| Boo | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/grub/grub-0.97/docs/texinfo.tex">texinfo.tex</a> | 226839 |
-| Visual Basic for Applications | <a href="https://bitbucket.com/2014vleadinterns/amulya/src/master/Eucalyptus/paper/IEEEtran.cls">IEEEtran.cls</a> | 215484 |
-| Go Template | <a href="https://bitbucket.com/accelecon/linux-uclinux-dist/src/master/Documentation/DocBook/writing-an-alsa-driver.tmpl">writing-an-alsa-driver.tmpl</a> | 205415 |
-| Visual Basic | <a href="https://bitbucket.com/acrotech/dotspatialpcl/src/master/Trunk/DotSpatial.Plugins.Taudem.Port/frmAutomatic_v3.vb">frmAutomatic_v3.vb</a> | 203170 |
-| VHDL | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/bundle/ctags58/Test/test.vhd">test.vhd</a> | 192381 |
-| Alex | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/gdb/gdb/ChangeLog-3.x">ChangeLog-3.x</a> | 184506 |
-| ReStructuredText | <a href="https://bitbucket.com/acclivitynyc/sqlalchemy/src/master/doc/build/changelog/changelog_06.rst">changelog_06.rst</a> | 170107 |
-| COBOL | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.cob">example.cob</a> | 153346 |
-| CMake | <a href="https://bitbucket.com/02jandal/multilaunch/src/master/cmake/cotire.cmake">cotire.cmake</a> | 152993 |
-| Document Type Definition | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/man/src/util/solbookv2/solbook.dtd">solbook.dtd</a> | 150786 |
-| Lisp | <a href="https://bitbucket.com/acgt/dotemacs/src/master/packs/clojure/lib/slime/swank.lisp">swank.lisp</a> | 144497 |
-| Macromedia eXtensible Markup Language | <a href="https://bitbucket.com/abhi8600/demo/src/master/SourceAdmin/src/RealtimeAdmin.mxml">RealtimeAdmin.mxml</a> | 139687 |
-| PSL Assertion | <a href="https://bitbucket.com/abdulhamid/integrated-genome-browser/src/master/core/genometryImpl/src/test/resources/data/server/A_thaliana/A_thaliana_TAIR8/mRNA1.mm.psl">mRNA1.mm.psl</a> | 137316 |
-| XML Schema | <a href="https://bitbucket.com/aburias/moolahsense/src/master/MoolahConnectnew/NLog.xsd">NLog.xsd</a> | 130385 |
-| TCL | <a href="https://bitbucket.com/achyutreddy24/abdevweb/src/master/dist/tcl/tcl8.6/clock.tcl">clock.tcl</a> | 129701 |
-| XAML | <a href="https://bitbucket.com/achadee/graphics-project/src/master/Common/StandardStyles.xaml">StandardStyles.xaml</a> | 119065 |
-| LESS | <a href="https://bitbucket.com/a_hassala/website/src/master/assets/less/3rd-party/lesshat.less">lesshat.less</a> | 114654 |
-| TypeScript Typings | <a href="https://bitbucket.com/12110201/12110201/src/master/webit/webit/Scripts/devexpress-web-14.1/ts/dx.all.d.ts">dx.all.d.ts</a> | 113915 |
-| Mustache | <a href="https://bitbucket.com/4lejandrito/cv-bootstrap/src/master/docs/templates/pages/components.mustache">components.mustache</a> | 110205 |
-| Razor | <a href="https://bitbucket.com/aburias/moolahsense/src/master/MoolahConnectnew/Views/Admin/_UserVerification.cshtml">_UserVerification.cshtml</a> | 109415 |
-| YAML | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/aws-sdk-1.28.1/lib/aws/api_config/EC2-2013-10-01.yml">EC2-2013-10-01.yml</a> | 108948 |
-| Objective C++ | <a href="https://bitbucket.com/achase55/gba4ios/src/master/GBA4iOS/GBAEmulationViewController.mm">GBAEmulationViewController.mm</a> | 105949 |
-| Pascal | <a href="https://bitbucket.com/5665tm/mytools/src/master/ConEmuFar/PluginSDK/Headers.pas/PluginW.pas">PluginW.pas</a> | 105205 |
-| Scala | <a href="https://bitbucket.com/_nkhalasi/fpscala-2012-assignments/src/master/objsets/src/main/scala/objsets/TweetData.scala">TweetData.scala</a> | 104077 |
-| Expect | <a href="https://bitbucket.com/adam_onodi/uclinux-lpcboard/src/master/user/gdb/gdb/testsuite/gdb.disasm/t01_mov.exp">t01_mov.exp</a> | 93614 |
-| Haxe | <a href="https://bitbucket.com/ace0/xen-restore-information/src/master/tools/qemu-xen/qemu-options.hx">qemu-options.hx</a> | 92576 |
-| Scheme | <a href="https://bitbucket.com/acgt/dotemacs/src/master/packs/programming/lib/slime-2013-04-05/contrib/swank-kawa.scm">swank-kawa.scm</a> | 84264 |
-| F* | <a href="https://bitbucket.com/achyutreddy24/abdevweb/src/master/IMGT-Human_IGHV+IGKV+IGLV_F+ORF_AA.fst">IMGT-Human_IGHV+IGKV+IGLV_F+ORF_AA.fst</a> | 83412 |
-| Device Tree | <a href="https://bitbucket.com/abhisit/firefly-rk3288-kernel/src/master/arch/arm/boot/dts/rk3288-clocks.dtsi">rk3288-clocks.dtsi</a> | 74436 |
-| Module-Definition | <a href="https://bitbucket.com/_1126/humble/src/master/tufte-common.def">tufte-common.def</a> | 66821 |
-| BuildStream | <a href="https://bitbucket.com/adam_0/300/src/master/IEEEannot.bst">IEEEannot.bst</a> | 61919 |
-| Smarty Template | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/gdb/Makefile.tpl">Makefile.tpl</a> | 59029 |
-| BASH | <a href="https://bitbucket.com/a_alfredo/vagrant-instance/src/master/modules/development/files/home/git-completion.bash">git-completion.bash</a> | 58130 |
-| License | <a href="https://bitbucket.com/acharyarajiv/resume_on_java/src/master/target/Resume-1.0-SNAPSHOT/WEB-INF/lib/apache-tomcat-7.0.30-embed/LICENSE">LICENSE</a> | 56812 |
-| Processing | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/realtime/src/acquisition/openbci/java/src/OpenBCI_GUI.pde">OpenBCI_GUI.pde</a> | 52494 |
-| Stata | <a href="https://bitbucket.com/0532/google-hosts/src/master/scripts/hosts.do">hosts.do</a> | 51267 |
-| Powershell | <a href="https://bitbucket.com/adamgiranowski/e-dziennik/src/master/packages/EntityFramework.6.1.0/tools/EntityFramework.psm1">EntityFramework.psm1</a> | 44234 |
-| AWK | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/mysql/bdb/dist/gen_rpc.awk">gen_rpc.awk</a> | 44131 |
-| OCaml | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/format.ml">format.ml</a> | 42416 |
-| Org | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/microwin/src/engine/devdraw.org">devdraw.org</a> | 41988 |
-| Thrift | <a href="https://bitbucket.com/abioy/hypertable/src/master/src/cc/ThriftBroker/Client.thrift">Client.thrift</a> | 39471 |
-| CoffeeScript | <a href="https://bitbucket.com/adamfallon/4chan-x/src/master/src/Posting/QR.coffee">QR.coffee</a> | 37666 |
-| Ada | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/lib/ncurses/ncurses-5.7/Ada95/src/terminal_interface-curses-forms.adb">terminal_interface-curses-forms.adb</a> | 36770 |
-| Wolfram | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/tutor/tutor.nb">tutor.nb</a> | 35601 |
-| Nim | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.nim">example.nim</a> | 35137 |
-| Swift | <a href="https://bitbucket.com/ac4lt/vistathing/src/master/VistaThing/VistaThingViewController.swift">VistaThingViewController.swift</a> | 33142 |
-| Erlang | <a href="https://bitbucket.com/5ht/n2o/src/master/src/mochijson2.erl">mochijson2.erl</a> | 31149 |
-| ASP | <a href="https://bitbucket.com/accessatecs/project-realise/src/master/presentation/lib/ckeditor/ckeditor.asp">ckeditor.asp</a> | 30817 |
-| Handlebars | <a href="https://bitbucket.com/73group/frames/src/master/app/views/editor/templates/editor.hbs">editor.hbs</a> | 30162 |
-| Korn Shell | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/itutools/itu.ksh">itu.ksh</a> | 28975 |
-| JavaServer Pages | <a href="https://bitbucket.com/aaronhujun/test/src/master/src/main/webapp/WEB-INF/views/views/loanmonitor.jsp">loanmonitor.jsp</a> | 28581 |
-| Ur/Web | <a href="https://bitbucket.com/4gott3n/inn/src/master/src/test/resources/extensions/profiles/ur">ur</a> | 28532 |
-| Stylus | <a href="https://bitbucket.com/abornasdinamic/rovi/src/master/src/Dinamic/Rovi/FrontendBundle/Resources/public/css/main.styl">main.styl</a> | 27854 |
-| FORTRAN Modern | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/zmlrpc.f90">zmlrpc.f90</a> | 27700 |
-| Julia | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/string.jl">string.jl</a> | 27687 |
-| PKGBUILD | <a href="https://bitbucket.com/11doctorwhocanada/arch-packages/src/master/vim-spell/trunk/PKGBUILD">PKGBUILD</a> | 27549 |
-| Haskell | <a href="https://bitbucket.com/abailly/capital-match-infra/src/master/src/Propellor/Property/SiteSpecific/JoeySites.hs">JoeySites.hs</a> | 27435 |
-| Rakefile | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/activerecord-3.2.13/lib/active_record/railties/databases.rake">databases.rake</a> | 26578 |
-| Rust | <a href="https://bitbucket.com/adakoda/android_403_gnexus_frameworks_base/src/master/tests/RenderScriptTests/PerfTest/src/com/android/perftest/rsbench.rs">rsbench.rs</a> | 25966 |
-| Protocol Buffers | <a href="https://bitbucket.com/acb/boiler/src/master/proto/cstrike15_gcmessages.proto">cstrike15_gcmessages.proto</a> | 25510 |
-| Xtend | <a href="https://bitbucket.com/3m45t3r/dsl/src/master/main/at.tuwien.dsg.dsl.tests/src/at/tuwien/dsg/dsl/tests/parser/LittleJilParserTest.xtend">LittleJilParserTest.xtend</a> | 25217 |
-| Puppet | <a href="https://bitbucket.com/acdtprn/proj-case-prototyping-boilerplate/src/master/puphpet/puppet/modules/puppi/manifests/project/maven.pp">maven.pp</a> | 24374 |
-| Clojure | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/genclass.clj">genclass.clj</a> | 21964 |
-| Extensible Stylesheet Language Transformations | <a href="https://bitbucket.com/40087220/sd2/src/master/Practical Work/Lab 4 Code/Lab 4 Code/_UpgradeReport_Files/UpgradeReport.xslt">UpgradeReport.xslt</a> | 21697 |
-| Twig Template | <a href="https://bitbucket.com/3663jgl/drupal-phpbb/src/master/piwik/plugins/PrivacyManager/templates/privacySettings.twig">privacySettings.twig</a> | 20780 |
-| Go | <a href="https://bitbucket.com/200bg/aquilo-server/src/master/aquilo/data/user.go">user.go</a> | 19923 |
-| Standard ML (SML) | <a href="https://bitbucket.com/_nkhalasi/proglang-2013-homework/src/master/hw1/hw1_test.sml">hw1_test.sml</a> | 18956 |
-| Bazel | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/samba/packaging/Debian/debian-sarge/README.build">README.build</a> | 18314 |
-| Zsh | <a href="https://bitbucket.com/abrookins/dotfiles/src/master/.zshrc">.zshrc</a> | 18079 |
-| Ruby HTML | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.rhtml">example.rhtml</a> | 17790 |
-| Systemd | <a href="https://bitbucket.com/ace0/xen-restore-information/src/master/tools/qemu-xen-traditional/Makefile.target">Makefile.target</a> | 17319 |
-| GLSL | <a href="https://bitbucket.com/0player/t-engine4/src/master/game/modules/tome/data/gfx/shaders/firearcs.frag">firearcs.frag</a> | 16765 |
-| IDL | <a href="https://bitbucket.com/ace0/xen-restore-information/src/master/tools/libxl/libxl_types.idl">libxl_types.idl</a> | 16578 |
-| Basic | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/unzip/windll/vb/vbunzip.bas">vbunzip.bas</a> | 16319 |
-| Game Maker Language | <a href="https://bitbucket.com/abouthydrology/udig-platform/src/master/plugins/net.refractions.udig.tool.edit.tests/data/lake.gml">lake.gml</a> | 15756 |
-| Android Interface Definition Language | <a href="https://bitbucket.com/abhinavgupta2812/dynamix-framework/src/master/src/org/ambientdynamix/api/application/IDynamixFacade.aidl">IDynamixFacade.aidl</a> | 15475 |
-| Gherkin Specification | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/compass-0.10.6/features/command_line.feature">command_line.feature</a> | 14767 |
-| Vala | <a href="https://bitbucket.com/17twenty/colourl/src/master/main.vala">main.vala</a> | 14451 |
-| SAS | <a href="https://bitbucket.com/a3955269/unlockfs/src/master/libjpegtwrp/makefile.sas">makefile.sas</a> | 12586 |
-| sed | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/mysql/bdb/rpc_server/db_server_proc.sed">db_server_proc.sed</a> | 12177 |
-| AsciiDoc | <a href="https://bitbucket.com/_tamim_/archibus/src/master/README.adoc">README.adoc</a> | 11455 |
-| Elixir | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example_elixir.ex">example_elixir.ex</a> | 10529 |
-| Gradle | <a href="https://bitbucket.com/10chars/wordpress-application-angular/src/master/node_modules/gulp-less/node_modules/less/build.gradle">build.gradle</a> | 10463 |
-| Cython | <a href="https://bitbucket.com/-elmer-/plinkseq/src/master/py/pyplinkseq/pyplinkseq.pyx">pyplinkseq.pyx</a> | 10163 |
-| Monkey C | <a href="https://bitbucket.com/abhi8600/demo/src/master/SMI/3rdparty/minnesota/DTake.mc">DTake.mc</a> | 9167 |
-| V | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/troff/troff.d/tmac.d/v">v</a> | 9164 |
-| QML | <a href="https://bitbucket.com/4s/4sdcdemo/src/master/QtProjects/DemoHtmlIntegration/SettingsDialog.qml">SettingsDialog.qml</a> | 9080 |
-| Unreal Script | <a href="https://bitbucket.com/___________chenjuensheng/android_kernel_samsung_n1/src/master/drivers/net/ixp2000/ixp2400_rx.uc">ixp2400_rx.uc</a> | 8680 |
-| Fish | <a href="https://bitbucket.com/aagraz/homebrew/src/master/Library/Contributions/brew_fish_completion.fish">brew_fish_completion.fish</a> | 7872 |
-| Scons | <a href="https://bitbucket.com/abuffer/soundcustomizer/src/master/sconstruct">sconstruct</a> | 7766 |
-| Jade | <a href="https://bitbucket.com/abhishekdelta/beamos/src/master/beamserv/node_modules/everyauth/example/views/home.jade">home.jade</a> | 7493 |
-| JSX | <a href="https://bitbucket.com/abaddongit/colordomenscheck/src/master/src/js/components/FileField.jsx">FileField.jsx</a> | 7422 |
-| F# | <a href="https://bitbucket.com/abred/btf-renderer/src/master/data/shader/btf.fs">btf.fs</a> | 7077 |
-| Mako | <a href="https://bitbucket.com/50onred/sqlalchemy/src/master/doc/build/templates/layout.mako">layout.mako</a> | 6310 |
-| Elm | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/man/src/util/cals-tbl.elm">cals-tbl.elm</a> | 6198 |
-| Dockerfile | <a href="https://bitbucket.com/abrad450/samm/src/master/.docker/Dockerfile">Dockerfile</a> | 5863 |
-| C Shell | <a href="https://bitbucket.com/aakef/cci/src/master/config/distscript.csh">distscript.csh</a> | 5828 |
-| Arvo | <a href="https://bitbucket.com/adam_novak/sequence-graphs/src/master/avro/sequencegraph.avdl">sequencegraph.avdl</a> | 5498 |
-| AutoHotKey | <a href="https://bitbucket.com/5665tm/mytools/src/master/AutoHotkey/key.ahk">key.ahk</a> | 5406 |
-| nuspec | <a href="https://bitbucket.com/acgt/opserver/src/master/packages/BookSleeve.1.3.38/BookSleeve.1.3.38.nuspec">BookSleeve.1.3.38.nuspec</a> | 4976 |
-| Dart | <a href="https://bitbucket.com/adam8810/chrome-app-samples/src/master/dart/dart/balls.dart">balls.dart</a> | 4581 |
-| GN | <a href="https://bitbucket.com/aakef/cci/src/master/README.ctp.gni">README.ctp.gni</a> | 4518 |
-| SKILL | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/uts/intel/ia32/ml/ia32.il">ia32.il</a> | 4468 |
-| Freemarker Template | <a href="https://bitbucket.com/618lf/tmt-base/src/master/base-webapp-tab/src/main/webapp/WEB-INF/template/index.ftl">index.ftl</a> | 4369 |
-| Varnish Configuration | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/nokogiri-1.6.0/ext/nokogiri/tmp/i686-apple-darwin11/ports/libxml2/2.8.0/libxml2-2.8.0/win32/wince/libxml2.vcl">libxml2.vcl</a> | 4153 |
-| LD Script | <a href="https://bitbucket.com/accelecon/linux-stable/src/master/arch/m68k/kernel/vmlinux-nommu.lds">vmlinux-nommu.lds</a> | 4070 |
-| LOLCODE | <a href="https://bitbucket.com/53454e4f4a/ba/src/master/tex/main.lol">main.lol</a> | 3962 |
-| Alloy | <a href="https://bitbucket.com/___________chenjuensheng/android_kernel_samsung_n1/src/master/Documentation/sound/oss/ALS">ALS</a> | 3770 |
-| Cabal | <a href="https://bitbucket.com/abailly/capital-match-infra/src/master/propellor.cabal">propellor.cabal</a> | 3698 |
-| XCode Config | <a href="https://bitbucket.com/1234224576/voiceactress_ios/src/master/Pods/Pods.xcconfig">Pods.xcconfig</a> | 3239 |
-| Bitbake | <a href="https://bitbucket.com/38zeros/power-meter/src/master/yocto/38z/38z.bb">38z.bb</a> | 2703 |
-| Jenkins Buildfile | <a href="https://bitbucket.com/abenity/postal-code-library/src/master/Jenkinsfile">Jenkinsfile</a> | 2679 |
-| Closure Template | <a href="https://bitbucket.com/13threbellion/spotify-plugin-for-stash/src/master/src/main/resources/spotify/feature/config/server/config-template.soy">config-template.soy</a> | 2321 |
-| Fragment Shader File | <a href="https://bitbucket.com/adamfallon/maply/src/master/GoogleMaps.framework/Versions/A/Resources/GoogleMaps.bundle/GMSCoreResources.bundle/HybridRoadShader.fsh">HybridRoadShader.fsh</a> | 1496 |
-| Modula3 | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/perl/t/lib/warnings/mg">mg</a> | 1146 |
-| Flow9 | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/snort/doc/README.flow">README.flow</a> | 1002 |
-| Kotlin | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.kt">example.kt</a> | 971 |
-| Ceylon | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.ceylon">example.ceylon</a> | 887 |
-| Brainfuck | <a href="https://bitbucket.com/_1126/humble/src/master/code/hello.bf">hello.bf</a> | 840 |
-| ColdFusion | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/demo.cfm">demo.cfm</a> | 724 |
-| Bitbucket Pipeline | <a href="https://bitbucket.com/adam_qc/petsc/src/master/bitbucket-pipelines.yml">bitbucket-pipelines.yml</a> | 562 |
-| GDScript | <a href="https://bitbucket.com/aadeshnpn/espeak/src/master/phsource/vowelcharts/gd">gd</a> | 498 |
-| Vertex Shader File | <a href="https://bitbucket.com/aaalexx/gamejam2013/src/master/cocos2d-x-2.1.5/samples/Javascript/Shared/tests/res/Shaders/example_ColorBars.vsh">example_ColorBars.vsh</a> | 323 |
-| Emacs Dev Env | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/realtime/src/buffer/java/bufferserver/Project.ede">Project.ede</a> | 312 |
-| Opalang | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/test.opa">test.opa</a> | 172 |
-| ignore | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/rsync/.ignore">.ignore</a> | 137 |
-| Docker ignore | <a href="https://bitbucket.com/abdulcordoba/retocid/src/master/docker/retocid_mezz/.dockerignore">.dockerignore</a> | 34 |
-| Creole | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/sinatra-1.3.4/test/views/hello.creole">hello.creole</a> | 20 |
+| Assembly | <a href="https://github.com/bogwonch/thesis/blob/master/MIPS/1-INST-JMP/J.s">J.s</a> | 8388608 |
+| LaTeX | <a href="https://github.com/zbhappy/c/blob/master/file/tex">tex</a> | 8316556 |
+| C++ Header | <a href="https://github.com/algotrust/qmlib/blob/master/include/qmlib/math/random/impl/primpoly_impl.hh">primpoly_impl.hh</a> | 8129599 |
+| Lisp | <a href="https://github.com/ayoub-89/nltk_data/blob/master/corpora/lin_thesaurus/simN.lsp">simN.lsp</a> | 7233972 |
+| Perl | <a href="https://github.com/logicmoo/jellyfish/blob/master/temp/aimlCore3.pl">aimlCore3.pl</a> | 6539759 |
+| SAS | <a href="https://github.com/herry13/fdt/blob/master/benchmark/cloud/cloud.old2/output.sas">output.sas</a> | 5874153 |
+| C | <a href="https://github.com/anumq/protein/blob/master/Imp6/sourceFiles/CathDomainDescriptionFile.v3.5.c">CathDomainDescriptionFile.v3.5.c</a> | 5440052 |
+| Lua | <a href="https://github.com/nan0meter/helix/blob/master/Content/Scenes/giant/giant.lua">giant.lua</a> | 5055019 |
+| R | <a href="https://bitbucket.com/richardberendsen/rdwps/src/master/R/disambisearches.R">disambisearches.R</a> | 4985492 |
+| MUMPS | <a href="https://bitbucket.com/dzhang50/gpm/src/master/spec2006/450.soplex/ref.mps">ref.mps</a> | 4709289 |
+| HEX | <a href="https://bitbucket.com/bcforres/18545/src/master/roms/bin/combine.hex">combine.hex</a> | 4194304 |
+| Python | <a href="https://github.com/anirudhvenkats/clowdflows/blob/master/workflows/segmine/data/mappings.py">mappings.py</a> | 3064594 |
+| Scheme | <a href="https://github.com/cosmoharrigan/test-datasets/blob/master/pln/tuffy/smokes/tests/03-08-14/atomspace.scm">atomspace.scm</a> | 3027366 |
+| C++ | <a href="https://github.com/arandur/prog3b/blob/master/src/Int.cpp">Int.cpp</a> | 2900609 |
+| Properties File | <a href="https://github.com/gunner14/old_rr_code/blob/master/java_workplace/sns-xiaonei/xiaonei-guide/trunk/src/main/resources/nuomi_active_user_ids.properties">nuomi_active_user_ids.properties</a> | 2747671 |
+| Alex | <a href="https://bitbucket.com/brendenl92/coldest-steeliest/src/master/Cold Steel/Release/media/Models/Dalek.X">Dalek.X</a> | 2459209 |
+| TCL | <a href="https://github.com/pdsteele/socialnetworksproject/blob/master/datasets/TCL">TCL</a> | 2362970 |
+| Ruby | <a href="https://github.com/bonifacefr/oddborg-1/blob/master/ext/fiparse/test/data/smj_12_2004.rb">smj_12_2004.rb</a> | 2329560 |
+| Wolfram | <a href="https://github.com/liei/shoebox/blob/master/hmm.nb">hmm.nb</a> | 2177422 |
+| Brainfuck | <a href="https://github.com/bletchley13/signature-based-malware-detection/blob/master/FFBloomFilter/BF">BF</a> | 2097158 |
+| TypeScript | <a href="https://github.com/selbst/handy-chem/blob/master/HandwritingV010/testingcharacters/0/all_6.ts">all_6.ts</a> | 1997637 |
+| Module-Definition | <a href="https://github.com/fukayatsu/kani_acid/blob/master/lib/mecab-naist-jdic/matrix.def">matrix.def</a> | 1948817 |
+| LESS | <a href="https://github.com/er2/euler/blob/master/less">less</a> | 1930356 |
+| Objective C | <a href="https://github.com/chinnabommu/computervisionwip/blob/master/imports/fast/fast-matlab-src-2.1/faster.m">faster.m</a> | 1913966 |
+| Org | <a href="https://github.com/dyfeng/linuxscripts/blob/master/sogou_dict_import/default.org">default.org</a> | 1875096 |
+| Jupyter | <a href="https://github.com/dunovank/pynb/blob/master/RADD/RADD/Proactive/ProHDDM/X/ReHDDM - AllGo sxFits-Copy0.ipynb">ReHDDM - AllGo sxFits-Copy0.ipynb</a> | 1780197 |
+| Specman e | <a href="https://github.com/yecol/yecolhubio/blob/master/twitter/twitter.e">twitter.e</a> | 1768135 |
+| F* | <a href="https://gitlab.com/projet_alphasat/projet_alphasat/blob/master/Pan_troglodytes_monomers.fst">Pan_troglodytes_monomers.fst</a> | 1739878 |
+| Systemd | <a href="https://github.com/cocoxu/shakespeare/blob/master/models/Translators/video_corpus_baseline/data/video_clean_lower_tokenized.target">video_clean_lower_tokenized.target</a> | 1685570 |
+| V | <a href="https://github.com/thepedestrian/fpga-simple-maze-game-using-vga-output/blob/master/SRC/FPGA-Verilog-Code/ImageMazeChannelValueROM.v">ImageMazeChannelValueROM.v</a> | 1440068 |
+| Markdown | <a href="https://github.com/subjectraw/subjectraw/blob/master/subject/data/eng/eukaryota.md">eukaryota.md</a> | 1432161 |
+| TeX | <a href="https://github.com/rogerbraun/wadoku-scripts/blob/master/japanischtest.tex">japanischtest.tex</a> | 1337456 |
+| Forth | <a href="https://github.com/mar-one/machine-trans-shared-task/blob/master/data/corpus/europarl.tok.fr">europarl.tok.fr</a> | 1288074 |
+| Shell | <a href="https://github.com/jcs/openbsd-commitid/blob/master/out/add_commitids_to_src.sh">add_commitids_to_src.sh</a> | 1274873 |
+| SKILL | <a href="https://github.com/jacktsai/tos/blob/master/9.13/Assembly-CSharp/hijacked.il">hijacked.il</a> | 1187701 |
+| CSS | <a href="https://github.com/pligo/icantgo/blob/master/web/css/7f116c3.css">7f116c3.css</a> | 1170216 |
+| C# | <a href="https://github.com/sdanil/test/blob/master/Form1.cs">Form1.cs</a> | 1140480 |
+| gitignore | <a href="https://github.com/arikanu/harpy/blob/master/harpy/.gitignore">.gitignore</a> | 1055167 |
+| Boo | <a href="https://github.com/ph111p/bwinf_2014_runde2/blob/master/Aufgabe_1/3.out.tex">3.out.tex</a> | 1032145 |
+| Java | <a href="https://github.com/castlely/compiler_tiger_lab1/blob/master/test/Monster.java">Monster.java</a> | 1000019 |
+| ActionScript | <a href="https://github.com/tarzzz/ds/blob/master/linked-list/as">as</a> | 1000000 |
+| MSBuild | <a href="https://github.com/chrisleewashere/swirl-osx/blob/master/corpus/train.props">train.props</a> | 989860 |
+| D | <a href="https://github.com/khalefa/dataset/blob/master/D">D</a> | 883308 |
+| Coq | <a href="https://bitbucket.com/mpettersson/reinsverifier/src/master/REINS/CompiledDFAs.v">CompiledDFAs.v</a> | 873354 |
+| Clojure | <a href="https://github.com/candera/cs-atom/blob/master/raw-data.clj">raw-data.clj</a> | 694202 |
+| Swig | <a href="https://bitbucket.com/roman_shafeyev/navsystem/src/master/workspace/NavCenter/3DEditor/3DEditor.i">3DEditor.i</a> | 645117 |
+| Happy | <a href="https://github.com/symbolicpower/perceptrondict/blob/master/y">y</a> | 624673 |
+| GLSL | <a href="https://github.com/aminems/opendwarfs/blob/master/test/n-body-methods/gem/capsid.vert">capsid.vert</a> | 593618 |
+| Verilog | <a href="https://github.com/sammsiontir/eecs470_superernie/blob/master/synth_report_0420/pipeline.vg">pipeline.vg</a> | 578418 |
+| Standard ML (SML) | <a href="https://github.com/amtriathlon/goldencheetah/blob/master/test/rides/Ambit3-HRVbutNoHR.sml">Ambit3-HRVbutNoHR.sml</a> | 576071 |
+| SystemVerilog | <a href="https://gitlab.com/andresavilas/ece337project/blob/master/mapped/bitcoinminer.v">bitcoinminer.v</a> | 561974 |
+| Visual Basic | <a href="https://bitbucket.com/mscalella/pronto/src/master/BussinessLogic/linqStoreProcs.designer.vb">linqStoreProcs.designer.vb</a> | 561067 |
+| Go | <a href="https://github.com/reusee/go-qt/blob/master/smoke_info/info.go">info.go</a> | 559236 |
+| Expect | <a href="https://github.com/jalwes/30_year_average/blob/master/Argonne_Hourly_Data/Argonne_hourly_dewpoint.exp">Argonne_hourly_dewpoint.exp</a> | 552269 |
+| Erlang | <a href="https://github.com/siteview/erlide/blob/master/com.siteview.kernel.core/modules/nnsdh/sdh_analogue_data.erl">sdh_analogue_data.erl</a> | 473924 |
+| Makefile | <a href="https://github.com/kssanath/ece497/blob/master/qt-everywhere-opensource-src-4.6.2/src/3rdparty/webkit/WebCore/Makefile">Makefile</a> | 462433 |
+| QML | <a href="https://github.com/kasra-hosseini/obspydmt/blob/master/obspyDMT/gcmt_catalog/COMBO/2005.qml">2005.qml</a> | 459113 |
+| SPDX | <a href="https://github.com/triplecheck/misc/blob/master/misc_spdx/linux-coreos.spdx">linux-coreos.spdx</a> | 444743 |
+| VHDL | <a href="https://github.com/mbarga/archive-cpu/blob/master/mapped/cpuTest.vhd">cpuTest.vhd</a> | 442043 |
+| ASP.NET | <a href="https://github.com/claq2/lcbodrinkfinder/blob/master/TestLcbo/AllProducts.aspx">AllProducts.aspx</a> | 438423 |
+| XML Schema | <a href="https://github.com/dvhill/impengineering/blob/master/xsd/rsx/7.4.1/856/AdvanceShipNotices.xsd">AdvanceShipNotices.xsd</a> | 436055 |
+| Elixir | <a href="https://github.com/lulance/courseranlangp/blob/master/h1-p/gene.train.with.rare.ex">gene.train.with.rare.ex</a> | 399995 |
+| Macromedia eXtensible Markup Language | <a href="https://bitbucket.com/jackcviers/flex-3-flex-4-performance-test/src/master/Flex4PerformanceTest/src/StaticFlex4PerformanceTest20000.mxml">StaticFlex4PerformanceTest20000.mxml</a> | 399821 |
+| Ada | <a href="https://github.com/raghup17/bmm/blob/master/hls/bmm_top/solution1/.autopilot/db/bmm_top.adb">bmm_top.adb</a> | 390275 |
+| TypeScript Typings | <a href="https://github.com/vansimke/dojotypedescriptiongenerator/blob/master/DojoTypeDescriptor/Scripts/typings/dojox.d.ts">dojox.d.ts</a> | 384171 |
+| Pascal | <a href="https://github.com/grahamegrieve/fhirserver/blob/master/library/r4/FHIR.R4.Resources.pas">FHIR.R4.Resources.pas</a> | 363291 |
+| COBOL | <a href="https://github.com/nesl/scpi-scripts/blob/master/kei/cpy">cpy</a> | 358745 |
+| Basic | <a href="https://github.com/jcorrius/go-oo-mingw32-soc/blob/master/test/macro/vba_streams/excel-vba-streams-#1.bas">excel-vba-streams-#1.bas</a> | 333707 |
+| Visual Basic for Applications | <a href="https://github.com/franc90/furnacedriver/blob/master/FurnaceDriver/FurnaceDriver_rpy/Default/Dispatcher.cls">Dispatcher.cls</a> | 332266 |
+| Puppet | <a href="https://github.com/malkia/multi_msvcrt/blob/master/main_110.pp">main_110.pp</a> | 314217 |
+| FORTRAN Legacy | <a href="https://github.com/yinyanghu/dmar/blob/master/Code/SVM/resultsX/f">f</a> | 313599 |
+| OCaml | <a href="https://github.com/merelyapseudonym/afp/blob/master/thys/Flyspeck-Tame/Archives/Pent.ML">Pent.ML</a> | 312749 |
+| FORTRAN Modern | <a href="https://github.com/johannesgerer/jburkardt-f/blob/master/slatec/slatec.f90">slatec.f90</a> | 298677 |
+| CoffeeScript | <a href="https://github.com/cherifya/letterpresser/blob/master/js/dictionary.coffee">dictionary.coffee</a> | 271378 |
+| Nix | <a href="https://github.com/edolstra/nixpkgs/blob/master/pkgs/development/haskell-modules/hackage-packages.nix">hackage-packages.nix</a> | 259940 |
+| Intel HEX | <a href="https://github.com/giorgio130/linux-2635-kobo-multitouch/blob/master/firmware/imx/epdc_ED060SCE.fw.ihex">epdc_ED060SCE.fw.ihex</a> | 253836 |
+| Scala | <a href="https://github.com/nette22/threeflowjs/blob/master/examples/renders/models_camaro.sc">models_camaro.sc</a> | 253559 |
+| Julia | <a href="https://github.com/carljv/bayescomp/blob/master/src/julia/*IJulia 0*.jl">*IJulia 0*.jl</a> | 221058 |
+| SRecode Template | <a href="https://github.com/malex984/mysettings/blob/master/.epsilon/espell.srt">espell.srt</a> | 216243 |
+| sed | <a href="https://github.com/sncosmo/sncosmohubio/blob/master/data/models/pierel/CSP-2004fe.SED">CSP-2004fe.SED</a> | 214290 |
+| ReStructuredText | <a href="https://github.com/ledmonster/japanese-law/blob/master/doc/S40/S40HO033.rst">S40HO033.rst</a> | 211403 |
+| Bosque | <a href="https://github.com/jalbertbowden/world-data/blob/master/world-dem-5-arcmin/world_dem_5arcmin_geo.bsq/world_dem_5arcmin_geo.bsq">world_dem_5arcmin_geo.bsq</a> | 199238 |
+| Emacs Lisp | <a href="https://github.com/cmungall/uberon/blob/master/util/ubermacros.el">ubermacros.el</a> | 195861 |
+| F# | <a href="https://bitbucket.com/akohlmey/lammps/src/master/examples/USER/misc/momb/Ag_O1X5.5_O2X0.55.eam.fs">Ag_O1X5.5_O2X0.55.eam.fs</a> | 180008 |
+| GDScript | <a href="https://github.com/hugo53/vinearts/blob/master/giaoduc.net.vn/Xa-hoi/Chum-anh-Phat-hien-chan-dong-tai-chua-Dam-Bac-Ninh/72906.gd">72906.gd</a> | 178628 |
+| Gherkin Specification | <a href="https://github.com/czlyc/2c-web-research/blob/master/data/raw/8/feature">feature</a> | 175229 |
+| Haskell | <a href="https://github.com/jjinkou2/agentcom/blob/master/Excel.hs">Excel.hs</a> | 173039 |
+| Dart | <a href="https://github.com/mattliberty/wordgen/blob/master/source/surnames_list.dart">surnames_list.dart</a> | 153144 |
+| Bazel | <a href="https://github.com/nonas/debian-clang/blob/master/tests/build_timeout/buildlogs/run1/matplotlib_1.3.1-1_amd64-20140427-1441.build">matplotlib_1.3.1-1_amd64-20140427-1441.build</a> | 149234 |
+| Haxe | <a href="https://github.com/ivideo/easytake/blob/master/FFmpeg-iOS-Encoder-master/hahah/ffmpeg-iOS/yasm-1.1.0/results/elf-x86id.hx">elf-x86id.hx</a> | 145800 |
+| IDL | <a href="https://github.com/brownplt/strobe/blob/master/data/all-idls.idl">all-idls.idl</a> | 129435 |
+| LD Script | <a href="https://github.com/t-crest/ospat/blob/master/misc/ldscripts/patmos/prep/kernel_partitions.lds">kernel_partitions.lds</a> | 127187 |
+| Monkey C | <a href="https://github.com/jlesniewski/pycrysfml/blob/master/hklgen/LFO/M3/LFO_BT1-point.mc">LFO_BT1-point.mc</a> | 120881 |
+| Modula3 | <a href="https://github.com/damsl/k3-mosaic/blob/master/tests/m3/tpch22.m3">tpch22.m3</a> | 120185 |
+| Batch | <a href="https://github.com/malific/script-shop/blob/master/EZhunter.cmd">EZhunter.cmd</a> | 119341 |
+| Rust | <a href="https://github.com/jankeromnes/gecko-dev/blob/master/third_party/rust/encoding_rs/src/data.rs">data.rs</a> | 114408 |
+| Ur/Web | <a href="https://github.com/deepuiitk/indian-parallel-corpora/blob/master/ur-en/tok/dict.ur-en.ur">dict.ur-en.ur</a> | 113911 |
+| Unreal Script | <a href="https://github.com/polyatail/scher_et_al_2013/blob/master/Figure_3/Panel_C/orfs.derep_id97.uc">orfs.derep_id97.uc</a> | 110737 |
+| Groovy | <a href="https://bitbucket.com/nfredricks/vim-files/src/master/tags/groovy">groovy</a> | 100297 |
+| Smarty Template | <a href="https://github.com/rodneyrehm/php-template-engines/blob/master/test/tests/smarty3/templates/assign.100000.tpl">assign.100000.tpl</a> | 100002 |
+| Bitbake | <a href="https://github.com/kellyhou/clientserver/blob/master/Examples/sys_net/io/bb">bb</a> | 100000 |
+| BASH | <a href="https://github.com/palmer-dabbelt/tek/blob/master/test/tek/palmer-master-thesis.bash">palmer-master-thesis.bash</a> | 96911 |
+| PSL Assertion | <a href="https://github.com/khayer/blat_parser/blob/master/lib/blat_parser/test_uno.psl">test_uno.psl</a> | 96253 |
+| ASP | <a href="https://github.com/grote/oclingo/blob/master/tests/gbie/instances/sat_gbie_01.asp">sat_gbie_01.asp</a> | 95144 |
+| Protocol Buffers | <a href="https://github.com/burrows-labs/sqllogictest/blob/master/proto/select1.proto">select1.proto</a> | 89796 |
+| Report Definition Language | <a href="https://github.com/vinhdoan/angroupdemo/blob/master/Reports/ACG.rdl">ACG.rdl</a> | 84666 |
+| Powershell | <a href="https://github.com/dwj7738/my-powershell-repository/blob/master/Modules/WPK/GeneratedControls/PresentationFramework.ps1">PresentationFramework.ps1</a> | 83861 |
+| Jinja | <a href="https://github.com/truebluedata/chakravyuhaiiitd/blob/master/jinja2">jinja2</a> | 76040 |
+| AWK | <a href="https://github.com/apurtell/llvm-test-suite/blob/master/MultiSource/Benchmarks/MallocBench/perl/INPUT/words-large.awk">words-large.awk</a> | 69964 |
+| LOLCODE | <a href="https://github.com/eldog/fface/blob/master/src/fsort/lol">lol</a> | 67520 |
+| Wren | <a href="https://github.com/munificent/wren/blob/master/test/limit/reuse_constants.wren">reuse_constants.wren</a> | 65550 |
+| JSX | <a href="https://github.com/imclab/drawgrid/blob/master/scripts/AEscript.jsx">AEscript.jsx</a> | 65108 |
+| Rakefile | <a href="https://github.com/vajapravin/pokemon_rails/blob/master/lib/tasks/seed.rake">seed.rake</a> | 63000 |
+| Stata | <a href="https://github.com/funzelknut/migrationsvariable/blob/master/Stata/DoFile/Logic/combinations/.31113.do">.31113.do</a> | 60343 |
+| Vim Script | <a href="https://github.com/yuratomo/cpp-api-ddk/blob/master/autoload/cppapi/ddk.vim">ddk.vim</a> | 60282 |
+| Swift | <a href="https://github.com/alexeyxo/protobuf-swift/blob/master/plugin/Tests/pbTests/Google.Protobuf.UnittestEnormousDescriptor.proto.swift">Google.Protobuf.UnittestEnormousDescriptor.proto.swift</a> | 60236 |
+| Korn Shell | <a href="https://github.com/ggouaillardet/ompi-www/blob/master/community/lists/devel/attachments/20090617/3f35b1fc/attachment-0002.ksh">attachment-0002.ksh</a> | 58298 |
+| AsciiDoc | <a href="https://github.com/cafe008/spring-framework/blob/master/src/asciidoc/index.adoc">index.adoc</a> | 52627 |
+| Freemarker Template | <a href="https://github.com/livesense/orglivesensesamplesimpleportal/blob/master/src/main/resources/apps/simpleportal/htmlmail/designed.eml.ftl">designed.eml.ftl</a> | 52160 |
+| Cython | <a href="https://github.com/szeng2013/eecs392/blob/master/391_Project/CALC/CALC.pex.netlist.CALC.pxi">CALC.pex.netlist.CALC.pxi</a> | 50283 |
+| m4 | <a href="https://github.com/tjgiese/atizer/blob/master/python/atizer/m4/m4/ax.m4">ax.m4</a> | 47828 |
+| Extensible Stylesheet Language Transformations | <a href="https://github.com/cmps290t/cmps290t/blob/master/templates/green_ccd.xslt">green_ccd.xslt</a> | 37247 |
+| License | <a href="https://github.com/xnox/android/blob/master/copyright">copyright</a> | 37205 |
+| JavaServer Pages | <a href="https://github.com/julien1990/wtp-sourceediting/blob/master/tests/org.eclipse.jst.jsp.ui.tests.performance/data/1MB.jsp">1MB.jsp</a> | 36007 |
+| Document Type Definition | <a href="https://github.com/braunoeder/yesodcms/blob/master/dita/dtd/bookmap/dtd/bookmap.dtd">bookmap.dtd</a> | 32815 |
+| Fish | <a href="https://gitlab.com/mitzip/fish-config/blob/master/functions/Godsay.fish">Godsay.fish</a> | 31112 |
+| ClojureScript | <a href="https://github.com/timvisher/painful-clojurescript-compilation/blob/master/src/painful_clojurescript_compilation/core.cljs">core.cljs</a> | 31013 |
+| Robot Framework | <a href="https://github.com/tomasz-kucharski/robocode/blob/master/doc/src_OpenGL/robot">robot</a> | 30460 |
+| Processing | <a href="https://github.com/bombilee/nxv11/blob/master/LidarSpoofing/data.pde">data.pde</a> | 30390 |
+| Ruby HTML | <a href="https://github.com/vijedi/javascript_framework_test/blob/master/app/views/home/big_table.rhtml">big_table.rhtml</a> | 29306 |
+| ColdFusion | <a href="https://github.com/llimllib/personal_code/blob/master/web/bnia/data/spreadsheet2009Q1.cfm">spreadsheet2009Q1.cfm</a> | 27974 |
+| CMake | <a href="https://github.com/luisibanez/vista-debian-med-package/blob/master/CMake/ListOfVistARoutines.cmake">ListOfVistARoutines.cmake</a> | 27550 |
+| ATS | <a href="https://github.com/ashalkhakov/ats-postiats/blob/master/npm-utils/contrib/libats-/hwxi/Andes/TEST/test06.dats">test06.dats</a> | 24350 |
+| Nim | <a href="https://github.com/renox/nimrod/blob/master/lib/windows/windows.nim">windows.nim</a> | 23949 |
+| Vue | <a href="https://github.com/deepfire/tech/blob/master/Ogre.vue">Ogre.vue</a> | 22916 |
+| Razor | <a href="https://github.com/agglerithm/readathonentry/blob/master/src/ReadAThonEntry/Views/Home/validationerror.cshtml">validationerror.cshtml</a> | 22832 |
+| Spice Netlist | <a href="https://github.com/danielsig727/dcs_labs/blob/master/DCS_FinalProject/input6.ckt">input6.ckt</a> | 22454 |
+| Isabelle | <a href="https://github.com/jshs/scyther-proof/blob/master/experiments/effect_of_reuse_and_minimization/output_FN/WooLam_cert_auto.thy">WooLam_cert_auto.thy</a> | 22312 |
+| XAML | <a href="https://github.com/tomba/dwarrowdelf/blob/master/Tests/WPFMapControlTest/SymbolDrawings.xaml">SymbolDrawings.xaml</a> | 20764 |
+| Opalang | <a href="https://github.com/kevtron/uniformsphere/blob/master/sample_data/p4000_g+5.0_m0.0_t00_st_z+0.00_a+0.00_c+0.00_n+0.00_o+0.00_r+0.00_s+0.00.opa">p4000_g+5.0_m0.0_t00_st_z+0.00_a+0.00_c+0.00_n+0.00_o+0.00_r+0.00_s+0.00.opa</a> | 20168 |
+| TOML | <a href="https://github.com/karupanerura/toml-parser/blob/master/xt/toml/too_large.toml">too_large.toml</a> | 20000 |
+| Madlang | <a href="https://github.com/cesarotti/dark-photons/blob/master/madgraph/madgraph_binaries/vendor/StdHEP/example/evgg.mad">evgg.mad</a> | 19416 |
+| Stylus | <a href="https://bitbucket.com/johanneskoch/interaktionskoll-client/src/master/node_modules/stylus-brunch/node_modules/stylus/testing/test.styl">test.styl</a> | 19127 |
+| Go Template | <a href="https://github.com/jtimothyking/perl6-bench/blob/master/data/html-template.tmpl">html-template.tmpl</a> | 19016 |
+| AutoHotKey | <a href="https://github.com/tinku99/ahk-hello-gl-ch2/blob/master/glext.ahk">glext.ahk</a> | 18036 |
+| ColdFusion CFScript | <a href="https://github.com/mfgglobalsolutions/collectmed/blob/master/collectmed1.0/CustomTags/com/common/db/IntakeHCPCIO.cfc">IntakeHCPCIO.cfc</a> | 17606 |
+| Zsh | <a href="https://github.com/voronenko/dotfiles/blob/master/completions/_oc.zsh">_oc.zsh</a> | 17307 |
+| Twig Template | <a href="https://github.com/terokaisti/elfinderbundle/blob/master/src/AlphaLemon/ElFinderBundle/Resources/views/ElFinder/show.html.twig">show.html.twig</a> | 16320 |
+| ABAP | <a href="https://github.com/yetaai/sap/blob/master/ZIM2Reports/ZRIM01F01.abap">ZRIM01F01.abap</a> | 16029 |
+| Elm | <a href="https://github.com/frankyn/csgraphics-fall13/blob/master/project1/data/viewpoint/57chevy.elm">57chevy.elm</a> | 14968 |
+| Kotlin | <a href="https://github.com/jetbrains/kotlin/blob/master/libraries/stdlib/common/src/generated/_Arrays.kt">_Arrays.kt</a> | 14396 |
+| Varnish Configuration | <a href="https://github.com/aureq/securityvcl/blob/master/vcl/breach/40_generic_attacks.vcl">40_generic_attacks.vcl</a> | 13367 |
+| Mustache | <a href="https://github.com/financial-times/o-table/blob/master/demos/src/huge.mustache">huge.mustache</a> | 13313 |
+| Alloy | <a href="https://github.com/epintos/fajita/blob/master/fajita/result/unroll_2/tacoOutput/output.als">output.als</a> | 12168 |
+| Device Tree | <a href="https://gitlab.com/mac/android_kernel_htc_flounder/blob/master/arch/arm64/boot/dts/tegra132-flounder-emc.dtsi">tegra132-flounder-emc.dtsi</a> | 11893 |
+| MQL4 | <a href="https://github.com/lvcster/java-examples/blob/master/PhD Appsolute System.mq4">PhD Appsolute System.mq4</a> | 11280 |
+| Jade | <a href="https://github.com/ernesto-licea/basictheme/blob/master/views/basic/images/icons/fugue.jade">fugue.jade</a> | 10711 |
+| Q# | <a href="https://github.com/afibanez/eneboo-modules/blob/master/direccion/analisis/scripts/in_navegador.qs">in_navegador.qs</a> | 10025 |
+| JSONL | <a href="https://github.com/aneeshmg/python/blob/master/NLP-TextEntailment/data/train.jsonl">train.jsonl</a> | 10000 |
+| Flow9 | <a href="https://github.com/hitchiker42/my-code/blob/master/cs758/asst-11/graph2.flow">graph2.flow</a> | 9902 |
+| Vala | <a href="https://github.com/stronnag/mwptools/blob/master/mwp/mwp.vala">mwp.vala</a> | 8765 |
+| Handlebars | <a href="https://github.com/jonschlinkert/liquid-to-handlebars/blob/master/test/expected/shopify-narrative/assets/theme.scss.hbs">theme.scss.hbs</a> | 8259 |
+| Crystal | <a href="https://github.com/000861/openfoam-21x/blob/master/tutorials/combustion/PDRFoam/flamePropagationWithObstacles/0/CR">CR</a> | 8084 |
+| C Shell | <a href="https://gitlab.com/bgcx262/zswi2010-svn-to-git/blob/master/trunk/data/plna.csh">plna.csh</a> | 8000 |
+| Hamlet | <a href="https://github.com/aliced3645/os/blob/master/weenix/user/hamlet">hamlet</a> | 7882 |
+| BuildStream | <a href="https://github.com/mrzork/proyectomaestria/blob/master/Final/Cites/Biometrics/biometrics.bst">biometrics.bst</a> | 7746 |
+| Mako | <a href="https://github.com/daniel2101/verificaciones/blob/master/report/verificaciones.mako">verificaciones.mako</a> | 7306 |
+| Agda | <a href="https://github.com/zsparks/pi-dual/blob/master/Univalence/Obsolete/Pifextra.agda">Pifextra.agda</a> | 6483 |
+| Thrift | <a href="https://github.com/cinchapi/concourse/blob/master/interface/concourse.thrift">concourse.thrift</a> | 6471 |
+| Fragment Shader File | <a href="https://github.com/jcamposr/wis20/blob/master/Simplex/ms812_bseqoslabel_l.fsh">ms812_bseqoslabel_l.fsh</a> | 6269 |
+| Cargo Lock | <a href="https://github.com/mozilla/servo/blob/master/Cargo.lock">Cargo.lock</a> | 6202 |
+| Xtend | <a href="https://github.com/arnobl/kompren/blob/master/kompren-examples/examples.umlFootprinting/src/main/java/umlfootprinter/UMLSlicerAspect.xtend">UMLSlicerAspect.xtend</a> | 5936 |
+| Arvo | <a href="https://github.com/scaleunlimited/cascadingavro/blob/master/scheme/src/test/resources/cascading/avro/test-extra-large.avsc">test-extra-large.avsc</a> | 5378 |
+| Scons | <a href="https://github.com/dxx-rebirth/dxx-rebirth/blob/master/SConstruct">SConstruct</a> | 5272 |
+| Closure Template | <a href="https://github.com/facebook/buck/blob/master/docs/files-and-dirs/buckconfig.soy">buckconfig.soy</a> | 5189 |
+| GN | <a href="https://github.com/v8/v8/blob/master/BUILD.gn">BUILD.gn</a> | 4653 |
+| Softbridge Basic | <a href="https://gitlab.com/bgcx261/znos-git/blob/master/build/usr/octopus/port/live/owptext.sbl">owptext.sbl</a> | 4646 |
+| PKGBUILD | <a href="https://bitbucket.com/axil42/aur-mirror/src/master/stepmania-extras/PKGBUILD">PKGBUILD</a> | 4636 |
+| Oz | <a href="https://github.com/aglie/mozart2/blob/master/lib/compiler/StaticAnalysis.oz">StaticAnalysis.oz</a> | 4500 |
+| Lucius | <a href="https://github.com/dsmatter/timetracker/blob/master/templates/bootstrap.lucius">bootstrap.lucius</a> | 3992 |
+| Ceylon | <a href="https://github.com/ceylon/ceylonast/blob/master/source/ceylon/ast/redhat/RedHatTransformer.ceylon">RedHatTransformer.ceylon</a> | 3907 |
+| Creole | <a href="https://github.com/bsmr-mariadb/mariadb-manager-monitor/blob/master/MariaDB_Manager_Monitors.creole">MariaDB_Manager_Monitors.creole</a> | 3855 |
+| Luna | <a href="https://github.com/luna/luna/blob/master/stdlib/Std/src/Base.luna">Base.luna</a> | 3731 |
+| Gradle | <a href="https://github.com/jasig/cas/blob/master/gradle/dependencies.gradle">dependencies.gradle</a> | 3612 |
+| MQL Header | <a href="https://github.com/ro31337/romanpushkin-dailygrid/blob/master/IncGUI.mqh">IncGUI.mqh</a> | 3544 |
+| Cabal | <a href="https://github.com/keqh-remote/cabals-mirror/blob/master/smartword.cabal">smartword.cabal</a> | 3452 |
+| Emacs Dev Env | <a href="https://github.com/a3090103838/emacs-24-mac/blob/master/info/ede">ede</a> | 3400 |
+| Meson | <a href="https://github.com/keruspe/systemd/blob/master/meson.build">meson.build</a> | 3264 |
+| nuspec | <a href="https://github.com/giggio/npm-nuget/blob/master/Npm.js.nuspec">Npm.js.nuspec</a> | 2823 |
+| Game Maker Project | <a href="https://github.com/kgs0142/ludum-dare/blob/master/LD40/LudumDare.yyp">LudumDare.yyp</a> | 2679 |
+| Julius | <a href="https://github.com/ahushh/monaba/blob/master/monaba/templates/default-layout.julius">default-layout.julius</a> | 2454 |
+| Idris | <a href="https://github.com/francks/ringidris/blob/master/Provers/ring_reduce.idr">ring_reduce.idr</a> | 2434 |
+| Alchemist | <a href="https://github.com/nim-hrkn/ecalj/blob/master/TestInstall/crn/out.lmf-dos.crn">out.lmf-dos.crn</a> | 2388 |
+| MQL5 | <a href="https://github.com/dennislwm/mlea/blob/master/MQL5/Experts/Commercial/DTS1-Build_814.1_B-test~.mq5">DTS1-Build_814.1_B-test~.mq5</a> | 2210 |
+| Android Interface Definition Language | <a href="https://github.com/android/platform_frameworks_base/blob/master/telephony/java/com/android/internal/telephony/ITelephony.aidl">ITelephony.aidl</a> | 2005 |
+| Vertex Shader File | <a href="https://github.com/bubbasacs/finalproj/blob/master/src/materialsystem/stdshaders/sdk_macros.vsh">sdk_macros.vsh</a> | 1922 |
+| Lean | <a href="https://github.com/leanprover/lean/blob/master/library/init/meta/interactive.lean">interactive.lean</a> | 1664 |
+| Jenkins Buildfile | <a href="https://github.com/elektrainitiative/libelektra/blob/master/scripts/jenkins/Jenkinsfile">Jenkinsfile</a> | 1559 |
+| FIDL | <a href="https://github.com/otcshare/automotive-message-broker/blob/master/docs/amb.in.fidl">amb.in.fidl</a> | 1502 |
+| Pony | <a href="https://bitbucket.com/thecomet/ponycraft-prototype/src/master/scripts/maps/demomap/scenery.pony">scenery.pony</a> | 1497 |
+| PureScript | <a href="https://github.com/maxnordlund/purescript/blob/master/prelude/prelude.purs">prelude.purs</a> | 1225 |
+| TaskPaper | <a href="https://github.com/jdzak/ncs_navigator_core/blob/master/audit/task-3275.taskpaper">task-3275.taskpaper</a> | 1196 |
+| Dockerfile | <a href="https://github.com/iplantcollaborativeopensource/discoveryenvironmentbackend/blob/master/docker/backwards-compat/Dockerfile">Dockerfile</a> | 1187 |
+| Janet | <a href="https://github.com/bianary/moosehead/blob/master/player/Janet">Janet</a> | 1158 |
+| Futhark | <a href="https://github.com/hiperfit/futhark/blob/master/futlib/math.fut">math.fut</a> | 990 |
+| Zig | <a href="https://github.com/aurametrix/aurametrixhubio/blob/master/Games/Tetris-zig/src/main.zig">main.zig</a> | 903 |
+| XCode Config | <a href="https://github.com/krzyzanowskim/cryptoswift/blob/master/config/Project-Shared.xcconfig">Project-Shared.xcconfig</a> | 522 |
+| JAI | <a href="https://github.com/andy-hay/lightzone/blob/master/lightcrafts/resources/com/lightcrafts/mediax/jai/LCregistryFile.jai">LCregistryFile.jai</a> | 489 |
+| QCL | <a href="https://bitbucket.com/gltronred/quipper-cabal/src/master/Programs/QCLParser/bwt.qcl">bwt.qcl</a> | 447 |
+| Ur/Web Project | <a href="https://github.com/huluwa/bazqux-urweb/blob/master/reader.urp">reader.urp</a> | 346 |
+| Cassius | <a href="https://github.com/nubis/haskellers/blob/master/cassius/default-layout.cassius">default-layout.cassius</a> | 313 |
+| Docker ignore | <a href="https://github.com/ahbeng/nusmods/blob/master/.dockerignore">.dockerignore</a> | 311 |
+| Dhall | <a href="https://github.com/github/linguist/blob/master/samples/Dhall/largeExpressionA.dhall">largeExpressionA.dhall</a> | 254 |
+| ignore | <a href="https://github.com/9renpoto/dotfiles/blob/master/.ignore">.ignore</a> | 192 |
+| Bitbucket Pipeline | <a href="https://github.com/ghb24/neci_stable/blob/master/bitbucket-pipelines.yml">bitbucket-pipelines.yml</a> | 181 |
+| Just | <a href="https://github.com/sporto/kic/blob/master/api/graphql/Justfile">Justfile</a> | 95 |
+| Verilog Args File | <a href="https://github.com/doswellf/combinator-uvm/blob/master/uvm_ref/1.2/uvm_ref_flow_1.2/designs/socv/rtl/rtl_lpw/opencores/or1200.irunargs">or1200.irunargs</a> | 60 |
+| Polly | <a href="https://github.com/hsoft/aurdiff/blob/master/aur/polly">polly</a> | 26 |
 
 ### Whats the most complex file in each language?
 
@@ -1419,131 +1280,186 @@ Some of these files are absolute monsters. For example consider one of the most 
 
 | language | filename | complexity |
 | -------- | -------- | ----- |
-| JavaScript | <a href="https://bitbucket.com/abaddongit/colordomenscheck/src/master/src/js/ace/src-noconflict/worker-xquery.js">worker-xquery.js</a> | 17988 |
-| Java | <a href="https://bitbucket.com/abioy/hypertable/src/master/src/gen-java/org/hypertable/thriftgen/ClientService.java">ClientService.java</a> | 16956 |
-| PHP | <a href="https://bitbucket.com/_phpdev/biling/src/master/protected/vendor/mpdf/mpdf.php">mpdf.php</a> | 10882 |
-| C | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/perl/vendor/lib/auto/share/dist/DBD-SQLite/sqlite3.c">sqlite3.c</a> | 8516 |
-| Autoconf | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/gdb/Makefile.in">Makefile.in</a> | 6737 |
-| Python | <a href="https://bitbucket.com/abioy/hypertable/src/master/src/py/ThriftClient/gen-py/hyperthrift/gen/ClientService.py">ClientService.py</a> | 6566 |
-| C++ | <a href="https://bitbucket.com/ac-web/trinitycore/src/master/src/server/game/Entities/Player/Player.cpp">Player.cpp</a> | 6375 |
-| Perl | <a href="https://bitbucket.com/abioy/hypertable/src/master/src/perl/ThriftClient/gen-perl/Hypertable/ThriftGen/ClientService.pm">ClientService.pm</a> | 4744 |
-| C# | <a href="https://bitbucket.com/abhi8600/demo/src/master/Performance Optimizer Administration/ApplicationBuilder.cs">ApplicationBuilder.cs</a> | 2687 |
-| SQL | <a href="https://bitbucket.com/abs-cbn/pbbteen/src/master/technicals/pbbteen_db.sql">pbbteen_db.sql</a> | 2338 |
-| C Header | <a href="https://bitbucket.com/abioy/hypertable/src/master/src/cc/ThriftBroker/gen-cpp/ClientService.h">ClientService.h</a> | 1938 |
-| Batch | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/perl/bin/cpanm.bat">cpanm.bat</a> | 1732 |
-| SystemVerilog | <a href="https://bitbucket.com/act-lab/axbench_old/src/master/hardware/circuits/inversek/rtl/multiplier_32b.v">multiplier_32b.v</a> | 1507 |
-| C++ Header | <a href="https://bitbucket.com/achase55/gba4ios/src/master/emu-ex-plus-alpha/imagine/bundle/darwin-iOS/include/boost/phoenix/core/preprocessed/function_equal_50.hpp">function_equal_50.hpp</a> | 1225 |
-| Objective C | <a href="https://bitbucket.com/abhineetm/iosgeofencing/src/master/GeofencingClient/GeofencingClient/RegexKitLite-4.0/RegexKitLite.m">RegexKitLite.m</a> | 1219 |
-| R | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.R">CIDE.R</a> | 1163 |
-| Shell | <a href="https://bitbucket.com/1120436joaopacheco/irudroid-technologies-lapr5/src/master/WalkMaze/lib/freetype-2.5.5/builds/unix/ltmain.sh">ltmain.sh</a> | 1151 |
-| Lua | <a href="https://bitbucket.com/0player/t-engine4/src/master/game/modules/tome/class/Actor.lua">Actor.lua</a> | 1147 |
-| Assembly | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.S">CIDE.S</a> | 1057 |
-| ActionScript | <a href="https://bitbucket.com/abhi8600/demo/src/master/AnyChart/Original/AnyChartSource_6_0_11/build/utils/flex/frameworks/projects/framework/src/mx/controls/listClasses/ListBase.as">ListBase.as</a> | 1041 |
-| Ruby | <a href="https://bitbucket.com/aalmacin/rails-learning/src/master/blog/path/ruby/2.0.0/gems/rdoc-4.1.2/lib/rdoc/markdown.rb">markdown.rb</a> | 998 |
-| Vim Script | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/autoload/netrw.vim">netrw.vim</a> | 993 |
-| Makefile | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/snort/src/win32/WIN32-Prj/snort.mak">snort.mak</a> | 926 |
-| Specman e | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.E">CIDE.E</a> | 711 |
-| TypeScript | <a href="https://bitbucket.com/abex/abex-mumble/src/master/src/mumble/mumble_nb_NO.ts">mumble_nb_NO.ts</a> | 581 |
-| TeX | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/snort/doc/snort_manual.tex">snort_manual.tex</a> | 533 |
-| TCL | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/mysql/bdb/test/testutils.tcl">testutils.tcl</a> | 426 |
-| FORTRAN Legacy | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/external/dmlt/external/glmnet/GLMnet.F">GLMnet.F</a> | 404 |
-| Objective C++ | <a href="https://bitbucket.com/achase55/gba4ios/src/master/GBA4iOS/GBAEmulationViewController.mm">GBAEmulationViewController.mm</a> | 389 |
-| VHDL | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/bundle/ctags58/Test/test.vhd">test.vhd</a> | 385 |
-| Emacs Lisp | <a href="https://bitbucket.com/acgt/dotemacs/src/master/packs/programming/lib/js2/js2-mode.el">js2-mode.el</a> | 384 |
-| Visual Basic for Applications | <a href="https://bitbucket.com/2014vleadinterns/amulya/src/master/Eucalyptus/paper/IEEEtran.cls">IEEEtran.cls</a> | 374 |
-| Org | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/microwin/src/engine/devdraw.org">devdraw.org</a> | 332 |
-| Groovy | <a href="https://bitbucket.com/4s/ot-70-opentele-server/src/master/grails-app/services/org/opentele/server/CompletedQuestionnaireService.groovy">CompletedQuestionnaireService.groovy</a> | 307 |
-| CMake | <a href="https://bitbucket.com/02jandal/multilaunch/src/master/cmake/cotire.cmake">cotire.cmake</a> | 296 |
-| Expect | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/gdb/gdb/testsuite/lib/gdb.exp">gdb.exp</a> | 288 |
-| Haxe | <a href="https://bitbucket.com/adag_dot_me/7drts/src/master/src/com/haxepunk/Scene.hx">Scene.hx</a> | 269 |
-| Smarty Template | <a href="https://bitbucket.com/adam_onodi/uclinux-lpcboard/src/master/user/gdb/Makefile.tpl">Makefile.tpl</a> | 200 |
-| CoffeeScript | <a href="https://bitbucket.com/adamfallon/4chan-x/src/master/src/Posting/QR.coffee">QR.coffee</a> | 196 |
-| Swift | <a href="https://bitbucket.com/ac4lt/vistathing/src/master/VistaThing/VistaThingViewController.swift">VistaThingViewController.swift</a> | 195 |
-| Razor | <a href="https://bitbucket.com/aburias/moolahsense/src/master/MoolahConnectnew/App_Code/RangeHelper.cshtml">RangeHelper.cshtml</a> | 194 |
-| Processing | <a href="https://bitbucket.com/acorbi/p5-light-controller/src/master/LightController.pde">LightController.pde</a> | 186 |
-| Module-Definition | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/bash/builtins/set.def">set.def</a> | 185 |
-| Go | <a href="https://bitbucket.com/200bg/aquilo-server/src/master/aquilo/data/user.go">user.go</a> | 178 |
-| Boo | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/grub/grub-0.97/docs/texinfo.tex">texinfo.tex</a> | 150 |
-| Julia | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/string.jl">string.jl</a> | 141 |
-| JavaServer Pages | <a href="https://bitbucket.com/acdevlin/opengrok/src/master/web/diff.jsp">diff.jsp</a> | 140 |
-| Korn Shell | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/lib/brand/shared/zone/common.ksh">common.ksh</a> | 137 |
-| BASH | <a href="https://bitbucket.com/a_alfredo/vagrant-instance/src/master/modules/development/files/home/git-completion.bash">git-completion.bash</a> | 134 |
-| Puppet | <a href="https://bitbucket.com/acdtprn/proj-case-prototyping-boilerplate/src/master/puphpet/puppet/modules/nginx/manifests/resource/vhost.pp">vhost.pp</a> | 124 |
-| Wolfram | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/tutor/tutor.nb">tutor.nb</a> | 120 |
-| Scala | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/ser/scripts/sc">sc</a> | 118 |
-| D | <a href="https://bitbucket.com/acehreli/ddili/src/master/src/ders/d.en/operator_overloading.d">operator_overloading.d</a> | 105 |
-| Lisp | <a href="https://bitbucket.com/acgt/dotemacs/src/master/packs/programming/lib/slime-2013-04-05/swank.lisp">swank.lisp</a> | 101 |
-| Rust | <a href="https://bitbucket.com/adakoda/android_403_gnexus_frameworks_base/src/master/tests/RenderScriptTests/tests/src/com/android/rs/test/vector.rs">vector.rs</a> | 94 |
-| Forth | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/psm/stand/bootblks/zfs/common/zfs.fth">zfs.fth</a> | 88 |
-| FORTRAN Modern | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/zmlrpc.f90">zmlrpc.f90</a> | 82 |
-| Nim | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.nim">example.nim</a> | 80 |
-| GLSL | <a href="https://bitbucket.com/0player/t-engine4/src/master/game/modules/tome/data/gfx/shaders/target_fbo.frag">target_fbo.frag</a> | 71 |
-| OCaml | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/format.ml">format.ml</a> | 71 |
-| ASP | <a href="https://bitbucket.com/abel-pacara/beta_masprospectos/src/master/admin/ckeditor/ckeditor.asp">ckeditor.asp</a> | 70 |
-| Sass | <a href="https://bitbucket.com/2one5/matchcode/src/master/source_code/wp-content/themes/senna/library/scss/vendor/greedy/_mixins.scss">_mixins.scss</a> | 65 |
-| Twig Template | <a href="https://bitbucket.com/3663jgl/drupal-phpbb/src/master/piwik/plugins/Installation/templates/_systemCheckSection.twig">_systemCheckSection.twig</a> | 58 |
-| Standard ML (SML) | <a href="https://bitbucket.com/_nkhalasi/proglang-2013-homework/src/master/hw1/hw1.sml">hw1.sml</a> | 53 |
-| Xtend | <a href="https://bitbucket.com/3m45t3r/dsl/src/master/main/at.tuwien.dsg.dsl/src/at/tuwien/dsg/validation/DslValidator.xtend">DslValidator.xtend</a> | 53 |
-| ASP.NET | <a href="https://bitbucket.com/abhi8600/demo/src/master/Acorn/Acorn/FlexModule.aspx">FlexModule.aspx</a> | 52 |
-| Ada | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/lib/ncurses/ncurses-5.7/Ada95/src/terminal_interface-curses-forms.adb">terminal_interface-curses-forms.adb</a> | 52 |
-| Brainfuck | <a href="https://bitbucket.com/_1126/humble/src/master/code/hello.bf">hello.bf</a> | 51 |
-| Powershell | <a href="https://bitbucket.com/1110245danielagrams/arqsi2/src/master/IDEIMusic/packages/EntityFramework.6.1.1/tools/EntityFramework.psm1">EntityFramework.psm1</a> | 51 |
-| Mustache | <a href="https://bitbucket.com/4lejandrito/cv-bootstrap/src/master/docs/templates/pages/components.mustache">components.mustache</a> | 50 |
-| Cython | <a href="https://bitbucket.com/abosamoor/polyglot2/src/master/polyglot2/polyglot2_inner.pyx">polyglot2_inner.pyx</a> | 50 |
-| Zsh | <a href="https://bitbucket.com/abrookins/dotfiles/src/master/.zshrc">.zshrc</a> | 46 |
-| Prolog | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/mysql/bdb/perl.BerkeleyDB/BerkeleyDB.pod.P">BerkeleyDB.pod.P</a> | 42 |
-| Rakefile | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/activerecord-3.2.13/lib/active_record/railties/databases.rake">databases.rake</a> | 35 |
-| JSX | <a href="https://bitbucket.com/8hoursdo/rui/src/master/src/lib/components/tree-node.jsx">tree-node.jsx</a> | 34 |
-| Stylus | <a href="https://bitbucket.com/abhishekghosh/dillinger/src/master/public/css/nib/lib/nib/gradients.styl">gradients.styl</a> | 34 |
-| Scons | <a href="https://bitbucket.com/abhisit/firefly-rk3288-kernel/src/master/drivers/gpu/arm/midgard/sconscript">sconscript</a> | 31 |
-| sed | <a href="https://bitbucket.com/4ptiv4/picasso-kernel_at100/src/master/arch/ia64/scripts/pvcheck.sed">pvcheck.sed</a> | 30 |
-| Haskell | <a href="https://bitbucket.com/abailly/capital-match-infra/src/master/src/Utility/Scheduled.hs">Scheduled.hs</a> | 30 |
-| Jade | <a href="https://bitbucket.com/abhishekdelta/beamos/src/master/beamserv/node_modules/everyauth/example/views/home.jade">home.jade</a> | 29 |
-| AutoHotKey | <a href="https://bitbucket.com/5665tm/mytools/src/master/AutoHotkey/key.ahk">key.ahk</a> | 29 |
-| Vala | <a href="https://bitbucket.com/17twenty/tictactoe/src/master/TicTacToeBoard.vala">TicTacToeBoard.vala</a> | 27 |
-| Mako | <a href="https://bitbucket.com/50onred/sqlalchemy/src/master/doc/build/templates/layout.mako">layout.mako</a> | 26 |
-| C Shell | <a href="https://bitbucket.com/aakef/cci/src/master/config/distscript.csh">distscript.csh</a> | 24 |
-| Fragment Shader File | <a href="https://bitbucket.com/aaalexx/gamejam2013/src/master/cocos2d-x-2.1.5/samples/Javascript/Shared/tests/res/Shaders/example_ColorBars.fsh">example_ColorBars.fsh</a> | 24 |
-| Game Maker Language | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/man/src/util/iso-box.gml">iso-box.gml</a> | 24 |
-| Cabal | <a href="https://bitbucket.com/3noch/hubble/src/master/hubble.cabal">hubble.cabal</a> | 21 |
-| Bazel | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/samba/packaging/Debian/debian-sarge/README.build">README.build</a> | 20 |
-| Fish | <a href="https://bitbucket.com/aagraz/homebrew/src/master/Library/Contributions/brew_fish_completion.fish">brew_fish_completion.fish</a> | 20 |
-| F# | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/lib/libast/sparcv9/src/lib/libast/FEATURE/fs">fs</a> | 20 |
-| Ruby HTML | <a href="https://bitbucket.com/aalmacin/rails-learning/src/master/blog/path/ruby/2.0.0/gems/rdoc-4.1.2/lib/rdoc/generator/template/darkfish/class.rhtml">class.rhtml</a> | 19 |
-| Dockerfile | <a href="https://bitbucket.com/abrad450/samm/src/master/.docker/Dockerfile">Dockerfile</a> | 19 |
-| Erlang | <a href="https://bitbucket.com/5ht/n2o/src/master/src/wf_tags.erl">wf_tags.erl</a> | 19 |
-| Gherkin Specification | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/rspec-expectations-2.14.4/features/built_in_matchers/yield.feature">yield.feature</a> | 18 |
-| QML | <a href="https://bitbucket.com/abuer/ricochet/src/master/src/ui/qml/MainWindow.qml">MainWindow.qml</a> | 18 |
-| Elixir | <a href="https://bitbucket.com/0x0me/elixir_fp_book/src/master/chap05/test/chap05_test.exs">chap05_test.exs</a> | 17 |
-| Dart | <a href="https://bitbucket.com/adam8810/chrome-app-samples/src/master/dart/dart/clock.dart">clock.dart</a> | 16 |
-| Clojure | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/genclass.clj">genclass.clj</a> | 13 |
-| Pascal | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/test.pas">test.pas</a> | 12 |
-| Freemarker Template | <a href="https://bitbucket.com/120011676/snow/src/master/snow/src/main/resources/pageTag.ftl">pageTag.ftl</a> | 12 |
-| Handlebars | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/nodechip/node_modules/bower/node_modules/handlebars/bin/handlebars">handlebars</a> | 11 |
-| IDL | <a href="https://bitbucket.com/ace0/xen-restore-information/src/master/tools/libxl/libxl_types.idl">libxl_types.idl</a> | 9 |
-| Monkey C | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/lib/libkrb5/windows/identity/kmm/lang/kmm_msgs.mc">kmm_msgs.mc</a> | 8 |
-| Modula3 | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/perl/t/lib/warnings/mg">mg</a> | 8 |
-| Protocol Buffers | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/lp/model/alert.proto">alert.proto</a> | 7 |
-| TypeScript Typings | <a href="https://bitbucket.com/12110201/12110201/src/master/webit/webit/Scripts/devexpress-web-14.1/ts/dx.all.d.ts">dx.all.d.ts</a> | 7 |
-| Alloy | <a href="https://bitbucket.com/4ptiv4/picasso-kernel_at100/src/master/Documentation/sound/oss/ALS">ALS</a> | 7 |
-| Visual Basic | <a href="https://bitbucket.com/acrotech/dotspatialpcl/src/master/Trunk/DotSpatial.Plugins.Taudem.Port/frmAutomatic_v3.vb">frmAutomatic_v3.vb</a> | 6 |
-| Kotlin | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.kt">example.kt</a> | 5 |
-| COBOL | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.cob">example.cob</a> | 5 |
-| CSS | <a href="https://bitbucket.com/2krueger/roundcubemail/src/master/skins/classic/iehacks.css">iehacks.css</a> | 5 |
-| MSBuild | <a href="https://bitbucket.com/4code/4code-lapr-v/src/master/C#/SocialGame/SocialGame.Services/SocialGame.Services.csproj">SocialGame.Services.csproj</a> | 4 |
-| Unreal Script | <a href="https://bitbucket.com/4ptiv4/picasso-kernel_at100/src/master/lib/raid6/int.uc">int.uc</a> | 4 |
-| V | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/troff/troff.d/tmac.d/v">v</a> | 3 |
-| SKILL | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/lib/libc/sparc/fp/base.il">base.il</a> | 3 |
-| Stata | <a href="https://bitbucket.com/acgt/dotemacs/src/master/packs/power/lib/yasnippet/snippets/text-mode/f90-mode/do">do</a> | 2 |
-| Bitbake | <a href="https://bitbucket.com/aakbalaev/blitz3d-project/src/master/main.bb">main.bb</a> | 2 |
-| Elm | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/man/src/util/ati-tbl.elm">ati-tbl.elm</a> | 2 |
-| Scheme | <a href="https://bitbucket.com/acgt/dotemacs/src/master/packs/clojure/lib/slime/contrib/swank-kawa.scm">swank-kawa.scm</a> | 2 |
-| SVG | <a href="https://bitbucket.com/0mid/fsusiam/src/master/talks/1-central-limit-thm/pictures/dice_clt.svg">dice_clt.svg</a> | 2 |
-| Closure Template | <a href="https://bitbucket.com/13threbellion/spotify-plugin-for-stash/src/master/src/main/resources/spotify/feature/config/server/config-template.soy">config-template.soy</a> | 2 |
-| LD Script | <a href="https://bitbucket.com/accelecon/u-boot/src/master/board/dave/PPChameleonEVB/u-boot.lds">u-boot.lds</a> | 1 |
-| Ceylon | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.ceylon">example.ceylon</a> | 1 |
-| XAML | <a href="https://bitbucket.com/__jacob/osu-music-library/src/master/OsuMusicLibrary/GUI/SettingsWindow.xaml">SettingsWindow.xaml</a> | 1 |
-| Coq | <a href="https://bitbucket.com/a85brown/ffmpeg/src/master/libavformat/libavformat.v">libavformat.v</a> | 1 |
+| C++ | <a href="https://bitbucket.com/zhangjingguo/opencollada/src/master/COLLADASaxFrameworkLoader/src/generated15/COLLADASaxFWLColladaParserAutoGen15PrivateValidation.cpp">COLLADASaxFWLColladaParserAutoGen15PrivateValidation.cpp</a> | 682001 |
+| JavaScript | <a href="https://github.com/gmarty/smsstarec/blob/master/compiled/blocks.js">blocks.js</a> | 582070 |
+| C Header | <a href="https://github.com/bathtub/c---project-with-ruby-tests/blob/master/src/bigmofoheader.h">bigmofoheader.h</a> | 465589 |
+| C | <a href="https://github.com/alexrhein/typechef-linuxanalysis/blob/master/fmFormula.c">fmFormula.c</a> | 445545 |
+| Objective C | <a href="https://github.com/chinnabommu/computervisionwip/blob/master/imports/fast/fast-matlab-src-2.1/faster.m">faster.m</a> | 409792 |
+| SQL | <a href="https://github.com/iklementiev/smscenter/blob/master/dump20120515.sql">dump20120515.sql</a> | 181146 |
+| ASP.NET | <a href="https://github.com/openindiana/oi-userland/blob/master/components/developer/gcc-7/test/results-i386.master">results-i386.master</a> | 164528 |
+| Java | <a href="https://github.com/cinchapi/concourse/blob/master/concourse-driver-java/src/main/java/com/cinchapi/concourse/thrift/ConcourseService.java">ConcourseService.java</a> | 139020 |
+| TCL | <a href="https://github.com/mheinrichs/68030tk/blob/master/Logic/68030_TK.tcl">68030_TK.tcl</a> | 136578 |
+| C++ Header | <a href="https://github.com/abdollah110/tauhlt/blob/master/CalibCalorimetry/EcalTPGTools/test/TPG_hardcoded.hh">TPG_hardcoded.hh</a> | 129465 |
+| TypeScript Typings | <a href="https://github.com/teppeis/closure-librarydts/blob/master/all.d.ts">all.d.ts</a> | 127785 |
+| SVG | <a href="https://github.com/tarekauel/planspiel/blob/master/Class Diagram2.svg">Class Diagram2.svg</a> | 105353 |
+| Lua | <a href="https://github.com/ldeniau/mad/blob/master/src/blackBoxTest/luaFile1000kLines.lua">luaFile1000kLines.lua</a> | 102960 |
+| PHP | <a href="https://github.com/bit3archive/php-benchmark/blob/master/fopen.php">fopen.php</a> | 100000 |
+| Org | <a href="https://github.com/mquinson/smpi-modeling/blob/master/collectives/log/2015-02-25_idfreeze-2.org">2015-02-25_idfreeze-2.org</a> | 63326 |
+| Ruby | <a href="https://github.com/calebbarr/tent-of-meeting/blob/master/resources/all_search_helpers.rb">all_search_helpers.rb</a> | 60375 |
+| Scheme | <a href="https://github.com/shilrobot/shilscript_plus_plus/blob/master/scripts/test.ss">test.ss</a> | 50000 |
+| Stata | <a href="https://github.com/funzelknut/migrationsvariable/blob/master/Stata/DoFile/Logic/combinations/.31113.do">.31113.do</a> | 48600 |
+| Elixir | <a href="https://github.com/teamcohen/querendipity/blob/master/data/pmid.sgd.crawl.ex">pmid.sgd.crawl.ex</a> | 46479 |
+| Brainfuck | <a href="https://bitbucket.com/pholey/poll/src/master/Brainfuck/Poll.bf">Poll.bf</a> | 41399 |
+| Perl | <a href="https://github.com/aanavas/srproject/blob/master/t2p/r1d7.pl">r1d7.pl</a> | 41128 |
+| Go | <a href="https://github.com/tsileo/blobstash/blob/master/vendor/github.com/blevesearch/segment/segment_words_prod.go">segment_words_prod.go</a> | 34715 |
+| Python | <a href="https://github.com/wks/lrparsing3/blob/master/doc/examples/lrparsing-sqlite.py">lrparsing-sqlite.py</a> | 34700 |
+| Module-Definition | <a href="https://github.com/mihania/slovo/blob/master/src/WindowsPhone/Slovo.UI/Data/wordnet3_0.def">wordnet3_0.def</a> | 32008 |
+| Clojure | <a href="https://github.com/candera/cs-atom/blob/master/raw-data.clj">raw-data.clj</a> | 29950 |
+| C# | <a href="https://github.com/accord-net/framework/blob/master/Sources/Accord.Math/Matrix/Matrix.Product.Generated.cs">Matrix.Product.Generated.cs</a> | 29675 |
+| D | <a href="https://github.com/cybershadow/seatd/blob/master/src/seatd/parser.d">parser.d</a> | 27249 |
+| FORTRAN Modern | <a href="https://github.com/rfitzp/tomuhawc/blob/master/chease_src/euitm_routines_407c.f90">euitm_routines_407c.f90</a> | 27161 |
+| Puppet | <a href="https://github.com/joliebig/crefactor-sqliteevaluation/blob/master/sqlite3.c.pp">sqlite3.c.pp</a> | 25753 |
+| SystemVerilog | <a href="https://github.com/rajdeep87/verilog-c/blob/master/safe/hwmcc15/6s131/6s131.sv">6s131.sv</a> | 24300 |
+| Autoconf | <a href="https://github.com/lronaldo/cpctelera/blob/master/cpctelera/tools/sdcc-3.6.8-r9946/src/device/lib/pic16/libio/Makefile.in">Makefile.in</a> | 23183 |
+| Specman e | <a href="https://github.com/alopez/en600468/blob/master/aligner/data/hansards.e">hansards.e</a> | 20893 |
+| Smarty Template | <a href="https://github.com/jouvin/pan/blob/master/panc/tests/Performance/tests/include/test-include-09.tpl">test-include-09.tpl</a> | 20000 |
+| TypeScript | <a href="UNKNOWN/blob/master/lib/compiler/parsers/JSONiqParser.ts">JSONiqParser.ts</a> | 18162 |
+| V | <a href="https://github.com/amartya00/verilog/blob/master/gplgpu/gplgpu/hdl/sim_lib/altera_mf.v">altera_mf.v</a> | 13584 |
+| F* | <a href="https://github.com/mmjb/kittel-koat/blob/master/koat-evaluation/examples/T2/slayer-3.fst">slayer-3.fst</a> | 13428 |
+| TeX | <a href="https://bitbucket.com/kommusoft/publications/src/master/urbandictionaryprintable/definitions.tex">definitions.tex</a> | 13342 |
+| Swift | <a href="https://github.com/alexeyxo/protobuf-swift/blob/master/plugin/Tests/pbTests/Google.Protobuf.UnittestEnormousDescriptor.proto.swift">Google.Protobuf.UnittestEnormousDescriptor.proto.swift</a> | 13017 |
+| Assembly | <a href="https://bitbucket.com/bminor/binutils-gdb/src/master/gas/testsuite/gas/tic54x/all-opcodes.s">all-opcodes.s</a> | 12800 |
+| Bazel | <a href="https://github.com/nonas/debian-clang/blob/master/tests/build_timeout/buildlogs/run1/firebird2.5_2.5.2.26540.ds4-10_amd64-20140427-2159.build">firebird2.5_2.5.2.26540.ds4-10_amd64-20140427-2159.build</a> | 12149 |
+| FORTRAN Legacy | <a href="https://github.com/bakhtatou/ecalj/blob/master/lm7K/lm67src/lm67.F">lm67.F</a> | 11837 |
+| R | <a href="https://github.com/nicebread/wrs/blob/master/pkg/R/Rallfun-v36.R">Rallfun-v36.R</a> | 11287 |
+| ActionScript | <a href="https://github.com/3bu1/crossbridge/blob/master/avmplus/test/acceptance/as3/Definitions/FunctionAccessors/AccessorSpray.as">AccessorSpray.as</a> | 10804 |
+| Haskell | <a href="https://bitbucket.com/plooney/lamdicom/src/master/Tags.hs">Tags.hs</a> | 10444 |
+| Prolog | <a href="https://github.com/nhuntwalker/mystuff/blob/master/books/books_save.p">books_save.p</a> | 10243 |
+| Dart | <a href="https://github.com/financecoding/dartlr/blob/master/tests/out/DartParser.dart">DartParser.dart</a> | 9606 |
+| VHDL | <a href="https://github.com/arunkumarcea/ahir/blob/master/vhdl/unisims/unisim_VITAL.vhd">unisim_VITAL.vhd</a> | 9590 |
+| Batch | <a href="https://github.com/alepharchives/arabica/blob/master/tests/XSLT/testsuite/test.bat">test.bat</a> | 9424 |
+| Boo | <a href="https://github.com/nddrylliog/ooc-legacy/blob/master/legacy-doc/compman.tex">compman.tex</a> | 9280 |
+| Coq | <a href="https://github.com/juliankemmerer/drexel-ecec575/blob/master/Encounter/NangateOpenCellLibrary/Front_End/Verilog/NangateOpenCellLibrary.v">NangateOpenCellLibrary.v</a> | 8988 |
+| Shell | <a href="https://github.com/existme/myvimconfig/blob/master/zsh/completion/i3_completion.sh">i3_completion.sh</a> | 8669 |
+| Kotlin | <a href="https://github.com/jetbrains/kotlin/blob/master/compiler/tests-spec/testData/diagnostics/notLinked/dfa/pos/1.kt">1.kt</a> | 7388 |
+| JSX | <a href="https://github.com/shibukawa/typescript-parserjsx/blob/master/src/typescript-parser.jsx">typescript-parser.jsx</a> | 7123 |
+| Makefile | <a href="https://github.com/kharmajbird/jayos/blob/master/jlfs/Makefile">Makefile</a> | 6642 |
+| Emacs Lisp | <a href="https://github.com/bbohrer/emacs/blob/master/correct/bible.el">bible.el</a> | 6345 |
+| Objective C++ | <a href="https://github.com/metamath/setmm/blob/master/set.mm">set.mm</a> | 6285 |
+| OCaml | <a href="https://github.com/nrnrnr/qc--/blob/master/gen/sparcrec.ml">sparcrec.ml</a> | 6285 |
+| Expect | <a href="https://bitbucket.com/chameleonos/android_external_valgrind/src/master/main/none/tests/s390x/condloadstore.stdout.exp">condloadstore.stdout.exp</a> | 6144 |
+| SAS | <a href="https://github.com/gracieha/fixit/blob/master/import_REDCap.sas">import_REDCap.sas</a> | 5783 |
+| Julia | <a href="https://github.com/open-data/ckan-datatools/blob/master/data/pilot-2013-05-14.jl">pilot-2013-05-14.jl</a> | 5599 |
+| Cython | <a href="https://github.com/facebook/fbthrift/blob/master/thrift/compiler/test/fixtures/mcpp2-compare/gen-py3/module/types.pyx">types.pyx</a> | 5278 |
+| Modula3 | <a href="https://github.com/damsl/k3-mosaic/blob/master/tests/m3/tpch22.m3">tpch22.m3</a> | 5182 |
+| Haxe | <a href="https://github.com/saumya/nuggeta/blob/master/src-nuggeta/com/nuggeta/temp/k/l/m/T1231.hx">T1231.hx</a> | 5110 |
+| Visual Basic for Applications | <a href="https://gitlab.com/celnet/celnet/blob/master/Bt-UAT/src/classes/Coverage.cls">Coverage.cls</a> | 5029 |
+| Lisp | <a href="https://github.com/ayoub-89/nltk_data/blob/master/corpora/lin_thesaurus/simN.lsp">simN.lsp</a> | 4994 |
+| Scala | <a href="https://github.com/byvoid/sugarcpp/blob/master/src/SugarCpp.Test/Performance/SpeedTest1MB.sc">SpeedTest1MB.sc</a> | 4908 |
+| Groovy | <a href="https://github.com/nagysz/zkui/blob/master/grails-app/taglib/org/grails/plugins/zkui/ZulTagLib.groovy">ZulTagLib.groovy</a> | 4714 |
+| Powershell | <a href="https://github.com/carneycalcutt/windowspowershell/blob/master/Modules/WPK/GeneratedControls/PresentationFramework.ps1">PresentationFramework.ps1</a> | 4108 |
+| Ada | <a href="https://github.com/grahamstark/tax_benefit_model_components/blob/master/src/uk/raw/bhps/bhps-print_full_version.adb">bhps-print_full_version.adb</a> | 3961 |
+| JavaServer Pages | <a href="https://github.com/builtlean/builtlean/blob/master/styles/sink_jq.jsp">sink_jq.jsp</a> | 3850 |
+| GN | <a href="https://github.com/reallyenglish/freebsd-ports/blob/master/www/chromium/files/patch-third_party__ffmpeg__ffmpeg_generated.gni">patch-third_party\__ffmpeg\__ffmpeg_generated.gni</a> | 3742 |
+| Basic | <a href="https://github.com/hpux735/spectrum-analyzer/blob/master/Spectrum Analyzer/MSA_version116_4q.bas">MSA_version116_4q.bas</a> | 3502 |
+| Pascal | <a href="https://github.com/katrid/python4delphi/blob/master/PythonVCL/Components/Sources/VCL/D4/Python_StdCtrls.pas">Python_StdCtrls.pas</a> | 3399 |
+| Standard ML (SML) | <a href="https://github.com/dsheets/hol/blob/master/examples/l3-machine-code/arm/model/arm.sml">arm.sml</a> | 3375 |
+| Erlang | <a href="https://github.com/h4xxel/prog2/blob/master/inl2/lipsum.hrl">lipsum.hrl</a> | 3228 |
+| ASP | <a href="https://github.com/cinsoft/my-library/blob/master/mylib.asp">mylib.asp</a> | 3149 |
+| CSS | <a href="https://github.com/kaosat-dev/polymer-threejs/blob/master/elements/three-viewer/vendor/three-viewer.css">three-viewer.css</a> | 3071 |
+| Unreal Script | <a href="https://github.com/svn2github/deus-ex-plus/blob/master/Classes/ScriptedPawn.uc">ScriptedPawn.uc</a> | 2909 |
+| CoffeeScript | <a href="https://github.com/uhyo/jinrou/blob/master/server/rpc/game/game.coffee">game.coffee</a> | 2772 |
+| AutoHotKey | <a href="https://github.com/billman87/fishlog/blob/master/fishlog5.93.ahk">fishlog5.93.ahk</a> | 2764 |
+| MQL4 | <a href="https://github.com/lvcster/java-examples/blob/master/PhD Appsolute System.mq4">PhD Appsolute System.mq4</a> | 2738 |
+| Processing | <a href="https://github.com/apcs-k/per10-zilbersher-reschke-lasercore/blob/master/Final/Final.pde">Final.pde</a> | 2635 |
+| Isabelle | <a href="https://github.com/shxycwxj/topos/blob/master/thy_lib/isabelle_afp/Collections/gen_algo/StdInst.thy">StdInst.thy</a> | 2401 |
+| Razor | <a href="https://github.com/nathantownsend/protodev/blob/master/DEQMYCOAL.web/Views/ePermitCompleteness/Checklist.cshtml">Checklist.cshtml</a> | 2341 |
+| Sass | <a href="https://github.com/aleph3d/wafer/blob/master/SOURCE/THIRDPARTY/Stackicons/scss/_multi-color-css-stackicons-social.scss">_multi-color-css-stackicons-social.scss</a> | 2325 |
+| Vala | <a href="https://github.com/gnome/vala/blob/master/codegen/valaccodebasemodule.vala">valaccodebasemodule.vala</a> | 2100 |
+| MSBuild | <a href="https://github.com/blackoutjack/jamweaver/blob/master/src/native/all.props">all.props</a> | 2008 |
+| Rust | <a href="https://github.com/blei/rust-dumb-gtk/blob/master/src/ffi.rs">ffi.rs</a> | 1928 |
+| QML | <a href="https://github.com/rakesh91/qt_mobile_apps/blob/master/DOTS/SmartDots-build-simulator/qml/Dots/Dots.qml">Dots.qml</a> | 1875 |
+| F# | <a href="https://github.com/jack-pappas/fsharp/blob/master/tests/fsharp/core/libtest/test.fsx">test.fsx</a> | 1826 |
+| Vim Script | <a href="https://github.com/anoxic/dotfiles/blob/master/vim/autoload/netrw.vim">netrw.vim</a> | 1790 |
+| Korn Shell | <a href="https://github.com/ggouaillardet/ompi-www/blob/master/community/lists/devel/attachments/20090108/42143e6f/attachment.ksh">attachment.ksh</a> | 1773 |
+| Vue | <a href="https://github.com/sebabelmar/sebabelmarhubio/blob/master/img/Seba Belmar - Software Engineer_files/vue">vue</a> | 1738 |
+| sed | <a href="https://bitbucket.com/foss4mv/scarletdme/src/master/GPL.BP/SED">SED</a> | 1699 |
+| GLSL | <a href="https://github.com/asirjoosingh/renorm_gamess/blob/master/comp">comp</a> | 1699 |
+| Nix | <a href="https://bitbucket.com/ifenglin/ideploy/src/master/Splunk_TA_nix/samples/auth.nix">auth.nix</a> | 1615 |
+| Mustache | <a href="https://github.com/browniefed/parsetemplateexample/blob/master/public/template.mustache">template.mustache</a> | 1561 |
+| Bitbake | <a href="https://github.com/rvclayton/bibtex/blob/master/my-2010.bb">my-2010.bb</a> | 1549 |
+| Ur/Web | <a href="https://github.com/deepuiitk/indian-parallel-corpora/blob/master/ur-en/votes.ur">votes.ur</a> | 1515 |
+| BASH | <a href="https://github.com/andrei-mart/postgres-xc/blob/master/contrib/pgxc_ctl/pgxc_ctl.bash">pgxc_ctl.bash</a> | 1426 |
+| MQL Header | <a href="https://github.com/ujfjhz/costbalancer/blob/master/Include/hanoverfunctions.mqh">hanoverfunctions.mqh</a> | 1393 |
+| Visual Basic | <a href="https://github.com/mateso/lgmd2ward/blob/master/lgmd2ward/LGMDdataDataSet.Designer.vb">LGMDdataDataSet.Designer.vb</a> | 1369 |
+| Q# | <a href="https://github.com/mariomop/abanq-ar/blob/master/modulos/facturacion/facturacion/scripts/flfacturac.qs">flfacturac.qs</a> | 1359 |
+| C Shell | <a href="https://bitbucket.com/dargueso/unsw-ccrc-wrf/src/master/WRFV3/tools/regtest_hwrf.csh">regtest_hwrf.csh</a> | 1214 |
+| MQL5 | <a href="https://github.com/dennislwm/mlea/blob/master/MQL5/Experts/Commercial/DTS1-Build_814.1_B-test~.mq5">DTS1-Build_814.1_B-test~.mq5</a> | 1186 |
+| Xtend | <a href="https://github.com/knisterpeter/djeypeg/blob/master/parser/src/main/java/de/matrixweb/djeypeg/internal/Parser.xtend">Parser.xtend</a> | 1116 |
+| Nim | <a href="https://github.com/comex/imaon/blob/master/disas.nim">disas.nim</a> | 1098 |
+| CMake | <a href="https://github.com/adc90/sandbox/blob/master/cmake/tutorial1/src/cmake/modules/MacroOutOfSourceBuild.cmake">MacroOutOfSourceBuild.cmake</a> | 1069 |
+| Protocol Buffers | <a href="https://github.com/areascout/vice-gles2/blob/master/configure.proto">configure.proto</a> | 997 |
+| SKILL | <a href="https://github.com/kth-prosper/main/blob/master/verification/out/from_hol2/switch.il">switch.il</a> | 997 |
+| COBOL | <a href="https://github.com/rflejeune/geekcode/blob/master/geekcode.cob">geekcode.cob</a> | 989 |
+| Game Maker Language | <a href="https://github.com/bkiselka/hale/blob/master/doc/plugins/eu.esdihumboldt.hale.doc.user.examples.meridian2/hydro/hydroEx_River.gml">hydroEx_River.gml</a> | 982 |
+| Gherkin Specification | <a href="https://github.com/catrobat/catroweb-symfony/blob/master/tests/behat/features/api/upload_remixed_program_again_complex.feature">upload_remixed_program_again_complex.feature</a> | 959 |
+| Alloy | <a href="https://github.com/iyouboushi/mirc-battlearena/blob/master/battlearena/battleformulas.als">battleformulas.als</a> | 948 |
+| Bosque | <a href="https://github.com/umeshsahoo/website_umesh/blob/master/servlet/oracle/product/10.2.0/server/RDBMS/ADMIN/recover.bsq">recover.bsq</a> | 924 |
+| ColdFusion | <a href="https://bitbucket.com/busches/lucee/src/master/lucee-cfml/lucee-admin/jquery.js.cfm">jquery.js.cfm</a> | 920 |
+| Stylus | <a href="https://gitlab.com/artisin/dreamdocs/blob/master/client/styles/imports/buttron.styl">buttron.styl</a> | 866 |
+| ColdFusion CFScript | <a href="https://github.com/blueriver/muracms/blob/master/core/mura/client/api/json/v1/apiUtility.cfc">apiUtility.cfc</a> | 855 |
+| Verilog | <a href="https://bitbucket.com/gdevic/a-z80/src/master/cpu/control/exec_matrix.vh">exec_matrix.vh</a> | 793 |
+| Freemarker Template | <a href="https://github.com/jonesde/moqui/blob/master/runtime/template/screen-macro/DefaultScreenMacros.html.ftl">DefaultScreenMacros.html.ftl</a> | 771 |
+| Crystal | <a href="https://github.com/mverzilli/crystal/blob/master/src/compiler/crystal/syntax/lexer.cr">lexer.cr</a> | 753 |
+| Forth | <a href="https://github.com/mdko/cs478/blob/master/project-toolkits/toolkitc/bin/e4">e4</a> | 690 |
+| Monkey C | <a href="https://github.com/nasahackto/mesh/blob/master/mesh-1.4/mesh/perl/mc">mc</a> | 672 |
+| Rakefile | <a href="https://github.com/structuralartistry/wavelineup3/blob/master/lib/tasks/import.rake">import.rake</a> | 652 |
+| Zsh | <a href="https://github.com/kino/mydotfile/blob/master/homefile/zshrc">zshrc</a> | 649 |
+| Ruby HTML | <a href="https://github.com/mallikarjunrao/hmm_application/blob/master/cravecupcakes/trunk/app/views/ownify/sales/ext_report.rhtml">ext_report.rhtml</a> | 633 |
+| Handlebars | <a href="https://github.com/sakai-mirror/roster2/blob/master/src/webapp/templates/templates.handlebars">templates.handlebars</a> | 557 |
+| SRecode Template | <a href="https://github.com/samdutton/chromesearch/blob/master/tracks/Al3SEbeK61s.srt">Al3SEbeK61s.srt</a> | 535 |
+| Scons | <a href="https://gitlab.com/ineris/amc/blob/master/share/SConstruct">SConstruct</a> | 522 |
+| Agda | <a href="https://github.com/hott/hott-agda/blob/master/core/lib/cubical/Square.agda">Square.agda</a> | 491 |
+| Ceylon | <a href="https://github.com/unratito/ceylonlanguage/blob/master/test/metamodel/runtime.ceylon">runtime.ceylon</a> | 467 |
+| Julius | <a href="https://github.com/ahushh/monaba/blob/master/monaba/templates/default-layout.julius">default-layout.julius</a> | 436 |
+| Wolfram | <a href="https://github.com/peeterjoot/mathematica/blob/master/phy487/qmSolidsPs8dContourPlot.nb">qmSolidsPs8dContourPlot.nb</a> | 417 |
+| Cabal | <a href="https://github.com/simonmar/parconc-examples/blob/master/parconc-examples.cabal">parconc-examples.cabal</a> | 406 |
+| Fragment Shader File | <a href="https://github.com/benraziel/flappybird-shader/blob/master/flappybird.fsh">flappybird.fsh</a> | 349 |
+| ATS | <a href="https://github.com/alex-ren/atstools/blob/master/src/ats_staexp2_util1.dats">ats_staexp2_util1.dats</a> | 311 |
+| Jinja | <a href="https://github.com/f500/ansible-php_cli/blob/master/templates/php.ini.j2">php.ini.j2</a> | 307 |
+| Opalang | <a href="https://github.com/alexkit/opalang/blob/master/lib/stdlib/core/unicode.opa">unicode.opa</a> | 306 |
+| Twig Template | <a href="https://github.com/babyonline/opencart/blob/master/upload/admin/view/template/catalog/product_form.twig">product_form.twig</a> | 296 |
+| ClojureScript | <a href="https://github.com/clojure/clojurescript/blob/master/src/main/cljs/cljs/core.cljs">core.cljs</a> | 271 |
+| Hamlet | <a href="https://github.com/pgarst/javabio/blob/master/Data/Text/hamlet">hamlet</a> | 270 |
+| Oz | <a href="https://github.com/doublec/mozart/blob/master/share/lib/compiler/StaticAnalysis.oz">StaticAnalysis.oz</a> | 267 |
+| Elm | <a href="https://github.com/cthree/dotfiles/blob/master/config/atom/packages/elmjutsu/elm/Indexer.elm">Indexer.elm</a> | 267 |
+| Meson | <a href="https://github.com/ixit/mesa-3d/blob/master/meson.build">meson.build</a> | 248 |
+| ABAP | <a href="https://github.com/yetaai/sap/blob/master/ZBCS01Reports/ZRFFORI99.abap">ZRFFORI99.abap</a> | 244 |
+| Dockerfile | <a href="https://github.com/osgeo/gdal/blob/master/gdal/docker/alpine-normal/Dockerfile">Dockerfile</a> | 243 |
+| Wren | <a href="https://github.com/munificent/wren/blob/master/src/module/repl.wren">repl.wren</a> | 242 |
+| Fish | <a href="https://github.com/adampash/dotfiles/blob/master/config/fish/functions/fisher.fish">fisher.fish</a> | 217 |
+| Emacs Dev Env | <a href="https://github.com/timvisher/emacsbak/blob/master/info/ede">ede</a> | 211 |
+| GDScript | <a href="https://github.com/grandmasterhack/1gam/blob/master/2017/June/Godot Picking Sticks/addons/vnen.tiled_importer/tiled_map.gd">tiled_map.gd</a> | 195 |
+| IDL | <a href="https://github.com/bkaradzic/bgfx/blob/master/scripts/bgfx.idl">bgfx.idl</a> | 187 |
+| Jade | <a href="https://github.com/jaeh/printit/blob/master/views/printit/pages/docs.jade">docs.jade</a> | 181 |
+| PureScript | <a href="https://github.com/purescript-contrib/purescript-lists/blob/master/test/Test/Data/List.purs">List.purs</a> | 180 |
+| XAML | <a href="https://github.com/btsmarco/theagpeya/blob/master/CopticAgpeya/English/Midnight.xaml">Midnight.xaml</a> | 179 |
+| Flow9 | <a href="https://github.com/samst0r/samst0rhubio/blob/master/node_modules/graphql-compose/mjs/TypeMapper.js.flow">TypeMapper.js.flow</a> | 173 |
+| Idris | <a href="https://github.com/cheepnis/idris-dev/blob/master/libs/base/Language/Reflection/Utils.idr">Utils.idr</a> | 166 |
+| PSL Assertion | <a href="https://github.com/endyson/sept-13-2011/blob/master/sim/psl/pre_dec.psl">pre_dec.psl</a> | 162 |
+| Lean | <a href="https://github.com/avigad/libraries/blob/master/library/standard/kernel.lean">kernel.lean</a> | 161 |
+| MUMPS | <a href="https://github.com/openzelda/content-package/blob/master/scripts/link.mps">link.mps</a> | 161 |
+| Vertex Shader File | <a href="https://github.com/sharaugn/mc-reloaded-shaders/blob/master/base.vsh">base.vsh</a> | 152 |
+| Go Template | <a href="https://github.com/aicp/frameworks_native/blob/master/vulkan/libvulkan/code-generator.tmpl">code-generator.tmpl</a> | 148 |
+| Mako | <a href="https://github.com/epithumia/spline-pokedex/blob/master/splinext/pokedex/templates/pokedex/search/pokemon.mako">pokemon.mako</a> | 137 |
+| Closure Template | <a href="https://github.com/gan/ganhubio/blob/master/blockly-games/genetics/template.soy">template.soy</a> | 121 |
+| Zig | <a href="https://github.com/aurametrix/aurametrixhubio/blob/master/Games/Tetris-zig/src/main.zig">main.zig</a> | 115 |
+| TOML | <a href="https://github.com/monome/teletype/blob/master/docs/ops/telex_o.toml">telex_o.toml</a> | 100 |
+| Softbridge Basic | <a href="https://github.com/hardbol/spitbol/blob/master/gas/asm.sbl">asm.sbl</a> | 98 |
+| QCL | <a href="https://bitbucket.com/gltronred/quipper-cabal/src/master/Programs/QCLParser/bwt.qcl">bwt.qcl</a> | 96 |
+| Futhark | <a href="https://github.com/hiperfit/futhark/blob/master/futlib/math.fut">math.fut</a> | 86 |
+| Pony | <a href="https://github.com/rockneurotiko/rockneurotikohubio/blob/master/RandomThings/Pony/json/jstypes.pony">jstypes.pony</a> | 70 |
+| LOLCODE | <a href="https://bitbucket.com/animeshsinha/linguist-github/src/master/samples/LOLCODE/LOLTracer.lol">LOLTracer.lol</a> | 61 |
+| Alchemist | <a href="https://github.com/boyter/scc/blob/master/alchemist.crn">alchemist.crn</a> | 55 |
+| Madlang | <a href="https://github.com/aldomx/stepmania/blob/master/Docs/Copying.MAD">Copying.MAD</a> | 44 |
+| LD Script | <a href="https://github.com/rockbox/rockbox/blob/master/apps/plugins/plugin.lds">plugin.lds</a> | 39 |
+| Device Tree | <a href="https://github.com/wanghao-xznu/vte/blob/master/testcases/third_party_suite/dt/dt.d/dts">dts</a> | 22 |
+| FIDL | <a href="https://github.com/bmwcarit/joynr/blob/master/basemodel/src/main/franca/joynr/GlobalCapabilitiesDirectory.fidl">GlobalCapabilitiesDirectory.fidl</a> | 19 |
+| JAI | <a href="https://github.com/mihxil/mmbase/blob/master/documentation/releases/legal/LICENSE.jai">LICENSE.jai</a> | 18 |
+| Just | <a href="https://github.com/opetushallitus/eperusteet/blob/master/Justfile">Justfile</a> | 7 |
+| Android Interface Definition Language | <a href="https://github.com/zhaojl/demo/blob/master/android_base/aidl">aidl</a> | 3 |
+| Ur/Web Project | <a href="https://bitbucket.com/rkeatin3/code-samples/src/master/C++(ROS)/ME530646/ur5/jointSpace.urp">jointSpace.urp</a> | 2 |
+| Spice Netlist | <a href="https://github.com/acuoci/edcsmoke/blob/master/run/kineticMechanisms/thermodynamics/GRI30.CKT">GRI30.CKT</a> | 2 |
 
 ### Whats the most complex file weighted against lines?
 
@@ -1560,147 +1476,211 @@ Whats the most commented file in each language? I have no idea what sort of info
 [skip table to next section](#how-many-pure-projects)
 
 | language | filename | comment lines |
-| -------- | -------- | ------- |
-| C | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.C">CIDE.C</a> | 84255 |
-| Prolog | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.P">CIDE.P</a> | 68004 |
-| JavaScript | <a href="https://bitbucket.com/3x0dv5/ao2sm/src/master/WebContent/extjs/ext-all-debug-w-comments.js">ext-all-debug-w-comments.js</a> | 57173 |
-| D | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.D">CIDE.D</a> | 52202 |
-| Objective C | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.M">CIDE.M</a> | 44141 |
+| -------- | -------- | ------------- |
+| Prolog | <a href="https://github.com/ncvc/sentiment/blob/master/ts-with-score-multiplier.p">ts-with-score-multiplier.p</a> | 5603870 |
+| C | <a href="https://github.com/aclements/thesis/blob/master/thesis/data/testgen.c">testgen.c</a> | 1705508 |
+| Python | <a href="https://github.com/maxsong123/bearded-wight/blob/master/Untitled0.py">Untitled0.py</a> | 1663466 |
+| JavaScript | <a href="https://github.com/meotimdihia/pythontest/blob/master/100MB.js">100MB.js</a> | 1165656 |
+| SVG | <a href="https://bitbucket.com/nicholma/cs4021-advanced-architecture-misc/src/master/Interleaves/alt/p4-s3_I369600.svg">p4-s3_I369600.svg</a> | 1107955 |
+| SQL | <a href="https://github.com/freeside/freeside/blob/master/FS-Test/share/test.sql">test.sql</a> | 858993 |
+| C Header | <a href="https://github.com/findingdestity/vuforiaaugmentedreality/blob/master/VuforiaAugmentedReality/VuforiaAugmentedReality/Models/head.h">head.h</a> | 686587 |
+| C++ | <a href="https://github.com/major-lab/mccore/blob/master/lib/ResidueTopology.cc">ResidueTopology.cc</a> | 663024 |
+| Autoconf | <a href="https://github.com/revivo/py_snippets/blob/master/data/square_detector_local.in">square_detector_local.in</a> | 625464 |
+| TypeScript | <a href="https://github.com/forivall/typescript/blob/master/tests/cases/fourslash/reallyLargeFile.ts">reallyLargeFile.ts</a> | 583708 |
+| LEX | <a href="https://github.com/furushchev/jsk_demos/blob/master/jsk_2015_06_hrp_drc/drc_task_common/euslisp/vehicle/polaris-xp900.l">polaris-xp900.l</a> | 457288 |
+| XML | <a href="https://github.com/cyberdrcarr/knowledgemanagementframework/blob/master/QA/CommonDataLayer/Test1-CDL-soapui-project.xml">Test1-CDL-soapui-project.xml</a> | 411321 |
+| HTML | <a href="https://github.com/alvarobp/donde_estudio/blob/master/test/fixtures/todos_centros.html">todos_centros.html</a> | 366776 |
+| Pascal | <a href="https://github.com/grahamegrieve/fhirserver/blob/master/library/r4/FHIR.R4.Resources.pas">FHIR.R4.Resources.pas</a> | 363289 |
+| SystemVerilog | <a href="https://github.com/t-crest/bluetree/blob/master/mkToplevelBT64.v">mkToplevelBT64.v</a> | 338042 |
+| PHP | <a href="https://github.com/easyvyc/easywebmanager/blob/master/site/classes/lib/cool-php-captcha/resources/words/lt.php">lt.php</a> | 295054 |
+| TypeScript Typings | <a href="https://github.com/vansimke/dojotypedescriptiongenerator/blob/master/DojoTypeDescriptor/Scripts/typings/dojox.d.ts">dojox.d.ts</a> | 291002 |
+| Verilog | <a href="https://github.com/krios262/551project/blob/master/synthVdotP/CVP14_synth.vg">CVP14_synth.vg</a> | 264649 |
+| Lua | <a href="https://github.com/kinshi/tarkin_scripts/blob/master/scripts/object/mobile/objects.lua">objects.lua</a> | 205006 |
+| V | <a href="https://github.com/bart-group/bart/blob/master/tests/ARTIETests/testfiles/TestDataset01-functional.v">TestDataset01-functional.v</a> | 201973 |
+| Java | <a href="https://github.com/christianharrington/mdd/blob/master/IfcXML/src/org/tech/iai/ifc/xml/ifc/_2x3/final_/FinalPackage.java">FinalPackage.java</a> | 198035 |
+| C++ Header | <a href="https://github.com/pykoder/redemption/blob/master/tests/includes/fixtures/test_cliprdr_channel_xfreerdp_full_authorisation.hpp">test_cliprdr_channel_xfreerdp_full_authorisation.hpp</a> | 196958 |
+| Shell | <a href="https://github.com/jcs/openbsd-commitid/blob/master/out/add_commitids_to_src.sh">add_commitids_to_src.sh</a> | 179223 |
+| C# | <a href="https://github.com/arventwei/wcell/blob/master/Core/WCell.Constants/Items/ItemId.cs">ItemId.cs</a> | 171944 |
+| FORTRAN Modern | <a href="https://github.com/johannesgerer/jburkardt-f/blob/master/slatec/slatec.f90">slatec.f90</a> | 169817 |
+| Assembly | <a href="https://github.com/dpeddi/ws-28xx-hacking/blob/master/HeavyWeather.asm">HeavyWeather.asm</a> | 169645 |
+| Module-Definition | <a href="https://github.com/msherman13/e6321_top_half/blob/master/apr/top_level.final.def">top_level.final.def</a> | 139150 |
+| FORTRAN Legacy | <a href="https://github.com/wch/r-source/blob/master/src/modules/lapack/dlapack.f">dlapack.f</a> | 110640 |
+| VHDL | <a href="https://github.com/mbarga/archive-cpu/blob/master/mapped/cpuTest.vhd">cpuTest.vhd</a> | 107882 |
+| Groovy | <a href="https://bitbucket.com/nfredricks/vim-files/src/master/tags/groovy">groovy</a> | 98985 |
+| IDL | <a href="https://github.com/brownplt/strobe/blob/master/data/all-idls.idl">all-idls.idl</a> | 91771 |
+| Wolfram | <a href="https://github.com/gillespie/torsions/blob/master/LinKnots/K2KL.nb">K2KL.nb</a> | 90224 |
+| Go | <a href="https://github.com/tsileo/blobstash/blob/master/vendor/gopkg.in/src-d/enry.v1/data/frequencies.go">frequencies.go</a> | 89661 |
+| Scheme | <a href="https://github.com/mojmir-svoboda/dbgtoolkit/blob/master/3rd/s7/s7test.scm">s7test.scm</a> | 88907 |
+| D | <a href="https://github.com/khanhbui/jpf/blob/master/old_projects/jpf-symbc/.hg/store/data/lib/coral.jar.d">coral.jar.d</a> | 80674 |
+| Coq | <a href="https://github.com/amigabill/minimig-de1/blob/master/lib/altera/cycloneiv_hssi_atoms.v">cycloneiv_hssi_atoms.v</a> | 74936 |
+| Specman e | <a href="https://github.com/shihyu/mytool/blob/master/mybin/se/macros/sysobjs.e">sysobjs.e</a> | 65146 |
+| Puppet | <a href="https://github.com/joliebig/crefactor-sqliteevaluation/blob/master/sqlite3.c.pp">sqlite3.c.pp</a> | 63656 |
+| Wren | <a href="https://github.com/munificent/wren/blob/master/test/limit/many_globals.wren">many_globals.wren</a> | 61388 |
+| Boo | <a href="https://github.com/dt888/starlink/blob/master/applications/kappa/sun95.tex">sun95.tex</a> | 57018 |
+| Ruby | <a href="https://github.com/pburba/demo_app/blob/master/app/models/bigfile.rb">bigfile.rb</a> | 50000 |
+| Objective C | <a href="https://github.com/jmcarp/fmri-pipe/blob/master/joblog/job_sub011.m">job_sub011.m</a> | 44788 |
+| CSS | <a href="https://github.com/26mansi/raxa-jss/blob/master/src/resources/css/screener.css">screener.css</a> | 43785 |
 | Swig | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.I">CIDE.I</a> | 37235 |
-| C Header | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.H">CIDE.H</a> | 30417 |
-| LEX | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.L">CIDE.L</a> | 28723 |
-| C++ | <a href="https://bitbucket.com/-elmer-/plinkseq/src/master/lib/r8lib.cpp">r8lib.cpp</a> | 22641 |
-| XML | <a href="https://bitbucket.com/a_hassala/projet-informatique/src/master/data/haarcascades/haarcascade_frontalface_alt_tree.xml">haarcascade_frontalface_alt_tree.xml</a> | 17027 |
-| SystemVerilog | <a href="https://bitbucket.com/abellnets/hrossparser/src/master/xml_files/CIDE.V">CIDE.V</a> | 13391 |
-| Java | <a href="https://bitbucket.com/_dev_/shards-of-destiny/src/master/worldserver/src/main/java/com/l2jfree/gameserver/network/SystemMessageId.java">SystemMessageId.java</a> | 12331 |
-| PHP | <a href="https://bitbucket.com/4nn3ck/myeclipse4php/src/master/configuration/org.eclipse.osgi/bundles/322/1/.cp/Resources/language/php5.4/standard.php">standard.php</a> | 10168 |
-| C# | <a href="https://bitbucket.com/acrotech/dotspatialpcl/src/master/Trunk/DotSpatial.Plugins.Taudem/Hydrology.cs">Hydrology.cs</a> | 4674 |
-| ActionScript | <a href="https://bitbucket.com/abhi8600/demo/src/master/AnyChart/Original/AnyChartSource_6_0_11/build/utils/flex/frameworks/projects/framework/src/mx/core/UIComponent.as">UIComponent.as</a> | 4468 |
-| Ruby | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/aws-sdk-1.11.3/lib/aws/ec2/client.rb">client.rb</a> | 3805 |
-| HTML | <a href="https://bitbucket.com/_thc_/asc2013/src/master/cokolino-html/war/com.podravka.cokolino.GwtDefinition/FA7CBF71A4805DCDA38517C976AE86E9.cache.html">FA7CBF71A4805DCDA38517C976AE86E9.cache.html</a> | 3712 |
-| Autoconf | <a href="https://bitbucket.com/14farresa/projecte_esin/src/master/jp_public_terminal.in">jp_public_terminal.in</a> | 3690 |
-| SQL | <a href="https://bitbucket.com/10bicsehali/blesk/src/master/structure.sql">structure.sql</a> | 3431 |
-| TeX | <a href="https://bitbucket.com/act-lab/r2code/src/master/Python-2.7.5/Modules/_ctypes/libffi/texinfo.tex">texinfo.tex</a> | 3208 |
-| Pascal | <a href="https://bitbucket.com/5665tm/mytools/src/master/ConEmuFar/PluginSDK/Headers.pas/PluginW.pas">PluginW.pas</a> | 3141 |
-| LaTeX | <a href="https://bitbucket.com/a3217055/illumos-joyent/src/master/usr/src/grub/grub-0.97/docs/texinfo.tex">texinfo.tex</a> | 2464 |
-| CSS | <a href="https://bitbucket.com/activey/reactor/src/master/reactor-transport-websockets-jetty/src/main/resources/static/css/semantic.css">semantic.css</a> | 2364 |
-| Perl | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/perl/vendor/lib/DateTime.pm">DateTime.pm</a> | 2217 |
-| Emacs Lisp | <a href="https://bitbucket.com/4ourbit/prefs/src/master/.emacs.d/emacs-goodies-el/folding.el">folding.el</a> | 2107 |
-| Visual Basic | <a href="https://bitbucket.com/acrotech/dotspatialpcl/src/master/Trunk/DotSpatial.Plugins.Taudem.Port/frmAutomatic_v3.vb">frmAutomatic_v3.vb</a> | 2053 |
-| m4 | <a href="https://bitbucket.com/2ion/libqueue/src/master/aclocal.m4">aclocal.m4</a> | 2009 |
-| Shell | <a href="https://bitbucket.com/1120436joaopacheco/irudroid-technologies-lapr5/src/master/WalkMaze/lib/freetype-2.5.5/builds/unix/ltmain.sh">ltmain.sh</a> | 1935 |
-| C++ Header | <a href="https://bitbucket.com/3togo/python-tesseract/src/master/vs2008/includes/opencv2/core/core.hpp">core.hpp</a> | 1869 |
-| ASP.NET | <a href="https://bitbucket.com/5665tm/nyancatrainbowshot/src/master/NyanCat_Data/Mono/etc/mono/2.0/DefaultWsdlHelpGenerator.aspx">DefaultWsdlHelpGenerator.aspx</a> | 1677 |
-| CMake | <a href="https://bitbucket.com/acoustid/chromaprint/src/master/Doxyfile.cmake">Doxyfile.cmake</a> | 1611 |
-| FORTRAN Legacy | <a href="https://bitbucket.com/adam_qc/petsc/src/master/src/contrib/fun3d/comp/user.F">user.F</a> | 1531 |
-| TCL | <a href="https://bitbucket.com/achyutreddy24/abdevweb/src/master/dist/tcl/tcl8.6/clock.tcl">clock.tcl</a> | 1323 |
-| Sass | <a href="https://bitbucket.com/aadonskoy/helpdesk/src/master/app/assets/stylesheets/foundation_and_overrides.scss">foundation_and_overrides.scss</a> | 1150 |
-| XAML | <a href="https://bitbucket.com/achadee/graphics-project/src/master/Common/StandardStyles.xaml">StandardStyles.xaml</a> | 1054 |
-| Python | <a href="https://bitbucket.com/__rvalle__/openerp-7/src/master/openobject-server/openerp/addons/resource/faces/task.py">task.py</a> | 1016 |
-| Thrift | <a href="https://bitbucket.com/abioy/hypertable/src/master/src/cc/ThriftBroker/Client.thrift">Client.thrift</a> | 906 |
-| Lisp | <a href="https://bitbucket.com/acgt/dotemacs/src/master/packs/programming/lib/slime-2013-04-05/xref.lisp">xref.lisp</a> | 904 |
-| TypeScript Typings | <a href="https://bitbucket.com/12110201/12110201/src/master/webit/webit/Scripts/devexpress-web-14.1/ts/jquery.d.ts">jquery.d.ts</a> | 770 |
-| LESS | <a href="https://bitbucket.com/6artisans/tlapse/src/master/app/assets/stylesheets/custom_bootstrap/variables.less">variables.less</a> | 642 |
-| Assembly | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/gdb/sim/testsuite/sim/h8300/shlr.s">shlr.s</a> | 588 |
-| Expect | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/gdb/gdb/testsuite/lib/gdb.exp">gdb.exp</a> | 542 |
-| Powershell | <a href="https://bitbucket.com/1110245danielagrams/arqsi2/src/master/IDEIMusic/packages/EntityFramework.6.1.1/tools/EntityFramework.psm1">EntityFramework.psm1</a> | 506 |
-| Makefile | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/lib/pwlib/src/ptlib/unix/Makefile">Makefile</a> | 481 |
-| YAML | <a href="https://bitbucket.com/aadonskoy/rubycas-server/src/master/config/config.example.yml">config.example.yml</a> | 464 |
-| Properties File | <a href="https://bitbucket.com/act-lab/r2code/src/master/jsr308-langtools/src/share/classes/com/sun/tools/javac/resources/compiler.properties">compiler.properties</a> | 458 |
-| Haskell | <a href="https://bitbucket.com/acgt/polyeuler/src/master/ProjectEuler.hs">ProjectEuler.hs</a> | 444 |
-| Scheme | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/boot-9.scm">boot-9.scm</a> | 439 |
-| Haxe | <a href="https://bitbucket.com/adag_dot_me/7drts/src/master/src/com/haxepunk/HXP.hx">HXP.hx</a> | 437 |
-| GLSL | <a href="https://bitbucket.com/0player/t-engine4/src/master/game/modules/tome/data/gfx/shaders/full_fbo.frag">full_fbo.frag</a> | 427 |
-| Lua | <a href="https://bitbucket.com/0player/t-engine4/src/master/game/modules/tome/class/interface/PlayerExplore.lua">PlayerExplore.lua</a> | 419 |
-| VHDL | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/bundle/ctags58/Test/test.vhd">test.vhd</a> | 396 |
-| COBOL | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.cob">example.cob</a> | 390 |
-| MSBuild | <a href="https://bitbucket.com/3f/_systemdatasqlite/src/master/SQLite.NET.Settings.targets">SQLite.NET.Settings.targets</a> | 386 |
-| Processing | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/realtime/src/acquisition/openbci/java/src/OpenBCI_GUI.pde">OpenBCI_GUI.pde</a> | 384 |
-| ASP | <a href="https://bitbucket.com/abel-pacara/beta_masprospectos/src/master/admin/ckeditor/ckeditor.asp">ckeditor.asp</a> | 347 |
-| Protocol Buffers | <a href="https://bitbucket.com/abex/abex-mumble/src/master/src/murmur/MurmurRPC.proto">MurmurRPC.proto</a> | 339 |
-| CoffeeScript | <a href="https://bitbucket.com/abhayathapa/interesting/src/master/app/assets/javascripts/gmaps4rails/gmaps4rails.googlemaps.js.coffee">gmaps4rails.googlemaps.js.coffee</a> | 339 |
-| FORTRAN Modern | <a href="https://bitbucket.com/adam_qc/petsc/src/master/src/snes/examples/tutorials/ex5f90t.F90">ex5f90t.F90</a> | 330 |
-| Groovy | <a href="https://bitbucket.com/4s/ot-70-opentele-server/src/master/grails-app/conf/Config.groovy">Config.groovy</a> | 309 |
-| AWK | <a href="https://bitbucket.com/achase55/gba4ios/src/master/emu-ex-plus-alpha/imagine/bundle/all/src/libpng/libpng-1.6.2/scripts/options.awk">options.awk</a> | 284 |
-| R | <a href="https://bitbucket.com/acoking/archervmperidot-mirror/src/master/MercuryMail/RESOURCE/wpm-lmtt.r">wpm-lmtt.r</a> | 284 |
-| Ada | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/lib/ncurses/ncurses-5.7/Ada95/src/terminal_interface-curses-forms.adb">terminal_interface-curses-forms.adb</a> | 278 |
-| Objective C++ | <a href="https://bitbucket.com/aaalexx/gamejam2013/src/master/cocos2d-x-2.1.5/cocos2dx/platform/mac/CCImage.mm">CCImage.mm</a> | 262 |
-| Korn Shell | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/lib/brand/shared/zone/common.ksh">common.ksh</a> | 253 |
-| Boo | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/external/dmlt/external/gpstuff/SuiteSparse/AMD/Doc/AMD_UserGuide.tex">AMD_UserGuide.tex</a> | 253 |
-| Clojure | <a href="https://bitbucket.com/acgt/polyeuler/src/master/euler.clj">euler.clj</a> | 227 |
-| Android Interface Definition Language | <a href="https://bitbucket.com/abhinavgupta2812/dynamix-framework/src/master/src/org/ambientdynamix/api/application/IDynamixFacade.aidl">IDynamixFacade.aidl</a> | 225 |
-| Batch | <a href="https://bitbucket.com/abhi8600/demo/src/master/BuildsAndReleases/deployment/deploy_acorn_noftp.bat">deploy_acorn_noftp.bat</a> | 224 |
-| Razor | <a href="https://bitbucket.com/aburias/moolahsense/src/master/MoolahConnectnew/Views/Admin/_LoanRequestMoolahCoreEdit.cshtml">_LoanRequestMoolahCoreEdit.cshtml</a> | 220 |
-| OCaml | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/format.ml">format.ml</a> | 218 |
-| BASH | <a href="https://bitbucket.com/aborrmann/dotfiles/src/master/.git-completion.bash">.git-completion.bash</a> | 188 |
-| TypeScript | <a href="https://bitbucket.com/0x3044/php-examples/src/master/public/typescript/form/form.ts">form.ts</a> | 186 |
-| Stylus | <a href="https://bitbucket.com/abihf/chsj/src/master/themes/chsj/source/css/_base/normalize.styl">normalize.styl</a> | 186 |
-| Puppet | <a href="https://bitbucket.com/acdtprn/proj-case-prototyping-boilerplate/src/master/puphpet/puppet/modules/puppi/manifests/project/maven.pp">maven.pp</a> | 186 |
-| Scala | <a href="https://bitbucket.com/adam_novak/sequence-graphs/src/master/scala/SparkUtil.scala">SparkUtil.scala</a> | 175 |
-| Module-Definition | <a href="https://bitbucket.com/act-lab/r2code/src/master/Python-2.7.5/PC/os2emx/python27.def">python27.def</a> | 174 |
-| SVG | <a href="https://bitbucket.com/0mid/fsusiam/src/master/talks/1-central-limit-thm/pictures/dice_clt.svg">dice_clt.svg</a> | 166 |
-| Device Tree | <a href="https://bitbucket.com/abhisit/firefly-rk3288-kernel/src/master/arch/arm/boot/dts/rk3288-box.dts">rk3288-box.dts</a> | 164 |
-| Monkey C | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/ntp/ports/winnt/libntp/messages.mc">messages.mc</a> | 134 |
-| Zsh | <a href="https://bitbucket.com/abrookins/dotfiles/src/master/.zshrc">.zshrc</a> | 120 |
-| Basic | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/unzip/windll/vb/vbunzip.bas">vbunzip.bas</a> | 119 |
-| Erlang | <a href="https://bitbucket.com/a12n/calendar_ext/src/master/src/internal/iso8601_datetime.erl">iso8601_datetime.erl</a> | 113 |
-| Gherkin Specification | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/cucumber-1.3.8/legacy_features/wire_protocol.feature">wire_protocol.feature</a> | 112 |
-| Nim | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/example.nim">example.nim</a> | 109 |
-| gitignore | <a href="https://bitbucket.com/aagraz/blwebsocketsserver/src/master/.gitignore">.gitignore</a> | 105 |
-| JavaServer Pages | <a href="https://bitbucket.com/abhi8600/demo/src/master/SalesforceConnector_28_0/WebContent/axis2-web/HappyAxis.jsp">HappyAxis.jsp</a> | 103 |
-| Unreal Script | <a href="https://bitbucket.com/___________chenjuensheng/android_kernel_samsung_n1/src/master/drivers/net/ixp2000/ixp2400_rx.uc">ixp2400_rx.uc</a> | 98 |
-| Bazel | <a href="https://bitbucket.com/4ptiv4/picasso-kernel_at100/src/master/scripts/Makefile.build">Makefile.build</a> | 93 |
-| Go | <a href="https://bitbucket.com/200bg/aquilo-server/src/master/aquilo/csrf/csrf.go">csrf.go</a> | 87 |
-| Vala | <a href="https://bitbucket.com/17twenty/colourl/src/master/main.vala">main.vala</a> | 73 |
-| Rust | <a href="https://bitbucket.com/abhijeetbhagat/rusqlite/src/master/src/sqlite_test.rs">sqlite_test.rs</a> | 73 |
-| QML | <a href="https://bitbucket.com/4s/4sdcdemo/src/master/QtProjects/DemoHtmlIntegration/Gateway/4SDC2QtWebKit/webBrowser.qml">webBrowser.qml</a> | 71 |
-| Swift | <a href="https://bitbucket.com/abutenko/simplechat/src/master/SimpleChat/BuddiesViewModel.swift">BuddiesViewModel.swift</a> | 67 |
-| SKILL | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/uts/intel/amd64/ml/amd64.il">amd64.il</a> | 67 |
-| Org | <a href="https://bitbucket.com/acue/unified-sessions-manager/src/master/trunk/ctys/plugins/VMs/XEN/network-bridge.org">network-bridge.org</a> | 64 |
-| sed | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/lib/ncurses/ncurses-5.7/man/manlinks.sed">manlinks.sed</a> | 63 |
-| Rakefile | <a href="https://bitbucket.com/3ign0n/3ign0nbitbucketorg/src/master/src/Rakefile">Rakefile</a> | 59 |
-| C Shell | <a href="https://bitbucket.com/aakef/cci/src/master/config/distscript.csh">distscript.csh</a> | 56 |
-| Standard ML (SML) | <a href="https://bitbucket.com/_nkhalasi/proglang-2013-homework/src/master/hw7/hw7.sml">hw7.sml</a> | 52 |
-| Smarty Template | <a href="https://bitbucket.com/aaryadewa/simpleresponsivetheme/src/master/themes/simpleresponsivetheme/authentication.tpl">authentication.tpl</a> | 52 |
-| Dockerfile | <a href="https://bitbucket.com/abrad450/samm/src/master/.docker/Dockerfile">Dockerfile</a> | 46 |
-| Xtend | <a href="https://bitbucket.com/3m45t3r/dsl/src/master/main/at.tuwien.dsg.dsl/src/at/tuwien/dsg/jvmmodel/DslJvmModelInferrer.xtend">DslJvmModelInferrer.xtend</a> | 45 |
-| Specman e | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/bundle/ctags58/Eiffel/tag_file.e">tag_file.e</a> | 43 |
-| Julia | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/string.jl">string.jl</a> | 43 |
-| LD Script | <a href="https://bitbucket.com/accelecon/u-boot/src/master/board/gaisler/gr_xc3s_1500/u-boot.lds">u-boot.lds</a> | 40 |
-| AutoHotKey | <a href="https://bitbucket.com/5665tm/mytools/src/master/AutoHotkey/key.ahk">key.ahk</a> | 38 |
-| IDL | <a href="https://bitbucket.com/53454e4f4a/vs2/src/master/Koordinator/monitor.idl">monitor.idl</a> | 30 |
-| F# | <a href="https://bitbucket.com/abred/btf-renderer/src/master/data/shader/btf.fs">btf.fs</a> | 29 |
-| Elixir | <a href="https://bitbucket.com/0x0me/elixir_fp_book/src/master/chap10/lib/chap10.ex">chap10.ex</a> | 28 |
-| Scons | <a href="https://bitbucket.com/abhisit/firefly-rk3288-kernel/src/master/drivers/gpu/arm/midgard/sconscript">sconscript</a> | 27 |
-| XCode Config | <a href="https://bitbucket.com/365plus/api/src/master/FacebookSDK v4/Samples/Configurations/Project.xcconfig">Project.xcconfig</a> | 26 |
-| BuildStream | <a href="https://bitbucket.com/adam_0/300/src/master/IEEEannot.bst">IEEEannot.bst</a> | 25 |
-| Gradle | <a href="https://bitbucket.com/aalmiray/javafx-gradle/src/master/samples/FullyExpressed/build.gradle">build.gradle</a> | 24 |
-| Mako | <a href="https://bitbucket.com/50onred/sqlalchemy/src/master/doc/build/templates/layout.mako">layout.mako</a> | 19 |
-| Fish | <a href="https://bitbucket.com/ac109158/django-portfolio/src/master/bin/activate.fish">activate.fish</a> | 19 |
-| Cython | <a href="https://bitbucket.com/abosamoor/polyglot2/src/master/polyglot2/polyglot2_inner.pyx">polyglot2_inner.pyx</a> | 19 |
-| Dart | <a href="https://bitbucket.com/adam8810/chrome-app-samples/src/master/dart/dart/balls.dart">balls.dart</a> | 18 |
-| Kotlin | <a href="https://bitbucket.com/adamansky/adamanskybitbucketorg/src/master/kotlin/src/ru/nsu/Lambda.kt">Lambda.kt</a> | 16 |
-| Handlebars | <a href="https://bitbucket.com/adam_paterson/blog/src/master/content/themes/cedar/partials/footer.hbs">footer.hbs</a> | 16 |
-| Closure Template | <a href="https://bitbucket.com/13threbellion/spotify-plugin-for-stash/src/master/src/main/resources/spotify/widget/track-selector/track-selector.soy">track-selector.soy</a> | 15 |
-| V | <a href="https://bitbucket.com/5665tm/mytools/src/master/Vim/bundle/ctags58/Test/bug1111214.v">bug1111214.v</a> | 14 |
-| nuspec | <a href="https://bitbucket.com/acrotech/dotspatialpcl/src/master/Branches- Obsolete/Topology_NTS/Nuget_DotSpatialCore.nuspec">Nuget_DotSpatialCore.nuspec</a> | 14 |
-| Modula3 | <a href="https://bitbucket.com/__wp__/mb-linux-msli/src/master/uClinux-dist/user/perl/t/lib/warnings/mg">mg</a> | 11 |
-| Fragment Shader File | <a href="https://bitbucket.com/adamfallon/maply/src/master/GoogleMaps.framework/Versions/A/Resources/GoogleMaps.bundle/GMSCoreResources.bundle/HybridRoadShader.fsh">HybridRoadShader.fsh</a> | 11 |
-| Ruby HTML | <a href="https://bitbucket.com/aalmacin/rails-learning/src/master/blog/path/ruby/2.0.0/gems/sdoc-0.4.1/lib/rdoc/generator/template/sdoc/_context.rhtml">_context.rhtml</a> | 8 |
-| Stata | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/external/dmlt/external/gpstuff/SuiteSparse/UMFPACK/Tcov/DO">DO</a> | 8 |
-| Jade | <a href="https://bitbucket.com/200bg/aquilo-server/src/master/html/src/index.jade">index.jade</a> | 8 |
-| Cabal | <a href="https://bitbucket.com/3noch/hubble/src/master/hubble.cabal">hubble.cabal</a> | 6 |
-| Bitbucket Pipeline | <a href="https://bitbucket.com/0x0me/sdsget/src/master/bitbucket-pipelines.yml">bitbucket-pipelines.yml</a> | 5 |
-| JSX | <a href="https://bitbucket.com/8hoursdo/rui/src/master/src/lib/components/button.jsx">button.jsx</a> | 5 |
-| SAS | <a href="https://bitbucket.com/a3955269/unlockfs/src/master/libjpegtwrp/jconfig.sas">jconfig.sas</a> | 4 |
-| Elm | <a href="https://bitbucket.com/a3217055/illumos-2/src/master/usr/src/cmd/man/src/util/ati-tbl.elm">ati-tbl.elm</a> | 4 |
-| Mustache | <a href="https://bitbucket.com/4lejandrito/cv-bootstrap/src/master/docs/templates/pages/scaffolding.mustache">scaffolding.mustache</a> | 4 |
-| GN | <a href="https://bitbucket.com/aakef/cci/src/master/README.ctp.gni">README.ctp.gni</a> | 2 |
-| Vertex Shader File | <a href="https://bitbucket.com/aaalexx/gamejam2013/src/master/cocos2d-x-2.1.5/samples/Javascript/Shared/tests/res/Shaders/example_ColorBars.vsh">example_ColorBars.vsh</a> | 2 |
-| Bitbake | <a href="https://bitbucket.com/17twenty/meta-feabhas/src/master/meta-feabhas/recipes-feabhas/images/feabhas-image.bb">feabhas-image.bb</a> | 2 |
-| Emacs Dev Env | <a href="https://bitbucket.com/aaleks/compileddatabatch/src/master/fieldtrip/realtime/src/buffer/java/bufferserver/Project.ede">Project.ede</a> | 2 |
-| ColdFusion | <a href="https://bitbucket.com/abashelor/mess/src/master/.gem/ruby/1.9.3/gems/pygments.rb-0.5.2/vendor/pygments-main/tests/examplefiles/demo.cfm">demo.cfm</a> | 1 |
-| Forth | <a href="https://bitbucket.com/a9group/workspace/src/master/Workspace/menu.fr">menu.fr</a> | 1 |
+| Fish | <a href="https://gitlab.com/mitzip/fish-config/blob/master/functions/Godsay.fish">Godsay.fish</a> | 31103 |
+| Sass | <a href="https://github.com/wangbiaouestc/clpeak/blob/master/OpsBench/ma-thesis/bench/results/instruction/sm30_kernels.sass">sm30_kernels.sass</a> | 30306 |
+| CoffeeScript | <a href="https://github.com/trshugu/nt/blob/master/tmp.coffee">tmp.coffee</a> | 29088 |
+| Erlang | <a href="https://github.com/nussiminen/git_nussia/blob/master/nci_ft_ricm_dul_SUITE.erl">nci_ft_ricm_dul_SUITE.erl</a> | 28306 |
+| Lisp | <a href="https://github.com/mbcode/kmb/blob/master/km_2-5-33.lisp">km_2-5-33.lisp</a> | 27579 |
+| YAML | <a href="https://github.com/mariouriarte/anbeed/blob/master/data/fixtures/ciudades.yml">ciudades.yml</a> | 27168 |
+| R | <a href="https://github.com/cran/phylosim/blob/master/R/PhyloSimSource.R">PhyloSimSource.R</a> | 26023 |
+| Scala | <a href="https://github.com/ajanker/typechef/blob/master/CTypeChecker/src/test/scala/de/fosd/typechef/typesystem/generated/GeneratedRedeclTests.scala">GeneratedRedeclTests.scala</a> | 24647 |
+| Emacs Lisp | <a href="https://gitlab.com/com-informatimago/emacs/blob/master/pjb-java.el">pjb-java.el</a> | 24375 |
+| Haskell | <a href="https://github.com/weltensegler/zeno/blob/master/src/Calculus/Dipole80.hs">Dipole80.hs</a> | 24245 |
+| ATS | <a href="https://github.com/ashalkhakov/ats-postiats/blob/master/npm-utils/contrib/libats-/hwxi/Andes/TEST/test06.dats">test06.dats</a> | 24179 |
+| m4 | <a href="https://github.com/tjgiese/atizer/blob/master/python/atizer/m4/m4/ax.m4">ax.m4</a> | 22675 |
+| ActionScript | <a href="https://github.com/oyhc/simonynx/blob/master/hero/src/cmodule/ALCSWF/__2E_str95.as">__2E_str95.as</a> | 21173 |
+| Objective C++ | <a href="https://github.com/antonbikineev/clang/blob/master/test/Analysis/edges-new.mm">edges-new.mm</a> | 20789 |
+| Visual Basic | <a href="https://github.com/celinak/directobservationtoolsforwindows/blob/master/MapWindow/Classes/Projections/clsProjections.vb">clsProjections.vb</a> | 20641 |
+| TCL | <a href="https://github.com/mheinrichs/68030tk/blob/master/Logic/68030_TK.tcl">68030_TK.tcl</a> | 20616 |
+| Nix | <a href="https://github.com/matthewbauer/matthewbauerhubio/blob/master/nix">nix</a> | 19605 |
+| Perl | <a href="https://github.com/imazen/repositext/blob/master/vendor/lf_aligner_3.12/scripts/LF_aligner_3.12_with_modules.pl">LF_aligner_3.12_with_modules.pl</a> | 18013 |
+| Ada | <a href="https://github.com/landgraf/matreshka/blob/master/source/amf/uml/amf-internals-tables-uml_metamodel-objects.adb">amf-internals-tables-uml_metamodel-objects.adb</a> | 14535 |
+| Batch | <a href="https://github.com/asfuyao/asfuyao/blob/master/Windows/微软产品激活/Microsoft Activation Script _0.6_中英双语/MAS_0.6_en.cmd">MAS_0.6_en.cmd</a> | 14402 |
+| OCaml | <a href="https://github.com/camlspotter/ocamlpro-ocaml-branch/blob/master/examples/00036_mandelbrot/code_new.ml">code_new.ml</a> | 13648 |
+| LaTeX | <a href="https://github.com/gnuplot/tex_demos/blob/master/demo/output/context/pm3dcolors.tex">pm3dcolors.tex</a> | 13092 |
+| Properties File | <a href="https://github.com/open-wide/owsi-nuxeo-translations-explorer/blob/master/l10n/5.6/messages_ar_SA.properties">messages_ar_SA.properties</a> | 13074 |
+| MSBuild | <a href="https://github.com/muraad/bc-csharp/blob/master/crypto/ncrypto.csproj">ncrypto.csproj</a> | 11302 |
+| ASP.NET | <a href="https://github.com/fran9rodriguez/socios/blob/master/SocIoS Front End/SociosFrontEnd/DesktopModules/EasyDNNGallery/GallerySettings.ascx">GallerySettings.ascx</a> | 10969 |
+| Powershell | <a href="https://github.com/uti7/foo/blob/master/mail_imap.ps1">mail_imap.ps1</a> | 10798 |
+| Standard ML (SML) | <a href="https://github.com/petersewell/netsem/blob/master/unmaintained/Net/TCP/Spec2/TCP1_hostLTSScript.sml">TCP1_hostLTSScript.sml</a> | 10790 |
+| Dart | <a href="https://github.com/nkratzke/nkratzkehubio/blob/master/assets/ss2018/webtech/games/team-4g/packages/$sdk/lib/html/dart2js/html_dart2js.dart">html_dart2js.dart</a> | 10547 |
+| AutoHotKey | <a href="https://github.com/dajunx/cplusplus/blob/master/ahk_script/others/studio.ahk">studio.ahk</a> | 10391 |
+| Expect | <a href="https://github.com/vicamo/b2g_mozilla-central/blob/master/cmd/macfe/projects/client/Navigator.exp">Navigator.exp</a> | 10063 |
+| Julia | <a href="https://github.com/stevengj/petscjl/blob/master/src/generated/PETScRealSingle.jl">PETScRealSingle.jl</a> | 9417 |
+| Makefile | <a href="https://github.com/objeck/objeck-lang/blob/master/misc/wxWidgets/stc/lexer/Makefile">Makefile</a> | 9204 |
+| Forth | <a href="https://github.com/mar-one/machine-trans-shared-task/blob/master/data/corpus/europarl.lowercased.fr">europarl.lowercased.fr</a> | 9107 |
+| ColdFusion | <a href="https://github.com/phillipsenn/matrix/blob/master/js/js.cfm">js.cfm</a> | 8786 |
+| TeX | <a href="https://github.com/delcmo/dissertation/blob/master/hyperref.sty">hyperref.sty</a> | 8591 |
+| Opalang | <a href="https://github.com/ajbetteridge/opalang/blob/master/lib/stdlib/core/i18n/i18n_language.opa">i18n_language.opa</a> | 7860 |
+| LESS | <a href="https://github.com/2jdesign/magento2/blob/master/lib/web/css/docs/source/_variables.less">_variables.less</a> | 7394 |
+| Swift | <a href="https://github.com/smart-on-fhir/swift-fhir/blob/master/Sources/Models/CodeSystems.swift">CodeSystems.swift</a> | 6847 |
+| Bazel | <a href="https://github.com/nonas/debian-clang/blob/master/tests/build_timeout/buildlogs/run1/gcc-mingw-w64_12_amd64-20140427-2100.build">gcc-mingw-w64_12_amd64-20140427-2100.build</a> | 6429 |
+| Kotlin | <a href="https://github.com/jetbrains/kotlin/blob/master/libraries/stdlib/common/src/generated/_Arrays.kt">_Arrays.kt</a> | 5887 |
+| SAS | <a href="https://github.com/ikonovalov/sas-bug/blob/master/sas-checkstyle/src/main/resources/202_002_Stream_DQ_DRVT.sas">202_002_Stream_DQ_DRVT.sas</a> | 5597 |
+| Haxe | <a href="https://github.com/waneck/hx-javastd/blob/master/src/com/sun/rowset/CachedRowSetImpl.hx">CachedRowSetImpl.hx</a> | 5438 |
+| Rust | <a href="https://github.com/autonome/gecko-dev/blob/master/third_party/rust/lalrpop-snap/src/parser/lrgrammar.rs">lrgrammar.rs</a> | 5150 |
+| Monkey C | <a href="https://github.com/nasahackto/mesh/blob/master/mesh-1.4/mesh/perl/mc">mc</a> | 5044 |
+| Cython | <a href="https://github.com/strawlab/python-pcl/blob/master/pcl/pcl_common_172.pxd">pcl_common_172.pxd</a> | 5030 |
+| Nim | <a href="https://github.com/comex/imaon/blob/master/disas.nim">disas.nim</a> | 4547 |
+| Game Maker Language | <a href="https://github.com/ecriss/gmspineapi/blob/master/gm_spineapi.gml">gm_spineapi.gml</a> | 4345 |
+| ABAP | <a href="https://github.com/yetaai/sap/blob/master/ZDFIReports/ZACO19U_SHOP_NEW_1.abap">ZACO19U_SHOP_NEW_1.abap</a> | 4244 |
+| XAML | <a href="https://github.com/pittruff/mystik/blob/master/MyStik/RaumPlan/Raumplan.xaml">Raumplan.xaml</a> | 4193 |
+| Razor | <a href="https://github.com/jonezy/epilogger/blob/master/Epilogger.Web/Views/Home/Privacy.cshtml">Privacy.cshtml</a> | 4092 |
+| Varnish Configuration | <a href="https://github.com/aureq/securityvcl/blob/master/vcl/breach/46_slr_et_rfi_attacks.vcl">46_slr_et_rfi_attacks.vcl</a> | 3924 |
+| Basic | <a href="https://github.com/hpux735/spectrum-analyzer/blob/master/Spectrum Analyzer/MSA_version116_4q.bas">MSA_version116_4q.bas</a> | 3892 |
+| Isabelle | <a href="https://github.com/tangentstorm/tangentlabs/blob/master/isar/Pick.thy">Pick.thy</a> | 3690 |
+| Protocol Buffers | <a href="https://github.com/nospamdan/frameworks_base/blob/master/proto/src/metrics_constants.proto">metrics_constants.proto</a> | 3682 |
+| BASH | <a href="https://github.com/c0moshack/c0moshack/blob/master/dotfiles/bashrc">bashrc</a> | 3606 |
+| Clojure | <a href="https://github.com/dedeibel/dilist/blob/master/experiment/all-playlists-output.clj">all-playlists-output.clj</a> | 3440 |
+| F# | <a href="https://github.com/chrisa23/fmat/blob/master/src/Fmat.Numerics/GenericMatrixDoc.fs">GenericMatrixDoc.fs</a> | 3383 |
+| Thrift | <a href="https://github.com/evernote/evernote-thrift/blob/master/src/NoteStore.thrift">NoteStore.thrift</a> | 3377 |
+| COBOL | <a href="https://github.com/therocket/mixanalytics/blob/master/lib/db2include/cobol_mf/db2ApiDf.cbl">db2ApiDf.cbl</a> | 3319 |
+| JavaServer Pages | <a href="https://github.com/builtlean/builtlean/blob/master/styles/sink_jq.jsp">sink_jq.jsp</a> | 3204 |
+| Modula3 | <a href="https://github.com/jeffmendoza/86duino/blob/master/build/linux/work/DJGPP/info/gdb.i3">gdb.i3</a> | 3124 |
+| Visual Basic for Applications | <a href="https://bitbucket.com/ckuyehar/openahlta/src/master/Source/Data Manager/Back End/HL7xmlBuilder.cls">HL7xmlBuilder.cls</a> | 2987 |
+| Oz | <a href="https://github.com/raphinou/oz-compiler/blob/master/perfs/timing.oz">timing.oz</a> | 2946 |
+| Closure Template | <a href="https://github.com/facebook/buck/blob/master/docs/files-and-dirs/buckconfig.soy">buckconfig.soy</a> | 2915 |
+| Agda | <a href="https://github.com/zsparks/pi-dual/blob/master/Univalence/Obsolete/Pifextra.agda">Pifextra.agda</a> | 2892 |
+| Stata | <a href="https://github.com/ibli/ibli_borena_hh_survey/blob/master/R2_2cleaningprocess.do">R2_2cleaningprocess.do</a> | 2660 |
+| ColdFusion CFScript | <a href="https://github.com/mfgglobalsolutions/collectmed/blob/master/collectmed1.0/CustomTags/com/common/Intake.cfc">Intake.cfc</a> | 2578 |
+| Luna | <a href="https://github.com/luna/luna/blob/master/stdlib/Std/src/Base.luna">Base.luna</a> | 2542 |
+| Unreal Script | <a href="https://github.com/arcaneflux/hostile-worlds/blob/master/src/Hostile Worlds/Development/Src/Engine/Classes/UIRoot.uc">UIRoot.uc</a> | 2449 |
+| CMake | <a href="https://github.com/ipfire/ipfire-2x/blob/master/config/rootfiles/oldcore/66/filelists/cmake">cmake</a> | 2425 |
+| Org | <a href="https://github.com/willijar/lens/blob/master/doc/lens-wsn.org">lens-wsn.org</a> | 2417 |
+| Flow9 | <a href="https://github.com/hitode909/higashi-dance-network/blob/master/flow-typed/jquery/index.js.flow">index.js.flow</a> | 2361 |
+| MQL Header | <a href="https://github.com/ro31337/romanpushkin-dailygrid/blob/master/IncGUI.mqh">IncGUI.mqh</a> | 2352 |
+| JSX | <a href="https://github.com/lezuse/photoshop-scripts/blob/master/default/ContactSheetII.jsx">ContactSheetII.jsx</a> | 2243 |
+| MQL4 | <a href="https://github.com/lvcster/java-examples/blob/master/PhD Appsolute System.mq4">PhD Appsolute System.mq4</a> | 2061 |
+| Ruby HTML | <a href="https://github.com/srvanderplas/dissertation/blob/master/Presentations/Final Oral/FinalOral-Old.Rhtml">FinalOral-Old.Rhtml</a> | 2061 |
+| GDScript | <a href="https://github.com/laurentbartholdi/fr/blob/master/gap/group.gd">group.gd</a> | 2023 |
+| Processing | <a href="https://github.com/alexisgrinbold/pjs-2d-game-engine/blob/master/mario/testcode.pde">testcode.pde</a> | 2014 |
+| PSL Assertion | <a href="https://github.com/seomoz/url-py/blob/master/url/psl/2016-08-16.psl">2016-08-16.psl</a> | 2011 |
+| ASP | <a href="https://github.com/zhou-hui/zblog/blob/master/Release/zb_system/FUNCTION/c_system_plugin.asp">c_system_plugin.asp</a> | 1878 |
+| AWK | <a href="https://github.com/azizyemloul/plover-france-dict/blob/master/Atelier/dic-generator.awk">dic-generator.awk</a> | 1732 |
+| Jinja | <a href="https://github.com/dfederlein/ansible-aiua/blob/master/playbooks/roles/php5/templates/etc/php5/fpm/php.ini.j2">php.ini.j2</a> | 1668 |
+| Zsh | <a href="https://github.com/saizai/dotfiles/blob/master/.zshrc">.zshrc</a> | 1588 |
+| Q# | <a href="https://github.com/siagal/eneboo-modules/blob/master/direccion/analisis/scripts/in_navegador.qs">in_navegador.qs</a> | 1568 |
+| sed | <a href="https://github.com/alexjordan/patmos-benchmarks/blob/master/MiBench/office/ghostscript/src/Makefile.sed">Makefile.sed</a> | 1554 |
+| Stylus | <a href="https://github.com/leiferikb/bitpop-private/blob/master/bitpop_specific/extensions/bittorrent_surf/app/popup/popup.styl">popup.styl</a> | 1550 |
+| Bitbake | <a href="https://github.com/sasha-tvo/beam-splitting/blob/master/Lib/Doxyfile.bb">Doxyfile.bb</a> | 1533 |
+| Rakefile | <a href="https://github.com/ccls/odms/blob/master/lib/tasks/samples.rake">samples.rake</a> | 1509 |
+| Gherkin Specification | <a href="https://bitbucket.com/hagashennaidu/warewolf-esb/src/master/Dev/Dev2.Activities.Specs/Composition/WorkflowExecution.feature">WorkflowExecution.feature</a> | 1421 |
+| Crystal | <a href="https://github.com/manastech/crystal/blob/master/src/string.cr">string.cr</a> | 1412 |
+| Android Interface Definition Language | <a href="https://github.com/android/platform_frameworks_base/blob/master/telephony/java/com/android/internal/telephony/ITelephony.aidl">ITelephony.aidl</a> | 1410 |
+| Xtend | <a href="https://github.com/skunkiferous/meta/blob/master/api/src/main/java/com/blockwithme/meta/Properties.xtend">Properties.xtend</a> | 1363 |
+| SKILL | <a href="https://github.com/saycv/saycv_cadence_skillmngt/blob/master/_src/destub/src/DT_destub.il">DT_destub.il</a> | 1181 |
+| Madlang | <a href="https://github.com/madrocker/kernels/blob/master/15March/.config.mad">.config.mad</a> | 1137 |
+| Spice Netlist | <a href="https://github.com/gauxonz/prp_2013/blob/master/Lib/APEXLINEAR.ckt">APEXLINEAR.ckt</a> | 1114 |
+| QML | <a href="https://bitbucket.com/patrickfi/combinedindirectgestures/src/master/qml/MainFULL.qml">MainFULL.qml</a> | 1078 |
+| GLSL | <a href="https://github.com/carlos-felipe88/spacecraft/blob/master/data/shader/subPlanetNoise.frag">subPlanetNoise.frag</a> | 1051 |
+| Ur/Web | <a href="https://github.com/vagoff/the-matrix/blob/master/initial.ur">initial.ur</a> | 1018 |
+| Alloy | <a href="https://github.com/davletd/productlinetesting/blob/master/ProductLineTesting/AlloyModels/TransactionFeatureFinal.als">TransactionFeatureFinal.als</a> | 1012 |
+| Vala | <a href="https://github.com/kamilprusko/puzzle/blob/master/src/puzzle-piece.vala">puzzle-piece.vala</a> | 968 |
+| Smarty Template | <a href="https://github.com/poganini/ee/blob/master/themes/Ensau.tpl">Ensau.tpl</a> | 965 |
+| Mako | <a href="https://github.com/andrewsallans/centerforopenscienceorg/blob/master/www/jobs.mako">jobs.mako</a> | 950 |
+| TOML | <a href="https://github.com/chuqingq/codeeveryday/blob/master/golang/20170420_go_reverseproxy_traefik/traefik.toml">traefik.toml</a> | 938 |
+| gitignore | <a href="https://github.com/michalsc/aros/blob/master/.gitignore">.gitignore</a> | 880 |
+| Elixir | <a href="https://github.com/alexbaranosky/elixir/blob/master/lib/elixir/macros.ex">macros.ex</a> | 832 |
+| GN | <a href="https://github.com/autonome/gecko-dev/blob/master/media/webrtc/trunk/build/config/android/rules.gni">rules.gni</a> | 827 |
+| Korn Shell | <a href="https://github.com/filipinotech/illumos-gate/blob/master/usr/src/lib/brand/lx/zone/lx_distro_install.ksh">lx_distro_install.ksh</a> | 807 |
+| LD Script | <a href="https://bitbucket.com/imoseyon/d2vzw-alpha/src/master/arch/arm/kernel/vmlinux.lds">vmlinux.lds</a> | 727 |
+| Scons | <a href="https://github.com/ajdavis/mongo/blob/master/SConstruct">SConstruct</a> | 716 |
+| Handlebars | <a href="https://github.com/palanieswaran/cs247projectwebsite/blob/master/views/Consent-Form.handlebars">Consent-Form.handlebars</a> | 714 |
+| Device Tree | <a href="https://github.com/coreboot/coreboot/blob/master/src/mainboard/cavium/cn8100_sff_evb/ddr4-common.dtsi">ddr4-common.dtsi</a> | 695 |
+| FIDL | <a href="https://github.com/otcshare/automotive-message-broker/blob/master/docs/amb.in.fidl">amb.in.fidl</a> | 686 |
+| Julius | <a href="https://github.com/sseefried/play-space-online/blob/master/julius/glMatrix.julius">glMatrix.julius</a> | 686 |
+| C Shell | <a href="https://github.com/pmaksim1/bin/blob/master/setup_grid.csh">setup_grid.csh</a> | 645 |
+| Lean | <a href="https://bitbucket.com/leanprover/lean/src/master/library/data/list/perm.lean">perm.lean</a> | 642 |
+| Idris | <a href="https://github.com/eckart/idris-tutorial/blob/master/Overview.idr">Overview.idr</a> | 637 |
+| PureScript | <a href="https://github.com/purescript/purescript-arrays/blob/master/src/Data/Array.purs">Array.purs</a> | 631 |
+| Freemarker Template | <a href="https://github.com/oscar810429/painiu-project/blob/master/web/WEB-INF/templates/search/result_softwares.ftl">result_softwares.ftl</a> | 573 |
+| ClojureScript | <a href="https://github.com/dwaynekj/lt-cljs-tutorial/blob/master/lt-cljs-tutorial.cljs">lt-cljs-tutorial.cljs</a> | 518 |
+| Fragment Shader File | <a href="https://github.com/imclab/aluminum/blob/master/osx/examples/nautilus/resources/bulb.fsh">bulb.fsh</a> | 464 |
+| Elm | <a href="https://github.com/catherinemoresco/catherinemorescohubio/blob/master/static/fourier-elm/elm-stuff/packages/evancz/elm-html/4.0.2/src/Html/Attributes.elm">Attributes.elm</a> | 434 |
+| Jade | <a href="https://github.com/benbaker/zooid/blob/master/zooid_web/views/control/index.jade">index.jade</a> | 432 |
+| Vue | <a href="https://github.com/iview/iview/blob/master/examples/routers/form.vue">form.vue</a> | 418 |
+| Gradle | <a href="https://github.com/wso2/emm-agent-android/blob/master/client/client/build.gradle">build.gradle</a> | 416 |
+| Lucius | <a href="https://github.com/dsmatter/timetracker/blob/master/templates/bootstrap.lucius">bootstrap.lucius</a> | 404 |
+| Go Template | <a href="https://github.com/disposaboy/margo/blob/master/vendor/github.com/ugorji/go/codec/fast-path.go.tmpl">fast-path.go.tmpl</a> | 400 |
+| Meson | <a href="https://github.com/tieto/pidgin/blob/master/meson.build">meson.build</a> | 306 |
+| F* | <a href="https://github.com/fstarlang/fstar/blob/master/examples/low-level/crypto/Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part1.fst">Crypto.Symmetric.Poly1305.Bignum.Lemmas.Part1.fst</a> | 289 |
+| Ceylon | <a href="https://github.com/ceylon/ceylon-ide-intellij/blob/master/source/org/eclipse/ceylon/ide/intellij/psi/IdeaCeylonParser.ceylon">IdeaCeylonParser.ceylon</a> | 286 |
+| MQL5 | <a href="https://github.com/dennislwm/mlea/blob/master/MQL5/Experts/Zigzag/ZigzagPattern_oldest.mq5">ZigzagPattern_oldest.mq5</a> | 282 |
+| XCode Config | <a href="https://github.com/krzyzanowskim/cryptoswift/blob/master/config/Project-Shared.xcconfig">Project-Shared.xcconfig</a> | 265 |
+| Futhark | <a href="https://github.com/hiperfit/futhark/blob/master/tests/blackscholes.fut">blackscholes.fut</a> | 257 |
+| Pony | <a href="https://bitbucket.com/thecomet/ponycraft-prototype/src/master/scripts/maps/demomap/scenery.pony">scenery.pony</a> | 252 |
+| Vertex Shader File | <a href="https://bitbucket.com/arif_uap/flipmymob-social-madness-iphone/src/master/FlipMobiPhone/cocos3d/GLSL/CC3TexturableRigidBones.vsh">CC3TexturableRigidBones.vsh</a> | 205 |
+| Softbridge Basic | <a href="https://github.com/snowballstem/snowball/blob/master/algorithms/greek.sbl">greek.sbl</a> | 192 |
+| Cabal | <a href="https://github.com/tener/deeplearning-thesis/blob/master/deeplearning.cabal">deeplearning.cabal</a> | 180 |
+| nuspec | <a href="https://github.com/prashantvc/xamarinauth/blob/master/nuget/Xamarin.Auth.XamarinForms.nuspec">Xamarin.Auth.XamarinForms.nuspec</a> | 156 |
+| Dockerfile | <a href="https://github.com/snewhouse/ngs/blob/master/containerized/pipeline/Dockerfile">Dockerfile</a> | 152 |
+| Mustache | <a href="https://bitbucket.com/moodle/moodle/src/master/admin/tool/analytics/templates/models_list.mustache">models_list.mustache</a> | 141 |
+| LOLCODE | <a href="https://bitbucket.com/animeshsinha/linguist-github/src/master/samples/LOLCODE/LOLTracer.lol">LOLTracer.lol</a> | 139 |
+| BuildStream | <a href="https://github.com/npadmana/npadmana_config/blob/master/texmf/bibtex/bst/mybst/astrobib.bst">astrobib.bst</a> | 120 |
+| Janet | <a href="https://github.com/bianary/moosehead/blob/master/player/Janet">Janet</a> | 101 |
+| Cassius | <a href="https://github.com/trevorssmith1392/yuplanner/blob/master/templates/xweek.cassius">xweek.cassius</a> | 94 |
+| Docker ignore | <a href="https://github.com/ahbeng/nusmods/blob/master/.dockerignore">.dockerignore</a> | 92 |
+| Hamlet | <a href="https://github.com/raphaelj/getwebborg/blob/master/templates/upload.hamlet">upload.hamlet</a> | 90 |
+| QCL | <a href="https://github.com/unixpickle/quantumprogramming/blob/master/mylib2/mod.qcl">mod.qcl</a> | 88 |
+| Dhall | <a href="https://github.com/trskop/command-wrapper/blob/master/dhall/Exec/completion/nix.bash.dhall">nix.bash.dhall</a> | 86 |
+| ignore | <a href="https://github.com/wy8023b/ka7ku/blob/master/.ignore">.ignore</a> | 60 |
+| Just | <a href="https://github.com/sporto/kic/blob/master/api/graphql/Justfile">Justfile</a> | 46 |
+| SRecode Template | <a href="https://bitbucket.com/andrewjchen/dotfiles/src/master/emacs.d/plugins/cedet/srecode/templates/srecode-test.srt">srecode-test.srt</a> | 35 |
+| Bitbucket Pipeline | <a href="https://bitbucket.com/c2tarun/integrated-genome-browser/src/master/bitbucket-pipelines.yml">bitbucket-pipelines.yml</a> | 30 |
+| Ur/Web Project | <a href="https://github.com/huluwa/bazqux-urweb/blob/master/reader.urp">reader.urp</a> | 22 |
+| Alchemist | <a href="https://github.com/bakhtatou/ecalj/blob/master/lm7K/fp/test/ctrl.crn">ctrl.crn</a> | 16 |
+| Zig | <a href="https://github.com/aurametrix/aurametrixhubio/blob/master/Games/Tetris-zig/src/main.zig">main.zig</a> | 12 |
+| MUMPS | <a href="https://github.com/milindparikh/mps/blob/master/rel/files/mps">mps</a> | 11 |
+| Bosque | <a href="https://github.com/boyter/scc/blob/master/bosque.bsq">bosque.bsq</a> | 8 |
+| Report Definition Language | <a href="https://github.com/jayaddison/autochef/blob/master/idx/rdl/example.rdl">example.rdl</a> | 4 |
+| Emacs Dev Env | <a href="https://bitbucket.com/hoangtu/my-emacs-prelude/src/master/cedet/lisp/cedet/Project.ede">Project.ede</a> | 3 |
+| Cargo Lock | <a href="https://bitbucket.com/dorianpula/rookeries/src/master/Cargo.lock">Cargo.lock</a> | 2 |
+| JAI | <a href="https://github.com/thekla/thekla_atlas/blob/master/src/thekla/thekla_atlas.jai">thekla_atlas.jai</a> | 1 |
 
 ### How many "pure" projects
 
@@ -1720,50 +1700,50 @@ The full list of results is included below.
 
 | language count | project count |
 | -------------- | ------------- |
-| 1 | 886559 |
-| 2 | 951009 |
-| 3 | 989025 |
-| 4 | 1070987 |
-| 5 | 1012686 |
-| 6 | 845898 |
-| 7 | 655510 |
-| 8 | 542625 |
-| 9 | 446278 |
-| 10 | 392212 |
-| 11 | 295810 |
-| 12 | 204291 |
-| 13 | 139021 |
-| 14 | 110204 |
-| 15 | 87143 |
-| 16 | 67602 |
-| 17 | 61936 |
-| 18 | 44874 |
-| 19 | 34740 |
-| 20 | 32041 |
-| 21 | 25416 |
-| 22 | 24986 |
-| 23 | 23634 |
-| 24 | 16614 |
-| 25 | 13823 |
-| 26 | 10998 |
-| 27 | 9973 |
-| 28 | 6807 |
-| 29 | 7929 |
-| 30 | 6223 |
-| 31 | 5602 |
-| 32 | 6614 |
-| 33 | 12155 |
-| 34 | 15375 |
-| 35 | 7329 |
-| 36 | 6227 |
-| 37 | 4158 |
-| 38 | 3744 |
-| 39 | 3844 |
-| 40 | 1570 |
-| 41 | 1041 |
+| 1 | 886,559 |
+| 2 | 951,009 |
+| 3 | 989,025 |
+| 4 | 1,070,987 |
+| 5 | 1,012,686 |
+| 6 | 845,898 |
+| 7 | 655,510 |
+| 8 | 542,625 |
+| 9 | 446,278 |
+| 10 | 392,212 |
+| 11 | 295,810 |
+| 12 | 204,291 |
+| 13 | 139,021 |
+| 14 | 110,204 |
+| 15 | 87,143 |
+| 16 | 67,602 |
+| 17 | 61,936 |
+| 18 | 44,874 |
+| 19 | 34,740 |
+| 20 | 32,041 |
+| 21 | 25,416 |
+| 22 | 24,986 |
+| 23 | 23,634 |
+| 24 | 16,614 |
+| 25 | 13,823 |
+| 26 | 10,998 |
+| 27 | 9,973 |
+| 28 | 6,807 |
+| 29 | 7,929 |
+| 30 | 6,223 |
+| 31 | 5,602 |
+| 32 | 6,614 |
+| 33 | 12,155 |
+| 34 | 15,375 |
+| 35 | 7,329 |
+| 36 | 6,227 |
+| 37 | 4,158 |
+| 38 | 3,744 |
+| 39 | 3,844 |
+| 40 | 1,570 |
+| 41 | 1,041 |
 | 42 | 746 |
-| 43 | 1037 |
-| 44 | 1363 |
+| 43 | 1,037 |
+| 44 | 1,363 |
 | 45 | 934 |
 | 46 | 545 |
 | 47 | 503 |
