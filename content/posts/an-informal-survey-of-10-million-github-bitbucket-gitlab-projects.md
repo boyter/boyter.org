@@ -25,7 +25,7 @@ It took about 5 weeks to download and run `scc` over all of the repositories col
 ## Quicklinks
 
  - [Methodology](#methodology)
- - [Results](#results)
+ - [Presenting and Computing Results](#presenting-and-computing-results)
  - [Data Sources](#data-sources)
  - [How many files in a repository?](#how-many-files-in-a-repository)
  - [Whats the project breakdown per language?](#whats-the-project-breakdown-per-language)
@@ -78,7 +78,9 @@ When you run `scc` you can choose to have it output the results in JSON and opti
 ]
 {{</highlight>}}
 
-As a larger example here are the results as JSON for the redis project, [redis.json](/static/an-informal-survey/redis.json).
+As a larger example here are the results as JSON for the redis project, [redis.json](/static/an-informal-survey/redis.json). All of the results below come from this output without any supporting data sources.
+
+One thing to keep in mind is that `scc` generally categories languages based on extension (except where extension is shared such as Verilog and Coq). As such if someone puts a HTML file with a java extension it will be counted as a java file. Usually this isn't a problem but at scale it is and something I mention at the end where some files were masquerading as another.
 
 A while back I wrote code to create github badges using `scc` https://boyter.org/posts/sloc-cloc-code-badges/ and since part of that included caching the results, I modified it slightly to cache the results as JSON in S3.
 
@@ -96,7 +98,7 @@ Running this on the box produced the following sort of metrics in htop, and the 
 
 ![scc-data process load](/static/an-informal-survey/1.png#center)
 
-## Results
+## Presenting and Computing Results
 
 Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index I thought I would steal the format of that post with regards to how I wanted to present the information. However this raised another question. How does one process 10 million JSON files taking up just over 1 TB of disk space in an S3 bucket? 
 
@@ -962,32 +964,30 @@ Working this out is not an exact science. It falls into the NLP class of problem
 
 The list I used contained some leet speak such as `b00bs` and `b1tch` to try and catch some of the most interesting cases. The full list is [here](/static/an-informal-survey/curse.txt).
 
-While not accurate at all as mentioned it is incredibly fun to see what this produces. So lets start with a list of which languages have the most curse words.
+While not accurate at all as mentioned it is incredibly fun to see what this produces. So lets start with a list of which languages have the most curse words. However we should probably weight this against how much code exists as well. So here are the top ones.
 
-| language | filename curse count |
-| -------- | ----------- |
-| C Header | 7,660 |
-| Java | 7,023 |
-| C | 6,897 |
-| PHP | 5,713 |
-| JavaScript | 4,306 |
-| HTML | 3,560 |
-| Ruby | 3,121 |
-| JSON | 1,598 |
-| C++ | 1,543 |
-| Dart | 1,533 |
-| Rust | 1,504 |
-| Go Template | 1,500 |
-| SVG | 1,234 |
-| XML | 1,212 |
-| Python | 1,092 |
-| JavaServer Pages | 1,037 |
+| language | filename curse count | percent of files |
+| -------- | -------------------- | ---------------- |
+| C Header | 7,660 | 0.00126394567906% |
+| Java | 7,023 | 0.00258792635479% |
+| C | 6,897 | 0.00120706524533% |
+| PHP | 5,713 | 0.00283428484703% |
+| JavaScript | 4,306 | 0.00140692338568% |
+| HTML | 3,560 | 0.00177646776919% |
+| Ruby | 3,121 | 0.00223136542655% |
+| JSON | 1,598 | 0.00293688627715% |
+| C++ | 1,543 | 0.00135977378652% |
+| Dart | 1,533 | 0.19129310646% |
+| Rust | 1,504 | 0.038465935524% |
+| Go Template | 1,500 | 0.0792233157387% |
+| SVG | 1,234 | 0.00771043360379% |
+| XML | 1,212 | 0.000875741051608% |
+| Python | 1,092 | 0.00119138129893% |
+| JavaServer Pages | 1,037 | 0.0215440542669% |
 
-Interesting! Those naughty C developers! However we should probably weight this against how much code exists. Which produces the following,
+Interesting! My first thought was "those naughty C developers!" but as it turns out while they have a high count they write so much code it probably isn't that big a deal. However pretty clearly Dart developers have an axe to grind!
 
-// TODO ADD WEIGHTED BY LANGUAGE COUNT HERE
-
-However what I really want to know is what are the most commonly used curse words. Lets see collectively how dirty a mind we have. A few of the top ones I could see being legitimate names (if you squint), but the majority would certainly produce few comments in a PR and raised eyebrow.
+However what I also want to know is what are the most commonly used curse words. Lets see collectively how dirty a mind we have. A few of the top ones I could see being legitimate names (if you squint), but the majority would certainly produce few comments in a PR and raised eyebrow.
 
 | word | count |
 | ---- | ----- |
@@ -1940,7 +1940,7 @@ Shortcomings id love to overcome in the above if I decide to do this again.
  - Not bother with S3. There is little point to pay the bandwidth cost when I was only using it for storage. Better to just stuff into the tar file from the beginning.
  - Invest some time in learning some tool to help with plotting and charting of results.
  - Use a trie or some other data type to keep a full count of filenames rather than the slightly lossy approach I used.
- - Add an option to scc to check the type of the file based on keywords as examples such as https://bitbucket.org/abellnets/hrossparser/src/master/xml_files/CIDE.C was picked up as being a C file despite obviously being HTML when the content is inspected. To be fair all code counters I tried seem to make this mistake.
+ - Add an option to scc to check the type of the file based on keywords as examples such as https://bitbucket.org/abellnets/hrossparser/src/master/xml_files/CIDE.C was picked up as being a C file despite obviously being HTML when the content is inspected. To be fair all code counters I tried behave the same way.
 
 ## So why bother?
 
