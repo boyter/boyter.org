@@ -1,5 +1,5 @@
 ---
-title: Downloading and processing 40 TB of code from 10 million git projects using a dedicated server Goroutines for under $100
+title: Downloading and processing 40 TB of code from 10 million git projects using a dedicated server and Goroutines for under $100
 date: 2019-09-20
 ---
 
@@ -119,21 +119,21 @@ If you do want to review code I have written to be read by others have a look at
 
 ## Cost
 
-I spent about $60 in compute while trialling lambda. I have not looked at the S3 storage cost yet but it should be close to $25. However this is not including the transfer costs which I am yet to see what are. Please note I cleared the bucket when I was finished with it so this is not an ongoing cost for me.
+I spent about $60 in compute while trialling lambda. I have not looked at the S3 storage cost yet but it should be close to $25 based on the size. However this is not including the transfer costs which I am also yet to see. Please note I cleared the bucket when I was finished with it so this is not an ongoing cost for me.
 
-However I chose not to use AWS in the end. So what's the cost?
+However I chose not to use AWS in the end because of cost. So what's the real cost assuming I wanted to do it again?
 
-In my case the cost would be free as I used "free compute" left over from searchcode. Not everyone has compute lying around however. So what if I were to do this from scratch.
+In my case the cost would be free as I used "free compute" left over from searchcode. Not everyone has compute lying around however. So lets assume I need to get a server to do this.
 
-It could be done for 73€ using the cheapest new dedicated server from Hetzner https://www.hetzner.com/dedicated-rootserver However that cost includes a new server setup fee. If you are willing to wait a little and poke around on their auction house https://www.hetzner.com/sb you can find much cheaper servers with no setup fee at all. For example at time of writing I found the below machine which would be perfect for this.
+It could be done for 73€ using the cheapest new dedicated server from Hetzner https://www.hetzner.com/dedicated-rootserver However that cost includes a new server setup fee. If you are willing to wait a little and poke around on their auction house https://www.hetzner.com/sb you can find much cheaper servers with no setup fee at all. For example at time of writing I found the below machine which would be perfect for this and is 25.21€ a month with no setup fee.
 
 ![hetzner server](/static/an-informal-survey/hetzner.png#center)
 
 Best part for me though? You can get the VAT removed if you are outside the EU. So give yourself an additional 10% discount on top if you are in this situation as I am.
 
-So were someone to do this from scratch using the same method I eventually went with it would cost under $100 USD to redo the same calculations, and more likely under $50 if you are a little patient or lucky.
+So were someone to do this from scratch using the same method I eventually went with it would cost under $100 USD to redo the same calculations, and more likely under $50 if you are a little patient or lucky. This also assumes you use the server for less than 2 months which is enough time to download and process.
 
-If I were to use a gzipped tar file in my analysis (which isn't that hard to do really) I could even do 10x the repositories on the same machine as the resulting file would still be small enough to fit on the hard disk. Going much larger is going to require some level of sharding though. Still its safe to say that you could redo the entire process I did or much larger one for roughly the same cost.
+If I were to use a gzipped tar file in my analysis (which isn't that hard to do really) I could even do 10x the repositories on the same machine as the resulting file would still be small enough to fit on the same hard disk. That would take longer to download though which is going to increase the cost for each additional month. Going much larger however is going to require some level of sharding of repositories. Still it is safe to say that you could redo the entire process I did or larger one on the same hardware without much effort.
 
 ### Data Sources
 
