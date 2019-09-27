@@ -123,7 +123,7 @@ Running this computation locally was out due to the abysmal state of the interne
 
 I didn't quite taco bell program the solution using bash and gnu tools. What I did was write a simple [Go program](https://github.com/boyter/scc-data/blob/master/process/main.go) to spin up 32 go-routines which read from a channel, spawned `git` and `scc` subprocesses before writing the JSON output into S3. I actually wrote a Python solution at first, but having to install the pip dependencies on my clean varnish box seemed like a bad idea and it keep breaking in odd ways which I didn't feel like debugging.
 
-Running this on the box produced the following sort of metrics in htop, and the multiple git/scc processes running suggested that everything was working as expected, which I confirmed by looking at the results in S3.
+Running this on the box produced the following sort of metrics in htop, and the multiple git/scc processes (scc is not visible in this screen capture) running suggested that everything was working as expected, which I confirmed by looking at the results in S3.
 
 ![scc-data process load](/static/an-informal-survey/1.png#center)
 
