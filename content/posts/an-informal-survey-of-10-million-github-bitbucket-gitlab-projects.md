@@ -1,5 +1,5 @@
 ---
-title: Downloading and processing 40 TB of code from 10 million git projects using a dedicated server and Goroutines for under $100
+title: Processing 40 TB of code from 10 million projects with a dedicated server and Go for $100
 date: 2019-09-20
 ---
 
@@ -9,14 +9,14 @@ date: 2019-09-20
 <script src="/static/an-informal-survey/jquery.dataTables.min.js"></script>
 <script src="/static/an-informal-survey/table.js"></script>
 
-The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) (and now modified and supported by many excellent people) counts lines of code, comments and make a complexity estimate for files inside a code repository. The latter is something you need a good sample size to make good use of. Otherwise what does "This file has complexity 10" tell you? So I thought I would try running it at all the source code I could get my hands on.
+The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) (which is now modified and maintained by many other excellent people) counts lines of code, comments and make a complexity estimate for files inside a code repository. The latter is something you need a good sample size to make good use of. It tries to count branch statements in code but what does that actually mean for most languages? Otherwise "This file has complexity 10" is not very useful. So I thought I would try running it at all the source code I could get my hands on. This would also allow me to see if there are any edge cases I didn't consider in the tool itself. A brute force Q/A trial by fire.
 
-However if I am going to run it over all that code which is going to be expensive computationally I may as well try to get some interesting numbers out of it. As such I decided to record everything as I went and produce this post.
+However if I am going to run it over all that code which is going to be expensive computationally I may as well try to get some interesting numbers out of it. As such I decided to record everything as I went and see if I could get something interesting in the end, hence this post.
 
-In short I downloaded and processed a lot of code using `scc`. The data set I looked at includes,
+In short I downloaded and processed a lot of code using `scc`. The raw numbers include,
 
  - **9,985,051** total repositories
- - **9,100,083** repositories with at least 1 known file
+ - **9,100,083** repositories with at least 1 identified file
  - **884,968** empty repositories (those with no files)
  - **58,389,641** files in all repositories
  - **40,736,530,379,778** bytes processed (40 TB)
@@ -25,8 +25,9 @@ In short I downloaded and processed a lot of code using `scc`. The data set I lo
  - **124,382,152,510** blank lines identified
  - **145,519,192,581** comment lines identified
  - **71,884,867,919** complexity count according to scc rules
+ - **2** new bugs raised in scc
 
-It took about 5 weeks to download and run `scc` over all of the repositories collecting all of the data. It took just over 49 hours to crunch and process the results which was just over 1TB of JSON.
+It took about 5 weeks to download and run `scc` over all of the repositories collecting all of the data. It took just over 49 hours to crunch and process the results which was stored in just over 1 TB of JSON.
 
 ## Quicklinks
 
@@ -129,7 +130,9 @@ Running this on the box produced the following sort of metrics in htop, and the 
 
 ## Presenting and Computing Results
 
-Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index I thought I would steal the format of that post with regards to how I wanted to present the information. However this raised another question. How does one process 10 million JSON files taking up just over 1 TB of disk space in an S3 bucket? 
+Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index I thought I would steal the format of that post with regards to how I wanted to present the information. My twist on the previous however is to add [jQuery DataTables](https://www.datatables.net/) over the large tables of information. This allows you to sort and search/filter results. Click the headers to sort and use the search box to filter. The search box indicates that this is enabled for you. I also added a jump link near these tables so you can skip over them.
+
+The size of the data I needed to process raised another question. How does one process 10 million JSON files taking up just over 1 TB of disk space in an S3 bucket? 
 
 The first thought I had was AWS Athena. But since it's going to cost something like $2.50 USD **per query** for that dataset I quickly looked for an alternative. That said if you kept the data there and processed it infrequently this might still work out to be the cheapest solution.
 
@@ -150,17 +153,17 @@ If you do want to review code I have written to be read by others have a look at
 
 ## Cost
 
-I spent about $60 in compute while trialling lambda. I have not looked at the S3 storage cost yet but it should be close to $25 based on the size. However this is not including the transfer costs which I am also yet to see. Please note I cleared the bucket when I was finished with it so this is not an ongoing cost for me.
+I spent about $60 in compute while trialling lambda. I have not looked at the S3 storage cost yet but it should be close to $25 based on the size of the data. However this is not including the transfer costs which I also have not observed. Please note I cleared the bucket when I was finished with it so this is not an ongoing cost for me.
 
-However I chose not to use AWS in the end because of cost. So what's the real cost assuming I wanted to do it again?
+However after time I chose not to use AWS in the end because of cost. So what's the real cost assuming I wanted to do it again?
 
-In my case the cost would be free as I used "free compute" left over from searchcode. Not everyone has compute lying around however. So lets assume I need to get a server to do this.
+In my case the cost would be free as I used "free compute" left over from searchcode. Not everyone has compute lying around however. So lets assume another person wishes to replicate this and as such needs to get a server.
 
 It could be done for €73 using the cheapest new dedicated server from Hetzner https://www.hetzner.com/dedicated-rootserver However that cost includes a new server setup fee. If you are willing to wait and poke around on their auction house https://www.hetzner.com/sb you can find much cheaper servers with no setup fee at all. At time of writing I found the below machine which would be perfect for this project and is €25.21 a month with no setup fee.
 
 ![hetzner server](/static/an-informal-survey/hetzner.png#center)
 
-Best part for me though? You can get the VAT removed if you are outside the EU. So give yourself an additional 10% discount on top if you are in this situation as I am.
+Best part though? You can get the VAT removed if you are outside the EU. So give yourself an additional 10% discount on top if you are in this situation as I am.
 
 So were someone to do this from scratch using the same method I eventually went with it would cost under $100 USD to redo the same calculations, and more likely under $50 if you are a little patient or lucky. This also assumes you use the server for less than 2 months which is enough time to download and process.
 
@@ -1958,6 +1961,7 @@ Shortcomings id love to overcome in the above if I decide to do this again.
  - Invest some time in learning some tool to help with plotting and charting of results.
  - Use a trie or some other data type to keep a full count of filenames rather than the slightly lossy approach I used.
  - Add an option to scc to check the type of the file based on keywords as examples such as https://bitbucket.org/abellnets/hrossparser/src/master/xml_files/CIDE.C was picked up as being a C file despite obviously being HTML when the content is inspected. To be fair all code counters I tried behave the same way.
+ - There appears to be a bug in scc where if a file has no extension but is named as one it will match that file which is incorrect. A bug has been raised in scc to address this https://github.com/boyter/scc/issues/114
 
 ## So why bother?
 
@@ -1969,4 +1973,4 @@ I should probably put an email sign up for that here at some point to gather int
 
 ## Raw / Processed Files
 
-I have included a link to the processed files for those who wish to do their own analysis and corrections. If someone wants to host the raw files to allow others to download them which is 83 GB as a gzip file let me know and I can arrange the handover and link here.
+I have included a link to the processed files for those who wish to do their own analysis and corrections. If someone wants to host the raw files to allow others to download it let me know. It is a 83 GB tar.gz file which uncompressed is just over 1 TB in size. It contents consists of just over 9 million JSON files of various sizes.
