@@ -32,12 +32,35 @@ It took about 5 weeks to download and run `scc` over all of the repositories col
 
  - [Methodology](#methodology)
  - [Presenting and Computing Results](#presenting-and-computing-results)
+ - [Cost](#cost)
  - [Data Sources](#data-sources)
  - [How many files in a repository?](#how-many-files-in-a-repository)
  - [Whats the project breakdown per language?](#whats-the-project-breakdown-per-language)
+ - [How many files in a repository per language?](#how-many-files-in-a-repository-per-language)
+ - [How many lines of code are in a typical file per language?
+](#how-many-lines-of-code-are-in-a-typical-file-per-language)
  - [What are the most common filenames?](#what-are-the-most-common-filenames)
  - [How many repositories appear to be missing a license?](#how-many-repositories-appear-to-be-missing-a-license)
- 
+ - [Which languages have the most comments?](#which-languages-have-the-most-comments)
+ - [How many projects use multiple .gitignore files?](#how-many-projects-use-multiple-gitignore-files)
+ - [Which language developers have the biggest potty mouth?](#which-language-developers-have-the-biggest-potty-mouth)
+ - [Longest files by lines per language](#longest-files-by-lines-per-language)
+ - [Whats the most complex file in each language?](#whats-the-most-complex-file-in-each-language)
+ - [Whats the most complex file weighted against lines?](#whats-the-most-complex-file-weighted-against-lines)
+ - [Whats the most commented file in each language?](#whats-the-most-commented-file-in-each-language)
+ - [How many "pure" projects](#how-many-pure-projects)
+ - [Projects with TypeScript but not JavaScript](#projects-with-typescript-but-not-javascript)
+ - [Anyone using CoffeeScript and TypeScript?](#anyone-using-coffeescript-and-typescript)
+ - [The most complex code is written in what language?](#the-most-complex-code-is-written-in-what-language)
+ - [What's the typical path length, broken up by language](#what-s-the-typical-path-length-broken-up-by-language)
+ - [YAML or YML?](#yaml-or-yml)
+ - [Who comments most-to-least, by language (95th percentile)](#who-comments-most-to-least-by-language-95th-percentile)
+ - [Upper, lower or mixed case?](#upper-lower-or-mixed-case)
+ - [Java Factories](#java-factories)
+ - [Future ideas](#future-ideas)
+ - [So why bother?](#so-why-bother)
+ - [Raw / Processed Files](#raw-processed-files)
+
 ## Methodology
 
 Since I run [searchcode.com](https://searchcode.com/) I already have a collection of over 7,000,000 projects across git, mercurial, subversion and such. So why not try processing them? Working with git is usually the easiest solution so I ignored mercurial and subversion and exported the list of git projects. Turns out I actually have 12 million git repositories being tracked, and I should probably update the page to reflect that.
@@ -133,7 +156,7 @@ However I chose not to use AWS in the end because of cost. So what's the real co
 
 In my case the cost would be free as I used "free compute" left over from searchcode. Not everyone has compute lying around however. So lets assume I need to get a server to do this.
 
-It could be done for 73€ using the cheapest new dedicated server from Hetzner https://www.hetzner.com/dedicated-rootserver However that cost includes a new server setup fee. If you are willing to wait a little and poke around on their auction house https://www.hetzner.com/sb you can find much cheaper servers with no setup fee at all. For example at time of writing I found the below machine which would be perfect for this and is 25.21€ a month with no setup fee.
+It could be done for €73 using the cheapest new dedicated server from Hetzner https://www.hetzner.com/dedicated-rootserver However that cost includes a new server setup fee. If you are willing to wait and poke around on their auction house https://www.hetzner.com/sb you can find much cheaper servers with no setup fee at all. At time of writing I found the below machine which would be perfect for this project and is €25.21 a month with no setup fee.
 
 ![hetzner server](/static/an-informal-survey/hetzner.png#center)
 
@@ -423,6 +446,8 @@ The full list is included below.
 | Verilog Args File | 2
 
 ### How many files in a repository per language?
+
+// TODO the number here should match IE tables should have the same length, janet is missing for example
 
 An extension of the above, but averaged over however many files are in each language per repository. So for projects that contain java, how many java files exist in that project, and on average for all projects how many files is that?
 
