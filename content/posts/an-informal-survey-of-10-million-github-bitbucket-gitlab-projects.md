@@ -655,7 +655,7 @@ So I calculated this using the median value. Even so there are still some defini
 
 So I figured why not have both? I did one small change based on the suggestion of [Darrell](https://www.packtpub.com/au/big-data-and-business-intelligence/hands-deep-learning-go) (Kablamo's resident and most excellent data scientist) and modified the average value to ignore files over 5000 lines to remove the outliers.
 
-[skip table to next section](#what-are-the-most-common-filenames)
+[skip table to next section](#how-many-lines-of-code-are-in-a-typical-file-per-language)
 
 <div class="table-3"></div>
 
@@ -898,6 +898,21 @@ So I figured why not have both? I did one small change based on the suggestion o
 | nuspec | 187 | 193 |
 | sed | 82 | 33 |
 
+### Average complexity for file in each language?
+
+What's the average complexity per file for each language?
+
+[skip table to next section](#what-are-the-most-common-filenames)
+
+<div class="table-9"></div>
+
+| language | complexity |
+| -------- | ----------- |
+| ABAP | 139 |
+| ASP | 513 |
+| ASP.NET | 315 |
+
+
 ### What are the most common filenames?
 
 What filenames are most common across all code-bases ignoring extension and case?
@@ -990,7 +1005,9 @@ Bringing this back to something sensible here is a plot of the data up to 20 .gi
 
 ![scc-data process load](/static/an-informal-survey/gitignorePerProject.png#center)
 
-Something you would expect would be that the majority of projects would have either 0 or 1 .gitignore files. This is confirmed by the results with a massive drop-off of 10x. What was surprising to me was how many projects have more than a single .gitignore file. The long tail is especially long in this case.
+Something you would expect would be that the majority of projects would have either 0 or 1 .gitignore files. This is confirmed by the results with a massive drop-off of 10x for projects with 2 .gitignores. What was surprising to me was how many projects have more than a single .gitignore file. The long tail is especially long in this case.
+
+I was also curious as to why some projects had thousands of .gitignore files so I included some of them here.
 
 [skip table to next section](#which-language-developers-have-the-biggest-potty-mouth)
 
