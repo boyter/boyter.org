@@ -40,6 +40,7 @@ It took about 5 weeks to download and run `scc` over all of the repositories col
  - [How many files in a repository per language?](#how-many-files-in-a-repository-per-language)
  - [How many lines of code are in a typical file per language?
 ](#how-many-lines-of-code-are-in-a-typical-file-per-language)
+ - [Average complexity for file in each language?](#average-complexity-for-file-in-each-language)
  - [What are the most common filenames?](#what-are-the-most-common-filenames)
  - [How many repositories appear to be missing a license?](#how-many-repositories-appear-to-be-missing-a-license)
  - [Which languages have the most comments?](#which-languages-have-the-most-comments)
@@ -655,7 +656,7 @@ So I calculated this using the median value. Even so there are still some defini
 
 So I figured why not have both? I did one small change based on the suggestion of [Darrell](https://www.packtpub.com/au/big-data-and-business-intelligence/hands-deep-learning-go) (Kablamo's resident and most excellent data scientist) and modified the average value to ignore files over 5000 lines to remove the outliers.
 
-[skip table to next section](#how-many-lines-of-code-are-in-a-typical-file-per-language)
+[skip table to next section](#average-complexity-for-file-in-each-language)
 
 <div class="table-3"></div>
 
