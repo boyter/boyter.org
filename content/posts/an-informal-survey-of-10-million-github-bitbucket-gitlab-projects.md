@@ -57,9 +57,9 @@ It took about 5 weeks to download and run `scc` over all of the repositories col
  - [The most complex code is written in what language?](#the-most-complex-code-is-written-in-what-language)
  - [What's the typical path length, broken up by language](#what-s-the-typical-path-length-broken-up-by-language)
  - [YAML or YML?](#yaml-or-yml)
- - [Who comments most-to-least, by language (95th percentile)](#who-comments-most-to-least-by-language-95th-percentile)
  - [Upper, lower or mixed case?](#upper-lower-or-mixed-case)
  - [Java Factories](#java-factories)
+ - [Ignore files](#ignore-files)
  - [Future ideas](#future-ideas)
  - [So why bother?](#so-why-bother)
  - [Raw / Processed Files](#raw-processed-files)
@@ -2646,8 +2646,6 @@ The debate can finally(?) be ended. Although I suspect some will still prefer to
 | yaml | 3,572,609 |
 | yml | 14,076,349 |
 
-### Who comments most-to-least, by language (95th percentile)
-
 ### Upper lower or mixed case?
 
 What case style is used on filenames? This includes the extension so you would expect it to be mostly mixed case.
@@ -2684,6 +2682,8 @@ So slightly over 2% of all the Java code that I checked appeared to be a factory
 ### Ignore files
 
 The .ignore file idea was hammered out by burntsushi and ggreer in a [Hacker News thread](https://news.ycombinator.com/item?id=12564442) and is possibly one of the greatest cases of "competing" open source tools working together to a good outcome and done in record time. It has become the defacto way to add things into source control yet have tools ignore them. As it turns out `scc` also implements .ignore files but counts them as well. Lets see how well the idea has spread.
+
+// TODO add this
 
 | .ignore count | project count |
 | -----------------| ------------- |
