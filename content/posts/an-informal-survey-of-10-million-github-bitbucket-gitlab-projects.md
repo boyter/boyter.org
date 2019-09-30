@@ -456,8 +456,6 @@ The full list is included below.
 
 ### How many files in a repository per language?
 
-// TODO the number here should match IE tables should have the same length, janet is missing for example as is robot framework
-
 An extension of the above, but averaged over however many files are in each language per repository. So for projects that contain java, how many java files exist in that project, and on average for all projects how many files is that?
 
 You can use this to see if a project is larger or smaller than usual for your language of choice.
@@ -468,189 +466,242 @@ You can use this to see if a project is larger or smaller than usual for your la
 
 | language | average file count |
 | -------- | ------------------ |
-| ASP | 1 |
-| ASP.NET | 9 |
-| AWK | 189 |
-| ActionScript | 69 |
-| Ada | 61 |
-| Alex | 406 |
-| Alloy | 1 |
-| Android Interface Definition Language | 147 |
-| Arvo | 1 |
-| AsciiDoc | 3 |
-| Assembly | 1274 |
-| AutoHotKey | 2 |
-| Autoconf | 892 |
-| BASH | 20 |
-| Basic | 2 |
-| Batch | 73 |
-| Bazel | 6 |
-| Bitbake | 1 |
+| ABAP | 1.0008927583699165 |
+| ASP | 1.6565139917314107 |
+| ASP.NET | 346.88867258489296 |
+| ATS | 7.888545610390882 |
+| AWK | 5.098807478952136 |
+| ActionScript | 15.682562363539644 |
+| Ada | 7.265376817272021 |
+| Agda | 1.2669381110755398 |
+| Alchemist | 7.437307493090622 |
+| Alex | 20.152479318023637 |
+| Alloy | 1.0000000894069672 |
+| Android Interface Definition Language | 3.1133707938643074 |
+| Arvo | 9.872687772928423 |
+| AsciiDoc | 14.645389421879814 |
+| Assembly | 1049.6270518312476 |
+| AutoHotKey | 1.5361384288472488 |
+| Autoconf | 33.99728695464163 |
+| BASH | 3.7384110335355545 |
+| Basic | 5.103623499110781 |
+| Batch | 3.943513588378872 |
+| Bazel | 1.0013122734382187 |
+| Bitbake | 1.0878349272366024 |
 | Bitbucket Pipeline | 1 |
-| Boo | 1 |
-| Brainfuck | 1 |
-| BuildStream | 1 |
-| C | 13249 |
-| C Header | 10961 |
-| C Shell | 1 |
-| C# | 2118 |
-| C++ | 478 |
-| C++ Header | 76 |
-| CMake | 22 |
-| COBOL | 1 |
-| CSS | 124 |
-| CSV | 54 |
-| Cabal | 1 |
-| Ceylon | 1 |
-| Clojure | 5 |
-| Closure Template | 1 |
-| CoffeeScript | 6 |
-| ColdFusion | 61 |
-| Coq | 5 |
-| Creole | 2 |
-| Cython | 2 |
-| D | 25 |
-| Dart | 2 |
-| Device Tree | 125 |
-| Docker ignore | 1 |
-| Dockerfile | 1 |
-| Document Type Definition | 5 |
-| Elixir | 7 |
-| Elm | 2 |
-| Emacs Dev Env | 1 |
-| Emacs Lisp | 12 |
-| Erlang | 2 |
-| Expect | 286 |
-| Extensible Stylesheet Language Transformations | 1 |
-| F# | 5 |
-| F* | 17 |
-| FORTRAN Legacy | 13 |
-| FORTRAN Modern | 18 |
-| Fish | 1 |
-| Flow9 | 1 |
-| Forth | 30 |
-| Fragment Shader File | 5 |
-| Freemarker Template | 1 |
-| GDScript | 1 |
-| GLSL | 13 |
-| GN | 1 |
-| Game Maker Language | 11 |
-| Gherkin Specification | 37 |
-| Go | 6 |
-| Go Template | 31 |
-| Gradle | 2 |
-| Groovy | 95 |
-| HEX | 15 |
-| HTML | 646 |
-| Handlebars | 6 |
-| Happy | 26 |
-| Haskell | 1 |
-| Haxe | 55 |
-| IDL | 1 |
-| Intel HEX | 86 |
-| JSON | 116 |
-| JSX | 6 |
-| Jade | 7 |
-| Java | 2758 |
-| JavaScript | 492 |
-| JavaServer Pages | 13 |
-| Jenkins Buildfile | 1 |
-| Julia | 1 |
-| Jupyter | 3 |
-| Korn Shell | 53 |
-| Kotlin | 4 |
-| LD Script | 12 |
-| LESS | 21 |
-| LEX | 17 |
-| LOLCODE | 1 |
-| LaTeX | 171 |
-| License | 167 |
-| Lisp | 41 |
-| Lua | 18 |
-| MSBuild | 166 |
-| Macromedia eXtensible Markup Language | 85 |
-| Makefile | 1432 |
-| Mako | 2 |
-| Markdown | 113 |
-| Modula3 | 1 |
-| Module-Definition | 91 |
-| Monkey C | 4 |
-| Mustache | 5 |
-| Nim | 2 |
-| OCaml | 25 |
-| Objective C | 23 |
-| Objective C++ | 1 |
-| Opalang | 1 |
-| Org | 11 |
-| PHP | 1467 |
-| PKGBUILD | 3392 |
-| PSL Assertion | 1 |
-| Pascal | 4 |
-| Patch | 60 |
-| Perl | 530 |
-| Plain Text | 1194 |
-| Powershell | 5 |
-| Processing | 2 |
-| Prolog | 22 |
-| Properties File | 45 |
-| Protocol Buffers | 4 |
-| Puppet | 179 |
-| Python | 1120 |
-| QML | 19 |
-| R | 2 |
-| Rakefile | 18 |
-| Razor | 23 |
-| ReStructuredText | 243 |
-| Ruby | 617 |
-| Ruby HTML | 19 |
-| Rust | 7 |
-| SAS | 2 |
-| SKILL | 7 |
-| SQL | 36 |
-| SVG | 27 |
-| Sass | 234 |
-| Scala | 1 |
-| Scheme | 9 |
-| Scons | 2 |
-| Shell | 800 |
-| Smarty Template | 18 |
-| Specman e | 1 |
-| Standard ML (SML) | 5 |
-| Stata | 1 |
-| Stylus | 10 |
-| Swift | 3 |
-| Swig | 11 |
-| SystemVerilog | 8 |
-| Systemd | 92 |
-| TCL | 137 |
-| TeX | 42 |
-| Thrift | 1 |
-| Twig Template | 200 |
-| TypeScript | 3 |
-| TypeScript Typings | 32 |
-| Unreal Script | 3 |
-| Ur/Web | 1 |
-| V | 1 |
-| VHDL | 8 |
-| Vala | 2 |
-| Varnish Configuration | 1 |
-| Vertex Shader File | 4 |
-| Vim Script | 1 |
-| Visual Basic | 93 |
-| Visual Basic for Applications | 2 |
-| Wolfram | 1 |
-| XAML | 4 |
-| XCode Config | 3 |
-| XML | 269 |
-| XML Schema | 6 |
-| Xtend | 5 |
-| YAML | 76 |
-| Zsh | 1 |
-| gitignore | 32 |
-| ignore | 1 |
-| m4 | 209 |
-| nuspec | 73 |
-| sed | 38 |
+| Boo | 5.321822367969364 |
+| Bosque | 1.28173828125 |
+| Brainfuck | 1.3141119785974242 |
+| BuildStream | 1.4704635441667189 |
+| C | 15610.17972307699 |
+| C Header | 14103.33936083782 |
+| C Shell | 3.1231084093649315 |
+| C# | 45.804460355773394 |
+| C++ | 30.416980313492328 |
+| C++ Header | 8.313450764990089 |
+| CMake | 37.2566873554469 |
+| COBOL | 3.129408853490878 |
+| CSS | 5.332398714337156 |
+| CSV | 8.370432089241898 |
+| Cabal | 1.0078125149013983 |
+| Cargo Lock | 1.0026407549221519 |
+| Cassius | 4.657169356495984 |
+| Ceylon | 7.397692655679642 |
+| Clojure | 8.702303821528872 |
+| ClojureScript | 5.384518778099244 |
+| Closure Template | 1.0210028022356945 |
+| CoffeeScript | 45.40906609668401 |
+| ColdFusion | 13.611857060674573 |
+| ColdFusion CFScript | 40.42554202020521 |
+| Coq | 10.903652047164622 |
+| Creole | 1.000122070313864 |
+| Crystal | 3.8729367926098117 |
+| Cython | 1.9811811237515262 |
+| D | 529.2562750397005 |
+| Dart | 1.5259554297822313 |
+| Device Tree | 586.4119588123021 |
+| Dhall | 5.072265625 |
+| Docker ignore | 1.0058596283197403 |
+| Dockerfile | 1.7570825852789156 |
+| Document Type Definition | 2.2977520758534693 |
+| Elixir | 8.916658446524252 |
+| Elm | 1.6702759813968946 |
+| Emacs Dev Env | 15.720268315288969 |
+| Emacs Lisp | 11.378847912292201 |
+| Erlang | 3.4764894379621607 |
+| Expect | 2.8863991651091614 |
+| Extensible Stylesheet Language Transformations | 1.2042068607534995 |
+| F# | 1.2856606249320954 |
+| F* | 32.784058919015 |
+| FIDL | 1.8441162109375 |
+| FORTRAN Legacy | 11.37801716560221 |
+| FORTRAN Modern | 27.408192558594685 |
+| Fish | 1.1282354207617833 |
+| Flow9 | 5.218046229973186 |
+| Forth | 10.64736177807574 |
+| Fragment Shader File | 3.648087980622546 |
+| Freemarker Template | 8.397226930409037 |
+| Futhark | 4.671875 |
+| GDScript | 3.6984173692608313 |
+| GLSL | 1.6749061330076334 |
+| GN | 1.0193083210608163 |
+| Game Maker Language | 3.6370866431049604 |
+| Game Maker Project | 1.625 |
+| Gherkin Specification | 60.430588516231666 |
+| Go | 115.23482489228113 |
+| Go Template | 28.011342078505013 |
+| Gradle | 5.628880473160033 |
+| Groovy | 6.697367294187844 |
+| HEX | 22.477003537989486 |
+| HTML | 4.822243456786672 |
+| Hamlet | 50.297887645777536 |
+| Handlebars | 36.60120978679127 |
+| Happy | 5.820573911044464 |
+| Haskell | 8.730027121836951 |
+| Haxe | 20.00590981880653 |
+| IDL | 79.38510300176867 |
+| Idris | 1.524684997890027 |
+| Intel HEX | 113.25178379632708 |
+| Isabelle | 1.8903018088753136 |
+| JAI | 1.4865150753259275 |
+| JSON | 6.507823973898348 |
+| JSONL | 1.003931049286678 |
+| JSX | 4.6359645801363465 |
+| Jade | 5.353279289700571 |
+| Janet | 1.0390625 |
+| Java | 118.86142228014006 |
+| JavaScript | 140.56079100796154 |
+| JavaServer Pages | 2.390251418283771 |
+| Jenkins Buildfile | 1.0000000000582077 |
+| Jinja | 4.574843152310338 |
+| Julia | 6.672268339671913 |
+| Julius | 2.2510109380818903 |
+| Jupyter | 13.480476117239338 |
+| Just | 1.736882857978344 |
+| Korn Shell | 1.5100887455636172 |
+| Kotlin | 3.9004723322169363 |
+| LD Script | 16.59996086864524 |
+| LESS | 39.6484785300563 |
+| LEX | 5.892075421476933 |
+| LOLCODE | 1.0381496530137617 |
+| LaTeX | 5.336103768010524 |
+| Lean | 1.6653789470747329 |
+| License | 5.593879701111845 |
+| Lisp | 33.15947937896521 |
+| Lua | 24.796117625764612 |
+| Lucius | 6.5742989471450155 |
+| Luna | 4.437807061133055 |
+| MQL Header | 13.515527575704464 |
+| MQL4 | 6.400151428436254 |
+| MQL5 | 46.489316522221515 |
+| MSBuild | 4.8321384193507875 |
+| MUMPS | 8.187699062741014 |
+| Macromedia eXtensible Markup Language | 2.1945287114300807 |
+| Madlang | 3.7857666909751373 |
+| Makefile | 1518.1769808494607 |
+| Mako | 3.410234685769436 |
+| Markdown | 45.687500000234245 |
+| Meson | 32.45071679724949 |
+| Modula3 | 1.1610784588847318 |
+| Module-Definition | 4.9327688042002595 |
+| Monkey C | 3.035163164383345 |
+| Mustache | 19.052714578803542 |
+| Nim | 1.202213335585401 |
+| Nix | 2.7291879559930488 |
+| OCaml | 3.7135029841909697 |
+| Objective C | 4.9795510788040005 |
+| Objective C++ | 2.2285232767506264 |
+| Opalang | 1.9975597794742732 |
+| Org | 5.258117805392903 |
+| Oz | 22.250069644336204 |
+| PHP | 199.17870638869982 |
+| PKGBUILD | 7.50632295051949 |
+| PSL Assertion | 3.0736406530442473 |
+| Pascal | 90.55238627885495 |
+| Patch | 25.331829692384225 |
+| Perl | 27.46770444081142 |
+| Plain Text | 1119.2375825397799 |
+| Polly | 1 |
+| Pony | 3.173291031071342 |
+| Powershell | 6.629884642978543 |
+| Processing | 9.139907354078636 |
+| Prolog | 1.816763080890156 |
+| Properties File | 2.1801967863634255 |
+| Protocol Buffers | 2.0456253005879304 |
+| Puppet | 43.424491631161054 |
+| PureScript | 4.063801504037935 |
+| Python | 22.473917606983292 |
+| Q# | 5.712939431518483 |
+| QCL | 7.590678825974464 |
+| QML | 1.255201818986247 |
+| R | 2.3781868952970115 |
+| Rakefile | 14.856192677576413 |
+| Razor | 62.79058974450959 |
+| ReStructuredText | 11.63852408056825 |
+| Report Definition Language | 23.065085061465403 |
+| Robot Framework | 2.6260137148703535 |
+| Ruby | 554.0134362337432 |
+| Ruby HTML | 24.091116656979562 |
+| Rust | 2.3002003813895207 |
+| SAS | 1.0032075758254648 |
+| SKILL | 1.9229039972029645 |
+| SPDX | 2.457843780517578 |
+| SQL | 2.293643752864969 |
+| SRecode Template | 20.688193360975845 |
+| SVG | 4.616972531365432 |
+| Sass | 42.92418345584642 |
+| Scala | 1.5957851387966393 |
+| Scheme | 10.480490204644848 |
+| Scons | 2.1977062552968114 |
+| Shell | 41.88552208947577 |
+| Smarty Template | 6.90615223295527 |
+| Softbridge Basic | 22.218602385698304 |
+| Specman e | 2.719783829645327 |
+| Spice Netlist | 2.454830619852739 |
+| Standard ML (SML) | 3.7598713626650295 |
+| Stata | 2.832579915520368 |
+| Stylus | 7.903926412469745 |
+| Swift | 54.175594149331914 |
+| Swig | 2.3953681161240747 |
+| SystemVerilog | 7.120705494624247 |
+| Systemd | 80.83254275520476 |
+| TCL | 46.9378307136513 |
+| TOML | 1.0316491217260413 |
+| TaskPaper | 1.0005036006351133 |
+| TeX | 8.690789447558961 |
+| Thrift | 1.620168483240211 |
+| Twig Template | 18.33051814392764 |
+| TypeScript | 1.2610517452930048 |
+| TypeScript Typings | 2.3638072576034137 |
+| Unreal Script | 2.9971615019965148 |
+| Ur/Web | 3.420488425604595 |
+| Ur/Web Project | 1.8752869585517504 |
+| V | 1.8780624768245784 |
+| VHDL | 5.764059992075602 |
+| Vala | 42.22072166146626 |
+| Varnish Configuration | 1.9899734258599446 |
+| Verilog | 1.443359777332832 |
+| Verilog Args File | 25.5 |
+| Vertex Shader File | 2.4700152399875077 |
+| Vim Script | 3.2196359799822662 |
+| Visual Basic | 119.8397831247842 |
+| Visual Basic for Applications | 2.5806381264096503 |
+| Vue | 249.0557418123258 |
+| Wolfram | 1.462178856761796 |
+| Wren | 227.4526259500999 |
+| XAML | 2.6149608174399264 |
+| XCode Config | 6.979387911493798 |
+| XML | 146.10128153519918 |
+| XML Schema | 6.832042266604565 |
+| Xtend | 2.87054940757827 |
+| YAML | 6.170148717655746 |
+| Zig | 1.071681022644043 |
+| Zsh | 2.6295064863912088 |
+| gitignore | 6.878908416722053 |
+| ignore | 1.0210649380633772 |
+| m4 | 57.5969985568356 |
+| nuspec | 3.245791111381787 |
+| sed | 1.3985770380241234 |
 
 
 ### How many lines of code are in a typical file per language?
@@ -912,36 +963,503 @@ The complexity estimate isn't really directly comparable between languages. Pull
 
 > The complexity estimate is really just a number that is only comparable to files in the same language. It should not be used to compare languages directly without weighting them. The reason for this is that its calculated by looking for branch and loop statements in the code and incrementing a counter for that file.
 
-This is more useful when you think about it applying to single files in the same language. On average is the file I am working with more or less complex than average?
+So comparing languages to each other is not the idea here, although it may be comparable between similar languages such as Java and C for example. Your mileage may vary.
+
+This is more useful when you think about it applying to single files in the same language. So you could answer the question "On average is the file I am working with more or less complex than average?".
+
+I should mention that I am always looking to improve this calculation and looking for submissions to [scc](https://github.com/boyter/scc/) to assist with this goal. Usually it is a case of just adding some keywords to the languages.json file so any programmer of any skill level should be able to assist with this. 
 
 [skip table to next section](#what-are-the-most-common-filenames)
-
-// TODO fill in this
 
 <div class="table-9"></div>
 
 | language | complexity |
 | -------- | ----------- |
-| ABAP | 139 |
-| ASP | 513 |
-| ASP.NET | 315 |
+| ABAP | 11.180740488380376 |
+| ASP | 11.536947250366211 |
+| ASP.NET | 2.149275320643484 |
+| ATS | 0.7621728432717677 |
+| AWK | 0 |
+| ActionScript | 22.088579905848178 |
+| Ada | 13.69141626294931 |
+| Agda | 0.19536590785719454 |
+| Alchemist | 0.3423442907696928 |
+| Alex | 0 |
+| Alloy | 6.9999997997656465 |
+| Android Interface Definition Language | 0 |
+| Arvo | 0 |
+| AsciiDoc | 0 |
+| Assembly | 1.5605608227976997 |
+| AutoHotKey | 423.87785756399626 |
+| Autoconf | 1.5524294972419739 |
+| BASH | 7.500000094871363 |
+| Basic | 1.0001350622574257 |
+| Batch | 1.4136352496767306 |
+| Bazel | 6.523681727119303 |
+| Bitbake | 0.00391388021490391 |
+| Bitbucket Pipeline | 0 |
+| Boo | 65.67764583729533 |
+| Bosque | 236.79837036132812 |
+| Brainfuck | 27.5516445041791 |
+| BuildStream | 0 |
+| C | 220.17236548200242 |
+| C Header | 0.027589923237434522 |
+| C Shell | 1.4911166269191476 |
+| C# | 1.0994400597744005 |
+| C++ | 215.23628287682845 |
+| C++ Header | 2.2893104921677154 |
+| CMake | 0.887660006199008 |
+| COBOL | 0.018726348891789816 |
+| CSS | 6.317460331175305E-176 |
+| CSV | 0 |
+| Cabal | 3.6547924155738194 |
+| Cargo Lock | 0 |
+| Cassius | 0 |
+| Ceylon | 21.664400369259404 |
+| Clojure | 0.00009155273437716484 |
+| ClojureScript | 0.5347588658332859 |
+| Closure Template | 0.503426091716392 |
+| CoffeeScript | 0.02021490140137264 |
+| ColdFusion | 6.851776515250336 |
+| ColdFusion CFScript | 22.287403080299764 |
+| Coq | 3.3282556015266307 |
+| Creole | 0 |
+| Crystal | 1.6065794006138856 |
+| Cython | 42.87412906489837 |
+| D | 0 |
+| Dart | 2.1264450684815657 |
+| Device Tree | 0 |
+| Dhall | 0 |
+| Docker ignore | 0 |
+| Dockerfile | 6.158891172385556 |
+| Document Type Definition | 0 |
+| Elixir | 0.5000612735793482 |
+| Elm | 5.237952479502043 |
+| Emacs Dev Env | 1.2701271416728307E-61 |
+| Emacs Lisp | 0.19531250990197657 |
+| Erlang | 0.08028322620528387 |
+| Expect | 0.329944610851471 |
+| Extensible Stylesheet Language Transformations | 0 |
+| F# | 0.32300702900710193 |
+| F* | 9.403954876643223E-38 |
+| FIDL | 0.12695312593132269 |
+| FORTRAN Legacy | 0.8337643985574195 |
+| FORTRAN Modern | 7.5833590276411185 |
+| Fish | 1.3386242155247368 |
+| Flow9 | 34.5 |
+| Forth | 2.4664166555765066 |
+| Fragment Shader File | 0.0003388836600090293 |
+| Freemarker Template | 10.511094652522283 |
+| Futhark | 0.8057891242233386 |
+| GDScript | 10.750000000022537 |
+| GLSL | 0.6383056697891334 |
+| GN | 22.400601854287807 |
+| Game Maker Language | 4.709514207365569 |
+| Game Maker Project | 0 |
+| Gherkin Specification | 0.4085178437480328 |
+| Go | 50.06279203974034 |
+| Go Template | 2.3866690339840662E-153 |
+| Gradle | 0 |
+| Groovy | 3.2506868488244898 |
+| HEX | 0 |
+| HTML | 0 |
+| Hamlet | 0.25053861103978114 |
+| Handlebars | 1.6943764911351036E-21 |
+| Happy | 0 |
+| Haskell | 28.470107150053625 |
+| Haxe | 66.52873523714804 |
+| IDL | 7.450580598712868E-9 |
+| Idris | 17.77642903881352 |
+| Intel HEX | 0 |
+| Isabelle | 0.0014658546850726184 |
+| JAI | 7.749968137734008 |
+| JSON | 0 |
+| JSONL | 0 |
+| JSX | 0.3910405338329044 |
+| Jade | 0.6881713929215119 |
+| Janet | 0 |
+| Java | 297.22908150612085 |
+| JavaScript | 1.861130583340945 |
+| JavaServer Pages | 7.24235416213196 |
+| Jenkins Buildfile | 0 |
+| Jinja | 0.6118526458846931 |
+| Julia | 5.779676990326951 |
+| Julius | 3.7432448068125277 |
+| Jupyter | 0 |
+| Just | 1.625490248219907 |
+| Korn Shell | 11.085027896435056 |
+| Kotlin | 5.467347841779503 |
+| LD Script | 6.538079182471746E-26 |
+| LESS | 0 |
+| LEX | 0 |
+| LOLCODE | 5.980839657708373 |
+| LaTeX | 0 |
+| Lean | 0.0019872561135834133 |
+| License | 0 |
+| Lisp | 4.033602018074421 |
+| Lua | 44.70686769972825 |
+| Lucius | 0 |
+| Luna | 0 |
+| MQL Header | 82.8036524637758 |
+| MQL4 | 2.9989408299408566 |
+| MQL5 | 32.84198718928553 |
+| MSBuild | 2.9802322387695312E-8 |
+| MUMPS | 5.767955578948634E-17 |
+| Macromedia eXtensible Markup Language | 0 |
+| Madlang | 8.25 |
+| Makefile | 3.9272747722381812E-90 |
+| Mako | 0.007624773579836673 |
+| Markdown | 0 |
+| Meson | 0.3975182396400463 |
+| Modula3 | 0.7517121883916386 |
+| Module-Definition | 0.25000000023283153 |
+| Monkey C | 9.838715311259486 |
+| Mustache | 0.00004191328599945435 |
+| Nim | 0.04812580073302998 |
+| Nix | 25.500204694250044 |
+| OCaml | 16.92218069843716 |
+| Objective C | 65.08967337175548 |
+| Objective C++ | 10.886891531550603 |
+| Opalang | 1.3724696160763994E-8 |
+| Org | 28.947825231747235 |
+| Oz | 6.260657086070324 |
+| PHP | 2.8314653639690874 |
+| PKGBUILD | 0 |
+| PSL Assertion | 0.5009768009185791 |
+| Pascal | 4 |
+| Patch | 0 |
+| Perl | 48.16959255514553 |
+| Plain Text | 0 |
+| Polly | 0 |
+| Pony | 4.91082763671875 |
+| Powershell | 0.43151378893449877 |
+| Processing | 9.691001653621564 |
+| Prolog | 0.5029296875147224 |
+| Properties File | 0 |
+| Protocol Buffers | 0.07128906529847256 |
+| Puppet | 0.16606500436341776 |
+| PureScript | 1.3008141816356456 |
+| Python | 11.510142201304832 |
+| Q# | 5.222080192729404 |
+| QCL | 13.195626304795667 |
+| QML | 0.3208023407643109 |
+| R | 0.40128818821921775 |
+| Rakefile | 2.75786388297917 |
+| Razor | 0.5298294073055322 |
+| ReStructuredText | 0 |
+| Report Definition Language | 0 |
+| Robot Framework | 0 |
+| Ruby | 7.8611656283491795 |
+| Ruby HTML | 1.3175727506823756 |
+| Rust | 8.62646485221385 |
+| SAS | 0.5223999023437882 |
+| SKILL | 0.4404907226562501 |
+| SPDX | 0 |
+| SQL | 0.00001537799835205078 |
+| SRecode Template | 0.18119949102401853 |
+| SVG | 1.7686873200833423E-74 |
+| Sass | 7.002974651049148E-113 |
+| Scala | 17.522343645163424 |
+| Scheme | 0.00003147125255509322 |
+| Scons | 25.56868253610655 |
+| Shell | 6.409446969197895 |
+| Smarty Template | 53.06143077491294 |
+| Softbridge Basic | 7.5 |
+| Specman e | 0.0639350358484781 |
+| Spice Netlist | 1.3684555315672042E-48 |
+| Standard ML (SML) | 24.686901116754818 |
+| Stata | 1.5115316917094068 |
+| Stylus | 0.3750006556512421 |
+| Swift | 0.5793484510104517 |
+| Swig | 0 |
+| SystemVerilog | 0.250593163372906 |
+| Systemd | 0 |
+| TCL | 96.5072605676113 |
+| TOML | 0.0048828125000002776 |
+| TaskPaper | 0 |
+| TeX | 54.0588040258797 |
+| Thrift | 0 |
+| Twig Template | 2.668124511961211 |
+| TypeScript | 9.191392608918255 |
+| TypeScript Typings | 6.1642456222327375 |
+| Unreal Script | 2.7333421227943004 |
+| Ur/Web | 16.51621568240534 |
+| Ur/Web Project | 0 |
+| V | 22.50230618938804 |
+| VHDL | 18.05495198571289 |
+| Vala | 147.2761703068509 |
+| Varnish Configuration | 0 |
+| Verilog | 5.582400367711671 |
+| Verilog Args File | 0 |
+| Vertex Shader File | 0.0010757446297590262 |
+| Vim Script | 2.4234658314493798 |
+| Visual Basic | 0.0004882812500167852 |
+| Visual Basic for Applications | 4.761343429454877 |
+| Vue | 0.7529517744621779 |
+| Wolfram | 0.0059204399585724215 |
+| Wren | 0.08593750013097715 |
+| XAML | 6.984919309616089E-10 |
+| XCode Config | 0 |
+| XML | 0 |
+| XML Schema | 0 |
+| Xtend | 2.8245844719990547 |
+| YAML | 0 |
+| Zig | 1.0158334437942358 |
+| Zsh | 1.81697392626756 |
+| gitignore | 0 |
+| ignore | 0 |
+| m4 | 0 |
+| nuspec | 0 |
+| sed | 22.91158285739948 |
 
 ### Average comments for file in each language?
 
-What's the average amount of comments used per file in each language?
+What's the average amount of comments used per file in each language? 
 
+You could probably rephrase this to asking what developers write the most comments assuming you squint enough.
 
 [skip table to next section](#what-are-the-most-common-filenames)
-
-// TODO fill in this
 
 <div class="table-11"></div>
 
 | language | complexity |
 | -------- | ----------- |
-| ABAP | 139 |
-| ASP | 513 |
-| ASP.NET | 315 |
+| ABAP | 56.3020026683825 |
+| ASP | 24.67145299911499 |
+| ASP.NET | 9.140447860406259E-11 |
+| ATS | 41.89465025163305 |
+| AWK | 11.290069486393975 |
+| ActionScript | 31.3568633027012 |
+| Ada | 61.269572412982384 |
+| Agda | 2.4337660860304755 |
+| Alchemist | 2.232399710231226E-103 |
+| Alex | 0 |
+| Alloy | 0.000002207234501959681 |
+| Android Interface Definition Language | 26.984662160277367 |
+| Arvo | 0 |
+| AsciiDoc | 0 |
+| Assembly | 2.263919769706678E-72 |
+| AutoHotKey | 15.833985920534857 |
+| Autoconf | 0.47779749499136687 |
+| BASH | 34.15625059662068 |
+| Basic | 1.4219117348874069 |
+| Batch | 1.0430908205926455 |
+| Bazel | 71.21859817579139 |
+| Bitbake | 0.002480246487177871 |
+| Bitbucket Pipeline | 0.567799577547725 |
+| Boo | 5.03128187009327 |
+| Bosque | 0.125244140625 |
+| Brainfuck | 0 |
+| BuildStream | 12.84734197699206 |
+| C | 256.2839210573451 |
+| C Header | 184.88885430308878 |
+| C Shell | 5.8409870392823375 |
+| C# | 30.96563720101839 |
+| C++ | 44.61584829131642 |
+| C++ Header | 27.578790410119197 |
+| CMake | 1.7564333047949374 |
+| COBOL | 0.7503204345703562 |
+| CSS | 4.998773531463529 |
+| CSV | 0 |
+| Cabal | 4.899812531420634 |
+| Cargo Lock | 0.0703125 |
+| Cassius | 0.07177734654413487 |
+| Ceylon | 3.6406326349824667 |
+| Clojure | 0.0987220821845421 |
+| ClojureScript | 0.6025725119252456 |
+| Closure Template | 17.078124673988057 |
+| CoffeeScript | 1.6345682790069884 |
+| ColdFusion | 33.745563628665096 |
+| ColdFusion CFScript | 13.566947396771592 |
+| Coq | 20.3222774725393 |
+| Creole | 0 |
+| Crystal | 6.0308081267588145 |
+| Cython | 21.0593019957583 |
+| D | 0 |
+| Dart | 4.634361584097128 |
+| Device Tree | 33.64898256434121 |
+| Dhall | 1.0053101042303751 |
+| Docker ignore | 8.003553375601768E-11 |
+| Dockerfile | 4.526245545632278 |
+| Document Type Definition | 0 |
+| Elixir | 8.0581139370409 |
+| Elm | 24.73191350743249 |
+| Emacs Dev Env | 2.74822998046875 |
+| Emacs Lisp | 12.168370702306452 |
+| Erlang | 16.670030919109056 |
+| Expect | 3.606161126133445 |
+| Extensible Stylesheet Language Transformations | 0 |
+| F# | 0.5029605040200058 |
+| F* | 5.33528354690743E-27 |
+| FIDL | 343.0418392068642 |
+| FORTRAN Legacy | 8.121405267242158 |
+| FORTRAN Modern | 171.32042583820953 |
+| Fish | 7.979248739519377 |
+| Flow9 | 0.5049991616979244 |
+| Forth | 0.7578125 |
+| Fragment Shader File | 0.2373057885016209 |
+| Freemarker Template | 62.250244379050855 |
+| Futhark | 0.014113984877253714 |
+| GDScript | 31.14457228694065 |
+| GLSL | 0.2182627061047912 |
+| GN | 17.443267241931284 |
+| Game Maker Language | 3.9815753922640824 |
+| Game Maker Project | 0 |
+| Gherkin Specification | 0.0032959059321794604 |
+| Go | 6.464829990599041 |
+| Go Template | 4.460169822267483E-251 |
+| Gradle | 0.5374194774415457 |
+| Groovy | 32.32068506016523 |
+| HEX | 0 |
+| HTML | 0.16671794164614084 |
+| Hamlet | 4.203293477836184E-24 |
+| Handlebars | 0.9389737429747177 |
+| Happy | 0 |
+| Haskell | 20.323476462551376 |
+| Haxe | 9.023509566990532 |
+| IDL | 1.01534495399968 |
+| Idris | 0.36279318680267497 |
+| Intel HEX | 0 |
+| Isabelle | 4.389802167076498 |
+| JAI | 2.220446049250313E-16 |
+| JSON | 0 |
+| JSONL | 0 |
+| JSX | 0.9860839844113964 |
+| Jade | 0.25000000000034117 |
+| Janet | 9.719207406044006 |
+| Java | 330.66188089718935 |
+| JavaScript | 22.102491285372537 |
+| JavaServer Pages | 4.31250095370342 |
+| Jenkins Buildfile | 0 |
+| Jinja | 2.5412145720173454E-50 |
+| Julia | 12.542627036271085 |
+| Julius | 0.24612165248208867 |
+| Jupyter | 0 |
+| Just | 0.3186038732601446 |
+| Korn Shell | 40.89005232702741 |
+| Kotlin | 0.3259347784770708 |
+| LD Script | 3.7613336386434204 |
+| LESS | 15.495439701029127 |
+| LEX | 55.277186392539086 |
+| LOLCODE | 13.578125958700468 |
+| LaTeX | 3.316717967334341 |
+| Lean | 21.194565176965895 |
+| License | 0 |
+| Lisp | 88.10676444837796 |
+| Lua | 76.67247973843406 |
+| Lucius | 0.3894241626790286 |
+| Luna | 16.844066019174637 |
+| MQL Header | 82.22436339969337 |
+| MQL4 | 1.957314499740677 |
+| MQL5 | 27.463183855085845 |
+| MSBuild | 0.19561428198176206 |
+| MUMPS | 5.960464477541773E-8 |
+| Macromedia eXtensible Markup Language | 0 |
+| Madlang | 6.75 |
+| Makefile | 1.2287070602578574 |
+| Mako | 1.3997604187154047E-8 |
+| Markdown | 0 |
+| Meson | 4.594536366188615 |
+| Modula3 | 3.4375390004645627 |
+| Module-Definition | 7.754887182446689 |
+| Monkey C | 0.02734480644075532 |
+| Mustache | 0.0000038370490074157715 |
+| Nim | 0.8432132130061808 |
+| Nix | 165.09375 |
+| OCaml | 27.238212826702338 |
+| Objective C | 32.250000004480256 |
+| Objective C++ | 4.688333711547599 |
+| Opalang | 3.2498599900436704 |
+| Org | 2.4032862186444435 |
+| Oz | 11.531631554476924 |
+| PHP | 0.37573912739754056 |
+| PKGBUILD | 0 |
+| PSL Assertion | 4.470348358154297E-7 |
+| Pascal | 274.7797153576955 |
+| Patch | 0 |
+| Perl | 42.73014043490598 |
+| Plain Text | 0 |
+| Polly | 0 |
+| Pony | 0.2718505859375 |
+| Powershell | 2.0956492198317282 |
+| Processing | 11.358358417519032 |
+| Prolog | 6.93889390390723E-17 |
+| Properties File | 4.297774864451927 |
+| Protocol Buffers | 5.013992889700926 |
+| Puppet | 1.9962931947466012 |
+| PureScript | 6.608705271035433 |
+| Python | 15.208443286809963 |
+| Q# | 0.4281108849922295 |
+| QCL | 13.880147817629737 |
+| QML | 16.17036877582475 |
+| R | 5.355639399818855 |
+| Rakefile | 0.4253943361101697 |
+| Razor | 0.2500305203720927 |
+| ReStructuredText | 0 |
+| Report Definition Language | 1.8589575837924928E-119 |
+| Robot Framework | 0 |
+| Ruby | 8.696056880656087 |
+| Ruby HTML | 0.031281024218515086 |
+| Rust | 22.359375028118006 |
+| SAS | 0.7712382248290134 |
+| SKILL | 0.002197265625 |
+| SPDX | 0 |
+| SQL | 0.4963180149979617 |
+| SRecode Template | 17.64534428715706 |
+| SVG | 0.780306812508952 |
+| Sass | 1.6041624981030795 |
+| Scala | 2.7290137764062656 |
+| Scheme | 18.68675828842983 |
+| Scons | 9.985132321266597 |
+| Shell | 19.757167057040007 |
+| Smarty Template | 0.0009841919236350805 |
+| Softbridge Basic | 4.76177694441164E-25 |
+| Specman e | 0.1925095270881778 |
+| Spice Netlist | 5.29710110812646 |
+| Standard ML (SML) | 0.20708566564292288 |
+| Stata | 0.04904100534194722 |
+| Stylus | 4.534405773074049 |
+| Swift | 1.8627019961192913E-9 |
+| Swig | 11.786422730001505 |
+| SystemVerilog | 0.00009708851624323821 |
+| Systemd | 0 |
+| TCL | 382.839838598133 |
+| TOML | 0.37500173695180483 |
+| TaskPaper | 0 |
+| TeX | 8.266233975096164 |
+| Thrift | 50.53134153016524 |
+| Twig Template | 0 |
+| TypeScript | 8.250029131770134 |
+| TypeScript Typings | 37.89904005334354 |
+| Unreal Script | 46.13322029508541 |
+| Ur/Web | 0.04756343913582129 |
+| Ur/Web Project | 6.776263578034403E-21 |
+| V | 28.75797889154211 |
+| VHDL | 37.47892257625405 |
+| Vala | 74.26528331441615 |
+| Varnish Configuration | 19.45791923156868 |
+| Verilog | 4.165537942430622 |
+| Verilog Args File | 0 |
+| Vertex Shader File | 1.7979557178975683 |
+| Vim Script | 0 |
+| Visual Basic | 0.26300267116040704 |
+| Visual Basic for Applications | 0.3985138943535276 |
+| Vue | 5.039982162930666E-52 |
+| Wolfram | 70.01674025323683 |
+| Wren | 30694.003311276458 |
+| XAML | 0.5000169009533838 |
+| XCode Config | 13.653495818959595 |
+| XML | 3.533205032457776 |
+| XML Schema | 0 |
+| Xtend | 19.279739396268607 |
+| YAML | 1.1074293861154887 |
+| Zig | 0.507775428428431 |
+| Zsh | 6.769231127673729 |
+| gitignore | 1.3347179947709417E-20 |
+| ignore | 0.0356445312500015 |
+| m4 | 5.4183238737327075 |
+| nuspec | 3.640625 |
+| sed | 6.423678000929861 |
 
 
 ### What are the most common filenames?
@@ -2683,22 +3201,48 @@ So slightly over 2% of all the Java code that I checked appeared to be a factory
 
 The .ignore file idea was hammered out by burntsushi and ggreer in a [Hacker News thread](https://news.ycombinator.com/item?id=12564442) and is possibly one of the greatest cases of "competing" open source tools working together to a good outcome and done in record time. It has become the defacto way to add things into source control yet have tools ignore them. As it turns out `scc` also implements .ignore files but counts them as well. Lets see how well the idea has spread.
 
-// TODO add this
+[skip table to next section](#future-ideas)
+
+<div class="table-13"></div>
 
 | .ignore count | project count |
 | -----------------| ------------- |
-| 0 | 3,628,829 |
-| 1 | 4,576,435 |
-| 2 | 387,748 |
-| 3 | 136,641 |
-| 4 | 79,808 |
-| 5 | 48,336 |
-| 6 | 33,686 |
-| 7 | 33,408 |
-| 8 | 22,571 |
-| 9 | 16,453 |
-| 10 | 11,198 |
-| 11 | 10,070 |
+| 0 | 9,088,796 |
+| 1 | 7,848 |
+| 2 | 1,258 |
+| 3 | 508 |
+| 4 | 333 |
+| 5 | 43 |
+| 6 | 130 |
+| 7 | 8 |
+| 8 | 14 |
+| 9 | 83 |
+| 10 | 49 |
+| 11 | 35 |
+| 12 | 112 |
+| 13 | 736 |
+| 15 | 4 |
+| 17 | 1 |
+| 18 | 4 |
+| 20 | 2 |
+| 21 | 1 |
+| 23 | 2 |
+| 24 | 3 |
+| 26 | 2 |
+| 27 | 1 |
+| 34 | 31 |
+| 35 | 19 |
+| 36 | 9 |
+| 38 | 2 |
+| 39 | 1 |
+| 43 | 12 |
+| 44 | 1 |
+| 45 | 2 |
+| 46 | 5 |
+| 49 | 7 |
+| 50 | 7 |
+| 51 | 12 |
+| 52 | 2 |
 
 ## Future ideas
 

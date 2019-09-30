@@ -82,4 +82,11 @@ $(document).ready( function () {
         "pageLength": 25,
         "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ]
     });
+
+    $(".table-13").next().DataTable({
+        "paging": true,
+        "order": [[ 0, "asc" ]],
+        "pageLength": 25,
+        "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ]
+    });
 });
