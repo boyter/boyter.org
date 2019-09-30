@@ -26,6 +26,8 @@ What did suprise me about this though was the question people were asking about 
 
 Hats off to them for the achievement's they made and for at least trying to take on the big boys of search. While new engines like [DuckDuckGo][10] are attempting the same, [Gabriel Weinberg][11] uses the existing indexes of Bing and Google [without really maintaining a huge custom one][12]. I can only hope at this point that Blekko delivers the goods ([and supposedly its getting close!][13]) and that the other players like Gigablast continue to innovate.
 
+Some additional recent thoughts about this [What Happened To Cuil? The Thought-To-Be Google Killer](https://www.pcguide.com/news/what-happended-to-cuil/)
+
  [1]: http://www.cuil.com/
  [2]: http://techcrunch.com/2010/09/17/cuil-goes-down-and-we-hear-its-down-for-good/
  [3]: http://www.google.com/

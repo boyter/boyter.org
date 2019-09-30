@@ -41,6 +41,7 @@ It took about 5 weeks to download and run `scc` over all of the repositories col
  - [How many lines of code are in a typical file per language?
 ](#how-many-lines-of-code-are-in-a-typical-file-per-language)
  - [Average complexity for file in each language?](#average-complexity-for-file-in-each-language)
+ - [Average comments for file in each language?](#average-comments-for-file-in-each-language)
  - [What are the most common filenames?](#what-are-the-most-common-filenames)
  - [How many repositories appear to be missing a license?](#how-many-repositories-appear-to-be-missing-a-license)
  - [Which languages have the most comments?](#which-languages-have-the-most-comments)
@@ -158,6 +159,8 @@ I spent about $60 in compute while trialling lambda. I have not looked at the S3
 
 However after time I chose not to use AWS in the end because of cost. So what's the real cost assuming I wanted to do it again?
 
+Well to start all the software used is free as in freedom and open source. So nothing to worry about there.
+
 In my case the cost would be free as I used "free compute" left over from searchcode. Not everyone has compute lying around however. So lets assume another person wishes to replicate this and as such needs to get a server.
 
 It could be done for €73 using the cheapest new dedicated server from Hetzner https://www.hetzner.com/dedicated-rootserver However that cost includes a new server setup fee. If you are willing to wait and poke around on their auction house https://www.hetzner.com/sb you can find much cheaper servers with no setup fee at all. At time of writing I found the below machine which would be perfect for this project and is €25.21 a month with no setup fee.
@@ -166,9 +169,11 @@ It could be done for €73 using the cheapest new dedicated server from Hetzner 
 
 Best part though? You can get the VAT removed if you are outside the EU. So give yourself an additional 10% discount on top if you are in this situation as I am.
 
-So were someone to do this from scratch using the same method I eventually went with it would cost under $100 USD to redo the same calculations, and more likely under $50 if you are a little patient or lucky. This also assumes you use the server for less than 2 months which is enough time to download and process.
+So were someone to do this from scratch using the same method I eventually went with it would cost under $100 USD to redo the same calculations, and more likely under $50 if you are a little patient or lucky. This also assumes you use the server for less than 2 months which is enough time to download and process. This also includes enough time for you to get a list of 10 million repositories to consider processing as well.
 
-If I were to use a gzipped tar file in my analysis (which isn't that hard to do really) I could even do 10x the repositories on the same machine as the resulting file would still be small enough to fit on the same hard disk. That would take longer to download though which is going to increase the cost for each additional month. Going much larger however is going to require some level of sharding of repositories. Still it is safe to say that you could redo the entire process I did or larger one on the same hardware without much effort.
+If I were to use a gzipped tar file in my analysis (which isn't that hard to do really) I could even do 10x the repositories on the same machine as the resulting file would still be small enough to fit on the same hard disk. That would take longer to download though which is going to increase the cost for each additional month and this might take multiple months to do. 
+
+Going much larger then 100 million repositories however is going to require some level of sharding. Still it is safe to say that you could redo the entire process I did or larger one on the same hardware without much effort or code changes.
 
 ### Data Sources
 
@@ -451,7 +456,7 @@ The full list is included below.
 
 ### How many files in a repository per language?
 
-// TODO the number here should match IE tables should have the same length, janet is missing for example
+// TODO the number here should match IE tables should have the same length, janet is missing for example as is robot framework
 
 An extension of the above, but averaged over however many files are in each language per repository. So for projects that contain java, how many java files exist in that project, and on average for all projects how many files is that?
 
@@ -903,9 +908,34 @@ So I figured why not have both? I did one small change based on the suggestion o
 
 What's the average complexity per file for each language?
 
+The complexity estimate isn't really directly comparable between languages. Pulling from the README of `scc` itself
+
+> The complexity estimate is really just a number that is only comparable to files in the same language. It should not be used to compare languages directly without weighting them. The reason for this is that its calculated by looking for branch and loop statements in the code and incrementing a counter for that file.
+
+This is more useful when you think about it applying to single files in the same language. On average is the file I am working with more or less complex than average?
+
 [skip table to next section](#what-are-the-most-common-filenames)
 
+// TODO fill in this
+
 <div class="table-9"></div>
+
+| language | complexity |
+| -------- | ----------- |
+| ABAP | 139 |
+| ASP | 513 |
+| ASP.NET | 315 |
+
+### Average comments for file in each language?
+
+What's the average amount of comments used per file in each language?
+
+
+[skip table to next section](#what-are-the-most-common-filenames)
+
+// TODO fill in this
+
+<div class="table-11"></div>
 
 | language | complexity |
 | -------- | ----------- |
@@ -920,7 +950,9 @@ What filenames are most common across all code-bases ignoring extension and case
 
 Had you asked me before I started this I would have said, README, main, index, license. Thankfully the results reflect my thoughts pretty well. Although there are a lot of interesting ones in there. I have no idea why so many projects contain a file called `15` or `s15`. 
 
-The makefile being the most common surprised me a little, but then I remembered it is used in many new JavaScript projects. Another interesting thing to note is that it appears jQuery is still king and reports of its death are greatly exaggerated.
+The makefile being the most common surprised me a little, but then I remembered it is used in many new JavaScript projects. Another interesting thing to note is that it appears jQuery is still king and reports of its death are greatly exaggerated, with it appearing as #4 on the list.
+
+<div class="table-12"></div>
 
 | file-name | count |
 | -------- | ----- |
@@ -1008,7 +1040,13 @@ Bringing this back to something sensible here is a plot of the data up to 20 .gi
 
 Something you would expect would be that the majority of projects would have either 0 or 1 .gitignore files. This is confirmed by the results with a massive drop-off of 10x for projects with 2 .gitignores. What was surprising to me was how many projects have more than a single .gitignore file. The long tail is especially long in this case.
 
-I was also curious as to why some projects had thousands of .gitignore files so I included some of them here.
+I was also curious as to why some projects had thousands of .gitignore files. One of the main offenders appears to be forks of https://github.com/PhantomX/slackbuilds which all have ~2,547 .gitignore files. However the other repositories with 1000+ ignore files are listed below.
+
+ - 25,794 files https://github.com/knot-git/rrs_publication_ocr
+ - 1,523 files https://github.com/brunosimon/hetic 
+ - 1,267 files https://github.com/par4all/par4all 
+ - 1,186 files https://github.com/ramonluis1987/code_school 
+ - 1,133 files https://github.com/signed/license-maven-plugin 
 
 [skip table to next section](#which-language-developers-have-the-biggest-potty-mouth)
 
@@ -2346,19 +2384,255 @@ Have to admit, I am a little surprised by that number. While I understand mixing
 
 I have a feeling some TypeScript developers are dry heaving at the very thought of this. If it is of any comfort I suspect most of these projects are things like `scc` which uses examples of all languages mixed together for testing purposes.
 
-### The most complex code is written in what language?
-
-The complexity estimate isn't really directly comparable between languages. Pulling from the README
-
-> The complexity estimate is really just a number that is only comparable to files in the same language. It should not be used to compare languages directly without weighting them. The reason for this is that its calculated by looking for branch and loop statements in the code and incrementing a counter for that file.
-
-However like the curse/potty mouth check its fun so lets do it anyway. However to make this fair it really needs to be weighted based on the number of code lines to ensure it is closer to being a fair comparison.
-
 
 ### What's the typical path length, broken up by language
 
 Given that you can either dump all the files you need in a single directory, or span them out using file paths whats the typical path length and number of directories?
 
+This is done by counting the number of path separators `/` for each file and its location and averaging it out. I didn't know what to expect here other that I would expect java to be close to the top as its file paths are usually quite deep.
+
+[skip table to next section](#yaml-or-yml)
+
+<div class="table-10"></div>
+
+| language | average path length |
+| -------- | ------------------- |
+| ABAP | 4.406555175781266 |
+| ASP | 6.372800350189209 |
+| ASP.NET | 7.25 |
+| ATS | 4.000007286696899 |
+| AWK | 4.951896171638623 |
+| ActionScript | 8.139775436837226 |
+| Ada | 4.00042700953189 |
+| Agda | 3.9126438455441743 |
+| Alchemist | 3.507827758789091 |
+| Alex | 5.000001311300139 |
+| Alloy | 5.000488222547574 |
+| Android Interface Definition Language | 11.0048217363656 |
+| Arvo | 5.9999994741776135 |
+| AsciiDoc | 3.5 |
+| Assembly | 4.75 |
+| AutoHotKey | 2.2087400984292067 |
+| Autoconf | 5.8725585937792175 |
+| BASH | 2.1289059027401294 |
+| Basic | 3.003903865814209 |
+| Batch | 6.527053831937014 |
+| Bazel | 3.18005371087348 |
+| Bitbake | 2.015624999069132 |
+| Bitbucket Pipeline | 2.063491820823401 |
+| Boo | 4.010679721835899 |
+| Bosque | 4.98316764831543 |
+| Brainfuck | 4.2025654308963425 |
+| BuildStream | 3.4058846323741645 |
+| C | 4.923767089530871 |
+| C Header | 4.8744963703211965 |
+| C Shell | 3.027952311891569 |
+| C# | 3.9303305113013427 |
+| C++ | 3.765686050057411 |
+| C++ Header | 5.0468749664724015 |
+| CMake | 4.474763816174707 |
+| COBOL | 2.718678008809146 |
+| CSS | 3.158353805542812 |
+| CSV | 2.0005474090593514 |
+| Cabal | 2.0234456174658693 |
+| Cargo Lock | 2.602630615232607 |
+| Cassius | 3.56445312181134 |
+| Ceylon | 4.750730359584461 |
+| Clojure | 3.992209411809762 |
+| ClojureScript | 4.905477865257108 |
+| Closure Template | 6.800760253008946 |
+| CoffeeScript | 4.503051759227674 |
+| ColdFusion | 6.124976545410084 |
+| ColdFusion CFScript | 6.188602089623717 |
+| Coq | 4.000243186950684 |
+| Creole | 3.124526690922411 |
+| Crystal | 3.1243934621916196 |
+| Cython | 5.219657994911814 |
+| D | 9.291626930357722 |
+| Dart | 3.939864161220478 |
+| Device Tree | 6.530643464186369 |
+| Dhall | 0.12061593477278201 |
+| Docker ignore | 2.9984694408020562 |
+| Dockerfile | 3.1281526535752064 |
+| Document Type Definition | 6.3923129292499254 |
+| Elixir | 3.9999989270017977 |
+| Elm | 2.968016967181992 |
+| Emacs Dev Env | 4.750648772301943 |
+| Emacs Lisp | 2.0156250001746203 |
+| Erlang | 4.756546300111156 |
+| Expect | 5.126907349098477 |
+| Extensible Stylesheet Language Transformations | 4.519531239055546 |
+| F# | 5.752862453457055 |
+| F* | 4.063724638864983 |
+| FIDL | 4.484130888886213 |
+| FORTRAN Legacy | 6.117128185927898 |
+| FORTRAN Modern | 5.742561882347131 |
+| Fish | 3.993835387425861 |
+| Flow9 | 9.462829245721366 |
+| Forth | 4.016601327653859 |
+| Fragment Shader File | 3.8598623261805187 |
+| Freemarker Template | 11.122007250069213 |
+| Futhark | 6.188476562965661 |
+| GDScript | 3.2812499999872675 |
+| GLSL | 6.6093769371505005 |
+| GN | 3.497192621218512 |
+| Game Maker Language | 4.968749999941792 |
+| Game Maker Project | 3.8828125 |
+| Gherkin Specification | 3.999099795268081 |
+| Go | 3.9588454874029275 |
+| Go Template | 4 |
+| Gradle | 2.655930499769198 |
+| Groovy | 11.499969503013528 |
+| HEX | 3.98394775342058 |
+| HTML | 4.564478578133282 |
+| Hamlet | 3.4842224120074867 |
+| Handlebars | 4.998766578761208 |
+| Happy | 5.699636149570479 |
+| Haskell | 2.000140870587468 |
+| Haxe | 5.999999999999997 |
+| IDL | 6.249999993495294 |
+| Idris | 3.515075657458509 |
+| Intel HEX | 3.983397483825683 |
+| Isabelle | 4.18351352773584 |
+| JAI | 7.750007518357038 |
+| JSON | 3.9999972562254724 |
+| JSONL | 5.751412352804029 |
+| JSX | 5.0041952044625715 |
+| Jade | 4.744544962807595 |
+| Janet | 3.0312496423721313 |
+| Java | 11.265740856469563 |
+| JavaScript | 4.242187985224513 |
+| JavaServer Pages | 7.999993488161865 |
+| Jenkins Buildfile | 2.000000000087315 |
+| Jinja | 6.937498479846909 |
+| Julia | 3.9999848530092095 |
+| Julius | 3.187606761406953 |
+| Jupyter | 2.375 |
+| Just | 4.312155187124516 |
+| Korn Shell | 7.0685427486899925 |
+| Kotlin | 6.455277973786039 |
+| LD Script | 5.015594720376608 |
+| LESS | 5.999999999999886 |
+| LEX | 5.6996263030493495 |
+| LOLCODE | 3.722656242392418 |
+| LaTeX | 4.499990686770616 |
+| Lean | 4.1324310302734375 |
+| License | 4.7715609660297105 |
+| Lisp | 6.00048828125 |
+| Lua | 3.999999057474633 |
+| Lucius | 3.0000303482974573 |
+| Luna | 4.758178874869392 |
+| MQL Header | 5.421851994469764 |
+| MQL4 | 5.171874999953652 |
+| MQL5 | 4.069171198975555 |
+| MSBuild | 4.8931884765733855 |
+| MUMPS | 4.999999672174454 |
+| Macromedia eXtensible Markup Language | 3.9139365140181326 |
+| Madlang | 3.625 |
+| Makefile | 4.717208385332443 |
+| Mako | 4.0349732004106045 |
+| Markdown | 2.25 |
+| Meson | 3.342019969206285 |
+| Modula3 | 3.980173215190007 |
+| Module-Definition | 8.875000973076205 |
+| Monkey C | 3.0672508481368164 |
+| Mustache | 6.000003708292297 |
+| Nim | 3.7500824918105313 |
+| Nix | 2.0307619677526234 |
+| OCaml | 3.269392550457269 |
+| Objective C | 3.526367187490962 |
+| Objective C++ | 5.000000834608569 |
+| Opalang | 4.500069382134143 |
+| Org | 5.953919619084296 |
+| Oz | 4.125 |
+| PHP | 7.999984720368943 |
+| PKGBUILD | 4.875488281252839 |
+| PSL Assertion | 5.004394620715175 |
+| Pascal | 5.0781240425935845 |
+| Patch | 3.999999999999819 |
+| Perl | 4.691352904239976 |
+| Plain Text | 5.247085583343509 |
+| Polly | 2.953125 |
+| Pony | 2.9688720703125 |
+| Powershell | 4.596205934882159 |
+| Processing | 3.999931812300937 |
+| Prolog | 4.4726600636568055 |
+| Properties File | 3.5139240025278604 |
+| Protocol Buffers | 6.544742336542192 |
+| Puppet | 6.662078857422106 |
+| PureScript | 4.000007774680853 |
+| Python | 5.4531080610843805 |
+| Q# | 3.7499999999999996 |
+| QCL | 2.992309644818306 |
+| QML | 7.042003512360623 |
+| R | 3.0628376582587578 |
+| Rakefile | 4.78515574071335 |
+| Razor | 8.062499530475186 |
+| ReStructuredText | 5.061766624473476 |
+| Report Definition Language | 5.996573380834889 |
+| Robot Framework | 4.0104638249612155 |
+| Ruby | 5.1094988621717725 |
+| Ruby HTML | 5.57654969021678 |
+| Rust | 3.2265624976654292 |
+| SAS | 4.826202331129183 |
+| SKILL | 6.039547920227052 |
+| SPDX | 4.000203706655157 |
+| SQL | 7.701822280883789 |
+| SRecode Template | 3.500030428171159 |
+| SVG | 5.217570301278483 |
+| Sass | 6.000000000056957 |
+| Scala | 4.398563579539738 |
+| Scheme | 6.999969714792911 |
+| Scons | 5.010994006631478 |
+| Shell | 4.988665378738929 |
+| Smarty Template | 5.000527858268356 |
+| Softbridge Basic | 4.87873840331963 |
+| Specman e | 5.765624999999318 |
+| Spice Netlist | 3.9687499998835882 |
+| Standard ML (SML) | 4.031283043158929 |
+| Stata | 6.27345275902178 |
+| Stylus | 3.5000006667406485 |
+| Swift | 3 |
+| Swig | 5.246093751920853 |
+| SystemVerilog | 2.9995259092956985 |
+| Systemd | 3.9960937500000284 |
+| TCL | 2.508188682367951 |
+| TOML | 2.063069331460588 |
+| TaskPaper | 2.003804363415667 |
+| TeX | 3.500000000931251 |
+| Thrift | 4.956119492650032 |
+| Twig Template | 8.952746974652655 |
+| TypeScript | 4.976589231140677 |
+| TypeScript Typings | 5.832031190521718 |
+| Unreal Script | 4.22499089783372 |
+| Ur/Web | 4.41992186196147 |
+| Ur/Web Project | 5.1147780619789955 |
+| V | 4.251464832544997 |
+| VHDL | 4.000000961231823 |
+| Vala | 3.99804687498741 |
+| Varnish Configuration | 4.006103516563625 |
+| Verilog | 3.6906727683381173 |
+| Verilog Args File | 8.93109059158814 |
+| Vertex Shader File | 3.8789061926163697 |
+| Vim Script | 3.9995117782528147 |
+| Visual Basic | 4.5 |
+| Visual Basic for Applications | 3.6874962672526417 |
+| Vue | 7.752930045514701 |
+| Wolfram | 3.075198844074798 |
+| Wren | 4 |
+| XAML | 4.515627968764219 |
+| XCode Config | 6.969711296260638 |
+| XML | 6 |
+| XML Schema | 5.807670593268995 |
+| Xtend | 4.315674404631856 |
+| YAML | 3.2037304108964673 |
+| Zig | 3.4181210184442534 |
+| Zsh | 2.0616455049940288 |
+| gitignore | 2.51172685490884 |
+| ignore | 10.6434326171875 |
+| m4 | 3.7519528857323934 |
+| nuspec | 4.109375 |
+| sed | 4.720429063539986 |
 
 
 ### YAML or YML?
@@ -2407,6 +2681,25 @@ Another one that came up in the internal company slack when looking through some
 
 So slightly over 2% of all the Java code that I checked appeared to be a factory or factoryfactory. Thankfully there are no factoryfactoryfactories and perhaps that joke can finally die, although I am sure at least one non-ironic one exist somewhere in some Java 5 monolith that makes more money every day than I will see over my entire working life.
 
+### Ignore files
+
+The .ignore file idea was hammered out by burntsushi and ggreer in a [Hacker News thread](https://news.ycombinator.com/item?id=12564442) and is possibly one of the greatest cases of "competing" open source tools working together to a good outcome and done in record time. It has become the defacto way to add things into source control yet have tools ignore them. As it turns out `scc` also implements .ignore files but counts them as well. Lets see how well the idea has spread.
+
+| .ignore count | project count |
+| -----------------| ------------- |
+| 0 | 3,628,829 |
+| 1 | 4,576,435 |
+| 2 | 387,748 |
+| 3 | 136,641 |
+| 4 | 79,808 |
+| 5 | 48,336 |
+| 6 | 33,686 |
+| 7 | 33,408 |
+| 8 | 22,571 |
+| 9 | 16,453 |
+| 10 | 11,198 |
+| 11 | 10,070 |
+
 ## Future ideas
 
 Id love to do some analysis of tabs vs spaces. Scanning for things like AWS AKIA keys and the like would be pretty neat as well. Id also love to expand out the bitbucket and gitlab coverage and get it broken down via each to see if groups of developers from different camps hang out in different areas.
@@ -2419,6 +2712,9 @@ Shortcomings id love to overcome in the above if I decide to do this again.
  - Use a trie or some other data type to keep a full count of filenames rather than the slightly lossy approach I used.
  - Add an option to scc to check the type of the file based on keywords as examples such as https://bitbucket.org/abellnets/hrossparser/src/master/xml_files/CIDE.C was picked up as being a C file despite obviously being HTML when the content is inspected. To be fair all code counters I tried behave the same way.
  - There appears to be a bug in scc where if a file has no extension but is named as one it will match that file which is incorrect. A bug has been raised in scc to address this https://github.com/boyter/scc/issues/114
+ - I'd like to add shebang detection into scc https://github.com/boyter/scc/issues/115
+ - Some sort of check against number of github stars would be pretty neat.
+ - Analysis against the number of commits would be very interesting.
 
 ## So why bother?
 
