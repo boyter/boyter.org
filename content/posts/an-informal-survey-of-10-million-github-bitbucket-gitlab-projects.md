@@ -1,5 +1,5 @@
 ---
-title: Processing 40 TB of code from 10 million projects with a dedicated server and Go for $100
+title: Processing 40 TB of code from ~10 million projects with a dedicated server and Go for $100
 date: 2019-09-20
 ---
 
@@ -9,9 +9,9 @@ date: 2019-09-20
 <script src="/static/an-informal-survey/jquery.dataTables.min.js"></script>
 <script src="/static/an-informal-survey/table.js"></script>
 
-The tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) (which is now modified and maintained by many other excellent people) counts lines of code, comments and make a complexity estimate for files inside a code repository. The latter is something you need a good sample size to make good use of. It tries to count branch statements in code but what does that actually mean for most languages? Otherwise "This file has complexity 10" is not very useful. So I thought I would try running it at all the source code I could get my hands on. This would also allow me to see if there are any edge cases I didn't consider in the tool itself. A brute force Q/A trial by fire. I think its safe to say that `scc` is a fairly reliable tool at this point.
+The command line tool I created [Sloc Cloc and Code (`scc`)](https://github.com/boyter/scc/) (which is now modified and maintained by many other excellent people) counts lines of code, comments and makes a complexity estimate for files inside a directory. The latter is something you need a good sample size to make good use of. The way it works is that it counts branch statements in code. However what does that actually mean? For example "This file has a complexity of 10" is not very useful without some context. To solve this issue I thought I would try to run scc at all the source code I could get my hands on. This would also allow me to see if there are any edge cases I didn't consider in the tool itself. A brute force Q/A trial by fire.
 
-However if I am going to run it over all that code which is going to be expensive computationally I may as well try to get some interesting numbers out of it. As such I decided to record everything as I went and see if I could get something interesting in the end, hence this post.
+However if I am going to run it over all that code, which is going to be computationally expensive I may as well try to get some use out of it. As such I decided to record everything as I went and see if I could get something interesting in the end, hence this post.
 
 In short I downloaded and processed a lot of code using `scc`. The raw numbers include,
 
@@ -27,7 +27,9 @@ In short I downloaded and processed a lot of code using `scc`. The raw numbers i
  - **71,884,867,919** complexity count according to scc rules
  - **2** new bugs raised in scc
 
-It took about 5 weeks to download and run `scc` over all of the repositories collecting all of the data. It took just over 49 hours to crunch and process the results which was stored in just over 1 TB of JSON.
+Lets get the elephant out of the room first. It was not 10 million projects as the "click bait" title indicates. I was shy by 15,000 so I rounded up. Please forgive me.
+
+It took about 5 weeks to download and run `scc` over the collection of repositories saving all of the data. It took just over 49 hours to crunch the 1 TB of JSON and produce the results below.
 
 ## Quicklinks
 
@@ -66,11 +68,11 @@ It took about 5 weeks to download and run `scc` over all of the repositories col
 
 ## Methodology
 
-Since I run [searchcode.com](https://searchcode.com/) I already have a collection of over 7,000,000 projects across git, mercurial, subversion and such. So why not try processing them? Working with git is usually the easiest solution so I ignored mercurial and subversion and exported the list of git projects. Turns out I actually have 12 million git repositories being tracked, and I should probably update the page to reflect that.
+Since I run [searchcode.com](https://searchcode.com/) I already have a collection of over 7,000,000 projects across git, mercurial, subversion and such. So why not try processing them? Working with git is usually the easiest solution so I ignored mercurial and subversion this time and exported the full list of git projects. Turns out I actually had 12 million git repositories being tracked, and I should probably update the page to reflect that.
 
 So now I have 12 million or so git repositories which I need to download and process.
 
-When you run `scc` you can choose to have it output the results in JSON and optionally saving this file to disk like so ` scc --format json --output myfile.json main.go` the results of which look like the following,
+When you run `scc` you can choose to have it output the results in JSON optionally saving this file to disk like so ` scc --format json --output myfile.json main.go` the results of which look like the following (done for a single file),
 
 {{<highlight json>}}
 [
@@ -110,29 +112,29 @@ When you run `scc` you can choose to have it output the results in JSON and opti
 ]
 {{</highlight>}}
 
-As a larger example here are the results as JSON for the redis project, [redis.json](/static/an-informal-survey/redis.json). All of the results below come from this output without any supporting data sources.
+As a larger example here are the results as JSON for the redis project, [redis.json](/static/an-informal-survey/redis.json). All of the results below come from this output without any supporting additional data.
 
-One thing to keep in mind is that `scc` generally categories languages based on extension (except where extension is shared such as Verilog and Coq). As such if someone puts a HTML file with a java extension it will be counted as a java file. Usually this isn't a problem but at scale it is and something I mention at the end where some files were masquerading as another.
+One thing to keep in mind is that `scc` generally categories languages based on extension (except where extension is shared such as Verilog and Coq). As such if someone puts a HTML file with a java extension it will be counted as a java file. Usually this isn't a problem, because why would you ever do that? But of course at scale it is. It is something I discovered later where some files were masquerading as another.
 
-A while back I wrote code to create github badges using `scc` https://boyter.org/posts/sloc-cloc-code-badges/ and since part of that included caching the results, I modified it slightly to cache the results as JSON in S3.
+A while back I wrote code to create github badges using `scc` https://boyter.org/posts/sloc-cloc-code-badges/ and since part of that included caching the results, I modified it slightly to cache the results as JSON in AWS S3.
 
-With the badge code working in AWS using lambda, I took the exported list and wrote about 15 lines of python to clean the format and make a request to the endpoint. I threw in some python multiprocessing to fork 32 processes to call the endpoint reasonably quickly. 
+With the badge code working in AWS using lambda, I took the exported list of projects, wrote about 15 lines of python to clean the format so it matched my lambda and make a request to it. I threw in some python multiprocessing to fork 32 processes to call the endpoint reasonably quickly. 
 
-This worked brilliantly. However the problem with the above was firstly the cost, and secondly because lambda behind API-Gateway/ALB has a 30 second timeout it couldn't process large repositories fast enough. I knew going in that this was not going to be the most cost effective solution but assuming it cost close to $100 I would have been willing to live with it. After processing 1 million repositories I checked and the cost was about $60 and since I didn't want a $700 AWS bill I decided to rethink my solution. Keep in mind that was mostly storage and CPU, or what was needed to collect this information. Assuming I processed or exported the data it was going to increase the cost considerably.
+This worked brilliantly. However the problem with the above was firstly the cost, and secondly lambda behind API-Gateway/ALB has a 30 second timeout, so it couldn't process large repositories fast enough. I knew going in that this was not going to be the most cost effective solution but assuming it came close to $100 I would have been willing to live with it. After processing 1 million repositories I checked and the cost was about $60 and since I didn't want a $700 AWS bill I decided to rethink my solution. Keep in mind that was mostly storage and CPU, or what was needed to collect this information. Assuming I processed or exported the data it was going to increase the cost considerably.
 
 Since I was already in AWS the hip solution would be to dump the url's as messages into SQS and pull from it using EC2 instances or fargate for processing. Then scale out like crazy. However despite working in AWS in my day job I have always believed in [taco bell programming](http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html). Besides it was only 12 million repositories so I opted to implement a simpler (cheaper) solution.
 
-Running this computation locally was out due to the abysmal state of the internet in Australia. However I do run [searchcode.com](https://searchcode.com/) fairly lean using dedicated servers from Hetzner. These boxes are quite powerful, i7 Quad Core 32 GB RAM machines often with 2 TB of disk space (usually unused). As such they usually has a lot of spare compute based on how I use them. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
+Running this computation locally was out due to the abysmal state of the internet in Australia. However I do run [searchcode.com](https://searchcode.com/) fairly lean using dedicated servers from Hetzner. These boxes are quite powerful, i7 Quad Core 32 GB RAM machines often with 2 TB of disk space (usually unused). As such they usually have a lot of spare compute based on how I use them. The front-end varnish box for instance is doing the square root of zero most of the time. So why not run the processing there?
 
 I didn't quite taco bell program the solution using bash and gnu tools. What I did was write a simple [Go program](https://github.com/boyter/scc-data/blob/master/process/main.go) to spin up 32 go-routines which read from a channel, spawned `git` and `scc` subprocesses before writing the JSON output into S3. I actually wrote a Python solution at first, but having to install the pip dependencies on my clean varnish box seemed like a bad idea and it keep breaking in odd ways which I didn't feel like debugging.
 
-Running this on the box produced the following sort of metrics in htop, and the multiple git/scc processes (scc is not visible in this screen capture) running suggested that everything was working as expected, which I confirmed by looking at the results in S3.
+Running this on the box produced the following sort of metrics in htop, and the multiple git/scc processes running (scc is not visible in this screen capture) suggested that everything was working as expected, which I confirmed by looking at the results in S3.
 
 ![scc-data process load](/static/an-informal-survey/1.png#center)
 
 ## Presenting and Computing Results
 
-Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index I thought I would steal the format of that post with regards to how I wanted to present the information. My twist on the previous however is to add [jQuery DataTables](https://www.datatables.net/) over the large tables of information. This allows you to sort and search/filter results. Click the headers to sort and use the search box to filter. The search box indicates that this is enabled for you. I also added a jump link near these tables so you can skip over them.
+Having recently read https://mattwarren.org/2017/10/12/Analysing-C-code-on-GitHub-with-BigQuery/ and https://psuter.net/2019/07/07/z-index I thought I would steal the format of those posts with regards to how I wanted to present the information. My twist on the previous however is to add [jQuery DataTables](https://www.datatables.net/) over the large tables of information. This allows you to sort and search/filter results. As such you can click the headers to sort and use the search box to filter. The search box indicates that this is enabled for you. I also added a jump link near these tables so you can skip over them if you like.
 
 The size of the data I needed to process raised another question. How does one process 10 million JSON files taking up just over 1 TB of disk space in an S3 bucket? 
 
@@ -140,11 +142,11 @@ The first thought I had was AWS Athena. But since it's going to cost something l
 
 I posted the question on the company slack because why should I solve issues alone.
 
-One idea raised was to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it multiple times. Plus the structure of the data meant having a few tables which means foreign keys and indexes to ensure some level of performance. This feels wasteful because we could just process the data as we read it once off. I was also worried about building a database this large. With just data it would be over 1 TB in size before adding indexes.
+One idea raised was to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it multiple times. Plus the structure of the data meant having a few tables which means foreign keys and indexes to ensure some level of performance. This feels wasteful because we could just process the data as we read it from disk in a single pass. I was also worried about building a database this large. With just data it would be over 1 TB in size before adding indexes.
 
-Seeing as I produced the JSON using spare compute, I thought why not process the results the same way? Of course there is one issue with this. Pulling 1 TB of data out of S3 is going to cost a lot. In the event the program crashes that is going to be annoying. To reduce costs I wanted to pull all the files down locally and save them for further processing. Handy tip, you really do not want to store lots of little files on disk in a single directory. It sucks for runtime performance and file-systems don't like it.
+Seeing as I produced the JSON using spare compute, I thought why not process the results the same way? Of course there is one issue with this. Pulling 1 TB of data out of S3 is going to cost a lot. In the event the program crashes that is going to be annoying. To reduce costs I wanted to pull all the files down locally and save them for further processing. Handy tip, you really do not want to store lots of [little files on disk in a single directory](https://boyter.org/2014/02/storing-tracking-managing-billions-tiny-files-file-system-nightmare/). It sucks for runtime performance and file-systems don't like it.
 
-My answer to this was another simple [go program](https://github.com/boyter/scc-data/blob/master/scc-tar/main.go) to pull the files down from S3 then store them in a tar file. I could then process that file over and over. The process itself is done though **very ugly** [go program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file so I could re-run my questions without having to trawl S3 over and over. I didn't bother with go-routines for this code for two reasons. The first was that I didn't want to max out my server, so this limits it to a single core for the hard CPU work. The second being I didn't want to ensure it was thread-safe.
+My answer to this was another simple [go program](https://github.com/boyter/scc-data/blob/master/scc-tar/main.go) to pull the files down from S3 then store them in a tar file. I could then process that file over and over. The process itself is done though **very ugly** [go program](https://github.com/boyter/scc-data/blob/master/main.go) to process the tar file so I could re-run my questions without having to trawl S3 over and over. I didn't bother with go-routines for this code for two reasons. The first was that I didn't want to max out my server, so this limits it to a single core for the hard CPU work (another to read the tar file was mostly blocked on the processor). The second being I didn't want to ensure it was thread-safe.
 
 With that done, what I needed was a collection of questions to answer. I used the slack brains trust again and crowd-sourced my work colleagues while I came up with some ideas of my own. The result of this mind meld is included below.
 
@@ -167,7 +169,7 @@ It could be done for €73 using the cheapest new dedicated server from Hetzner 
 
 ![hetzner server](/static/an-informal-survey/hetzner.png#center)
 
-Best part though? You can get the VAT removed if you are outside the EU. So give yourself an additional 10% discount on top if you are in this situation as I am.
+Best part though? You can get the VAT removed if you are outside the EU. So give yourself an additional 10% discount on top if you are in this situation.
 
 So were someone to do this from scratch using the same method I eventually went with it would cost under $100 USD to redo the same calculations, and more likely under $50 if you are a little patient or lucky. This also assumes you use the server for less than 2 months which is enough time to download and process. This also includes enough time for you to get a list of 10 million repositories to consider processing as well.
 
@@ -177,7 +179,7 @@ Going much larger then 100 million repositories however is going to require some
 
 ### Data Sources
 
-From the three sources, github, bitbucket and gitlab how many projects came from each? Note that this is counted before excluding empty repositories hence the sum is over the number of repositories that actually form the counts below.
+From the three sources, github, bitbucket and gitlab how many projects came from each? Note that this is counted before excluding empty repositories hence the sum is over the number of repositories that actually form the counts below this point.
 
 | source | count |
 | ------ | ----- |
@@ -1533,7 +1535,7 @@ I could have used a trie structure to "compress" the space and gotten absolute n
 
 This is an interesting one. Which repositories have an explicit license file somewhere? Note that the lack of a license file here does not mean that the project has none, as it might exist within the README or be indicated through SPDX comment tags in-line. it just means that `scc` could not find an explicit license file using its own criteria which at time of writing means a file ignoring case named "license", "licence", "copying", "copying3", "unlicense", "unlicence", "license-mit", "licence-mit" or "copyright".
 
-Sadly it appears that the vast majority of repositories are missing a license. I would argue that all software should have a license for a variety of reasons but here is [someone elses take](https://www.infoworld.com/article/2839560/sticking-a-license-on-everything.html) on that.
+Sadly it appears that the vast majority of repositories are missing a license. I would argue that all software should have a license for a variety of reasons but here is [someone else's take](https://www.infoworld.com/article/2839560/sticking-a-license-on-everything.html) on that.
 
 | has license | count |
 | ----------- | ----- |
@@ -1542,15 +1544,11 @@ Sadly it appears that the vast majority of repositories are missing a license. I
 
 ![scc-data license count](/static/an-informal-survey/hasLicense.png#center)
 
-### Which languages have the most comments?
-
-To make this fair this is averaged over each file as a percentage of comments.
-
 ### How many projects use multiple .gitignore files?
 
 Some may not know this but it is possible to have multiple .gitignore files in a git project. Given that fact how many projects use multiple .gitignore files? While we are looking how many have none?
 
-What I did find that was interesting was one project that has 25,794 .gitignore files in its repository. The next highest was 2,547. I have no idea what is going on there.
+What I did find that was interesting was one project that has 25,794 .gitignore files in its repository. The next highest was 2,547. I have no idea what is going on there. I had a brief look at it and it looks like they are used to allow checking in of the directories but I cannot confirm this.
 
 Bringing this back to something sensible here is a plot of the data up to 20 .gitignore files and close to 99% of the total result.
 
@@ -3259,10 +3257,11 @@ Shortcomings id love to overcome in the above if I decide to do this again.
  - I'd like to add shebang detection into scc https://github.com/boyter/scc/issues/115
  - Some sort of check against number of github stars would be pretty neat.
  - Analysis against the number of commits would be very interesting.
+ - I want to add maintainability index calculations at some point. It would be very cool to see what projects are considered the most maintainable based on their size.
 
 ## So why bother?
 
-Well I can take some of this information and plug it into searchcode.com and scc even if just as some useful data points. The stated goal was pretty much this and it is potentially very useful to know how your project compares to others. Besides it was a fun way to spend a few days solving some interesting problems.
+Well I can take some of this information and plug it into searchcode.com and scc. Even if only some useful data points. The stated goal was pretty much this and it is potentially very useful to know how your project compares to others. Besides it was a fun way to spend a few days solving some interesting problems. Also I think it is safe to say that `scc` is a fairly reliable tool at this point.
 
 In addition, I am working on a tool that helps senior-developer or manager types analyze code looking for languages, large files, flaws etc... with the assumption you have to watch multiple repositories. You put in some code and it will tell you how maintainable it is and what skills you need to maintain it. Useful for determining if you should buy or maintain some code-base and getting an overview of what your development team is producing. Should in theory help teams scale through shared resources. Something like AWS Macie but for code is the angle I am working with. It's something I need for my day job and I suspect others may find use in it, or at least thats the theory.
 
@@ -3270,4 +3269,4 @@ I should probably put an email sign up for that here at some point to gather int
 
 ## Raw / Processed Files
 
-I have included a link to the processed files for those who wish to do their own analysis and corrections. If someone wants to host the raw files to allow others to download it let me know. It is a 83 GB tar.gz file which uncompressed is just over 1 TB in size. It contents consists of just over 9 million JSON files of various sizes.
+I have included a link to the [processed files](/static/an-informal-survey/results.zip) (20 MB) for those who wish to do their own analysis and corrections. If someone wants to host the raw files to allow others to download it let me know. It is a 83 GB tar.gz file which uncompressed is just over 1 TB in size. It contents consists of just over 9 million JSON files of various sizes.
