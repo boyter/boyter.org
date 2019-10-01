@@ -1,6 +1,6 @@
 ---
 title: Processing 40 TB of code from ~10 million projects with a dedicated server and Go for $100
-date: 2019-09-20
+date: 2019-09-30
 ---
 
 <link rel="stylesheet" href="/static/an-informal-survey/table.css" />
