@@ -56,7 +56,6 @@ It took about 5 weeks to download and run `scc` over the collection of repositor
  - [How many "pure" projects](#how-many-pure-projects)
  - [Projects with TypeScript but not JavaScript](#projects-with-typescript-but-not-javascript)
  - [Anyone using CoffeeScript and TypeScript?](#anyone-using-coffeescript-and-typescript)
- - [The most complex code is written in what language?](#the-most-complex-code-is-written-in-what-language)
  - [What's the typical path length, broken up by language](#what-s-the-typical-path-length-broken-up-by-language)
  - [YAML or YML?](#yaml-or-yml)
  - [Upper, lower or mixed case?](#upper-lower-or-mixed-case)
