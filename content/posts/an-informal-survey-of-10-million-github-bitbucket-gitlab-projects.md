@@ -1223,7 +1223,7 @@ You could probably rephrase this to asking what developers write the most commen
 
 <div class="table-11"></div>
 
-| language | complexity |
+| language | comments |
 | -------- | ----------- |
 | ABAP | 56.3020026683825 |
 | ASP | 24.67145299911499 |
@@ -2064,8 +2064,6 @@ Note that some of the more offensive words in the list did have matching filenam
 ### Longest files by lines per language
 
 As you would probably expect Plain Text, SQL, XML, JSON and CSV take the top positions of this one, seeing as they usually contain meta-data, database dumps and the like.
-
-Limited to 40 because at some point there is only a hello world example or such available and the result is not very interesting. It is not surprising to see that someone has checked in `sqlite3.c` somewhere but I would be a little worried about that 3,064,594 line Python file and that 1,997,637 line TypeScript monster.
 
 **NB** Some of the links below MAY not translate 100% due to throwing away some information when I created the files. Most should work, but a few you may need to mangle the URL to resolve.
 
