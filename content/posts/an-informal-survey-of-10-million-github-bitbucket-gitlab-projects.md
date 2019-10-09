@@ -18,7 +18,7 @@ In short I downloaded and processed a lot of code using `scc`. The raw numbers i
  - **9,985,051** total repositories
  - **9,100,083** repositories with at least 1 identified file
  - **884,968** empty repositories (those with no files)
- - **58,389,641** files in all repositories
+ - **3,529,516,251** files in all repositories
  - **40,736,530,379,778** bytes processed (40 TB)
  - **1,086,723,618,560** lines identified
  - **816,822,273,469** code lines identified
@@ -30,6 +30,8 @@ In short I downloaded and processed a lot of code using `scc`. The raw numbers i
 Lets get the elephant out of the room first. It was not 10 million projects as the "click bait" title indicates. I was shy by 15,000 so I rounded up. Please forgive me.
 
 It took about 5 weeks to download and run `scc` over the collection of repositories saving all of the data. It took just over 49 hours to crunch the 1 TB of JSON and produce the results below.
+
+Also note its likely I messed up some of the calculations. I will keep this up to date with the data set provided as this occurs.
 
 ## Quicklinks
 
@@ -3267,3 +3269,9 @@ I should probably put an email sign up for that here at some point to gather int
 ## Raw / Processed Files
 
 I have included a link to the [processed files](/static/an-informal-survey/results.zip) (20 MB) for those who wish to do their own analysis and corrections. If someone wants to host the raw files to allow others to download it let me know. It is a 83 GB tar.gz file which uncompressed is just over 1 TB in size. It contents consists of just over 9 million JSON files of various sizes.
+
+EDIT - A few very kind souls have offered to host the file, the locations are included below
+
+ - https://releases.wekan.team/scc/ 
+
+For hosting that tar.gz file, thanks to <a href="https://www.cncf.io/">CNCF</a> for providing that server to <a href="https://github.com/xet7">xet7</a> for <a href="https://wekan.github.io">Wekan</a> development.
