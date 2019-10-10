@@ -1,6 +1,6 @@
 ---
 title: How to start with Elasticsearch in 2019
-date: 2029-02-15
+date: 2029-10-10
 ---
 
 The below is aimed at developers who need to write a search interface which is backed by Elasticsearch. If you need to perform basic searches across documents with facets then read on. It will not cover the setup or use of tools for elastic such as Kibana.
