@@ -11,3 +11,5 @@ A post that is constantly a work in progress.
  - fd
  - fzf
  - gron
+ - hexyl
+ - hyperfine
