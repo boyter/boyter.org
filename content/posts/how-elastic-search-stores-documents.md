@@ -25,7 +25,7 @@ ElasticSearch
 │   │   └── Document7
 ```
 
-The confusing thing however is that documents stored in elastic don't actually need to have the same structure. You can index both of the documents,
+The confusing thing however is that documents stored in elasticsearch don't actually need to have the same structure. You can index both of the documents,
 
 {{<highlight json>}}
 {
@@ -48,13 +48,13 @@ and
 }
 {{</highlight>}}
 
-Into the same index of the same type and everything will work. However it will be problematic as a consumer as you will need to guess what type the documents coming out of elastic are. It will be especially annoying when it comes to adding facets and other fancy queries on top of your search.
+Into the same index of the same type and everything will work. However it will be problematic as a consumer as you will need to guess what type the documents coming out of elasticsearch are. It will be especially annoying when it comes to adding facets and other fancy queries on top of your search.
 
 > Rule of thumb. Use an index per project and type per each unique thing you want to search against.
 
 For the purposes of your project, you probably want a single index and then one or multiple types. Have your index named something like what your project is called. As for the types for each "thing" you want to search across E.G. `ticket`, `document`, `metadata record` and define a type for each one.
 
-To store a document in elastic under an index and type you POST to the endpoint with the JSON you want to create.
+To store a document in elasticsearch under an index and type you POST to the endpoint with the JSON you want to create.
 
 For the above you could POST our Keanu document to the index `film` and the type `actor` to the endpoint `http://localhost:9200/film/actor` with the type as `application/json`. The result of this should be similar to the below,
 
@@ -75,10 +75,10 @@ For the above you could POST our Keanu document to the index `film` and the type
 }
 {{</highlight>}}
 
-The above indicates that the document was added to the index film with the type actor and that Elastic has generated the unique ID for this document as being `xeB3nGcB5wabZ-h5JSJW`.
+The above indicates that the document was added to the index film with the type actor and that elasticsearch has generated the unique ID for this document as being `xeB3nGcB5wabZ-h5JSJW`.
 
-> Don't use elastic as a primary data store. Use another document store for persistence and populate elastic using it. Having a fast rebuild process is a good idea and using a highly durable data-store for your data such as S3 is an excellent backup solution.
+> Don't use elasticsearch as a primary data store. Use another document store for persistence and populate elasticsearch using it. Having a fast rebuild process is a good idea and using a highly durable data-store for your data such as S3 is an excellent backup solution.
 
-It is worth-while writing a robust way of populating elastic from your documents before doing anything else. This allows you to delete and rebuild the index at will allowing for rapid iteration. It also ensures that you have a way to rebuild everything should your elastic cluster die or have issues. For a smallish cluster of 6 nodes with 4 CPU's each you should be able to index over 1 million documents in under an hour.
+It is worth-while writing a robust way of populating elasticsearch from your documents before doing anything else. This allows you to delete and rebuild the index at will allowing for rapid iteration. It also ensures that you have a way to rebuild everything should your elasticsearch cluster die or have issues. For a smallish cluster of 6 nodes with 4 CPU's each you should be able to index over 1 million documents in under an hour.
 
-> If you want to use a custom id and not an elastic generated one post to `http://localhost:9200/film/actor/id` where id is the id you want to use. Keep in mind that if that id already exists you will replace the existing document with your new one
+> If you want to use a custom id and not an elasticsearch generated one post to `http://localhost:9200/film/actor/id` where id is the id you want to use. Keep in mind that if that id already exists you will replace the existing document with your new one

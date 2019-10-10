@@ -3,11 +3,11 @@ title: Elasticsearch mappings - How to add Facets and Aggregations
 date: 2019-10-10
 ---
 
-Mappings define type and values in documents. You use them to specify that fields within your document should be treated as numbers, dates, geo-locations and whatever other types elastic supports. You can also define the stemming algorithm used and other useful index fields.
+In elasticsearch mappings define type and values in documents. You use them to specify that fields within your document should be treated as numbers, dates, geo-locations and whatever other types elasticsearch supports. You can also define the stemming algorithm used and other useful index fields.
 
  > You have to define a mapping if you want to provide functionality such as aggregations or facets. You cannot add a mapping after indexing any document. To add one afterwards requires dropping the index and re-indexing the content.
 
-You define a mapping by putting to the index/type inside elastic before then adding a document. Consider for example this document defining Keanu Reeves. 
+You define a mapping by putting to the index/type inside elasticsearch before then adding a document. Consider for example this document defining Keanu Reeves. 
 
 {{<highlight json>}}
 {
@@ -58,7 +58,7 @@ To set the mapping you need to PUT the above to an index, such as `http://localh
 
 With this done you can then put the actor document to `http://localhost:9200/film/actor` where it would be indexed against the mapping.
 
-There are ways to add dynamic mappings where elastic will guess the type, but generally I found this more problematic then its worth. Explicit is always better then implicit when it comes to code in my opinion.
+There are ways to add dynamic mappings where elasticsearch will guess the type, but generally I found this more problematic then its worth. Explicit is always better then implicit when it comes to code in my opinion.
 
 With the above done you can now perform facet/aggregation queries against documents of type actor in the film index.
 
