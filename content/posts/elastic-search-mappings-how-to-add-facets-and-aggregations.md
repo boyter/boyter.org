@@ -1,6 +1,6 @@
 ---
 title: Elasticsearch mappings - How to add Facets and Aggregations
-date: 2019-10-10
+date: 2019-10-12
 ---
 
 In elasticsearch mappings define type and values in documents. You use them to specify that fields within your document should be treated as numbers, dates, geo-locations and whatever other types elasticsearch supports. You can also define the stemming algorithm used and other useful index fields.
