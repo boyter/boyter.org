@@ -37,4 +37,10 @@ So what do you do as a response to such things?
 
 // Over compensating for past failures
 
-So what I wanted was a tool that
+So what I wanted was a tool that combines both, but works across all languages.
+
+I am not original enough to have had this idea, and it turns out at the time where were 2 other projects I could find. Tokei (great name) and Loc. Both were written in rust and both claim to offer exceptional performance.
+
+Challange accepted.
+
+My theory was its likely they missed some optimisations that I could implement.
