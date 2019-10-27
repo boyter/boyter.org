@@ -17,7 +17,7 @@ As such I was working on projects in other languages such as C# and Java.
 
 One that came past was to upgrade a an application written in C# with a JavaScript frontend. The goal was to upgrade the frontend and fix some backend issues. It was meant to take 6 weeks. It took over a year.
 
-Code Iceberg
+The reason is that I massively underestimated how large a project it was. So what do we do when we make mistakes?
 
 When looking though any new project one tends to poke through the code, looking at login methods, database calls, file logic, logging etc... One thing thats very useful is knowing how large the project is and what languages are included.
 
