@@ -3,11 +3,30 @@ title: Sloc Cloc and Code - Can a crusty Go program outperform a well written Ru
 date: 2029-10-12
 ---
 
+
+
+Sloc Cloc and Code - Can a crusty Go program outperform a well written Rust Project?
+TALK
+Description
+Sloc cloc and code. How a death march project lead to learning Go, the creation of a source lines of code counter which is faster and more accurate then the Rust/ATS/C equivalents, while learning about some really bizarre performance characteristics.
+
+About Ben Boyter
+A technical lead for Kablamo but at heart a codemonkey. I write about various topics on my blog https://boyter.org/ which occasionally makes the front of the orange site, as well as run searchcode.com as a side gig for fun. I like writing code, walks on beach and getting caught in the rain. I hate eating raw tomato unless you prepare it somehow, and slices on a hamburger does not count as preparation.
+
+
+
+
+
+
+
+
+
+
 Hello All!
 
 Hope you are having a wonderful day.
 
-So I am Ben. I am a technical lead for Kablamo which means "codemoney". As you are probably aware my talk is about a command line tool I created. The talk is name "Sloc Cloc and Code - Can a crusty Go program outperform a well written Rust Project?"
+So I am Ben. I am not an alcholic, but I might be if this does't go well. I am a technical lead for Kablamo which means "codemoney". As you are probably aware my talk is about a command line tool I created. The talk is name "Sloc Cloc and Code - Can a crusty Go program outperform a well written Rust Project?"
 
 // title slide with name + photo
 
