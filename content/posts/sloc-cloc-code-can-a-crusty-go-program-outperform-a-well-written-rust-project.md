@@ -15,7 +15,9 @@ As I mentioned I work for Kablamo. Kablamo builds a lot of custom software on AW
 
 As such I was working on projects in other languages such as C# and Java. 
 
-The catalyst for everything was a C# project I landed. It was a large application previously maintained by two teams. We were tasked with upgrading the frontend look and feel and to resolve issues on the backend. 
+One that came past was to upgrade a an application written in C# with a JavaScript frontend. The goal was to upgrade the frontend and fix some backend issues. It was meant to take 6 weeks. It took over a year.
+
+Code Iceberg
 
 When looking though any new project one tends to poke through the code, looking at login methods, database calls, file logic, logging etc... One thing thats very useful is knowing how large the project is and what languages are included.
 
@@ -43,4 +45,7 @@ I am not original enough to have had this idea, and it turns out at the time whe
 
 Challange accepted.
 
-My theory was its likely they missed some optimisations that I could implement.
+My theory was it's likely they missed some optimisations that I could implement. If nothing else I would get what I wanted which was a fast code counter which included some ideas of complexity.
+
+So lets start talking about the first issue I had. Which was I wrote a basic version. I followed the usual Go method of channels to communicate which almost fits this model perfectly (more on that later).
+
