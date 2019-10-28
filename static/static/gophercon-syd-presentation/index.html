@@ -77,14 +77,15 @@
 					But lets see if anyone has considered this...<br>
 					<a href="https://github.com/XAMPPRocky/tokei">tokei</a>, <a href="https://github.com/cgag/loc">loc</a>, <a href="https://github.com/vmchale/polyglot">polyglot</a>, <a href="https://gitlab.com/esr/loccount">loccount</a> and <a href="https://github.com/hhatto/gocloc">gocloc</a>
 					<br><br>
-					NONE do code complexity.
+					SPIN! Calculate some value for code complexity.
 					</p>
 				</section>
 
 				<section>
-					<h2>Goals!</h2>
+					<h2>Goals</h2>
 					Learn Go.<br>
 					Be as fast as possible (and TRY to beat tokei and loc).<br>
+					Be <u>readable</u> Go<br>
 					Push CPU to limits (unlikely) OR to my limits (likely)<br>
 					Be as accurate as possible<br>
 					Be a library<br>
@@ -94,8 +95,8 @@
 
 				<section>
 					<h2>Design</h2>
-Processes seperated by channels<br>
-Channel buffers limited to CPU cores for backpressure.<br>
+Processes separated by channels<br>
+Channel buffers size = CPU cores for back-pressure.<br>
 Tried intermediate channel buffers... no difference<br>
 <img src="./img/design1.jpg" />
 				</section>
@@ -125,13 +126,13 @@ Case 7 Create a directory that with 100 subdirectories and 100 files in each
 				</section>
 
 				<section>
-					<h2>File Walk Process</h2>
+					<h2>1. File Walk Process</h2>
 					What about .gitignore files?
 				</section>
 
 
 				<section>
-					<h2>File Reading</h2>
+					<h2>2. File Reading</h2>
 					<p>
 					Know your use case! 18554 bytes in my case<br>
 					Memory maps or Scanner?<br>
@@ -145,7 +146,7 @@ scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
 				</section>
 
 				<section>
-					<h2>File Processor</h2>
+					<h2>3. File Processor</h2>
 					<p>3 main ways to count code.</p>
 					<ol>
 						<li>Use regular expressions</li>
@@ -157,23 +158,144 @@ scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
 
 
 				<section>
-					<h2>Mechanical Sympathy</h2>
+					<h2>3. Mechanical Sympathy</h2>
 					<blockquote>"You don't have to be an engineer to be be a racing driver, but you do have to have Mechanical Sympathy."</blockquote>
 					<img src="./img/jackie-stewart.jpg" height="300px" />
 				</section>
 
 				<section>
-					<h2>How to Go fast Multicore Edition</h2>
+					<h2>3. How to Go fast Multicore Edition</h2>
 					<p>
 					Do as little as possible.<br>
 					On many cores.<br>
 					Make it easy to do the next thing.<br><br>
-					The key to making programs fast is to make them do practically nothing<br>
+					</p>
+					<blockquote>"The key to making programs fast is to make them do practically nothing"</blockquote><br>
+				</section>
+
+
+				<section>
+					<h2>3. Byte Comparison</h2>
+					<p>Which is fastest?</p>
+<pre><code style="font-size: 16px;">equal := reflect.DeepEqual(one, two)</code></pre>
+<pre><code style="font-size: 16px;">equal := bytes.Equal(one, two)</code></pre>
+<pre><code style="font-size: 16px;">equal := true
+for j := 0; j < len(one); j++ {
+	if one[j] != two[j] {
+		equal = false
+		break
+	}
+}
+</code></pre>
+				</section>
+
+				<section>
+					<h2>3. Byte Comparison</h2>
+<pre>
+BenchmarkCheckByteEqualityReflect-8                5000000 344.00 ns/op
+BenchmarkCheckByteEqualityBytes-8                300000000   5.52 ns/op
+BenchmarkCheckByteEqualityLoopWithAddtional-8    500000000   3.76 ns/op
+BenchmarkCheckByteEqualityLoop-8                 500000000   3.41 ns/op <--
+</pre>
+				</section>
+
+				<section>
+					<h2>3. Loop & Check VS Change & Loop</h2>
+					<table>
+						<tr>
+							<td><img src="./img/process1.png" /></td>
+							<td><img src="./img/process2.png" /></td>
+						</tr>
+					</table>
+				</section>
+
+				<section>
+					<h2>3. Loop & Check VS Change & Loop</h2>
+<pre>
+Benchmark #1: ./scc1 linux
+  Time (mean ± σ):      2.343 s ±  0.097 s    [User: 27.740 s, System: 0.868 s]
+  Range (min … max):    2.187 s …  2.509 s
+
+Benchmark #1: ./scc2 linux
+  Time (mean ± σ):      1.392 s ±  0.019 s    [User: 19.415 s, System: 0.825 s]
+  Range (min … max):    1.367 s …  1.430 s
+</pre>
+				</section>
+
+				<section>
+					<h2>3. if statement Ordering</h2>
+					<p>
+						Serious micro-optimisation.<br>
+						
+					</p>
+<pre>
+$ hyperfine -m 50 'scc1 cpython'
+Benchmark #1: scc1 cpython
+  Time (mean ± σ):     522.9 ms ±   9.3 ms    [User: 1.890 s, System: 1.740 s]
+  Range (min … max):   510.1 ms … 577.7 ms
+
+$ hyperfine -m 50 'scc2 cpython'
+Benchmark #1: scc2 cpython
+  Time (mean ± σ):     491.0 ms ±  10.2 ms    [User: 1.628 s, System: 1.763 s]
+  Range (min … max):   476.3 ms … 539.5 ms
+</pre>
+					<p>BUT in tight loops...</p>
+				</section>
+
+				<section>
+					<h2>3 .Algorithms</h2>
+					<p>
+						Loop<br>
+						Bit-Mask.<br>
+						<a href="https://en.wikipedia.org/wiki/Trie">Trie</a>
 					</p>
 				</section>
 
-				
+				<section>
+					<h2>3. Garbage Collector</h2>
+					<p>Not tune-able. On/Off.</p>
+					<img src="./img/throughput.jpg" />
+				</section>
 
+
+				<section>
+					<h2>3. Lazy Loading</h2>
+					<p>Support 200+ languages.</p>
+					<p>More noticeable with smaller repositories</p>
+<pre>
+Benchmark #1: scc-2.1.0 redis
+  Time (mean ± σ):      81.6 ms ±   5.0 ms    [User: 173.8 ms, System: 265.4 ms]
+  Range (min … max):    75.5 ms …  97.1 ms
+
+Benchmark #1: scc-2.0.0 redis
+  Time (mean ± σ):     124.4 ms ±   2.4 ms    [User: 168.6 ms, System: 289.1 ms]
+  Range (min … max):   120.0 ms … 128.4 ms
+</pre>
+				</section>
+
+				<section>
+					<h2>3. Anything else?</h2>
+					<p>Probably little "low hanging fruit"</p>
+				</section>
+
+
+				<section>
+					<h2>4. Summerise</h2>
+					<p>Limited output (thankfully)</p>
+					<p><a href="https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go">Handy Benchmark</a></p>
+<pre>
+BenchmarkConcat-8              1000000  64850.00 ns/op
+BenchmarkBuffer-8            200000000      6.76 ns/op
+BenchmarkCopy-8             1000000000      3.06 ns/op
+BenchmarkStringBuilder-8     200000000      7.74 ns/op
+</pre>
+
+<pre>
+// When using columise   ~28726 ns/op
+// When using home grown ~14293 ns/op
+</pre>
+
+				</section>
 
 				<section>
 					<h2>Fair Benchmarks</h2>
@@ -191,33 +313,11 @@ scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
 
 
 				<section>
-					<h2>Loop and check state VS change state and loop</h2>
-					<table>
-						<tr>
-							<td><img src="./img/process1.png" /></td>
-							<td><img src="./img/process2.png" /></td>
-						</tr>
-					</table>
+					<h2>4. Summeriser</h2>
+					<p></p>
 				</section>
 
-
-				<section>
-					<h2>Byte Comparison</h2>
-
-					Which is fastest?
-
-<pre><code style="font-size: 16px;">equal := reflect.DeepEqual(one, two)</code></pre>
-<pre><code style="font-size: 16px;">equal := bytes.Equal(one, two)</code></pre>
-<pre><code style="font-size: 16px;">equal := true
-for j := 0; j < len(one); j++ {
-	if one[j] != two[j] {
-		equal = false
-		break
-	}
-}
-</code></pre>
-
-				</section>
+				
 
 			</div>
 		</div>
