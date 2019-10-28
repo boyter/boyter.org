@@ -47,48 +47,57 @@
 				</section>
 
 				<section>
+					<h2>Code Iceberg</h2>
 					<img src="./img/code-iceberg.jpg" />
 					<small>Image by © Ralph A. Clevenger/CORBIS</small>
 				</section>
 
 				<section>
 					<h2>How to spot code icebergs?</h2>
-					https://github.com/AlDanial/cloc
-					cloc counts blank lines, comment lines, and physical lines of source code in many programming languages.
-					very full featured
-					probably not an example of a fast program
+					<p>
+					SLOC/CLOC counters<br>
+					<a href="https://github.com/AlDanial/cloc">cloc</a> (the OG) counts blank lines, comment lines, and physical lines of source code in many programming languages<br>
+					VERY full featured.<br>
+					probably not an example of a fast program.
+					</p>
 				</section>
 
 				<section>
 					<h2>How to spot code icebergs? Continued...</h2>
-						Cyclomatic Complexity
-						<img src="./img/code-metrics.jpg" />
+					<p>
+					Cyclomatic Complexity
+					<img src="./img/code-metrics.jpg" />
+					</p>
 				</section>
 
 				<section>
-					<h2>I am not original</h2>
+					<h2>BTW I am not original</h2>
+					<p>
 					<a href="https://github.com/XAMPPRocky/tokei">Tokei</a>, <a href="https://github.com/cgag/loc">Loc</a>, <a href="https://github.com/hhatto/gocloc">Gocloc</a>, <a href="https://github.com/vmchale/polyglot">Polyglot</a>, <a href="https://gitlab.com/esr/loccount">loccount</a>
-
-					BUT none do code complexity and author of tokei explicitly refuses to add
+					<br><br>
+					BUT none do code complexity and author of tokei explicitly refused to add
+					</p>
 				</section>
 
 				<section>
 					<h2>Goals!</h2>
-					Be as fast as possible (show the Rust people what we can do!)
-					Be as accurate as possible!
-
+					Learn Go (and Go-Routines)<br>
+					Be as fast as possible (and TRY to beat Rust).<br>
+					Be as accurate as possible!<br>
+					Be a library!<br>
+					Guess complexity!<br>
 				</section>
 
 
 				<section>
 					<h2>Design</h2>
-<pre>
-Walk Process -> File Reader -> File Processor -> Summeriser
-</pre>
 
-				
+Processes seperated by channels<br>
+<img src="./img/design1.jpg" />
 
 				</section>
+
+
 
 
 				<section>
@@ -96,27 +105,38 @@ Walk Process -> File Reader -> File Processor -> Summeriser
 
 					3 ways to count code.
 
-					1. Use regex
-					2. Use AST
-					3. State machine
+					<ol>
+						<li>Use regex (cloc)</li>
+						<li>Use AST (Visual Studio)</li>
+						<li>State machine (tokei, loc, scc, polyglot)</li>
+					</ol>
 
 				</section>
 
 
 				<section>
+					<h2>Mechanical Sympathy</h2>
+					<blockquote>"You don't have to be an engineer to be be a racing driver, but you do have to have Mechanical Sympathy."</blockquote>
+					<img src="./img/jackie-stewart.jpg" height="300px" />
+				</section>
+
+				<section>
+					<h2>How to Go fast in modern world</h2>
+					Do less.<br>
+					On many cores.<br>
+					Make it easy to do the next thing.
+				</section>
+
+				<section>
 					<h2>File Walking</h2>
-					Native file walk is slow!
+					Go build in file walk is slow!
 
 					https://boyter.org/2018/03/quick-comparison-go-file-walk-implementations/
 
 					https://github.com/boyter/scc/blob/master/examples/performance_tests/create_folders_with_files.py
 
 					# GRAPH HERE SHOWING
-
-					Fair benchmark...
-
-					Deep directories
-
+<pre>
 Case 0 Create a directory thats quite deep and put a 10000 files at the end
 Case 1 Create a directory thats quite deep and put 100 files in each folder
 Case 2 Create a directory that has a single level and put 10000 files in it
@@ -125,11 +145,14 @@ Case 4 Create a directory that with 10 subdirectories and 1000 files in each
 Case 5 Create a directory that with 20 subdirectories and 500 files in each
 Case 6 Create a directory that with 5 subdirectories and 2000 files in each
 Case 7 Create a directory that with 100 subdirectories and 100 files in each
+</pre>
+
 
 				</section>
 
 				<section>
 					<h2>File Walking Continued</h2>
+					What about .gitignore files?
 				</section>
 
 
@@ -142,12 +165,16 @@ Case 7 Create a directory that with 100 subdirectories and 100 files in each
 					Tried to create one as fair as possible
 				</section>
 
+				<section>
+					<h2>Flame Graph</h2>
+					<img src="./img/flame-graph.jpg" />
+				</section>
+
 
 				<section>
 					<h2>Byte Comparison</h2>
 
 					Which is fastest?
-
 
 <pre><code style="font-size: 16px;">equal := reflect.DeepEqual(one, two)</code></pre>
 <pre><code style="font-size: 16px;">equal := bytes.Equal(one, two)</code></pre>
@@ -180,3 +207,22 @@ for j := 0; j < len(one); j++ {
 		</script>
 	</body>
 </html>
+
+
+<!--
+digraph G {
+  "for (byte in file_bytes)" -> "switch (state)"
+  "switch (state)" -> "process (byte)"
+  "process (byte)" -> "update (state)"
+  "update (state)" -> "for (byte in file_bytes)"
+}
+
+digraph G {
+  "for (byte in file_bytes)" -> "switch (state)"
+  "switch (state)" -> "process (byte)"
+  "process (byte)" -> "for (byte till newline || change state)"
+  "for (byte till newline || change state)" -> "process (byte)"
+  "for (byte till newline || change state)" -> "update (state)"
+  "update (state)" -> "for (byte in file_bytes)"
+}
+-->

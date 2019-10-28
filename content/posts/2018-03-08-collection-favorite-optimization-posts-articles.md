@@ -50,5 +50,7 @@ In no particular order.
  - Making the obvious code fast https://jackmott.github.io/programming/2016/07/22/making-obvious-fast.html with interesting HN comments https://news.ycombinator.com/item?id=19680595
  - Optimizing M3: How Uber Halved Our Metrics Ingestion Latency by (Briefly) Forking the Go Compiler https://eng.uber.com/optimizing-m3/ https://news.ycombinator.com/item?id=19692451
  - Linux Load Averages: Solving the Mystery http://www.brendangregg.com/blog/2017-08-08/linux-load-averages.html
+ - The state of caching in Go https://blog.dgraph.io/post/caching-in-go/
+ - Introducing Ristretto: A High-Performance Go Cache https://blog.dgraph.io/post/introducing-ristretto-high-perf-go-cache/
 
 Will attempt to keep this list up to date as I find other content that really impresses me.
