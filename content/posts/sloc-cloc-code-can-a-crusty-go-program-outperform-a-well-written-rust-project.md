@@ -68,3 +68,7 @@ My theory was it's likely they missed some optimisations that I could implement.
 
 So lets start talking about the first issue I had. Which was I wrote a basic version. I followed the usual Go method of channels to communicate which almost fits this model perfectly (more on that later).
 
+
+
+
+<pre><code>ioutil.ReadFile(res.Location)</code></pre>

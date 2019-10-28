@@ -58,7 +58,7 @@
 					SLOC/CLOC counters<br>
 					<a href="https://github.com/AlDanial/cloc">cloc</a> (the OG) counts blank lines, comment lines, and physical lines of source code in many programming languages<br>
 					VERY full featured.<br>
-					probably not an example of a fast program.
+					All other tools descend from it
 					</p>
 				</section>
 
@@ -71,44 +71,86 @@
 				</section>
 
 				<section>
-					<h2>BTW I am not original</h2>
+					<h2>Are you thinking what I am!?</h2>
 					<p>
-					<a href="https://github.com/XAMPPRocky/tokei">Tokei</a>, <a href="https://github.com/cgag/loc">Loc</a>, <a href="https://github.com/hhatto/gocloc">Gocloc</a>, <a href="https://github.com/vmchale/polyglot">Polyglot</a>, <a href="https://gitlab.com/esr/loccount">loccount</a>
+					We totally need another code counter!<br><br>
+					But lets see if anyone has considered this...<br>
+					<a href="https://github.com/XAMPPRocky/tokei">tokei</a>, <a href="https://github.com/cgag/loc">loc</a>, <a href="https://github.com/vmchale/polyglot">polyglot</a>, <a href="https://gitlab.com/esr/loccount">loccount</a> and <a href="https://github.com/hhatto/gocloc">gocloc</a>
 					<br><br>
-					BUT none do code complexity and author of tokei explicitly refused to add
+					NONE do code complexity.
 					</p>
 				</section>
 
 				<section>
 					<h2>Goals!</h2>
-					Learn Go (and Go-Routines)<br>
-					Be as fast as possible (and TRY to beat Rust).<br>
-					Be as accurate as possible!<br>
-					Be a library!<br>
-					Guess complexity!<br>
+					Learn Go.<br>
+					Be as fast as possible (and TRY to beat tokei and loc).<br>
+					Push CPU to limits (unlikely) OR to my limits (likely)<br>
+					Be as accurate as possible<br>
+					Be a library<br>
+					Guess complexity<br>
 				</section>
 
 
 				<section>
 					<h2>Design</h2>
-
 Processes seperated by channels<br>
+Channel buffers limited to CPU cores for backpressure.<br>
+Tried intermediate channel buffers... no difference<br>
 <img src="./img/design1.jpg" />
+				</section>
+
+				<section>
+					<h2>1. File Walking</h2>
+					Go's <a href="https://boyter.org/2018/03/quick-comparison-go-file-walk-implementations/">built in file walk is slow</a>! (comparatively)<br>
+					Probably because its also deterministic
+
+					
+
+					https://github.com/boyter/scc/blob/master/examples/performance_tests/create_folders_with_files.py
+
+					# GRAPH HERE SHOWING
+<pre>
+Case 0 Create a directory thats quite deep and put a 10000 files at the end
+Case 1 Create a directory thats quite deep and put 100 files in each folder
+Case 2 Create a directory that has a single level and put 10000 files in it
+Case 3 Create a directory that has a two levels with 10000 directories in the second with a single file in each
+Case 4 Create a directory that with 10 subdirectories and 1000 files in each
+Case 5 Create a directory that with 20 subdirectories and 500 files in each
+Case 6 Create a directory that with 5 subdirectories and 2000 files in each
+Case 7 Create a directory that with 100 subdirectories and 100 files in each
+</pre>
+
 
 				</section>
 
-
+				<section>
+					<h2>File Walk Process</h2>
+					What about .gitignore files?
+				</section>
 
 
 				<section>
-					<h2>Design</h2>
+					<h2>File Reading</h2>
+					<p>
+					Know your use case! 18554 bytes in my case<br>
+					Memory maps or Scanner?<br>
+					Burnt a lot of time here.<br>
+<pre>$ time scc linux
+DEBUG 2018-03-27T21:34:26Z: milliseconds to walk directory: 7593
+--SNIP--
+scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
+					</p>
 
-					3 ways to count code.
+				</section>
 
+				<section>
+					<h2>File Processor</h2>
+					<p>3 main ways to count code.</p>
 					<ol>
-						<li>Use regex (cloc)</li>
-						<li>Use AST (Visual Studio)</li>
-						<li>State machine (tokei, loc, scc, polyglot)</li>
+						<li>Use regular expressions</li>
+						<li>Use abstract syntax tree (AST)</li>
+						<li>State machine</li>
 					</ol>
 
 				</section>
@@ -130,33 +172,7 @@ Processes seperated by channels<br>
 					</p>
 				</section>
 
-				<section>
-					<h2>File Walking</h2>
-					Go build in file walk is slow!
-
-					https://boyter.org/2018/03/quick-comparison-go-file-walk-implementations/
-
-					https://github.com/boyter/scc/blob/master/examples/performance_tests/create_folders_with_files.py
-
-					# GRAPH HERE SHOWING
-<pre>
-Case 0 Create a directory thats quite deep and put a 10000 files at the end
-Case 1 Create a directory thats quite deep and put 100 files in each folder
-Case 2 Create a directory that has a single level and put 10000 files in it
-Case 3 Create a directory that has a two levels with 10000 directories in the second with a single file in each
-Case 4 Create a directory that with 10 subdirectories and 1000 files in each
-Case 5 Create a directory that with 20 subdirectories and 500 files in each
-Case 6 Create a directory that with 5 subdirectories and 2000 files in each
-Case 7 Create a directory that with 100 subdirectories and 100 files in each
-</pre>
-
-
-				</section>
-
-				<section>
-					<h2>File Walking Continued</h2>
-					What about .gitignore files?
-				</section>
+				
 
 
 				<section>
