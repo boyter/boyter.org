@@ -33,11 +33,11 @@
 							</td>
 							<td>
 								Ben Boyter <a href="https://twitter.com/boyter">@boyter</a><br>
-								Officially Tech Lead<br>
+								Title "Tech Lead"<br>
 								Really a Code Monkey for <a href="https://www.kablamo.com.au/">Kablamo</a>.
-								Just search for boyter<br>
 								<pre><code style="font-size: 16px;">func Produce(c Coffee, b Beer) (Code, Cloud, []error)</code></pre>
 								Can a crusty Go program outperform a well written Rust Project?<br>
+								Sloc Cloc and Code. Name?
 							</td>
 						</tr>
 					</table>
@@ -56,10 +56,10 @@
 				<section>
 					<h2>How to spot code icebergs?</h2>
 					<p>
-					SLOC/CLOC counters<br>
-					<a href="https://github.com/AlDanial/cloc">cloc</a> (the OG) counts blank lines, comment lines, and physical lines of source code in many programming languages<br>
+					SLOC/CLOC counters<br><br>
+					<a href="https://github.com/AlDanial/cloc">cloc</a> counts blank lines, comment lines, and physical lines of source code in many programming languages<br><br>
 					VERY full featured.<br><br>
-					All other tools descend from it
+					Most other tools descend from it
 					</p>
 				</section>
 
@@ -75,10 +75,10 @@
 					<h2>I am thinking...</h2>
 					<p>
 					We totally need another code counter!<br><br>
-					But lets see if anyone has considered this...<br>
+					Has anyone has considered this?<br>
 					<a href="https://github.com/XAMPPRocky/tokei">tokei</a>, <a href="https://github.com/cgag/loc">loc</a>, <a href="https://github.com/vmchale/polyglot">polyglot</a>, <a href="https://gitlab.com/esr/loccount">loccount</a> and <a href="https://github.com/hhatto/gocloc">gocloc</a>.
 					<br><br>
-					SPIN! Calculate some value for code complexity.
+					SPIN! Calculate some "value" for code complexity.
 					</p>
 				</section>
 
@@ -88,13 +88,14 @@
 					Be as fast as possible.<br>
 					Push CPU limits OR my limits.<br>
 					Be as accurate as possible.<br>
-					Guess complexity.<br>
+					Estimate complexity.<br>
 				</section>
 
 
 				<section>
 					<h2>Design</h2>
-Processes separated by channels. Streaming.<br>
+					4 stage pipeline<br>
+Processes separated by channels.<br>
 Buffered channel's mostly for back-pressure.<br>
 <img src="./img/design1.jpg" />
 				</section>
@@ -102,7 +103,7 @@ Buffered channel's mostly for back-pressure.<br>
 				<section>
 					<h2>1. File Walking</h2>
 					Go's <a href="https://boyter.org/2018/03/quick-comparison-go-file-walk-implementations/">built in file walk is slow</a>! (comparatively)<br>
-					<a href="https://github.com/boyter/scc/blob/master/examples/performance_tests/create_folders_with_files.py">Benchmark</a><br>
+					<a href="https://github.com/boyter/scc/blob/master/examples/performance_tests/create_folders_with_files.py">File walk benchmark</a><br>
 
 					<img src="./img/benchmark-file-walk.png" />
 
@@ -121,7 +122,7 @@ Case 7 Create a directory that with 100 subdirectories and 100 files in each
 
 				<section>
 					<h2>Still not fast enough</h2>
-					<p>godirwalk good, but not enough</p>
+					<p>godirwalk an improvement, but not enough</p>
 					<p>Make parallel!</p>
 					<p>New problem .gitignore / .ignore files</p>
 				</section>
@@ -180,21 +181,27 @@ xxxxxxx     ");</code></pre>
 
 				</section>
 
+
+				<section>
+					<h2>Problem</h2>
+					<p>Making scc accurate made it twice as slow as tokei</p>
+				</section>
+
 				<section>
 					<h2>Mechanical Sympathy</h2>
 					<blockquote>"You don't have to be an engineer to be be a racing driver, but you do have to have Mechanical Sympathy."</blockquote>
 					<img src="./img/jackie-stewart.jpg" height="300px" /><br>
-					<small>Jackie Stewart being cool</small>
+					<small>Jackie Stewart looking cool</small>
 				</section>
 
 				<section>
 					<h2>How to Go fast 2019</h2>
+					<blockquote>"The key to making programs fast is to make them do practically nothing"</blockquote>
 					<p>
 					Do as little as possible.<br>
 					On many cores.<br>
 					Make it easy to do the next thing.<br><br>
 					</p>
-					<blockquote>"The key to making programs fast is to make them do practically nothing"</blockquote><br>
 				</section>
 
 				<section>
@@ -214,8 +221,9 @@ Showing top 10 nodes out of 83
 
 				<section>
 					<h2>Go Fast - Benchmark</h2>
+					<blockquote>In god we trust. Everyone else bring data.</blockquote>
 					<p>Go benchmark tools are pretty good.</p>
-					<p>Try it and see</p>
+					<p>Code speaks volumes. Prove it.</p>
 				</section>
 
 				<section>
@@ -264,6 +272,7 @@ Benchmark #1: ./scc2 linux
   Time (mean ± σ):      1.392 s ±  0.019 s    [User: 19.415 s, System: 0.825 s]
   Range (min … max):    1.367 s …  1.430 s
 </pre>
+<p>Why?</p>
 				</section>
 
 				<section>
@@ -290,9 +299,9 @@ Benchmark #1: scc2 cpython
 					<h2>Algorithms</h2>
 					<p>
 						How to check for conditions?
-						<pre>/* /** */ if for each <%-- --> (* //// switch while // " ''' """</pre>
-						Loop. Bit-Mask.<br>
-						<a href="https://en.wikipedia.org/wiki/Trie">Trie</a><br>
+						<pre>/* /** <%-- --> # //</pre>
+						<pre>for if each while switch && || != ==</pre>
+						Loop. Bit-Masks. <a href="https://en.wikipedia.org/wiki/Trie">Trie</a><br>
 
 						<img src="./img/trie.png" height="150px" /><br>
 						A trie for keys "A", "to", "tea", "ted", "ten", "i", "in", and "inn".
@@ -312,6 +321,7 @@ Benchmark #1: scc2 cpython
 				<section>
 					<h2>Lazy Loading</h2>
 					<p>Support 200+ languages.</p>
+					<p>Also caching of filenames -> language</p>
 					<p>Most noticeable with smaller repositories</p>
 <pre>
 Benchmark #1: scc-2.0.0 redis
@@ -328,8 +338,8 @@ Benchmark #1: scc-2.1.0 redis
 					<h2>Annoyances</h2>
 					<p>Nested Multi-line Comments</p>
 					<p>D-Lang</p>
-					<p>Python DocString</p>
-					<p>BOM</p>
+					<p>Python DocString's</p>
+					<p>Byte Order Marks (BOM)</p>
 				</section>
 
 
@@ -358,8 +368,8 @@ BenchmarkStringBuilder-8     200000000      7.74 ns/op
 
 
 				<section>
-					<h2>Results!</h2>
-					<p>I would guess the complex file is workers.go</p>
+					<h2>Results</h2>
+					<p>I know that the most complex file is workers.go</p>
 <pre>───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
 ───────────────────────────────────────────────────────────────────────────────
@@ -398,6 +408,11 @@ examples/language/go.go               19        6         6        7          0<
 				</section>
 
 				<section>
+					<h2>Benchmarks Redis Project</h2>
+					<img src="./img/benchmark-redis.png" />
+				</section>
+
+				<section>
 					<h2>Fair Benchmarks</h2>
 					<p>
 					No such thing.<br>
@@ -410,33 +425,23 @@ examples/language/go.go               19        6         6        7          0<
 				</section>
 
 				<section>
-					<h2>Benchmarks Redis Project</h2>
-					<img src="./img/benchmark-redis.png" />
-				</section>
-
-				<section>
-					<h2>Benchmarks Artificial Project</h2>
+					<h2>Artificial Benchmark</h2>
 					<img src="./img/benchmark-artificial.png" />
 				</section>
 
 				<section>
-					<h2>Benchmarks Cpython Project</h2>
-					<img src="./img/benchmark-cpython.png" />
-				</section>
-
-				<section>
-					<h2>Benchmarks Linux Project</h2>
+					<h2>Linux Kernel Benchmark</h2>
 					<img src="./img/benchmark-linux.png" />
 				</section>
 
 				<section>
-					<h2>Benchmarks 10 Copies of Linux Project</h2>
+					<h2>10 copies of Linux</h2>
 					<img src="./img/benchmark-10-linux.png" />
 				</section>
 
 
 				<section>
-					<h2>Can a crusty Go program outperform a well written Rust Project?</h2>
+					<h2>SO! Can a crusty Go program outperform a well written Rust Project?</h2>
 				</section>
 
 				<section>
@@ -477,10 +482,25 @@ digraph G {
 
 digraph G {
   "for (byte in file_bytes)" -> "switch (state)"
+  "switch (state)" -> "process (byte) AND update (state)"
+  "process (byte) AND update (state)" -> "for (byte in file_bytes)"
+}
+
+digraph G {
+  "for (byte in file_bytes)" -> "switch (state)"
   "switch (state)" -> "process (byte)"
   "process (byte)" -> "for (byte till newline || change state)"
   "for (byte till newline || change state)" -> "process (byte)"
   "for (byte till newline || change state)" -> "update (state)"
+  "update (state)" -> "for (byte in file_bytes)"
+}
+
+digraph G {
+  "for (byte in file_bytes)" -> "switch (state)"
+  "switch (state)" -> "process (byte)"
+  "process (byte)" -> "for (byte till newline OR change state)"
+  "for (byte till newline OR change state)" -> "process (byte)"
+  "for (byte till newline OR change state)" -> "update (state)"
   "update (state)" -> "for (byte in file_bytes)"
 }
 
