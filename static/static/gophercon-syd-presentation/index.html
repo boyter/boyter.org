@@ -32,9 +32,10 @@
 								<img src="./img/ben.jpg" >
 							</td>
 							<td>
-								Ben Boyter<br>
+								Ben Boyter <a href="https://twitter.com/boyter">@boyter</a><br>
 								Officially Tech Lead<br>
 								Really a Code Monkey for <a href="https://www.kablamo.com.au/">Kablamo</a>.
+								Just search for boyter<br>
 								<pre><code style="font-size: 16px;">func Produce(c Coffee, b Beer) (Code, Cloud, []error)</code></pre>
 								Can a crusty Go program outperform a well written Rust Project?<br>
 							</td>
@@ -85,9 +86,9 @@
 					<h2>Goals</h2>
 					Learn Go.<br>
 					Be as fast as possible.<br>
-					Push CPU to limits (unlikely) OR to my limits (likely)<br>
+					Push CPU limits OR my limits.<br>
 					Be as accurate as possible.<br>
-					Guess complexity<br>
+					Guess complexity.<br>
 				</section>
 
 
@@ -120,14 +121,15 @@ Case 7 Create a directory that with 100 subdirectories and 100 files in each
 
 				<section>
 					<h2>Still not fast enough</h2>
+					<p>godirwalk good, but not enough</p>
 					<p>Make parallel!</p>
-					<p>new problem .gitignore / .ignore files</p>
+					<p>New problem .gitignore / .ignore files</p>
 				</section>
 
 				<section>
 					<h2>.gitignore / .ignore</h2>
 					<p>Channels are great for uni-directional work</p>
-					<p>However ignore files need to alter rules on the fly</p>
+					<p>However ignore files mean we need to alter rules on the fly</p>
 					<p><a href="https://github.com/dbaggerman/cuba">https://github.com/dbaggerman/cuba</a></p>
 				</section>
 
@@ -135,11 +137,10 @@ Case 7 Create a directory that with 100 subdirectories and 100 files in each
 				<section>
 					<h2>2. File Reading</h2>
 					<p>
-					Know your use case! 18,554 bytes for scc.<br>
-					Memory maps or Scanner?<br>
-					I burnt a lot of time here.<br>
-					</p>
-					<p>Just use ioutil.ReadFile</p>
+					Know your use case! 18,554 bytes.<br>
+					Memory maps or Scanner?<br><br>
+					I burnt a lot of time here.<br><br>
+					Just use ioutil.ReadFile for small files.</p>
 
 					<pre>$ time scc linux
 DEBUG 2018-03-27T21:34:26Z: milliseconds to walk directory: 7593
@@ -162,12 +163,14 @@ scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
 
 				<section>
 					<h2>Problems with regex</h2>
-
+					<p>Not so much speed, but accuracy.</p>
 <pre><code>printf(" /* ");
 for (i = 0; i < 100; i++) {
     a += i;
 }
 printf(" */ ");</code></pre>
+
+<p>cloc sees the above as</p>
 
 <pre><code>printf(" xxxxxxx
 xxxxxxx
@@ -180,11 +183,12 @@ xxxxxxx     ");</code></pre>
 				<section>
 					<h2>Mechanical Sympathy</h2>
 					<blockquote>"You don't have to be an engineer to be be a racing driver, but you do have to have Mechanical Sympathy."</blockquote>
-					<img src="./img/jackie-stewart.jpg" height="300px" />
+					<img src="./img/jackie-stewart.jpg" height="300px" /><br>
+					<small>Jackie Stewart being cool</small>
 				</section>
 
 				<section>
-					<h2>How to Go fast Multi-core Edition</h2>
+					<h2>How to Go fast 2019</h2>
 					<p>
 					Do as little as possible.<br>
 					On many cores.<br>
@@ -194,9 +198,24 @@ xxxxxxx     ");</code></pre>
 				</section>
 
 				<section>
-					<h2>Measure</h2>
+					<h2>Go Fast - Measure</h2>
+					<p>Your bottleneck is often not what you expect.</p>
+					<p>pprof</p>
+<pre>(pprof) top10
+Showing nodes accounting for 49.46s, 89.12% of 55.50s total
+Showing top 10 nodes out of 83
+      flat  flat%   sum%        cum   cum%
+    20.67s 37.24% 37.24%     20.70s 37.30%  runtime.cgocall
+    17.41s 31.37% 68.61%     25.54s 46.02%  github.com/boyter/scc/processor.countStats
+</pre>
 					<p>Flame Graphs</p>
 					<img src="./img/flame-graph.jpg" />
+				</section>
+
+				<section>
+					<h2>Go Fast - Benchmark</h2>
+					<p>Go benchmark tools are pretty good.</p>
+					<p>Try it and see</p>
 				</section>
 
 				<section>
@@ -295,13 +314,13 @@ Benchmark #1: scc2 cpython
 					<p>Support 200+ languages.</p>
 					<p>Most noticeable with smaller repositories</p>
 <pre>
-Benchmark #1: scc-2.1.0 redis
-  Time (mean ± σ):      81.6 ms ±   5.0 ms    [User: 173.8 ms, System: 265.4 ms]
-  Range (min … max):    75.5 ms …  97.1 ms
-
 Benchmark #1: scc-2.0.0 redis
   Time (mean ± σ):     124.4 ms ±   2.4 ms    [User: 168.6 ms, System: 289.1 ms]
   Range (min … max):   120.0 ms … 128.4 ms
+
+Benchmark #1: scc-2.1.0 redis
+  Time (mean ± σ):      81.6 ms ±   5.0 ms    [User: 173.8 ms, System: 265.4 ms]
+  Range (min … max):    75.5 ms …  97.1 ms
 </pre>
 				</section>
 
@@ -316,7 +335,7 @@ Benchmark #1: scc-2.0.0 redis
 
 				<section>
 					<h2>4. Summerise</h2>
-					<p>Limited output (thankfully)</p>
+					<p>Limited output (thankfully).</p>
 					<p><a href="https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go">Handy Benchmark</a></p>
 <pre>
 BenchmarkConcat-8              1000000  64850.00 ns/op
@@ -324,6 +343,9 @@ BenchmarkBuffer-8            200000000      6.76 ns/op
 BenchmarkCopy-8             1000000000      3.06 ns/op
 BenchmarkStringBuilder-8     200000000      7.74 ns/op
 </pre>
+
+
+<p>Tried using columise but too slow</p>
 
 <pre>
 // When using columise   ~28726 ns/op
@@ -412,6 +434,16 @@ examples/language/go.go               19        6         6        7          0<
 					<img src="./img/benchmark-10-linux.png" />
 				</section>
 
+
+				<section>
+					<h2>Can a crusty Go program outperform a well written Rust Project?</h2>
+				</section>
+
+				<section>
+					<h2>YES!</h2>
+					<p>But all of the tweaks would work in Rust/ATS as well.</p>
+					<p>Go however trades off ease of development, so perhaps was able to implement the changes faster.</p>
+				</section>
 
 			</div>
 		</div>

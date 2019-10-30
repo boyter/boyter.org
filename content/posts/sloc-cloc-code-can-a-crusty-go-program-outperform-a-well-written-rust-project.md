@@ -70,5 +70,4 @@ So lets start talking about the first issue I had. Which was I wrote a basic ver
 
 
 
-
-<pre><code>ioutil.ReadFile(res.Location)</code></pre>
+integer parsing C# story
