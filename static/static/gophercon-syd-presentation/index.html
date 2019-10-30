@@ -84,7 +84,7 @@
 				<section>
 					<h2>Goals</h2>
 					Learn Go.<br>
-					Be as fast as possible (beat tokei / loc).<br>
+					Be as fast as possible.<br>
 					Push CPU to limits (unlikely) OR to my limits (likely)<br>
 					Be as accurate as possible.<br>
 					Guess complexity<br>
@@ -101,11 +101,10 @@ Buffered channel's mostly for back-pressure.<br>
 				<section>
 					<h2>1. File Walking</h2>
 					Go's <a href="https://boyter.org/2018/03/quick-comparison-go-file-walk-implementations/">built in file walk is slow</a>! (comparatively)<br>
-					Probably because its also deterministic (I think)<br>
-
 					<a href="https://github.com/boyter/scc/blob/master/examples/performance_tests/create_folders_with_files.py">Benchmark</a><br>
 
-					# GRAPH HERE SHOWING<br>
+					<img src="./img/benchmark-file-walk.png" />
+
 <pre>
 Case 0 Create a directory thats quite deep and put a 10000 files at the end
 Case 1 Create a directory thats quite deep and put 100 files in each folder
@@ -195,7 +194,8 @@ xxxxxxx     ");</code></pre>
 				</section>
 
 				<section>
-					<h2>Flame Graphs</h2>
+					<h2>Measure</h2>
+					<p>Flame Graphs</p>
 					<img src="./img/flame-graph.jpg" />
 				</section>
 
@@ -215,7 +215,7 @@ for j := 0; j < len(one); j++ {
 				</section>
 
 				<section>
-					<h2>Byte Comparison</h2>
+					<h2>Byte Comparison Continued</h2>
 <pre>
 BenchmarkCheckByteEqualityReflect-8                5000000 344.00 ns/op
 BenchmarkCheckByteEqualityBytes-8                300000000   5.52 ns/op
@@ -334,6 +334,40 @@ BenchmarkStringBuilder-8     200000000      7.74 ns/op
 
 				</section>
 
+
+				<section>
+					<h2>Results!</h2>
+					<p>I would guess the complex file is workers.go</p>
+<pre>───────────────────────────────────────────────────────────────────────────────
+Language                 Files     Lines   Blanks  Comments     Code Complexity
+───────────────────────────────────────────────────────────────────────────────
+Go                          22      6506     1075       273     5158       1116
+───────────────────────────────────────────────────────────────────────────────
+processor/workers_test.go           1492      278        32     1182        271
+processor/workers.go                 734      106        78      550        181
+processor/formatters.go              699      104        12      583        144
+processor/detector_test.go           378       84         1      293         99
+processor/formatters_test.go         863       96         2      765         71
+processor/file.go                    231       39         9      183         54
+processor/file_test.go               327       68         7      252         53
+processor/detector.go                210       40        20      150         52
+processor/processor.go               416       89        58      269         45
+~ocessor/workers_tokei_test.go       247       36         1      210         40
+~or/workers_regression_test.go       150       30         4      116         32
+processor/helpers_test.go             60       13         0       47         20
+scripts/include.go                    79       16         8       55         15
+processor/structs.go                 183       20        17      146         14
+processor/processor_test.go           80       18         0       62         11
+processor/cocomo_test.go              35        7         3       25          6
+processor/structs_test.go             30        7         0       23          4
+processor/helpers.go                  30        5         3       22          2
+main.go                              212        7         6      199          2
+processor/cocomo.go                   26        5         6       15          0
+processor/constants.go                 5        1         0        4          0
+examples/language/go.go               19        6         6        7          0</pre>
+				</section>
+
+
 				<section>
 					<h2>Performance over time</h2>
 					<!-- https://jsfiddle.net/xwh034a9/1/ -->
@@ -345,20 +379,37 @@ BenchmarkStringBuilder-8     200000000      7.74 ns/op
 					<h2>Fair Benchmarks</h2>
 					<p>
 					No such thing.<br>
+					Languages.<br>
+					Ignore Files.<br>
+					String Support.<br>
 					<br>
-					Tried to <a href="https://github.com/boyter/scc/blob/master/examples/performance_tests/create_performance_test.py">create one</a> as fair as possible.<br>
-					<br>
-
-					Have
+					Tried to <a href="https://github.com/boyter/scc/blob/master/examples/performance_tests/create_performance_test.py">create one</a> to be as fair as possible.
 					</p>
 				</section>
-
-
-				
 
 				<section>
 					<h2>Benchmarks Redis Project</h2>
 					<img src="./img/benchmark-redis.png" />
+				</section>
+
+				<section>
+					<h2>Benchmarks Artificial Project</h2>
+					<img src="./img/benchmark-artificial.png" />
+				</section>
+
+				<section>
+					<h2>Benchmarks Cpython Project</h2>
+					<img src="./img/benchmark-cpython.png" />
+				</section>
+
+				<section>
+					<h2>Benchmarks Linux Project</h2>
+					<img src="./img/benchmark-linux.png" />
+				</section>
+
+				<section>
+					<h2>Benchmarks 10 Copies of Linux Project</h2>
+					<img src="./img/benchmark-10-linux.png" />
 				</section>
 
 
