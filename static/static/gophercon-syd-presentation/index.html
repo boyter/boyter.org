@@ -6,7 +6,7 @@
 		<title>Sloc Cloc and Code - Can a crusty Go program outperform a well written Rust Project?</title>
 		<link rel="stylesheet" href="css/reset.css">
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/black.css">
+		<link rel="stylesheet" href="css/theme/sky.css">
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/monokai.css">
 		<!-- Printing and PDF exports -->
@@ -33,7 +33,7 @@
 							</td>
 							<td>
 								Ben Boyter<br>
-								Offically Tech Lead<br>
+								Officially Tech Lead<br>
 								Really a Code Monkey for <a href="https://www.kablamo.com.au/">Kablamo</a>.
 								<pre><code style="font-size: 16px;">func Produce(c Coffee, b Beer) (Code, Cloud, []error)</code></pre>
 								Can a crusty Go program outperform a well written Rust Project?<br>
@@ -48,7 +48,7 @@
 
 				<section>
 					<h2>Code Iceberg</h2>
-					<img src="./img/code-iceberg.jpg" />
+					<img src="./img/code-iceberg.jpg" height="400px" />
 					<small>Image by © Ralph A. Clevenger/CORBIS</small>
 				</section>
 
@@ -57,7 +57,7 @@
 					<p>
 					SLOC/CLOC counters<br>
 					<a href="https://github.com/AlDanial/cloc">cloc</a> (the OG) counts blank lines, comment lines, and physical lines of source code in many programming languages<br>
-					VERY full featured.<br>
+					VERY full featured.<br><br>
 					All other tools descend from it
 					</p>
 				</section>
@@ -71,11 +71,11 @@
 				</section>
 
 				<section>
-					<h2>Are you thinking what I am!?</h2>
+					<h2>I am thinking...</h2>
 					<p>
 					We totally need another code counter!<br><br>
 					But lets see if anyone has considered this...<br>
-					<a href="https://github.com/XAMPPRocky/tokei">tokei</a>, <a href="https://github.com/cgag/loc">loc</a>, <a href="https://github.com/vmchale/polyglot">polyglot</a>, <a href="https://gitlab.com/esr/loccount">loccount</a> and <a href="https://github.com/hhatto/gocloc">gocloc</a>
+					<a href="https://github.com/XAMPPRocky/tokei">tokei</a>, <a href="https://github.com/cgag/loc">loc</a>, <a href="https://github.com/vmchale/polyglot">polyglot</a>, <a href="https://gitlab.com/esr/loccount">loccount</a> and <a href="https://github.com/hhatto/gocloc">gocloc</a>.
 					<br><br>
 					SPIN! Calculate some value for code complexity.
 					</p>
@@ -84,33 +84,28 @@
 				<section>
 					<h2>Goals</h2>
 					Learn Go.<br>
-					Be as fast as possible (and TRY to beat tokei and loc).<br>
-					Be <u>readable</u> Go<br>
+					Be as fast as possible (beat tokei / loc).<br>
 					Push CPU to limits (unlikely) OR to my limits (likely)<br>
-					Be as accurate as possible<br>
-					Be a library<br>
+					Be as accurate as possible.<br>
 					Guess complexity<br>
 				</section>
 
 
 				<section>
 					<h2>Design</h2>
-Processes separated by channels<br>
-Channel buffers size = CPU cores for back-pressure.<br>
-Tried intermediate channel buffers... no difference<br>
+Processes separated by channels. Streaming.<br>
+Buffered channel's mostly for back-pressure.<br>
 <img src="./img/design1.jpg" />
 				</section>
 
 				<section>
 					<h2>1. File Walking</h2>
 					Go's <a href="https://boyter.org/2018/03/quick-comparison-go-file-walk-implementations/">built in file walk is slow</a>! (comparatively)<br>
-					Probably because its also deterministic
+					Probably because its also deterministic (I think)<br>
 
-					
+					<a href="https://github.com/boyter/scc/blob/master/examples/performance_tests/create_folders_with_files.py">Benchmark</a><br>
 
-					https://github.com/boyter/scc/blob/master/examples/performance_tests/create_folders_with_files.py
-
-					# GRAPH HERE SHOWING
+					# GRAPH HERE SHOWING<br>
 <pre>
 Case 0 Create a directory thats quite deep and put a 10000 files at the end
 Case 1 Create a directory thats quite deep and put 100 files in each folder
@@ -122,57 +117,75 @@ Case 6 Create a directory that with 5 subdirectories and 2000 files in each
 Case 7 Create a directory that with 100 subdirectories and 100 files in each
 </pre>
 
-
 				</section>
 
 				<section>
-					<h2>1. Still not fast enough</h2>
-					<p>Make parallel</p>
+					<h2>Still not fast enough</h2>
+					<p>Make parallel!</p>
+					<p>new problem .gitignore / .ignore files</p>
 				</section>
 
 				<section>
-					<h2>1. File Walk Process</h2>
-					What about .gitignore files?
+					<h2>.gitignore / .ignore</h2>
+					<p>Channels are great for uni-directional work</p>
+					<p>However ignore files need to alter rules on the fly</p>
+					<p><a href="https://github.com/dbaggerman/cuba">https://github.com/dbaggerman/cuba</a></p>
 				</section>
 
 
 				<section>
 					<h2>2. File Reading</h2>
 					<p>
-					Know your use case! 18554 bytes in my case<br>
+					Know your use case! 18,554 bytes for scc.<br>
 					Memory maps or Scanner?<br>
-					Burnt a lot of time here.<br>
-<pre>$ time scc linux
+					I burnt a lot of time here.<br>
+					</p>
+					<p>Just use ioutil.ReadFile</p>
+
+					<pre>$ time scc linux
 DEBUG 2018-03-27T21:34:26Z: milliseconds to walk directory: 7593
 --SNIP--
 scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
-					</p>
 
 				</section>
 
 				<section>
 					<h2>3. File Processor</h2>
-					<p>3 main ways to count code.</p>
+
+					<p>3 main ways tools count code.</p>
 					<ol>
-						<li>Use regular expressions</li>
-						<li>Use abstract syntax tree (AST)</li>
-						<li>State machine</li>
+						<li>Use regular expressions.</li>
+						<li>Use abstract syntax tree (AST).</li>
+						<li>State machine.</li>
 					</ol>
 
 				</section>
 
 				<section>
-					<h2>3. </h2>
+					<h2>Problems with regex</h2>
+
+<pre><code>printf(" /* ");
+for (i = 0; i < 100; i++) {
+    a += i;
+}
+printf(" */ ");</code></pre>
+
+<pre><code>printf(" xxxxxxx
+xxxxxxx
+xxxxxxx
+xxxxxxx
+xxxxxxx     ");</code></pre>
+
 				</section>
 
 				<section>
-					<h2>3. Mechanical Sympathy</h2>
+					<h2>Mechanical Sympathy</h2>
 					<blockquote>"You don't have to be an engineer to be be a racing driver, but you do have to have Mechanical Sympathy."</blockquote>
 					<img src="./img/jackie-stewart.jpg" height="300px" />
 				</section>
 
 				<section>
-					<h2>3. How to Go fast Multicore Edition</h2>
+					<h2>How to Go fast Multi-core Edition</h2>
 					<p>
 					Do as little as possible.<br>
 					On many cores.<br>
@@ -181,9 +194,13 @@ scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
 					<blockquote>"The key to making programs fast is to make them do practically nothing"</blockquote><br>
 				</section>
 
+				<section>
+					<h2>Flame Graphs</h2>
+					<img src="./img/flame-graph.jpg" />
+				</section>
 
 				<section>
-					<h2>3. Byte Comparison</h2>
+					<h2>Byte Comparison</h2>
 					<p>Which is fastest?</p>
 <pre><code style="font-size: 16px;">equal := reflect.DeepEqual(one, two)</code></pre>
 <pre><code style="font-size: 16px;">equal := bytes.Equal(one, two)</code></pre>
@@ -198,17 +215,17 @@ for j := 0; j < len(one); j++ {
 				</section>
 
 				<section>
-					<h2>3. Byte Comparison</h2>
+					<h2>Byte Comparison</h2>
 <pre>
 BenchmarkCheckByteEqualityReflect-8                5000000 344.00 ns/op
 BenchmarkCheckByteEqualityBytes-8                300000000   5.52 ns/op
-BenchmarkCheckByteEqualityLoopWithAddtional-8    500000000   3.76 ns/op
-BenchmarkCheckByteEqualityLoop-8                 500000000   3.41 ns/op <--
+BenchmarkCheckByteEqualityLoop-8                 500000000   3.76 ns/op
 </pre>
+<p>Why?</p>
 				</section>
 
 				<section>
-					<h2>3. Loop & Check VS Change & Loop</h2>
+					<h2>Loop & Check VS Change & Loop</h2>
 					<table>
 						<tr>
 							<td><img src="./img/process1.png" /></td>
@@ -218,7 +235,7 @@ BenchmarkCheckByteEqualityLoop-8                 500000000   3.41 ns/op <--
 				</section>
 
 				<section>
-					<h2>3. Loop & Check VS Change & Loop</h2>
+					<h2>Loop & Check VS Change & Loop</h2>
 <pre>
 Benchmark #1: ./scc1 linux
   Time (mean ± σ):      2.343 s ±  0.097 s    [User: 27.740 s, System: 0.868 s]
@@ -231,7 +248,7 @@ Benchmark #1: ./scc2 linux
 				</section>
 
 				<section>
-					<h2>3. if statement Ordering</h2>
+					<h2>if statement Ordering</h2>
 					<p>
 						Serious micro-optimisation.<br>
 						
@@ -251,25 +268,32 @@ Benchmark #1: scc2 cpython
 				</section>
 
 				<section>
-					<h2>3 .Algorithms</h2>
+					<h2>Algorithms</h2>
 					<p>
-						Loop<br>
-						Bit-Mask.<br>
-						<a href="https://en.wikipedia.org/wiki/Trie">Trie</a>
+						How to check for conditions?
+						<pre>/* /** */ if for each <%-- --> (* //// switch while // " ''' """</pre>
+						Loop. Bit-Mask.<br>
+						<a href="https://en.wikipedia.org/wiki/Trie">Trie</a><br>
+
+						<img src="./img/trie.png" height="150px" /><br>
+						A trie for keys "A", "to", "tea", "ted", "ten", "i", "in", and "inn".
+
+						<a href="https://web.archive.org/web/20171105092611/http://mailinator.blogspot.com/2008/01/how-to-search-for-word-pen1s-in-185.html">Mailinator blog about Trie</a>.
 					</p>
 				</section>
 
 				<section>
-					<h2>3. Garbage Collector</h2>
+					<h2>Garbage Collector</h2>
 					<p>Not tune-able. On/Off.</p>
+					<p>Turn off till some threshold.</p>
 					<img src="./img/throughput.jpg" />
 				</section>
 
 
 				<section>
-					<h2>3. Lazy Loading</h2>
+					<h2>Lazy Loading</h2>
 					<p>Support 200+ languages.</p>
-					<p>More noticeable with smaller repositories</p>
+					<p>Most noticeable with smaller repositories</p>
 <pre>
 Benchmark #1: scc-2.1.0 redis
   Time (mean ± σ):      81.6 ms ±   5.0 ms    [User: 173.8 ms, System: 265.4 ms]
@@ -282,8 +306,11 @@ Benchmark #1: scc-2.0.0 redis
 				</section>
 
 				<section>
-					<h2>3. Anything else?</h2>
-					<p>Probably little "low hanging fruit"</p>
+					<h2>Annoyances</h2>
+					<p>Nested Multi-line Comments</p>
+					<p>D-Lang</p>
+					<p>Python DocString</p>
+					<p>BOM</p>
 				</section>
 
 
@@ -303,29 +330,37 @@ BenchmarkStringBuilder-8     200000000      7.74 ns/op
 // When using home grown ~14293 ns/op
 </pre>
 
+				<p>Using StringBuilder to ensure >= Go 1.10</p>
+
+				</section>
+
+				<section>
+					<h2>Performance over time</h2>
+					<!-- https://jsfiddle.net/xwh034a9/1/ -->
+					<p>Every version of scc over time</p>
+					<img src="./img/performance-over-time.png" />
 				</section>
 
 				<section>
 					<h2>Fair Benchmarks</h2>
-					No such thing.
+					<p>
+					No such thing.<br>
+					<br>
+					Tried to <a href="https://github.com/boyter/scc/blob/master/examples/performance_tests/create_performance_test.py">create one</a> as fair as possible.<br>
+					<br>
 
-					https://github.com/boyter/scc/blob/master/examples/performance_tests/create_performance_test.py
-
-					Tried to create one as fair as possible
+					Have
+					</p>
 				</section>
 
-				<section>
-					<h2>Flame Graph</h2>
-					<img src="./img/flame-graph.jpg" />
-				</section>
-
-
-				<section>
-					<h2>4. Summeriser</h2>
-					<p></p>
-				</section>
 
 				
+
+				<section>
+					<h2>Benchmarks Redis Project</h2>
+					<img src="./img/benchmark-redis.png" />
+				</section>
+
 
 			</div>
 		</div>
@@ -365,4 +400,7 @@ digraph G {
   "for (byte till newline || change state)" -> "update (state)"
   "update (state)" -> "for (byte in file_bytes)"
 }
+
+regression chart
+https://jsfiddle.net/xwh034a9/2/
 -->

@@ -1,0 +1,131 @@
+Benchmark #1: scc1.0.0 linux
+  Time (mean ± σ):      1.574 s ±  0.072 s    [User: 29.614 s, System: 1.074 s]
+  Range (min … max):    1.474 s …  1.720 s    10 runs
+ 
+Benchmark #2: scc1.1.0 linux
+  Time (mean ± σ):      1.550 s ±  0.048 s    [User: 29.912 s, System: 1.046 s]
+  Range (min … max):    1.468 s …  1.619 s    10 runs
+ 
+Benchmark #3: scc1.2.0 linux
+  Time (mean ± σ):      1.561 s ±  0.049 s    [User: 29.795 s, System: 0.992 s]
+  Range (min … max):    1.489 s …  1.638 s    10 runs
+ 
+Benchmark #4: scc1.3.0 linux
+  Time (mean ± σ):      1.560 s ±  0.053 s    [User: 30.168 s, System: 0.981 s]
+  Range (min … max):    1.486 s …  1.646 s    10 runs
+ 
+Benchmark #5: scc1.4.0 linux
+  Time (mean ± σ):      1.541 s ±  0.034 s    [User: 29.846 s, System: 0.925 s]
+  Range (min … max):    1.465 s …  1.581 s    10 runs
+ 
+Benchmark #6: scc1.5.0 linux
+  Time (mean ± σ):      1.517 s ±  0.027 s    [User: 29.729 s, System: 0.992 s]
+  Range (min … max):    1.485 s …  1.571 s    10 runs
+ 
+Benchmark #7: scc1.6.0 linux
+  Time (mean ± σ):      1.485 s ±  0.049 s    [User: 30.013 s, System: 1.066 s]
+  Range (min … max):    1.408 s …  1.548 s    10 runs
+ 
+Benchmark #8: scc1.7.0 linux
+  Time (mean ± σ):      1.424 s ±  0.047 s    [User: 30.619 s, System: 1.169 s]
+  Range (min … max):    1.354 s …  1.504 s    10 runs
+ 
+Benchmark #9: scc1.8.0 linux
+  Time (mean ± σ):      1.184 s ±  0.033 s    [User: 26.276 s, System: 1.157 s]
+  Range (min … max):    1.119 s …  1.231 s    10 runs
+ 
+Benchmark #10: scc1.9.0 linux
+  Time (mean ± σ):      1.658 s ±  0.170 s    [User: 27.693 s, System: 1.188 s]
+  Range (min … max):    1.424 s …  1.919 s    10 runs
+ 
+Benchmark #11: scc1.10.0 linux
+  Time (mean ± σ):     695.4 ms ±  35.6 ms    [User: 12.344 s, System: 1.114 s]
+  Range (min … max):   657.6 ms … 747.7 ms    10 runs
+ 
+Benchmark #12: scc1.11.0 linux
+  Time (mean ± σ):     709.5 ms ±  21.5 ms    [User: 12.260 s, System: 1.087 s]
+  Range (min … max):   689.2 ms … 753.8 ms    10 runs
+ 
+Benchmark #13: scc1.12.0 linux
+  Time (mean ± σ):     695.4 ms ±  37.5 ms    [User: 12.344 s, System: 1.142 s]
+  Range (min … max):   662.9 ms … 791.0 ms    10 runs
+ 
+Benchmark #14: scc1.12.1 linux
+  Time (mean ± σ):     687.5 ms ±  30.6 ms    [User: 12.428 s, System: 1.164 s]
+  Range (min … max):   640.7 ms … 731.2 ms    10 runs
+ 
+Benchmark #15: scc2.0.0 linux
+  Time (mean ± σ):     697.2 ms ±  30.4 ms    [User: 12.231 s, System: 1.120 s]
+  Range (min … max):   647.9 ms … 762.3 ms    10 runs
+ 
+Benchmark #16: scc2.1.0 linux
+  Time (mean ± σ):     732.8 ms ±  45.8 ms    [User: 12.470 s, System: 1.236 s]
+  Range (min … max):   679.7 ms … 834.2 ms    10 runs
+ 
+Benchmark #17: scc2.2.0 linux
+  Time (mean ± σ):     698.8 ms ±  42.2 ms    [User: 13.723 s, System: 1.217 s]
+  Range (min … max):   656.2 ms … 774.7 ms    10 runs
+ 
+Benchmark #18: scc2.3.0 linux
+  Time (mean ± σ):     707.8 ms ±  44.4 ms    [User: 13.193 s, System: 1.178 s]
+  Range (min … max):   653.5 ms … 813.2 ms    10 runs
+ 
+Benchmark #19: scc2.4.0 linux
+  Time (mean ± σ):     686.5 ms ±  36.3 ms    [User: 13.439 s, System: 1.156 s]
+  Range (min … max):   635.9 ms … 764.4 ms    10 runs
+ 
+Benchmark #20: scc2.5.0 linux
+  Time (mean ± σ):     733.9 ms ±  41.1 ms    [User: 13.650 s, System: 1.285 s]
+  Range (min … max):   687.7 ms … 800.3 ms    10 runs
+ 
+Benchmark #21: scc2.6.0 linux
+  Time (mean ± σ):     904.7 ms ±  46.5 ms    [User: 14.622 s, System: 1.216 s]
+  Range (min … max):   866.2 ms … 988.3 ms    10 runs
+ 
+Benchmark #22: scc2.7.0 linux
+  Time (mean ± σ):     668.5 ms ±  32.4 ms    [User: 12.720 s, System: 1.868 s]
+  Range (min … max):   625.2 ms … 719.9 ms    10 runs
+ 
+Benchmark #23: scc2.8.0 linux
+  Time (mean ± σ):     670.3 ms ±  28.4 ms    [User: 12.718 s, System: 1.828 s]
+  Range (min … max):   648.3 ms … 741.1 ms    10 runs
+ 
+Benchmark #24: scc2.9.0 linux
+  Time (mean ± σ):     681.6 ms ±  30.1 ms    [User: 12.768 s, System: 1.898 s]
+  Range (min … max):   634.3 ms … 727.3 ms    10 runs
+ 
+Benchmark #25: scc2.9.1 linux
+  Time (mean ± σ):     677.4 ms ±  28.8 ms    [User: 12.772 s, System: 1.976 s]
+  Range (min … max):   633.3 ms … 722.9 ms    10 runs
+ 
+Benchmark #26: scc2.10.0 linux
+  Time (mean ± σ):     689.1 ms ±  45.2 ms    [User: 12.742 s, System: 1.881 s]
+  Range (min … max):   644.3 ms … 793.9 ms    10 runs
+ 
+Summary
+  'scc2.7.0 linux' ran
+    1.00 ± 0.06 times faster than 'scc2.8.0 linux'
+    1.01 ± 0.07 times faster than 'scc2.9.1 linux'
+    1.02 ± 0.07 times faster than 'scc2.9.0 linux'
+    1.03 ± 0.07 times faster than 'scc2.4.0 linux'
+    1.03 ± 0.07 times faster than 'scc1.12.1 linux'
+    1.03 ± 0.08 times faster than 'scc2.10.0 linux'
+    1.04 ± 0.07 times faster than 'scc1.10.0 linux'
+    1.04 ± 0.08 times faster than 'scc1.12.0 linux'
+    1.04 ± 0.07 times faster than 'scc2.0.0 linux'
+    1.05 ± 0.08 times faster than 'scc2.2.0 linux'
+    1.06 ± 0.08 times faster than 'scc2.3.0 linux'
+    1.06 ± 0.06 times faster than 'scc1.11.0 linux'
+    1.10 ± 0.09 times faster than 'scc2.1.0 linux'
+    1.10 ± 0.08 times faster than 'scc2.5.0 linux'
+    1.35 ± 0.10 times faster than 'scc2.6.0 linux'
+    1.77 ± 0.10 times faster than 'scc1.8.0 linux'
+    2.13 ± 0.13 times faster than 'scc1.7.0 linux'
+    2.22 ± 0.13 times faster than 'scc1.6.0 linux'
+    2.27 ± 0.12 times faster than 'scc1.5.0 linux'
+    2.31 ± 0.12 times faster than 'scc1.4.0 linux'
+    2.32 ± 0.13 times faster than 'scc1.1.0 linux'
+    2.33 ± 0.14 times faster than 'scc1.3.0 linux'
+    2.33 ± 0.14 times faster than 'scc1.2.0 linux'
+    2.35 ± 0.16 times faster than 'scc1.0.0 linux'
+    2.48 ± 0.28 times faster than 'scc1.9.0 linux'
