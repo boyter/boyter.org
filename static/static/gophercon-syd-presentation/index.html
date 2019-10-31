@@ -265,7 +265,42 @@ I chose to use the state machine because in theory it should be the fastest meth
 				</section>
 
 				<section>
-					<h2>Output/Problem</h2>
+					<h2>Results</h2>
+<pre>───────────────────────────────────────────────────────────────────────────────
+Language                 Files     Lines   Blanks  Comments     Code Complexity
+───────────────────────────────────────────────────────────────────────────────
+Go                          22      6506     1075       273     5158       1116
+───────────────────────────────────────────────────────────────────────────────
+processor/workers_test.go           1492      278        32     1182        271
+processor/workers.go                 734      106        78      550        181
+processor/formatters.go              699      104        12      583        144
+processor/detector_test.go           378       84         1      293         99
+processor/formatters_test.go         863       96         2      765         71
+processor/file.go                    231       39         9      183         54
+processor/file_test.go               327       68         7      252         53
+processor/detector.go                210       40        20      150         52
+processor/processor.go               416       89        58      269         45
+~ocessor/workers_tokei_test.go       247       36         1      210         40
+~or/workers_regression_test.go       150       30         4      116         32
+processor/helpers_test.go             60       13         0       47         20
+scripts/include.go                    79       16         8       55         15
+processor/structs.go                 183       20        17      146         14
+processor/processor_test.go           80       18         0       62         11
+processor/cocomo_test.go              35        7         3       25          6
+processor/structs_test.go             30        7         0       23          4
+processor/helpers.go                  30        5         3       22          2
+main.go                              212        7         6      199          2
+processor/cocomo.go                   26        5         6       15          0
+processor/constants.go                 5        1         0        4          0
+examples/language/go.go               19        6         6        7          0</pre>
+<aside class="notes">I wanted to try out the complexity estimate. This is some output for scc running against itself. Its showing us the results for each file, sorted by complexity. 
+
+I know the most complex file in the codebase is probably workers.go were most of the code processing logic lives, and thankfully scc is able to identify it.
+</aside>
+				</section>
+
+				<section>
+					<h2>Problem</h2>
 					<pre>$ scc
 ───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
@@ -308,6 +343,8 @@ For every second the other tools took to run scc took two.
 
 At this point my vision darkened, I saw the author of each of the other tools (in my mind), and said "You are mine".</aside>
 				</section>
+
+
 
 				<section>
 					<h2>Mechanical Sympathy</h2>
@@ -583,40 +620,6 @@ I did compare this specific implementation to a nice column processor I found be
 				</section>
 
 
-				<section>
-					<h2>Results</h2>
-<pre>───────────────────────────────────────────────────────────────────────────────
-Language                 Files     Lines   Blanks  Comments     Code Complexity
-───────────────────────────────────────────────────────────────────────────────
-Go                          22      6506     1075       273     5158       1116
-───────────────────────────────────────────────────────────────────────────────
-processor/workers_test.go           1492      278        32     1182        271
-processor/workers.go                 734      106        78      550        181
-processor/formatters.go              699      104        12      583        144
-processor/detector_test.go           378       84         1      293         99
-processor/formatters_test.go         863       96         2      765         71
-processor/file.go                    231       39         9      183         54
-processor/file_test.go               327       68         7      252         53
-processor/detector.go                210       40        20      150         52
-processor/processor.go               416       89        58      269         45
-~ocessor/workers_tokei_test.go       247       36         1      210         40
-~or/workers_regression_test.go       150       30         4      116         32
-processor/helpers_test.go             60       13         0       47         20
-scripts/include.go                    79       16         8       55         15
-processor/structs.go                 183       20        17      146         14
-processor/processor_test.go           80       18         0       62         11
-processor/cocomo_test.go              35        7         3       25          6
-processor/structs_test.go             30        7         0       23          4
-processor/helpers.go                  30        5         3       22          2
-main.go                              212        7         6      199          2
-processor/cocomo.go                   26        5         6       15          0
-processor/constants.go                 5        1         0        4          0
-examples/language/go.go               19        6         6        7          0</pre>
-<aside class="notes">I wanted to try out the complexity estimate. This is some output for scc running against itself. Its showing us the results for each file, sorted by complexity. 
-
-I know the most complex file in the codebase is probably workers.go were most of the code processing logic lives, and thankfully scc is able to identify it.
-</aside>
-				</section>
 
 
 <!-- 				<section>
@@ -662,7 +665,7 @@ So I tried to create as fair a benchmark as I could. It consists of thousands of
 
 				<section>
 					<section>
-						<h2>Stupidly risky demo</h2>
+						<h2>Risky demo</h2>
 						<img src="./img/demo.jpg" height="300px" />
 						<p>Benchmark slides below if demo gods displeased</p>
 						<aside class="notes"></aside>

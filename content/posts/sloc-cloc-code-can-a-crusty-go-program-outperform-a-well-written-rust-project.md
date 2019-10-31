@@ -1,6 +1,6 @@
 ---
 title: Sloc Cloc and Code - Can a crusty Go program outperform a well written Rust Project?
-date: 2029-10-12
+date: 2019-10-31
 ---
 
 For those that wish to follow along with the presentation use the below link,
