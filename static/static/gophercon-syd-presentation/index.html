@@ -34,10 +34,9 @@
 							<td>
 								Ben Boyter <a href="https://twitter.com/boyter">@boyter</a><br>
 								Title "Tech Lead"<br>
-								Really a Code Monkey for <a href="https://www.kablamo.com.au/">Kablamo</a>.
+								Code Monkey ATS <a href="https://www.kablamo.com.au/">Kablamo</a>.
 								<pre><code style="font-size: 16px;">func Produce(c Coffee, b Beer) (Code, Cloud, []error)</code></pre>
 								Can a crusty Go program outperform a well written Rust Project?<br>
-								Sloc Cloc and Code. Name?
 							</td>
 						</tr>
 					</table>
@@ -139,7 +138,7 @@ Case 7 Create a directory that with 100 subdirectories and 100 files in each
 					<h2>2. File Reading</h2>
 					<p>
 					Know your use case! 18,554 bytes.<br>
-					Memory maps or Scanner?<br><br>
+					Memory maps.<br><br>
 					I burnt a lot of time here.<br><br>
 					Just use ioutil.ReadFile for small files.</p>
 
@@ -152,39 +151,17 @@ scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
 
 				<section>
 					<h2>3. File Processor</h2>
-
 					<p>3 main ways tools count code.</p>
 					<ol>
 						<li>Use regular expressions.</li>
 						<li>Use abstract syntax tree (AST).</li>
 						<li>State machine.</li>
 					</ol>
-
 				</section>
-
-				<section>
-					<h2>Problems with regex</h2>
-					<p>Not so much speed, but accuracy.</p>
-<pre><code>printf(" /* ");
-for (i = 0; i < 100; i++) {
-    a += i;
-}
-printf(" */ ");</code></pre>
-
-<p>cloc sees the above as</p>
-
-<pre><code>printf(" xxxxxxx
-xxxxxxx
-xxxxxxx
-xxxxxxx
-xxxxxxx     ");</code></pre>
-
-				</section>
-
 
 				<section>
 					<h2>Problem</h2>
-					<p>Making scc accurate made it twice as slow as tokei</p>
+					<p>Making scc accurate made it slower than tokei</p>
 				</section>
 
 				<section>
@@ -335,7 +312,7 @@ Benchmark #1: scc-2.1.0 redis
 				</section>
 
 				<section>
-					<h2>Annoyances</h2>
+					<h2>Annoyances (edge cases)</h2>
 					<p>Verbatim strings</p>
 					<p>Nested Multi-line Comments</p>
 					<p>D-Lang</p>
@@ -448,12 +425,17 @@ examples/language/go.go               19        6         6        7          0<
 
 				<section>
 					<h2>YES!</h2>
-					<p>But all of the tweaks would work in Rust/ATS as well.</p>
-					<p>Go however trades off ease of development, so perhaps was able to implement the changes faster.</p>
+					<p>But all of this would work in Rust/ATS as well.</p>
+					<p>Go however trades off ease of development.</p>
+					<p>So perhaps was able to implement the changes faster.</p>
+					<p>I still think a direct port to Rust would be faster</p>
+					<p>So exploit Go's development speed!</p>
 				</section>
 
 				<section>
 					<h2>THANK YOU</h2>
+					<p>Massive thank you to all contributors to scc</p>
+					<img src="./img/please-clap.gif" />
 					<ul>
 						<li><a href="https://github.com/boyter/scc/">https://github.com/boyter/scc/</a></li>
 						<li><a href="https://github.com/XAMPPRocky/tokei/">https://github.com/XAMPPRocky/tokei/</a></li>
