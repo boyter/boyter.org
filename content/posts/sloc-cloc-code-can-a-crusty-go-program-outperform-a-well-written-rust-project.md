@@ -65,7 +65,7 @@ However the spin is I was going to add complexity estimates. So I decided to go 
 
 // SLIDE CHANGE
 
-XKCD
+Obligatory XKCD
 
 // SLIDE CHANGE
 
@@ -78,17 +78,17 @@ Estimate complexity. TO help spot those code icebergs.
 
 // SLIDE CHANGE
 
-Having briefly worked on a command line application I knew roughtly what I needed to do, after I read up about channels.
+Having briefly worked on a command line application I knew roughly what I needed to do, after I read up about channels.
 
-Have a pipeline of processes which Go supports well with channels. 
+Have a pipeline of processes which Go supports well with channels. For some parts of the process scc spawns as many go-routines are there are cpu cores.
 
-I also use buffered channels to ensure backpressure when processes get bogged down.
+The use of buffered channels in scc is mostly to ensure backpressure on the previous parts of the pipeline and not for "performance"
 
 // SLIDE CHANGE
 
 So the first part of the pipeline. Walking the file system.
 
-As it turns out the native Go file walk is slow, compartively.
+As it turns out the native Go file walk is slow, comparatively.
 
 I tried out a few other solutions and benchmarked them, with one called Godirwalk being the fastest.
 
@@ -97,7 +97,11 @@ The reason is that it avoids costly os.stat calls. The other libraries use gorou
 
 // SLIDE CHANGE
 
-Sadly this still isnt fast enough. The file walk was bottlenecking the CPU processing, which is probably the last thing most people would expect.
+Sadly by making scc accurate I also took out all of the performance it had.
+
+For every second the other tools took to run scc took two.
+
+At this point my vision darkened, I saw the author of each of the other tools (in my mind), and said "You are mine".
 
 So my cunning plan was to add goroutines to godirwalk. This comes with another issue that because of how it is written you cannot deal with .gitignore and .ignore files.
 
@@ -347,6 +351,12 @@ YES!
 However the techniques used could be moved into tokei and it would probably be just as fast.
 
 I still think a direct port to Rust would be faster, or converting one of those tools to use the same techniques.
+
+Well I had to re-implement almost everything myself. Although it could be argued the nice thing about reinventing the wheel is you get a round one.
+
+I also had sacrifice some level of readability.
+
+Also a lot of time.
 
 I also don't think I have reached an optimum level of performance. Id love to see one of you brilliant people submit a PR that improves performance again or creates another project which crushes scc.
 
