@@ -7,9 +7,7 @@ Wow... so when they said conference I was thinking many breakout rooms and 30 pe
 
 // SLIDE CHANGE
 
-So I Ben. I am not an alcholic, but I might be if this does't go well. 
-
-My offical title is technical lead but Im a code monkey. I write code.
+Hello all! I am Ben. My offical title is technical lead but Im a code monkey. I write code.
 
 This talk is about a command line tool I made called Sloc Cloc and Code. The name is inspired from two similar tools called sloccount and cloc while trying to make it sound like a Guy Richie film.
 
@@ -43,7 +41,11 @@ Its a very full featured, but probably not known for being fast. I actually trie
 
 // SLIDE CHANGE
 
+The other way is to get cyclomatic complexity
+
 However in the .NET world you can use Visual Studio to count code as well. But it also gives you a count of the complexity of code. This tells you where the problematic files are likely to be. The complexity estimate is a meaure of the number of branch conditions in the code.
+
+So thats where we are
 
 // SLIDE CHANGE
 
@@ -72,7 +74,7 @@ Learn Go.
 Want the counter to be as fast as possible.
 Push CPU limits (which is unlikely) OR my limits (FAR more likely).
 Be as accurate as possible. I don't want to trade accuracy for speed.
-Estimate complexity.
+Estimate complexity. TO help spot those code icebergs.
 
 // SLIDE CHANGE
 
@@ -169,7 +171,9 @@ In short.
 
 Do as little as possible, the less you do the fast your program runs based on the wall clock.
 Do as little as possible on many cores, use those extra CPU's we all have.
-Do as little as possible on many cores, making it easy to do the next thing. This means have your caches primed, keep loops in cache and avoid branch predition fails. If you don't know what that means don't worry, I have hit 1 branch prediction issue ever. I felt like a coding genius for about 5 minute when I fixed it though.
+Do as little as possible on many cores, making it easy to do the next thing. 
+
+This means have your caches primed, keep loops in cache and avoid branch predition fails. If you don't know what that means don't worry, I have hit 1 branch prediction issue ever. I felt like a coding genius for about 5 minute when I fixed it though.
 
 All of the performance improves fall into one of these categories.
 
@@ -181,7 +185,7 @@ Your bottleneck is not often what you think it is.
 
 Go pprof and flame graphs are really good at helping with this.
 
-Classic example of this is a C# application I helped maintain once. A page was taking over 20 seconds to load. A was working with mate and it had some 3 deep nested loop. He insisted that was the issue, and I agreed, but said we should profile first just to be sure.
+Classic example of this is a C# application I helped maintain once. A page was taking over 20 seconds to load. I was working with mate and it had some 3 deep nested loop. He insisted that was the issue, and I agreed, but said we should profile first just to be sure.
 
 Turns out the actual issue was integer casting from string to int. We swapped to a faster method, and added a cache and the page started loading almost instantly.
 
