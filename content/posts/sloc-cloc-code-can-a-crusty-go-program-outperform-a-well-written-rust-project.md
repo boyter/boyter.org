@@ -7,7 +7,7 @@ Wow... so when they said conference I was thinking many breakout rooms and 30 pe
 
 // SLIDE CHANGE
 
-Hello all! I am Ben. My offical title is technical lead but Im a code monkey. I write code.
+Hello all! I am Ben. My official title is technical lead. Im a code monkey. I write code.
 
 This talk is about a command line tool I made called Sloc Cloc and Code. The name is inspired from two similar tools called sloccount and cloc while trying to make it sound like a Guy Richie film.
 

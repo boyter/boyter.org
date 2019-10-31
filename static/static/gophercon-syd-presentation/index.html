@@ -39,16 +39,33 @@
 								<pre><code style="font-size: 16px;">func Produce(c Coffee, b Beer) (Code, Cloud, []error)</code></pre>
 								
 							</p>
+							<aside class="notes">
+								Hello all! I am Ben. My official title is technical lead. Im a code monkey. I write code.
+
+This talk is about a command line tool I made called Sloc Cloc and Code. The name is inspired from two similar tools called sloccount and cloc while trying to make it sound like a Guy Richie film.
+
+As I mentioned I work for Kablamo. Kablamo builds a lot of custom software on AWS. Our backend language of choice is Go which was a problem for me because I didn't know it. I had used it a little bit for some come command line and http tools but nothing major.
+
+As such I was working on projects in other languages such as C# and Java. 
+
+One that came past was to upgrade a an application written in C# with a JavaScript frontend. The goal was to upgrade the frontend and fix some backend issues. It was meant to take 6 weeks. It turned into a year long death-march project.
+
+My fault. I totally underestimated how complex it was. 
+
+So what do we do when we make mistakes?
+							</aside>
 				</section>
 
 				<section>
 					<img src="./img/overcorrecting.jpg" height="650px" />
+					<aside class="notes">We overcorrect for past failures.</aside>
 				</section>
 
 				<section>
 					<h2>Code Iceberg</h2>
 					<img src="./img/code-iceberg.jpg" height="400px" />
 					<small>Image by © Ralph A. Clevenger/CORBIS</small>
+					<aside class="notes">See the project was a code iceberg. The visible part, http endpoints, and the like is easy to see. But the real meat and bones of the application was hidden much like an iceberg.</aside>
 				</section>
 
 				<section>
@@ -58,6 +75,13 @@
 					<a href="https://github.com/AlDanial/cloc">cloc</a> counts blank lines, comment lines, and physical lines of source code in many programming languages<br><br>
 					VERY full featured.
 					</p>
+					<aside class="notes">So the question is how do we spot code icebergs.
+
+On solution is to use a code counter.
+
+Enter cloc. A perl command line tool. cloc counts blank lines, comment lines, and physical lines of source code in many programming languages.
+
+Its a very full featured, but probably not known for being fast. I actually tried it on my death march project and it took longer than I was willing to wait.</aside>
 				</section>
 
 				<section>
@@ -66,6 +90,11 @@
 					Cyclomatic Complexity
 					<img src="./img/code-metrics.jpg" />
 					</p>
+					<aside class="notes">The other way is to get cyclomatic complexity
+
+However in the .NET world you can use Visual Studio to count code as well. But it also gives you a count of the complexity of code. This tells you where the problematic files are likely to be. The complexity estimate is a measure of the number of branch conditions in the code.
+
+So thats where we are. One tool thats a bit slow and another thats limited to certain languages</aside>
 				</section>
 
 				<section>
@@ -77,10 +106,24 @@
 					<br><br>
 					SPIN! Calculate some "value" for code complexity.
 					</p>
+					<aside class="notes">Are you thinking what I am? We need another code counter! One thats fast!
+
+However I am not very orignal and I had a look around to see if anyone else had the same idea.
+
+Two rust projects already existed, tokei and loc and BOTH claimed excellent performance.
+
+Polyglot was also around. Written in ATS by Vanessa Mchale is probably the most interesting code counter.
+
+Eric S Raymond also had a code counter loccount. Lastly another one existed called Gocloc.
+
+I thought I was being orginal in the choice of language at least, but both loccout and gocloc are both in Go.
+
+However the spin is I was going to add complexity estimates. So I decided to go ahead anyway.</aside>
 				</section>
 
 				<section>
 					<img src="./img/standards.png" />
+					<aside class="notes">Obligatory XKCD</aside>
 				</section>
 
 				<section>
@@ -90,6 +133,12 @@
 					Push CPU limits OR my limits.<br>
 					Be as accurate as possible.<br>
 					Estimate complexity.<br>
+					<aside class="notes">Goals.
+Learn Go.
+Want the counter to be as fast as possible.
+Push CPU limits (which is unlikely) OR my limits (FAR more likely).
+Be as accurate as possible. I don't want to trade accuracy for speed.
+Estimate complexity. TO help spot those code icebergs.</aside>
 				</section>
 
 
@@ -97,6 +146,11 @@
 					<h2>Design</h2>
 					4 stage pipeline<br>
 <img src="./img/design1.jpg" />
+<aside class="notes">Having briefly worked on a command line application I knew roughly what I needed to do, after I read up about channels.
+
+Have a pipeline of processes which Go supports well with channels. For some parts of the process scc spawns as many go-routines are there are cpu cores.
+
+The use of buffered channels in scc is mostly to ensure backpressure on the previous parts of the pipeline and not for "performance"</aside>
 				</section>
 
 				<section>
@@ -116,7 +170,13 @@ Case 5 Create a directory that with 20 subdirectories and 500 files in each
 Case 6 Create a directory that with 5 subdirectories and 2000 files in each
 Case 7 Create a directory that with 100 subdirectories and 100 files in each
 </pre>
+<aside class="notes">So the first part of the pipeline. Walking the file system.
 
+As it turns out the native Go file walk is slow, comparatively.
+
+I tried out a few other solutions and benchmarked them, with one called Godirwalk being the fastest.
+
+The reason is that it avoids costly os.stat calls. The other libraries use goroutines and are still beaten out.</aside>
 				</section>
 
 				<section>
@@ -124,6 +184,13 @@ Case 7 Create a directory that with 100 subdirectories and 100 files in each
 					<p>godirwalk an improvement, but not enough</p>
 					<p>Make parallel!</p>
 					<p>New problem .gitignore / .ignore files</p>
+					<aside class="notes">Still not good enough.
+
+So my cunning plan was to add goroutines to godirwalk. This comes with another issue that because of how it is written you cannot deal with .gitignore and .ignore files.
+
+Turns out a lot of projects use more than one .gitignore file. I found one recently with over 25,000 of them.
+
+The ignore files are important because they produce better results so ignoring them for performance is not an option.</aside>
 				</section>
 
 				<section>
@@ -131,6 +198,13 @@ Case 7 Create a directory that with 100 subdirectories and 100 files in each
 					<p>Channels are great for uni-directional work</p>
 					<p>However ignore files mean we need to alter rules on the fly</p>
 					<p><a href="https://github.com/dbaggerman/cuba">https://github.com/dbaggerman/cuba</a></p>
+					<aside class="notes">Still need to resolve the .gitignore issue. Otherwise the results will not be correct.
+
+Channels are great for uni-directional work.
+
+What we needed was a cyclical process that happens to be in parallel.
+
+In the end David Baggerman a Melbourne developer and contributor to scc wrote a custom library cuba which solves the gitignore problem. Id suggest you check it out and github star him.</aside>
 				</section>
 
 
@@ -145,6 +219,21 @@ Case 7 Create a directory that with 100 subdirectories and 100 files in each
 DEBUG 2018-03-27T21:34:26Z: milliseconds to walk directory: 7593
 --SNIP--
 scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
+<aside class="notes">Now the second part of the pipeline.
+
+Reading the files from our lovely disks into memory.
+
+The first thing is to know your use case, so I worked out the average number of bytes in a code file which came out at about 19kb.
+
+If you look into reading files quickly a lot of suggestions will say use memory maps. They allow you to outsource bookkeeping activity of locations in files to the kernel.
+
+Don't do this for small files. Its slower.
+
+I also made a huge rookie error here. I made the biggest mistake you can make with performance. I saw something was slow, guessed what it was and was wrong.
+
+See I thought the reading of files into memory was slow. What was actually slow was the walking of files from the disk. Hence doing so much work in the previous step.
+
+I only noticed when I was adding times for the processed and noticed that my CPU was not being used and yet the file walk took as long as the program run time.</aside>
 
 				</section>
 
@@ -156,11 +245,66 @@ scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
 						<li>Use abstract syntax tree (AST).</li>
 						<li>State machine.</li>
 					</ol>
+					<aside class="notes">On to the third part of the pipeline. The processor.
+
+There are 3 main ways that all of the code count tools work.
+
+The first is to use regular expressions. Cloc does this.
+
+The problem with this is not so much speed but accuracy. If you put a comment into a string cloc will flip to comment mode.
+
+The second is to build an AST. This is how visual studio works. 
+
+The problem is that you need to build AST for every language you want to support which is hard.
+
+The third option is to iterate the bytes of the file and use a small state machine to track things.
+
+I chose to use the state machine because in theory it should be the fastest method. So I implemented a state machine, got to some level of accuracy.</aside>
 				</section>
 
 				<section>
-					<h2>Problem</h2>
-					<p>Making scc accurate made it slower than tokei</p>
+					<h2>Output/Problem</h2>
+					<pre>$ scc
+───────────────────────────────────────────────────────────────────────────────
+Language                 Files     Lines   Blanks  Comments     Code Complexity
+───────────────────────────────────────────────────────────────────────────────
+C                          258    153081    17005     26121   109955      27671
+C Header                   200     28794     3252      5877    19665       1557
+TCL                        101     17802     1879       981    14942       1439
+Shell                       42      1467      197       314      956        176
+Lua                         20       525       68        70      387         65
+Autoconf                    18     10821     1026      1326     8469        951
+Makefile                    10      1082      220       103      759         51
+Ruby                        10       778       78        71      629        115
+gitignore                   10       150       16         0      134          0
+Markdown                     9      1935      527         0     1408          0
+HTML                         5      9658     2928        12     6718          0
+C++                          4       286       48        14      224         31
+License                      4       100       20         0       80          0
+YAML                         4       266       20         3      243          0
+CSS                          2       107       16         0       91          0
+Python                       2       219       12         6      201         34
+BASH                         1       102       13         5       84         26
+Batch                        1        28        2         0       26          3
+C++ Header                   1         9        1         3        5          0
+Extensible Styleshe…         1        10        0         0       10          0
+Plain Text                   1        23        7         0       16          0
+Smarty Template              1        44        1         0       43          5
+m4                           1       562      116        53      393          0
+───────────────────────────────────────────────────────────────────────────────
+Total                      706    227849    27452     34959   165438      32124
+───────────────────────────────────────────────────────────────────────────────
+Estimated Cost to Develop $5,769,821
+Estimated Schedule Effort 29.862934 months
+Estimated People Required 22.886772
+───────────────────────────────────────────────────────────────────────────────</pre>
+					<aside class="notes">So I tweaked it till it was accruate and this is the result. You can see it counting the languages and whats in each for the redis project.
+
+						Sadly by making scc accurate I also took out all of the performance it had.
+
+For every second the other tools took to run scc took two.
+
+At this point my vision darkened, I saw the author of each of the other tools (in my mind), and said "You are mine".</aside>
 				</section>
 
 				<section>
@@ -168,6 +312,10 @@ scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
 					<blockquote>"You don't have to be an engineer to be be a racing driver, but you do have to have Mechanical Sympathy."</blockquote>
 					<img src="./img/jackie-stewart.jpg" height="300px" /><br>
 					<small>Jackie Stewart looking cool</small>
+					<aside class="notes">This is Jackie Stewart. Hes was a very successful F1 driver. Thats his quote up there. What he means by this is you don't need to understand how to design a CPU not write Assembly to get the most out of the computer. But it helps to know how it works.
+
+So knowing that the CPU has caches, has pipelines has SIMD instructions is usually enough. Thankfully the compiler writers know these things are hard to understand (they are indeed beyond me) so you don't need to worry too much.
+</aside>
 				</section>
 
 				<section>
@@ -178,6 +326,19 @@ scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
 					On many cores.<br>
 					Make it easy to do the next thing.<br><br>
 					</p>
+					<aside class="notes">So how to go fast in 2019.
+
+The quote is from one of the maintainers of grep.
+
+In short.
+
+Do as little as possible, the less you do the fast your program runs based on the wall clock.
+Do as little as possible on many cores, use those extra CPU's we all have.
+Do as little as possible on many cores, making it easy to do the next thing. 
+
+This means have your caches primed, keep loops in cache and avoid branch predition fails. If you don't know what that means don't worry, I have hit 1 branch prediction issue ever. I felt like a coding genius for about 5 minute when I fixed it though.
+
+All of the performance improves fall into one of these categories.</aside>
 				</section>
 
 				<section>
@@ -193,6 +354,15 @@ Showing top 10 nodes out of 83
 </pre>
 					<p>Flame Graphs</p>
 					<img src="./img/flame-graph.jpg" />
+					<aside class="notes">Next is to measure your performance.
+
+Your bottleneck is not often what you think it is.
+
+Go pprof and flame graphs are really good at helping with this.
+
+Classic example of this is a C# application I helped maintain once. A page was taking over 20 seconds to load. I was working with mate and it had some 3 deep nested loop. He insisted that was the issue, and I agreed, but said we should profile first just to be sure.
+
+Turns out the actual issue was integer casting from string to int. We swapped to a faster method, and added a cache and the page started loading almost instantly.</aside>
 				</section>
 
 				<section>
@@ -200,6 +370,13 @@ Showing top 10 nodes out of 83
 					<blockquote>In god we trust. Everyone else bring data.</blockquote>
 					<p>Go benchmark tools are pretty good.</p>
 					<p>Code speaks volumes. Prove it.</p>
+					<aside class="notes">The next thing to do is benchmark code.
+
+A great quote from some American "In god we trust. Everyone else bring data."
+
+The go benchmark tools are pretty good.
+
+If you think something is slow, prove it. Code speaks volumes.</aside>
 				</section>
 
 				<section>
@@ -215,6 +392,15 @@ for j := 0; j < len(one); j++ {
 	}
 }
 </code></pre>
+<aside class="notes">Here we have 3 ways of checking byte slices in Go for equality.
+
+The first uses reflection in the standard library.
+
+The second uses bytes equal in the standard library.
+
+The third is a loop I wrote which checks each byte for equality.
+
+So which do you think would be the fastest?</aside>
 				</section>
 
 				<section>
@@ -225,6 +411,15 @@ BenchmarkCheckByteEqualityBytes-8                300000000   5.52 ns/op
 BenchmarkCheckByteEqualityLoop-8                 500000000   3.76 ns/op
 </pre>
 <p>Why?</p>
+<aside class="notes">So reflection as you probably guessed is right out. Reflection is almost always slow.
+
+What was surprising to me was that my loop was the fastest. 
+
+Why?
+
+The really nice thing about Go is you can poke at the code inside the libraries, and its usually not some hand optimized Assembly. Bytes actually looks the same to the code I wrote, except it checks that the length of each slice is the same before it processes.
+
+So you can do better than the standard library from time to time if you have constrained requirements.</aside>
 				</section>
 
 				<section>
@@ -235,6 +430,13 @@ BenchmarkCheckByteEqualityLoop-8                 500000000   3.76 ns/op
 							<td><img src="./img/process2.png" /></td>
 						</tr>
 					</table>
+					<aside class="notes">This is one of the bigger performance improvements I found.
+
+These both show 2 different ways that the core loop in scc works.
+
+The left loops the bytes, switches to the state checks if we should leave that state and if so updates it then returns to the loop.
+
+The right loops the bytes, switches to the state, and the loops again looking for a state change or a newline, then updates and returns to the loop.</aside>
 				</section>
 
 				<section>
@@ -249,6 +451,9 @@ Benchmark #1: ./scc2 linux
   Range (min … max):    1.367 s …  1.430 s
 </pre>
 <p>Why?</p>
+<aside class="notes">As it turns out the method with the additional loop is actually faster. Why?
+
+Well it turns out most code files don't change state that often. So despite the code smell of the additional loop this actually does less work, and the tight loop is very cpu friendly.</aside>
 				</section>
 
 				<section>
@@ -268,7 +473,8 @@ Benchmark #1: scc2 cpython
   Time (mean ± σ):     491.0 ms ±  10.2 ms    [User: 1.628 s, System: 1.763 s]
   Range (min … max):   476.3 ms … 539.5 ms
 </pre>
-					<p>BUT in tight loops...</p>
+					<p>Why?</p>
+					<aside class="notes">So this is a serious micro optimisation but assuming you have a very tight loop you can sometimes eke out additional performance by juggling if statements. This is a combination of doing less and in some cases helping the CPU branch predictor.</aside>
 				</section>
 
 				<section>
@@ -284,6 +490,13 @@ Benchmark #1: scc2 cpython
 
 						<a href="https://web.archive.org/web/20171105092611/http://mailinator.blogspot.com/2008/01/how-to-search-for-word-pen1s-in-185.html">Mailinator blog about Trie</a>.
 					</p>
+					<aside class="notes">One of the main changes to see was in how it loops looking for matches. 
+
+The first solution implemented used a loop over the terms for each byte. This is rather wasteful.
+
+It was cut down using bitmarks of the terms we are looking for, and then if we have a bitmatch then we perform the loop looking deeper to see if we have an actual match. 
+
+The last improvement was to use Trie structures. A sample trie is shown containing some terms. For those following along I have linked a nice blog post about this. Warning the post is about matching spam emails so language warning.</aside>
 				</section>
 
 				<section>
@@ -291,6 +504,13 @@ Benchmark #1: scc2 cpython
 					<p>Not tune-able. On/Off.</p>
 					<p>Turn off till some threshold.</p>
 					<img src="./img/throughput.jpg" />
+					<aside class="notes">
+						So the GC is something I like and dislike in Go. I dislike that all you really get to turn it is an on/off switch. 
+
+I also dislike that its optimized for latency. Which is great for HTTP and UI things but not for number crunching.
+
+In scc because its a short lived program it actually turns off the GC until a file threshold has been passed.
+					</aside>
 				</section>
 
 
@@ -308,6 +528,7 @@ Benchmark #1: scc-2.1.0 redis
   Time (mean ± σ):      81.6 ms ±   5.0 ms    [User: 173.8 ms, System: 265.4 ms]
   Range (min … max):    75.5 ms …  97.1 ms
 </pre>
+<aside class="notes">Another small but important change is lazy loading of language features. Because they are stored in the previously mentioned trie, the trie needs to be built for the language. It used to process all the languages in a single pass, but was changed to lazy load them in as required which gave a nice performance boost.</aside>
 				</section>
 
 				<section>
@@ -317,6 +538,19 @@ Benchmark #1: scc-2.1.0 redis
 					<p>D-Lang</p>
 					<p>Python DocString's</p>
 					<p>Byte Order Marks (BOM)</p>
+					<aside class="notes">Ah edge cases. The bottom of any code iceberg. 
+
+In no particular order, some of the more annoying ones I had to deal with.
+
+Verbartim strings. These are especially annoying because they are a special edge case of string where you need to ignore escape characters.
+
+Nested multi line comments. I didn't even know this was a thing. Its a complier error in Go for example. Its how valid in Rust. Which means you need to keep a queue and push and pop to ensure you match correctly.
+
+D. Any D programmers? So D is problematic because it supports nested multi line comments, and has two ways of declaring them and you can nest them inside each other. This is an edge case I cannot be bothered to fix and I keep it as a open bug.
+
+Docstrings in python are annoying because people quite often don't want them counted as code. So you have to check if the previous bytes were whitespace to a colon.
+
+Byte Order Marks. So they are not actually required in UTF-8 and the spec suggests not to use them. For whatever reason they are common though. So you need to check for them, and if found skip them otherwise you can count the first line of a file as code when it might actually be a comment.</aside>
 				</section>
 
 
@@ -331,7 +565,18 @@ BenchmarkCopy-8             1000000000      3.06 ns/op
 BenchmarkStringBuilder-8     200000000      7.74 ns/op
 </pre>
 
-				<p>Using StringBuilder to ensure >= Go 1.10</p>
+				<p>Use StringBuilder to ensure >= Go 1.10</p>
+				<aside class="notes">Step four. Bring it all back to you.
+
+Know your problem domain. The output for scc is limited.
+
+Its also a lot of string concatenation.
+
+I found a nice benchmark which shows which methods are the fastest, and then I didn't use those.
+
+See its such a small amount of runtime in the application I opted to use a new Go feature, to avoid people compiling using an old version.
+
+I did compare this specific implementation to a nice column processor I found because I was able to be very specific about it it runs in about half the time.</aside>
 
 				</section>
 
@@ -365,6 +610,10 @@ main.go                              212        7         6      199          2
 processor/cocomo.go                   26        5         6       15          0
 processor/constants.go                 5        1         0        4          0
 examples/language/go.go               19        6         6        7          0</pre>
+<aside class="notes">I wanted to try out the complexity estimate. This is some output for scc running against itself. Its showing us the results for each file, sorted by complexity. 
+
+I know the most complex file in the codebase is probably workers.go were most of the code processing logic lives, and thankfully scc is able to identify it.
+</aside>
 				</section>
 
 
@@ -378,6 +627,11 @@ examples/language/go.go               19        6         6        7          0<
 				<section>
 					<h2>Redis Benchmark</h2>
 					<img src="./img/benchmark-redis.png" />
+					<aside class="notes">So benchmarks. Here is a benchmark over the redis code base between all the code counters I have talked about. I mostly included this one to illustrate the performance gains all the newer tools have over cloc. Cloc is on the bottom.
+
+When I tried charting this using the linux kernel all the new tools were a thin smear on the left side.
+
+I will be dropping cloc from further comparisons.</aside>
 				</section>
 
 				<section>
@@ -391,27 +645,46 @@ examples/language/go.go               19        6         6        7          0<
 					<br>
 					Tried to <a href="https://github.com/boyter/scc/blob/master/examples/performance_tests/create_performance_test.py">create one</a> to be as fair as possible.
 					</p>
+					<aside class="notes">So there is no such thing as a fair benchmark. I wrote one of the tools so I am biased.
+
+Also each program supports different languages. Scc includes XML, JSON and TEXT files for example.
+
+Ignore files are only supported in some language which can increase or decrease the work to process.
+
+String support which is an additional level of bookkeeping is only supported by scc and tokei.
+
+Also scc supports complexity estimates.
+
+So I tried to create as fair a benchmark as I could. It consists of thousands of files in wide spanning directories to which all counters produce the same output. This means it should be a test of how quickly they can identify the files, read them into memory and count them.</aside>
 				</section>
 
 				<section>
 					<section>
 						<h2>Stupidly risky demo</h2>
 						<p>Benchmark slides below if demo gods displeased</p>
+						<aside class="notes"></aside>
 					</section>
 					<section>
 						<h2>Artificial Benchmark</h2>
 						<img src="./img/benchmark-artificial.png" />
+						<aside class="notes">Lets start with out artificial benchmark. 
+
+Of course artificial is just that, so lets try on a copy of the linux kernel to get a feel for the real world.</aside>
 					</section>
 
 					<section>
 						<h2>Linux Kernel Benchmark</h2>
 						<img src="./img/benchmark-linux.png" />
+						<aside class="notes"></aside>
 					</section>
 				</section>
 
 				<section>
 					<h2>10 copies of Linux</h2>
 					<img src="./img/benchmark-10-linux.png" />
+					<aside class="notes">One last benchmark. This time in a slide because it takes too long to run.
+
+10 copies of the linux kernel copied into a directory. </aside>
 				</section>
 
 
@@ -424,6 +697,22 @@ examples/language/go.go               19        6         6        7          0<
 					<p>But all of this would work in Rust/ATS/C just as well</p>
 					<p>But feel free to boast when people mention Rust anyway</p>
 					<p>Whats the cost?</p>
+					<aside class="notes">So can a go program outperform a well written rust one?
+
+YES!
+
+However the techniques used could be moved into tokei and it would probably be just as fast.
+
+I still think a direct port to Rust would be faster, or converting one of those tools to use the same techniques.
+
+Well I had to re-implement almost everything myself. Although it could be argued the nice thing about reinventing the wheel is you get a round one.
+
+I also had sacrifice some level of readability.
+
+Also a lot of time.
+
+I also don't think I have reached an optimum level of performance. Id love to see one of you brilliant people submit a PR that improves performance again or creates another project which crushes scc.
+</aside>
 				</section>
 
 				<section>
