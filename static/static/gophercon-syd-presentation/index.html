@@ -26,20 +26,14 @@
 					<h3>Can a crusty Go program outperform a well written Rust Project?</h3>
 				</section>
 				<section>
-					<table>
-						<tr>
-							<td>
-								<img src="./img/ben.jpg" >
-							</td>
-							<td>
+					<p>
+								<img height="200px" src="./img/avatar.jpg" ><br>
 								Ben Boyter <a href="https://twitter.com/boyter">@boyter</a><br>
 								Title "Tech Lead"<br>
-								Code Monkey ATS <a href="https://www.kablamo.com.au/">Kablamo</a>.
+								Code Monkey at <a href="https://www.kablamo.com.au/">Kablamo</a>.
 								<pre><code style="font-size: 16px;">func Produce(c Coffee, b Beer) (Code, Cloud, []error)</code></pre>
 								Can a crusty Go program outperform a well written Rust Project?<br>
-							</td>
-						</tr>
-					</table>
+							</p>
 				</section>
 
 				<section>
@@ -82,6 +76,10 @@
 				</section>
 
 				<section>
+					<img src="" />
+				</section>
+
+				<section>
 					<h2>Goals</h2>
 					Learn Go.<br>
 					Be as fast as possible.<br>
@@ -94,8 +92,6 @@
 				<section>
 					<h2>Design</h2>
 					4 stage pipeline<br>
-Processes separated by channels.<br>
-Buffered channel's mostly for back-pressure.<br>
 <img src="./img/design1.jpg" />
 				</section>
 
@@ -139,7 +135,6 @@ Case 7 Create a directory that with 100 subdirectories and 100 files in each
 					<p>
 					Know your use case! 18,554 bytes.<br>
 					Memory maps.<br><br>
-					I burnt a lot of time here.<br><br>
 					Just use ioutil.ReadFile for small files.</p>
 
 					<pre>$ time scc linux
@@ -324,20 +319,12 @@ Benchmark #1: scc-2.1.0 redis
 				<section>
 					<h2>4. Summerise</h2>
 					<p>Limited output (thankfully).</p>
-					<p><a href="https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go">Handy Benchmark</a></p>
+					<p><a href="https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go">String concatenation benchmark</a></p>
 <pre>
 BenchmarkConcat-8              1000000  64850.00 ns/op
 BenchmarkBuffer-8            200000000      6.76 ns/op
 BenchmarkCopy-8             1000000000      3.06 ns/op
 BenchmarkStringBuilder-8     200000000      7.74 ns/op
-</pre>
-
-
-<p>Tried using columise but too slow</p>
-
-<pre>
-// When using columise   ~28726 ns/op
-// When using home grown ~14293 ns/op
 </pre>
 
 				<p>Using StringBuilder to ensure >= Go 1.10</p>
@@ -347,7 +334,6 @@ BenchmarkStringBuilder-8     200000000      7.74 ns/op
 
 				<section>
 					<h2>Results</h2>
-					<p>I know that the most complex file is workers.go</p>
 <pre>───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
 ───────────────────────────────────────────────────────────────────────────────
@@ -378,13 +364,13 @@ examples/language/go.go               19        6         6        7          0<
 				</section>
 
 
-				<section>
+<!-- 				<section>
 					<h2>Performance over time</h2>
-					<!-- https://jsfiddle.net/xwh034a9/1/ -->
+					https://jsfiddle.net/xwh034a9/1/
 					<p>Every version of scc over time</p>
 					<img src="./img/performance-over-time.png" />
 				</section>
-
+ -->
 				<section>
 					<h2>Redis Benchmark</h2>
 					<img src="./img/benchmark-redis.png" />
@@ -403,7 +389,7 @@ examples/language/go.go               19        6         6        7          0<
 					</p>
 				</section>
 
-				<section>
+				<!-- <section>
 					<h2>Artificial Benchmark</h2>
 					<img src="./img/benchmark-artificial.png" />
 				</section>
@@ -411,7 +397,7 @@ examples/language/go.go               19        6         6        7          0<
 				<section>
 					<h2>Linux Kernel Benchmark</h2>
 					<img src="./img/benchmark-linux.png" />
-				</section>
+				</section> -->
 
 				<section>
 					<h2>10 copies of Linux</h2>
@@ -425,11 +411,7 @@ examples/language/go.go               19        6         6        7          0<
 
 				<section>
 					<h2>YES!</h2>
-					<p>But all of this would work in Rust/ATS as well.</p>
-					<p>Go however trades off ease of development.</p>
-					<p>So perhaps was able to implement the changes faster.</p>
-					<p>I still think a direct port to Rust would be faster</p>
-					<p>So exploit Go's development speed!</p>
+					<p>But all of this would work in Rust/ATS/C just as well</p>
 				</section>
 
 				<section>
