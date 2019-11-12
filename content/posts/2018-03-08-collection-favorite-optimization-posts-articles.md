@@ -52,6 +52,6 @@ In no particular order.
  - Linux Load Averages: Solving the Mystery http://www.brendangregg.com/blog/2017-08-08/linux-load-averages.html
  - The state of caching in Go https://blog.dgraph.io/post/caching-in-go/
  - Introducing Ristretto: A High-Performance Go Cache https://blog.dgraph.io/post/introducing-ristretto-high-perf-go-cache/
- - Building a Vectorized SQL Engine. A very good read about how CPU's work and data layouts affect it https://www.cockroachlabs.com/blog/how-we-built-a-vectorized-sql-engine/
+ - Building a Vectorized SQL Engine. A very good read about how CPU's work and data layouts affect it https://www.cockroachlabs.com/blog/how-we-built-a-vectorized-sql-engine/ with Hacker News comments https://news.ycombinator.com/item?id=21516322
 
 Will attempt to keep this list up to date as I find other content that really impresses me.
