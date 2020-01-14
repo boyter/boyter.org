@@ -54,5 +54,6 @@ In no particular order.
  - Introducing Ristretto: A High-Performance Go Cache https://blog.dgraph.io/post/introducing-ristretto-high-perf-go-cache/
  - Building a Vectorized SQL Engine. A very good read about how CPU's work and data layouts affect it https://www.cockroachlabs.com/blog/how-we-built-a-vectorized-sql-engine/ with Hacker News comments https://news.ycombinator.com/item?id=21516322
  - Writing a fast cache service in Go https://allegro.tech/2016/03/writing-fast-cache-service-in-go.html
+ - qgrep internals https://zeux.io/2019/04/20/qgrep-internals/
 
 Will attempt to keep this list up to date as I find other content that really impresses me.
