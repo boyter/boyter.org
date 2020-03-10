@@ -7,3 +7,22 @@ http://www.ijsrp.org/research_paper_jul2012/ijsrp-july-2012-101.pdf
 
 
 https://www.youtube.com/watch?v=Ec1OOiG4RMA
+
+
+https://stackoverflow.com/questions/2829303/given-a-document-select-a-relevant-snippet
+https://stackoverflow.com/questions/282002/c-sharp-finding-relevant-document-snippets-for-search-result-display
+
+https://github.com/BurntSushi/ripgrep/issues/95
+
+https://news.ycombinator.com/item?id=16944947
+
+https://stackoverflow.com/questions/24836044/case-insensitive-string-search-in-golang
+
+
+
+https://www.w3.org/International/wiki/Case_folding
+https://en.wikipedia.org/wiki/%C3%9F
+https://www.w3.org/TR/charmod-norm/
+
+
+https://news.ycombinator.com/item?id=16944947
