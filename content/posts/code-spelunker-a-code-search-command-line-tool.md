@@ -1,6 +1,6 @@
 ---
 title: Code Spelunker a Code Search Command Line Tool
-date: 2020-03-10
+date: 2050-03-10
 ---
 
 Code Spelunker (cs) or code search is a new command line tool I have been working on and off over the last few months. The idea came about while watching a work colleague continually opening Visual Studio Code in order to search over files recursively in a directory. I asked why he didn't use a tool like ripgrep with the context flag to which he replied that he liked the interactivity the UI gave him. Having wanted to work on a terminal UI application for a while, also being interested in code search and having always wanted to build a real search ranking algorithm it seemed like a overlap of goals to try and build a tool just for him.
@@ -85,7 +85,6 @@ The algorithm is fairly well documented so for those interested please look at t
 
 ### Fast Unicode Literal Matching in Go
 
-
 There is one obvious way in all programming languages to support a search case-insensitive search across a string. It also happens to be wrong.
 
 The below is a pseudocode example of how most would implement this.
@@ -119,7 +118,9 @@ func main() {
 
 This raises the question how do you match like this? You need to match insensitive so you can highlight correctly. In Go the answer would be to use regular expressions. The regex engine inside Go is unicode aware so problem solved?
 
-Not quite. The Go regular expression engine for case insensitive matching can be quite slow. How slow you say? Well here is it compared to what I ended up using in `cs`. It is a simple program that you can pass two arguments to. The first is your search term and the second the file. It then searches using Go's regex FindAllIndex as a case sensitive match, then a IndexAll function I wrote which produces the same results but does not touch the regular expression engine. The second test uses the same regex FindAllIndex in a case insensitive search which is unicode aware and my custom method which does the same. Note that both custom methods are for literals only and do not support any regular expression operations.
+Not quite. The Go regular expression engine for case insensitive matching can be quite slow. How slow you say? 
+
+Below I have compared to what I ended up using in `cs`. It is a simple program that accepts two arguments. The first is your search term and the second the file. It then searches using Go's regex FindAllIndex as a case sensitive match. Then by comparison a IndexAll function I wrote which produces the same results but does not touch the regular expression engine. The second test uses the same regex FindAllIndex in a case insensitive search which is unicode aware and my custom method which does the same. Note that both custom methods are for literals only and do not support any regular expression operations.
 
 The corpus being searched against is a collection of public domain books and about 37MB in size.
 
