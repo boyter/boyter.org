@@ -1,5 +1,5 @@
 ---
-title: Building an API rate limiter in Go for searchcode
+title: Building a API rate limiter in Go for searchcode
 date: 2020-05-04
 ---
 
@@ -64,7 +64,7 @@ Note that the above is designed to punish checks against the API to see if the I
 
 You can increase the RATE_BAN_LIMIT as required to provide longer lockouts of those that abuse the system.
 
-The only think left to do is to reduce the counts every now and then. To do so I create a simple go-routine that runs constantly in the background decrementing the count and then sleeping.
+The only thing left to do is to reduce the counts every now and then. That is reduce the API counts so that the limits reduce. To do so I create a simple go-routine that runs constantly in the background decrementing the count and then sleeping.
 
 {{<highlight go>}}
 go func() {
@@ -126,8 +126,10 @@ Well the below is a dump of the map in memory a few seconds after a fresh deploy
 }
 ```
 
-I do keep an eye on the above while its running to ensure the map never fills up and thankfully the most entries I have ever seen was a few hundred at times and generally its cleared out except for a single IP address every time the decrement works. Probably not the most memory efficient thing around but does not appear to have triggered any additional GC pauses.
+I do keep an eye on the above while its running to ensure the map never fills up and thankfully the most entries I have ever seen was a few hundred at times and generally its cleared out except for a single IP address every time the decrement works. Probably not the most memory efficient thing around but does not appear to have triggered any additional GC pauses. In addition the load average on the search servers has gone down very slightly.
 
-So is this a perfect implementation? No. However it works well enough and there is scope to improve it at a later date if required. Assuming I need to expand on the code I will but in this case it achieved my simple goal of restricting a certain abuse of the system. Some ideas I have to improve it would be moving the map into redis to ensure it persists between API deployments, but this comes at the cost of latency and/or complexity if I keep the check in a in process map and sync it across. 
+So is this a perfect implementation? No. However it works well enough and there is scope to improve it at a later date if required. Assuming I need to expand on the code I will but in this case it achieved my simple goal of restricting a certain abuse of the system. Some ideas I have to improve it would be moving the map into redis to ensure it persists between API deployments, but this comes at the cost of latency and/or complexity if I keep the check in a in process map and sync it across. Of course redis already supports rate limiting patterns itself if you need it https://redislabs.com/redis-best-practices/basic-rate-limiting/
+
+There is also the option to use an existing library such as tollbooth for this https://github.com/didip/tollbooth however generally I would rather not pull in another dependency when a reasonable implementation is only 30 or so lines of code.
 
 By the way, if you were planning on using searchcode's API and now are getting throttled, get in contact with me. We can hammer out a commercial agreement and I can ensure you get your own special rate limit applied.
