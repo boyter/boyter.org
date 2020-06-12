@@ -1,5 +1,5 @@
 ---
-title: 'Can anyone explain how this regex [- ~] matches ASCII characters?'
+title: 'Can anyone explain how this regex [ -~] matches ASCII characters?'
 author: Ben E. Boyter
 type: post
 date: 2014-02-04T00:07:02+00:00
@@ -10,7 +10,7 @@ categories:
 ---
 Since I am pulling most of my content from other sites such as Mahalo and Quora I thought I would pull back some of my more interesting HN comments.
 
-[<span style="line-height: 1.5;">Can anyone explain how this regex [- ~] matches ASCII characters ?</span>][1]
+> [Can anyone explain how this regex [- ~] matches ASCII characters?](https://news.ycombinator.com/item?id=4774426)
 
 It's pretty simple. Assuming you know regex&#8230; Im going to assume you don't since you are asking.
 
@@ -27,8 +27,8 @@ In this case [ -~] it means every character between <space> and <tilde>, which j
   
 You could rewrite the regex like so (note I haven't escaped or anything in this so its probably not valid)
 
-<pre>[ !"#$%&'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~]</pre>
+```
+[ !"#$%&'()*+,-./0123456789:;&lt;=&gt;?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~]
+```
 
 but that's not quite as clever or neat.
-
- [1]: https://news.ycombinator.com/item?id=4774426
