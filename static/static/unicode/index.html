@@ -1,0 +1,171 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<title>Unicode is more than just emojis 😃😭😈</title>
+		<link rel="stylesheet" href="css/reset.css">
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/sky.css">
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/monokai.css">
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+	
+				<section>
+					<h1>Unicode</h1>
+					<h3>is more than just emojis 😃😭😈</h3>
+				</section>
+				
+				<section>
+					<h1>What is it?</h1>
+					<p>Standard for representing the worlds text</p>
+					<p><a href="https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/">Different to encoding</a></p>
+				</section>
+
+				<section>
+					<h2>My app already displays emojis 👍</h2>
+					<p>Job done right? Actually... little bit more to it...</p>
+				</section>
+
+				<section>
+					<h2>Case Folding 🙏</h2>
+					<p>According to full unicode rules the following characters match...</p>
+					<p>s == s</p>
+					<p>s == ſ</p>
+				</section>
+
+				<section>
+					<h2>Implications... 😞</h2>
+					<p>usernames sam,ſam</p>
+					<p>email sam@gmail.com, ſam@gmail.com, Sam@gmail.com</p>
+					<p>But what happens when you say want to upper or lowercase?</p>
+					<p>sam -> Sam</p>
+					<p>Sam -> Sam</p>
+					<p>ſam -> Sam</p>
+				</section>
+
+				<section>
+					<h2>Or the reverse... ◀️</h2>
+					<p>Lowercase of Sam -> sam</p>
+					<p>it could also be Sam -> ſam</p>
+					<p>Which one is correct? 🤔</p>
+				</section>
+
+				<section>
+					<h2>Ignoring case... it gets worse 🧳</h2>
+					<p>ſecret == secret == Secret</p>
+				</section>
+
+				<section>
+					<h2>Lowercase/Uppercase all the things! 🤔</h2>
+					<p>COTE</p>
+					<p>cote (rating)</p>
+					<p>coté (highly regarded)</p>
+					<p>côte (coast)</p>
+					<p>côté (side)</p>
+					<p>Information is lost!</p>
+				</section>
+
+				<section>
+					<h2>Im a designer 🎨</h2>
+					<p>It affects you in all sorts of ways...</p>
+					<h2>Im front/back end 👿</h2>
+					<p>Lies you are taught when learning to code</p>
+					<code>thing.ToLower() == otherThing.ToLower()</code>
+					<code>thing.ToUpper() == otherThing.ToUpper()</code>
+				</section>
+
+				<section>
+					<p>Did you know there are non whitespace characters that display as whitespace? Nordic runes. 🪓</p>
+					<img src="./img/whitespace.png" />
+				</section>
+
+				<section>
+					<h2>So what? Consider the humble search bar 🔍</h2>
+					<img src="./img/searchbar.jpeg" />
+				</section>
+				
+				<section>
+					<h2>What should this match? 🔍</h2>
+					<p>Search term: secret</p>
+					<p>secret, secrets, Secret, Secrets, ſecret, ſecrets</p>
+				</section>
+
+				<section>
+					<h2>I'll just use bytes! 🍢</h2>
+					<p>Remember the lowercase example...</p>
+					<p>Ⱥ -> ⱥ</p>
+					<p>Ⱦ -> ⱦ</p>
+					<pre>Ⱥ ⱥ 2 3
+Ⱦ ⱦ 2 3</pre>
+				</section>
+
+				<section>
+					<h2>Remember case folding? 🙏</h2>
+					<p>Two versions...</p>
+					<p>Full... and simple<p>
+					<p>GROSS -> groß -> GROß || GROSS</p>
+				</section>
+
+				<section>
+					<p>Surely Google/Mozilla/Microsoft agree?</p>
+					<img src="./img/example_chrome.png" />
+				</section>
+
+				<section>
+					<p>Surely Google/Mozilla/Microsoft agree?</p>
+					<img src="./img/example_edge.png" />
+				</section>
+
+				<section>
+					<p>Surely Google/Mozilla/Microsoft agree?</p>
+					<img src="./img/example_firefox.png" />
+				</section>
+
+				<section>
+					<h2>Did you know?</h2>
+					<p>Being unicode aware has performance costs... unless you are very careful in your implementations</p>
+				</section>
+
+				<section>
+					<h2>So....</h2>
+					<p>Use official libraries (and even they get it wrong...)</p>
+					<p>For the love of all thats holy DO NOT promise unicode support... unless you REALLY know what that implies...</p>
+					<p>Asking which version of case folding they want should stop that in its tracks though. 👍</p>
+				</section>
+
+				<section>
+					<h2>Why????</h2>
+					<p>Decided to dive into learning how to do case insensitive searches while supporting unicode and now I am in awe at how anything actually works.</p>
+				</section>
+
+			</div>
+		</div>
+		<script src="js/reveal.js"></script>
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true }
+				]
+			});
+		</script>
+	</body>
+</html>

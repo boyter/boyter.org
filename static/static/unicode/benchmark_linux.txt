@@ -1,0 +1,31 @@
+Benchmark #1: scc linux
+  Time (mean ± σ):     685.6 ms ±  22.1 ms    [User: 12.866 s, System: 1.866 s]
+  Range (min … max):   657.1 ms … 724.9 ms    10 runs
+ 
+Benchmark #2: scc -c linux
+  Time (mean ± σ):     587.2 ms ±  53.0 ms    [User: 7.923 s, System: 1.792 s]
+  Range (min … max):   495.3 ms … 700.6 ms    10 runs
+ 
+Benchmark #3: tokei linux
+  Time (mean ± σ):     762.0 ms ±  28.5 ms    [User: 12.425 s, System: 1.075 s]
+  Range (min … max):   719.4 ms … 805.2 ms    10 runs
+ 
+Benchmark #4: loc linux
+  Time (mean ± σ):      2.037 s ±  0.097 s    [User: 60.056 s, System: 2.090 s]
+  Range (min … max):    1.915 s …  2.174 s    10 runs
+ 
+Benchmark #5: polyglot linux
+  Time (mean ± σ):      1.255 s ±  0.051 s    [User: 2.938 s, System: 2.181 s]
+  Range (min … max):    1.188 s …  1.368 s    10 runs
+ 
+Benchmark #6: gocloc linux
+  Time (mean ± σ):     11.296 s ±  0.067 s    [User: 12.700 s, System: 1.387 s]
+  Range (min … max):   11.209 s … 11.426 s    10 runs
+ 
+Summary
+  'scc -c linux' ran
+    1.17 ± 0.11 times faster than 'scc linux'
+    1.30 ± 0.13 times faster than 'tokei linux'
+    2.14 ± 0.21 times faster than 'polyglot linux'
+    3.47 ± 0.35 times faster than 'loc linux'
+   19.24 ± 1.74 times faster than 'gocloc linux'

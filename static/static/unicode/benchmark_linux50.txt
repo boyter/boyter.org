@@ -1,0 +1,5 @@
+Benchmark #1: scc linux50
+  Time (mean ± σ):     57.579 s ±  4.451 s    [User: 579.939 s, System: 168.548 s]
+  Range (min … max):   55.008 s … 69.535 s    10 runs
+ 
+Benchmark #2: scc -c linux50

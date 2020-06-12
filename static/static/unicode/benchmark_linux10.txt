@@ -1,0 +1,26 @@
+Benchmark #1: scc linux10
+  Time (mean ± σ):      5.326 s ±  0.560 s    [User: 128.571 s, System: 15.695 s]
+  Range (min … max):    5.100 s …  6.918 s    10 runs
+ 
+Benchmark #2: scc -c linux10
+  Time (mean ± σ):      3.678 s ±  0.031 s    [User: 80.210 s, System: 14.809 s]
+  Range (min … max):    3.625 s …  3.732 s    10 runs
+ 
+Benchmark #3: tokei linux10
+  Time (mean ± σ):      6.959 s ±  0.238 s    [User: 122.284 s, System: 8.558 s]
+  Range (min … max):    6.614 s …  7.213 s    10 runs
+ 
+Benchmark #4: loc linux10
+  Time (mean ± σ):     20.582 s ±  0.237 s    [User: 611.981 s, System: 19.826 s]
+  Range (min … max):   20.288 s … 21.153 s    10 runs
+ 
+Benchmark #5: polyglot linux10
+  Time (mean ± σ):     11.919 s ±  0.160 s    [User: 68.619 s, System: 25.135 s]
+  Range (min … max):   11.703 s … 12.213 s    10 runs
+ 
+Summary
+  'scc -c linux10' ran
+    1.45 ± 0.15 times faster than 'scc linux10'
+    1.89 ± 0.07 times faster than 'tokei linux10'
+    3.24 ± 0.05 times faster than 'polyglot linux10'
+    5.60 ± 0.08 times faster than 'loc linux10'

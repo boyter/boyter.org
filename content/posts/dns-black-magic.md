@@ -1,9 +1,11 @@
 ---
-title: DNS Black Magic
-date: 2028-12-10
+title: "Build a SaaS App - DNS Black Magic"
+date: 2040-06-12
 ---
 
-DNS can be a complex beast. To distil it down to the simplest thing that can possibly work, you buy a domain from a domain registrar, then configure the name servers to point at your servers public IP address.
+> A part of a series of blog posts I have been working on to turn into a book about building a SaaS application.
+
+DNS can be a complex beast. To distil it down to the simplest thing that can possibly work, you buy a domain from a domain registrar, then configure the name servers to point at your servers public IP address. Where this gets confusing is thatsome domain registrars offer nameservers, and others don't. This can cause issues
 
 `DNS -> Nameserver -> Server IP Address`
 

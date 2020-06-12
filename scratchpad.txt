@@ -1,0 +1,7 @@
+Nice landing page. If you Google "summarizer", you will find dozens of similar services for free. The mechanism behind it is very simple. A couple a years ago I built one from scratch in about 2 hours, then I accidentally deleted it and rewrote it in 15 minutes. Here's how most of them work:
+1. Split the text into words
+2. Rank each word based on how many times it appears in the text. For example, a word that appears 10 times gets 10 points, and so on.
+3. Rank sentences based on the sum of the scores of each word inside them.
+4. Return the top N sentences by score (N is up to the user), in the order in which they appear in the text.
+For extra fancyness, exclude the most common articles and prepositions and give 2 points to proper nouns.
+Works surprisingly well.
