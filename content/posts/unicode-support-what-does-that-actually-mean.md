@@ -9,7 +9,7 @@ Unicode support in my experience seems to be one of those hand wavy things where
 
 Which is partially correct... It's certainly a good start. However unicode is more than emojis.
 
-So lets take a step back. What is unicode? It's actually easy to explain, here it is taken from the wiki page "A standard for representing the worlds text". That means it includes all the languages in the world, such as chinese characters, japanese writing systems, arabic and even nordic runes. As such you get all sorts of interesting things in the standard such as characters that display as white space but actually are not because they represent a nordic rune carved on the side of the stone not visible from the front.
+So lets take a step back. What is unicode? It's actually easy to explain, here it is taken from the wiki page "A standard for representing the worlds text". That means it includes all the languages in the world, such as chinese characters, japanese writing systems, arabic and even nordic runes. As such you get all sorts of interesting things in the standard such as characters that display as white space but actually are not because they represent a nordic rune carved on the [side of the stone not visible from the front](https://www.youtube.com/watch?v=2yWWFLI5kFU). 
 
 Being able to save these characters into your system as mentioned a very good start. Emoji's tending to be the yard-stick used to test a unicode support claim, because who doesn't love sprinkling them through everyday communication.
 
@@ -21,7 +21,7 @@ Case folding rules I hear you ask? 🙏
 
 In modern English generally a single upper-case character has a 1 to 1 mapping to a lower-case character. `A-a B-b C-c` etc... However once you move to older English and international languages this is no longer true. For old English once you include unicode characters all of a sudden you have to deal with things like `ſ`.
 
-According wikipedia the character `ſ` is a [long s](https://en.wikipedia.org/wiki/Long_s). Which means if you want to support unicode you need to ensure that if someone does a case insentive comparison then the following examples are all string equivalent. 
+According wikipedia the character `ſ` is a [long s](https://en.wikipedia.org/wiki/Long_s). Which means if you want to support unicode you need to ensure that if someone does a case insensitive comparison then the following examples are all string equivalent. 
 
 ```
 ſecret == secret == Secret
@@ -33,7 +33,7 @@ The above is just a simple example... consider the following (not all permutatio
 ſatisfaction == satisfaction == ſatiſfaction == Satiſfaction == SatiSfaction === ſatiSfaction
 ```
 
-As you can see there is a loss of information in some of the above too. If you go from `ſ` to `S` you have lost some information and there is no way to go back to what you started with. So by chaging case you potentially don't actually know which character to use. The classic example for this in unicode is the French word cote. Because cote, coté, côte and côté are all different words with the same upper-case representation COTE.
+As you can see there is a loss of information in some of the above too. If you go from `ſ` to `S` you have lost some information and there is no way to go back to what you started with. So by changing case you potentially don't actually know which character to use. The classic example for this in unicode is the French word cote. Because cote, coté, côte and côté are all different words with the same upper-case representation COTE. Also, an astute reader pointed out that in French Canadian it actually does upper-case with accents, adding some more depth to unicode operations localization which is something I have never investigated so won't discuss in depth.
 
 The above is something to keep in mind from design to implementation. Because your design *might* require that you lower-case/upper-case/title-case something to look better, and this might be losing information while doing so.
 
@@ -54,11 +54,11 @@ Under simple case folding rules the lower of `Æ` is `ǣ`. However with full cas
 ![Chrome Unicode Case Folding](/static/code-spelunker-a-code-search-command-line-tool/example_chrome.png)
 ![Firefox Unicode Case Folding](/static/code-spelunker-a-code-search-command-line-tool/example_firefox.png)
 
-Chome (Edge does the same thing) follows full case folding rules (which also maps Æ to accented ae variants!), where-as Firefox follows simple case folding rules. Which one is correct? I asked a work collegue from Denmark, and he actually liked *both* depending on what he was searching for and the context of the page. So there is no clear answer as to which one you should implement, BOTH types can be considered correct.
+Chome (Edge does the same thing) follows full case folding rules (which also maps Æ to accented ae variants!), where-as Firefox follows simple case folding rules. Which one is correct? I asked a work colleague from Denmark, and he actually liked *both* depending on what he was searching for and the context of the page. So there is no clear answer as to which one you should implement, BOTH types can be considered correct.
 
 That's one of the issue's with stating "unicode support" in any software product. Your implementation probably isn't wrong, but it might not be what the user expects.
 
-So dealing with case-folding is clearly a lot of work. How about we just work with bytes? The string is just bytes under the hood after all... 🤔 This incidently was the response I got from a resident C programmer. Lets forget case folding and just worry about the "normal case". If we lower-case/upper-case everything and work like that everything be fine yes?
+So dealing with case-folding is clearly a lot of work. How about we just work with bytes? The string is just bytes under the hood after all... 🤔 This incidentally was the response I got from a resident C programmer. Lets forget case folding and just worry about the "normal case". If we lower-case/upper-case everything and work like that everything be fine yes?
 
 Consider trying to make a search engine 🔍. After finding some relevant results you probably want to highlight matches inside the result. That is the user searches for something and expects you to highlight that term in the results page. Lets consider the following search string,
 
@@ -68,7 +68,7 @@ and the text we have found and now what to highlight.
 
 > the regex can work with Ⱥ. Java by contrast will
 
-Clearly we want to match java. So you lower-case both the search text and the content. Find the offset position. Then against the orginal content you markup. And you get something like
+Clearly we want to match java. So you lower-case both the search text and the content. Find the offset position. Then against the original content you markup. And you get something like
 
 > the regex can work with Ⱥ. J**ava** by contrast will
 
@@ -96,20 +96,24 @@ func main() {
 {{</highlight>}}
 
 
-Keep in mind this is just scratching the surface of the edge cases in unicode. Im sure there are heap of additional cases I have not yet run into nor covered (I was only trying to solve a single small problem) but this should at least give an idea as to the sort of problems you need to consider.
+Keep in mind this is just scratching the surface of the edge cases in unicode. I'm sure there are heap of additional cases I have not yet run into nor covered (I was only trying to solve a single small problem) but this should at least give an idea as to the sort of problems you need to consider.
 
-One last thing to consider is the performance cost of supporting unicode, which unless you pay special attention can be non trivial. Probably best illustrated by the ripgrep introduction blog https://blog.burntsushi.net/ripgrep/#linux_unicode_word and specificly the unicode aware test where some of the tools get a non trivial order of magnitute slow down cost by supporting it. 
+One last thing to consider is the performance cost of supporting unicode, which unless you pay special attention can be non trivial. Probably best illustrated by the ripgrep introduction blog https://blog.burntsushi.net/ripgrep/#linux_unicode_word and specifically the unicode aware test where some of the tools get a non trivial order of magnitude slow down cost by supporting it. 
 
 So... key take-aways.
 
 * You cannot explicitly assume that the lower/upper-case representations of any two strings are or are not the same by checking the underlying bytes
 * Case folding can be done in one or two ways, simple and full
 * Sometimes people like **both** versions
+* Oh and you need to consider localization
+* As well as normalization where a following diacritical mark can make what appears to be a single character multiple
 * Even big players implement different versions in the same tools including Microsoft, Google and Mozilla
 * There *can* be non trivial performance costs to support unicode
 
-So what to do? Well the first is obviously use well supported libraries that solve this problem for you. However be aware of the limitations they have. Know what case folding it supports for instance. I'd also suggest not claiming to have unicode support unless you are very explict with what you support, or know in advance what the user expects. I would be inclined to ask "Can you develop that point please?" when faced with this question. 
+So what to do? Well the first is obviously use well supported libraries that solve this problem for you. However be aware of the limitations they have. Know what case folding it supports for instance. I'd also suggest not claiming to have unicode support unless you are very explicit with what you support, or know in advance what the user expects. I would be inclined to ask "Can you develop that point please?" when faced with this question. 
 
 Saying "We support it this way" is acceptable in my books, but might come back to bite you if the customer expects something else. Lastly keep in mind the key take-aways above, especially the performance one. 👍
 
 Lastly... why would you ever investigate this? Well I have been working on a command line tool to search over text and code. I wanted it to be unicode aware, ran into performance issues with regular expressions in Go and decided to dive into learning how to do case insensitive searches while supporting unicode... now I am in awe at how anything actually works.
+
+HN Comments https://news.ycombinator.com/item?id=23524400
