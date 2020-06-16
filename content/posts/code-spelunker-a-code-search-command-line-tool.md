@@ -1,6 +1,6 @@
 ---
 title: Code Spelunker a Code Search Command Line Tool
-date: 2050-06-14
+date: 2020-06-15
 ---
 
 Code Spelunker (cs) or code search is a new command line tool I have been working on and off over the last few months. The idea came about while watching a work colleague continually opening Visual Studio Code in order to search over files recursively in a directory. I asked why he didn't use a tool like ripgrep with the context flag to which he replied that he liked the interactivity the UI gave him. Having wanted to work on a terminal UI application for a while, also being interested in code search and having always wanted to build a real search ranking algorithm it seemed like a overlap of goals to try and build a tool just for him.
@@ -36,44 +36,45 @@ Regular expressions generally does not scale to very large corpus's (tens of gig
 I believe this leaves a small space for a boolean search tool with ranking that "brute forces" its searches similar to the regular expression tools work. I also believe that this technique can work in other situations, such as for research purposes. I also think that given the HTTP interface that `cs` can be a replacement for a lot of the heavier tools such as searchcodeserver.com without the need to stand-up much infrastructure and wait for it to build its index.
 
 
-### Snippet Extraction
+### Fuzzy Text Problems - Snippet Extraction or Excerpt-Building Algorithms
 
 
-The extraction of snippets from some text is one of those problems I naively assumed would be fairly simple. I did have a reason to assume this however as I had previously written about building one in PHP https://boyter.org/2013/04/building-a-search-result-extract-generator-in-php/ which was based on an even older stackoverflow answer. I mostly copied the techniques used in an even older PHP project called Sphider.
+The extraction of snippets from some text is one of those problems I naively assumed would be simple to solve. I did have a small reason to assume this however as I had previously written about building one in PHP https://boyter.org/2013/04/building-a-search-result-extract-generator-in-php/ which was based on an even older stackoverflow answer of mine. It was based on the techniques used in an even older PHP crawler/indexer project named [Sphider](http://www.sphider.eu/).
 
-Well blow me down. Turns out this small chunk of code I wrote in anger was picked up by a bunch of PHP projects https://github.com/msaari/relevanssi/blob/master/lib/excerpts-highlights.php https://github.com/bolt/bolt/blob/master/src/Helpers/Excerpt.php and https://github.com/Flowpack/Flowpack.SimpleSearch/blob/master/Classes/Search/MysqlQueryBuilder.php
+As such what I had previously written was what I first tried when working on cs. So I quickly ported it to Go to see how it would perform. For small snippets it continued to work reasonably well giving reasonable results. For multiple terms, especially those spread out in large files it was not producing the results I wanted.
 
-What's interesting to me about this is that Relevanssi (a wordpress plugin) which improves your search results has over 100,000 installs. Which means it is probably the most successful code I have ever written in terms of use. Also interesting is that it is written in PHP. I have almost never been paid to write PHP. Certainly my professional PHP code days can be counted on both hands. I wonder if thats something I should put on my resume?
+Annoyingly snippet extraction is a "fuzzy code" problem, with no obvious 100% correct solution you can work towards. What is most relevant to my search might not be what you expected. It also means that coming up with some test cases is problematic, as the moment you solve one you might break another. In any case I decided that my test case for snippet extraction would be based on Jane Austen's Pride and Prejudice which I admit to knowing more about than I probably should. One of the main test cases I wanted to work was a search for `ten thousand a year` with or without quotes to return one of two snippets. The reason being that the terms occur a few times in the book as is, with the rest scattered around and the letter a appearing all over the place. The two most relevant portion of the text however are,
 
-So given I had some code that apparently was working all over the place I ported it to Go to see how it would perform. For small snippets it continued to work reasonably well giving reasonable results. For multiple terms, especially those spread out in large files it was not producing the results I wanted.
-
-Annoyingly snippet extraction is a "fuzzy code" problem, with no obvious 100% correct solution you can work towards. What is most relevant to my search might not be what you expected. It also means that coming up with some test cases is problematic, as the moment you solve one you might break another. In any case I decided that my test case for snippet extraction would be based on Jane Austen's Pride and Prejudice which I admit to knowing more about than I probably should. One of the main test cases I wanted to work was a search for `ten thousand a year` with or without quotes to return one of two snippets. Either
-
-> features, noble mien, and the report which was in general circulation within five minutes after his entrance, of his having *ten thousand a year*. The gentlemen pronounced him to be a fine
+> features, noble mien, and the report which was in general circulation within five minutes after his entrance, of his having **ten thousand a year**. The gentlemen pronounced him to be a fine
 
 or
 
-> it. Dear, dear Lizzy. A house in town! Every thing that is charming! Three daughters married! *Ten thousand a year*! Oh, Lord! What will become of me. I shall go distracted.”
+> it. Dear, dear Lizzy. A house in town! Every thing that is charming! Three daughters married! **Ten thousand a year**! Oh, Lord! What will become of me. I shall go distracted.”
 
-For this case either is an acceptable answer for me, and I can live with a word or two being included or excluded on the edge. Although in an ideal world I would prefer it to be case sensitive when ranking them and produce the first result as a slight preference over the second. At this point I started searching around to find out what existing research was out there regarding snippet extraction and see and how this problem had already been solved.
+For this case either is an acceptable answer for me, and I can live with a word or two being included or excluded on the edge. Although in an ideal world I would prefer it to be case sensitive when ranking them and produce the first result as a slight preference over the second. At this point I started searching around to find out what existing research was out there regarding snippet extraction and see and how this problem had already been solved. This included looking at existing code bases. I was aware that the PHP Relevanssi plugin probably had some implementation that might be worth looking at and started there.
 
-Here is a collection of links I found relevant to this specific problem, and a cached version as PDF's just in case there is some link rot and you cannot get that document you want.
+Well blow me down. Turns out this small chunk of code I wrote in anger was picked up by a bunch of PHP projects including Relevanssi https://github.com/msaari/relevanssi/blob/master/lib/excerpts-highlights.php https://github.com/bolt/bolt/blob/master/src/Helpers/Excerpt.php and https://github.com/Flowpack/Flowpack.SimpleSearch/blob/master/Classes/Search/MysqlQueryBuilder.php For Relevanssi turns out I am even mentioned by name in the credits of the release of both the [free](https://www.relevanssi.com/release-notes/free-3-5/) and [paid](https://www.relevanssi.com/release-notes/premium-1-14/) for versions. No idea how my usual vanity searches didn't turn up that.
 
- - https://www.hathitrust.org/blogs/large-scale-search/practical-relevance-ranking-11-million-books-part-3-document-length-normali [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/Practical Relevance Ranking for 11 Million Books, Part 3_ Docum... _ HathiTrust Digital Library.pdf)
- - https://github.com/apache/lucene-solr/blob/master/lucene/highlighter/src/java/org/apache/lucene/search/uhighlight/UnifiedHighlighter.java [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/lucene-solr_UnifiedHighlighter.java at master · apache_lucene-solr.pdf)
- - https://lucene.apache.org/core/7_0_0/highlighter/org/apache/lucene/search/vectorhighlight/package-summary.html [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/org.apache.lucene.search.vectorhighlight Lucene 7.0.0 API.pdf)
- - https://www.compose.com/articles/how-scoring-works-in-elasticsearch/ [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/How scoring works in Elasticsearch - Compose Articles.pdf)
- - https://blog.softwaremill.com/6-not-so-obvious-things-about-elasticsearch-422491494aa4 [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/6 not so obvious things about Elasticsearch - SoftwareMill Tech Blog.pdf)
- - https://github.com/elastic/elasticsearch/blob/master/docs/reference/search/request/highlighting.asciidoc#unified-highlighter [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/elasticsearch_highlighting.asciidoc at master · elastic_elasticsearch)
- - https://www.elastic.co/guide/en/elasticsearch/reference/6.8/search-request-highlighting.html#unified-highlighter [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/Highlighting _ Elasticsearch Reference [6.8] _ Elastic.pdf)
- - http://www.public.asu.edu/~candan/papers/wi07.pdf [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/wi07.pdf)
- - https://faculty.ist.psu.edu/jessieli/Publications/WWW10-ZLi-KeywordExtract.pdf [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/WWW10-ZLi-KeywordExtract.pdf)
- - https://www.researchgate.net/publication/221299008_Fast_generation_of_result_snippets_in_web_search [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/Fast_generation_of_result_snippets_in_web_search.pdf)
- - https://arxiv.org/pdf/1904.03061.pdf [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/1904.03061.pdf)
- - https://web.archive.org/web/20141230232527/http://rcrezende.blogspot.com/2010/08/smallest-relevant-text-snippet-for.html [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/RCRezende Blog_ The smallest relevant text snippet for search results.pdf)
- - https://stackoverflow.com/questions/282002/c-sharp-finding-relevant-document-snippets-for-search-result-display [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/algorithm - C# Finding relevant document snippets for search result display - Stack Overflow.pdf)
- - https://stackoverflow.com/questions/2829303/given-a-document-select-a-relevant-snippet [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/statistics - Given a document, select a relevant snippet - Stack Overflow.pdf)
- - https://www.forrestthewoods.com/blog/reverse_engineering_sublime_texts_fuzzy_match/ [[pdf]](/static/code-spelunker-a-code-search-command-line-tool/snippet/Reverse Engineering Sublime Text’s Fuzzy Match - ForrestTheWoods.pdf)
+What's interesting to me about this is that Relevanssi (as wordpress plugin) has over 100,000 installs. Which means it is probably the most successful code I have ever written in terms of use. Also interesting is that it is written in PHP. I have *almost* never been paid to write PHP. Certainly my professional PHP code days can be counted on both hands. I wonder if thats something I should put on my resume?
+
+Anyway the catch being this code I had already ruled out. As such I expanded my search. Here is a collection of links I found relevant to this specific problem, and a cached version as PDF's just in case there is some link rot and you cannot get that document you want.
+
+ - [Practical Relevance Ranking for 11 Million Books, Part 3: Document Length Normalization.](https://www.hathitrust.org/blogs/large-scale-search/practical-relevance-ranking-11-million-books-part-3-document-length-normali) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/Practical Relevance Ranking for 11 Million Books, Part 3_ Docum... _ HathiTrust Digital Library.pdf>)
+ - [UnifiedHighlighter.java](https://github.com/apache/lucene-solr/blob/master/lucene/highlighter/src/java/org/apache/lucene/search/uhighlight/UnifiedHighlighter.java) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/lucene-solr_UnifiedHighlighter.java at master · apache_lucene-solr.pdf>)
+ - [Package org.apache.lucene.search.vectorhighlight](https://lucene.apache.org/core/7_0_0/highlighter/org/apache/lucene/search/vectorhighlight/package-summary.html) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/org.apache.lucene.search.vectorhighlight Lucene 7.0.0 API.pdf>)
+ - [How scoring works in Elasticsearch](https://www.compose.com/articles/how-scoring-works-in-elasticsearch/) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/How scoring works in Elasticsearch - Compose Articles.pdf>)
+ - [6 not so obvious things about Elasticsearch](https://blog.softwaremill.com/6-not-so-obvious-things-about-elasticsearch-422491494aa4) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/6 not so obvious things about Elasticsearch - SoftwareMill Tech Blog.pdf>)
+ - [Elasticsearch unified-highlighter doc reference](https://github.com/elastic/elasticsearch/blob/master/docs/reference/search/request/highlighting.asciidoc#unified-highlighter) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/elasticsearch_highlighting.asciidoc at master · elastic_elasticsearch>)
+ - [Elasticsearch unified-highligher reference](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/search-request-highlighting.html#unified-highlighter) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/Highlighting _ Elasticsearch Reference [6.8] _ Elastic.pdf>)
+ - [Extracting Relevant Snippets from Web Documents through Language Model based Text Segmentation](http://www.public.asu.edu/~candan/papers/wi07.pdf) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/wi07.pdf>)
+ - [Keyword Extraction for Social Snippets](https://faculty.ist.psu.edu/jessieli/Publications/WWW10-ZLi-KeywordExtract.pdf) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/WWW10-ZLi-KeywordExtract.pdf>)
+ - [Fast Generation of Result Snippets in Web Search](https://www.researchgate.net/publication/221299008_Fast_generation_of_result_snippets_in_web_search) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/Fast_generation_of_result_snippets_in_web_search.pdf>)
+ - [A LITERATURE STUDY OF EMBEDDINGS ON SOURCE CODE](https://arxiv.org/pdf/1904.03061.pdf) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/1904.03061.pdf>)
+ - [The smallest relevant text snippet for search results](https://web.archive.org/web/20141230232527/http://rcrezende.blogspot.com/2010/08/smallest-relevant-text-snippet-for.html) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/RCRezende Blog_ The smallest relevant text snippet for search results.pdf>)
+ - [C# Finding relevant document snippets for search result display](https://stackoverflow.com/questions/282002/c-sharp-finding-relevant-document-snippets-for-search-result-display) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/algorithm - C# Finding relevant document snippets for search result display - Stack Overflow.pdf>)
+ - [Given a document, select a relevant snippet
+ ](https://stackoverflow.com/questions/2829303/given-a-document-select-a-relevant-snippet) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/statistics - Given a document, select a relevant snippet - Stack Overflow.pdf>)
+ - [Reverse Engineering Sublime Text’s Fuzzy Match](https://www.forrestthewoods.com/blog/reverse_engineering_sublime_texts_fuzzy_match/) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/Reverse Engineering Sublime Text’s Fuzzy Match - ForrestTheWoods.pdf>)
 
 My constant need to look through the PDF's for portions of text resulted in me adding some PDF support in `cs` which will be covered later.
 
@@ -82,122 +83,6 @@ Of all the above the most promising to turned out to be the information I found 
 The reason for this is that most of the algorithms were dealing with search results for web results, where as these implementations seemed to be the best. As such I ended up writing a new custom snippet extractor. In fact I actually wrote a simple one, and then the one that is in `cs` now hence it has the name version 3 in the source code.
 
 The algorithm is fairly well documented so for those interested please look at the source code https://github.com/boyter/cs/blob/master/processor/snippet.go which is reasonably well documented. In short though it looks though the previously identified locations using a sliding window style algorithm where if finds bounding matches within the same window and then ranks based on term frequency and a few other factors.
-
-
-### Unicode support. What does it actually mean?
-
-Unicode support seems to be one of those hand wavy things where most people respond to the question of "Do you support unicode?" with 
-
-> Yeah we support emojis, so yes we support unicode 😃😭😈
-
-Which is partially correct... It's certainly a good start.
-
-So lets take a step back. What is unicode? It's actually easy to explain. "A standard for representing the worlds text". That means it includes all the languages in the world, such as chinese characters, japanese writing systems, arabic and even nordic runes. As such you get all sorts of interesting things in the standard such as characters that display as white space but actually are not because they represent a nordic rune carved on the side of the stone not visible from the front.
-
-Being able to save these characters into your system is as mentioned a very good start. Emoji's tending to be the yard-stick used to test the unicode support claim, because who doesn't love sprinkling them through everyday communication.
-
-However what true unicode support actually means, if you perform string operations on unicode characters are you able to process them correctly. Note I am not covering encoding here, but this classic [Joel on Software](https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/) post covers it well enough. Your programming language of choice might have functions to help you with this, or have they enabled on your string functions already. But lets consider what this entails. The first thing is that your language need to know how to split and count strings based on the number of characters and not the bytes that represent them. If you count the number of characters below using your language of choices string function,
-
-```
-Ⱥ
-```
-
-and get back the answer 1 then fantastic your language natively supports unicode. If you get back 2 then you are actually getting the count of the bytes it takes to represent the character. However there is more to unicode then knowing how many characters string holds. That thing being case folding rules.
-
-Case folding rules I hear you ask?
-
-In modern English generally a single upper-case character has a 1 to 1 mapping to a lower-case character. `A-a B-b C-c` etc... However once you move to older English and international languages this is no longer true. For old English once you include unicode characters all of a sudden you have to deal with things like `ſ`.
-
-According wikipedia the character `ſ` is a [long s](https://en.wikipedia.org/wiki/Long_s). Which means if you want to support unicode you need to ensure that if someone does a case insentive comparison then the following examples are all string equivalent. 
-
-```
-ſecret == secret == Secret
-```
-
-The above is just a simple example... consider the following (not all permutations included),
-
-```
-ſatisfaction == satisfaction == ſatiſfaction == Satiſfaction == SatiSfaction === ſatiSfaction
-```
-
-As you can see there is a loss of information in some of the above too. If you go from `ſ` to `S` you have lost some information. So by chaging case you potentially don't don't actually know which character to use. This is worth remembering because in French for example the following cote, coté, côte and côté are all different words with the same upper-case representation COTE.
-
-The above is something to keep in mind from design to implementation. Because your design *might* require that you lower-case/upper-case/title-case something to look better, and this might be losing information while doing so.
-
-Actually its more complex than the above. Because the above is dealing with simple case folding rules, where a single character maps to a single character (although it could be multiple single characters). Full case folding rules mean that one character can actually map to multiple.
-
-Let's look at the German character [ß](https://en.wikipedia.org/wiki/%C3%9F). Which under full-case folding rules actually has two mappings, one to a single character and one to two characters.
-
-```
-GROSS -> groß -> GROß | GROSS
-```
-
-When you lower GROSS you can actually get groß. However when you upper groß you can get either GROß or GROSS and depending on how old the person you are working with one might be correct or according to Council for German Orthography either.
-
-Another good one to consider is the character [Æ](https://en.wikipedia.org/wiki/%C3%86). Mostly because I have some personal experience with it.
-
-Under simple case folding rules the lower of `Æ` is `ǣ`. However with full case folding rules this also matches `ae`. Which one is correct? Well that depends on who you ask, but consider the following on page search done in Chrome and Firefox.
-
-![Chrome Unicode Case Folding](/static/code-spelunker-a-code-search-command-line-tool/example_chrome.png)
-![Firefox Unicode Case Folding](/static/code-spelunker-a-code-search-command-line-tool/example_firefox.png)
-
-Chome (Edge does the same thing) follows full case folding rules (which also maps Æ to accented ae variants!), where-as Firefox follows simple case folding rules. Which one is correct? I asked a work collegue from Denmark, and he actually liked *both* depending on what he was searching for and the context of the page. So there is no clear answer as to which one you should implement, BOTH types can be considered correct.
-
-That's one of the issue's with stating "unicode support" in any software product. Your implementation probably isn't wrong, but it might not be what the user expects.
-
-So dealing with case-folding is clearly a lot of work. How about we just work with bytes? The string is just bytes under the hood after all... This incidently was the response I got from a resident C programmer. Lets forget case folding and just worry about the "normal case". If we lower-case/upper-case everything and work like that everything be fine yes?
-
-Consider trying to make a search engine where you want to highlight matches. The user searches for something and expects you to highlight that term in the results page. Lets consider the following search string,
-
-> java
-
-and the text we have found and now what to highlight.
-
-> the regex can work with Ⱥ. Java by contrast will
-
-Clearly we want to match java. So you lower-case both the search text and the content. Find the offset position. Then against the orginal content you markup. And you get something like
-
-> the regex can work with Ⱥ. J**ava** by contrast will
-
-Wait what happened there? We should be bolding Java, not just ava.
-
-Well culprit as you probably have guessed is Ⱥ. Ⱥ takes 2 bytes to represent. However its lower-case variant takes 3 bytes. So when you calculate the index unless you deal with the original string you are going to have off by 1 errors for each byte that does this. 
-
-At which point you go, fine i'll just search for all case variants of Java and use that to work things out, and then realise adding case folding is a small addition to what you just wrote and working with just bytes was a red-herring (been there got the t-shirt).
-
-It also means that you cannot explicitly assume that the lower/upper-case representations of any two strings are not the same just by checking the bytes.
-
-For those curious here is a Go program which illustrates the difference in byte sizes.
-
-{{<highlight go>}}
-package main
-
-import (
-	"fmt"
-	"strings"
-)
-
-func main() {
-	fmt.Println("Ⱥ", strings.ToLower("Ⱥ"), len("Ⱥ"), len(strings.ToLower("Ⱥ")))
-}
-{{</highlight>}}
-
-
-Keep in mind this is just scratching the surface of the edge cases in unicode. Im sure there are heap of additional cases I have not yet run into nor covered but this should at least give an idea as to the sort of problems you need to consider.
-
-One last thing to consider is the performance cost of supporting unicode, which unless you pay special attention can be non trivial. Probably best illustrated by the ripgrep introduction blog https://blog.burntsushi.net/ripgrep/#linux_unicode_word and specificly the unicode aware test where some of the tools get a non trivial order of magnitute slow down cost supporting it. 
-
-So... key take-aways.
-
-* You cannot explicitly assume that the lower/upper-case representations of any two strings are or are not the same by checking bytes
-* Case folding has two types simple and full
-* Sometimes people like both versions
-* Even big players implement different versions in the same tools
-* There can be non trivial performance costs to support unicode
-
-So what to do? Well the first is obviously use well supported libraries that solve this problem for you. However be aware of the limitations they have. Know what case folding it supports for instance. I'd also suggest not claiming to have unicode support unless you are very explict with what you support, or know in advance what the user expects. Saying "We support it this way" is acceptable in my books. Lastly keep in mind the key take-aways above, especially the performance one.
-
-Lastly... why would you ever investigate this? I decided to dive into learning how to do case insensitive searches while supporting unicode... now I am in awe at how anything actually works.
 
 
 ### Fast Unicode Literal Matching in Go
