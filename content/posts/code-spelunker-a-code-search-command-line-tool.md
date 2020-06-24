@@ -76,13 +76,16 @@ Anyway the catch being this code I had already ruled out. As such I expanded my 
  ](https://stackoverflow.com/questions/2829303/given-a-document-select-a-relevant-snippet) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/statistics - Given a document, select a relevant snippet - Stack Overflow.pdf>)
  - [Reverse Engineering Sublime Text’s Fuzzy Match](https://www.forrestthewoods.com/blog/reverse_engineering_sublime_texts_fuzzy_match/) [[Cached PDF]](</static/code-spelunker-a-code-search-command-line-tool/snippet/Reverse Engineering Sublime Text’s Fuzzy Match - ForrestTheWoods.pdf>)
 
-My constant need to look through the PDF's for portions of text resulted in me adding some PDF support in `cs` which will be covered later.
+My constant need to look through the PDF's for portions of text resulted in me adding some PDF support in `cs` while building it which was rather helpful.
 
-Of all the above the most promising to turned out to be the information I found on rcrezende.blogspot.com and the source code of Lucene. Given the ideas inside both them I implemented an algorithm based on what they had fused with the scoring techniques of the reverse engineered sublime text fuzzy matching.
+Of the above documents the most promising to turned out to be the information I found on rcrezende.blogspot.com and the source code of Lucene. I took some of the ideas from the descriptions of both and then implemented an algorithm fused with the scoring techniques of the reverse engineered Sublime Text fuzzy matching. The main reason for going with something custom is that most of the algorithms were dealing with search results for web results, which were all based on keyword indexes.
 
-The reason for this is that most of the algorithms were dealing with search results for web results, where as these implementations seemed to be the best. As such I ended up writing a new custom snippet extractor. In fact I actually wrote a simple one, and then the one that is in `cs` now hence it has the name version 3 in the source code.
+The algorithm is fairly well documented so for those interested please look at the source code https://github.com/boyter/cs/blob/master/processor/snippet.go
 
-The algorithm is fairly well documented so for those interested please look at the source code https://github.com/boyter/cs/blob/master/processor/snippet.go which is reasonably well documented. In short though it looks though the previously identified locations using a sliding window style algorithm where if finds bounding matches within the same window and then ranks based on term frequency and a few other factors.
+It is called by passing the document content to extract the snippet from and all of the match locations for each term. It then looks though each location for each word, and checks on either side looking for terms close to it. It then ranks on the term frequency for the term we are checking around and rewards rarer terms. It also rewards more matches, closer matches, exact case matches and matches that are whole words. The results turned out to be better than expected for my sample text of  
+
+
+In short it looks though the previously identified locations using a sliding window style algorithm where if finds bounding matches within the same window and then ranks based on term frequency and a few other factors.
 
 
 ### Fast Unicode Literal Matching in Go
