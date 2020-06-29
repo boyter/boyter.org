@@ -67,6 +67,8 @@ Keep in mind we were looking for an outcome here and as such I am not going to v
 
 Based on the above we are going to create a web application, which you type in some search terms and click "research". It then hits search engine API's getting back the first 100 or so results. It then fetches each of those results itself, and builds a report based on them all. I am thinking that a summeriser of whats in the page, with the ability to search over everything in the report. Adding addtional documents using another search is useful and the ability to remove results and view them all.
 
+Intuitively this seems to be a reasonable thing to build. Certainly I would find this useful when researching topics.
+
 The end result being you can get a good overview of any topic with little effort. Its also very doable. Search API's are thankfully common these days, with Yahoo, Bing, Yandex and Gigablast all offering one. Basic summerisation is not a hard problem (lots of examples), and everything else looks very easy to implement with off the shelf software.
 
 
