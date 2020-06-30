@@ -1,5 +1,5 @@
 ---
-title: Use Golang to Restore Glacier to S3
+title: Use Go to Restore Glacier to S3
 date: 2019-01-22
 ---
 
