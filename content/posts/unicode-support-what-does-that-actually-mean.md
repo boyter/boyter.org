@@ -98,6 +98,8 @@ func main() {
 
 Keep in mind this is just scratching the surface of the edge cases in unicode. I'm sure there are heap of additional cases I have not yet run into nor covered (I was only trying to solve a single small problem) but this should at least give an idea as to the sort of problems you need to consider.
 
+There are also security implications to consider when working with unicode such at the ones rasied here https://eng.getwisdom.io/hacking-github-with-unicode-dotless-i/ where blindly lower casing email addresses results in security a security issue.
+
 One last thing to consider is the performance cost of supporting unicode, which unless you pay special attention can be non trivial. Probably best illustrated by the ripgrep introduction blog https://blog.burntsushi.net/ripgrep/#linux_unicode_word and specifically the unicode aware test where some of the tools get a non trivial order of magnitude slow down cost by supporting it. 
 
 So... key take-aways.
@@ -108,6 +110,7 @@ So... key take-aways.
 * Oh and you need to consider localization
 * As well as normalization where a following diacritical mark can make what appears to be a single character multiple
 * Even big players implement different versions in the same tools including Microsoft, Google and Mozilla
+* There are also potential security issues that can come from not getting things right
 * There *can* be non trivial performance costs to support unicode
 
 So what to do? Well the first is obviously use well supported libraries that solve this problem for you. However be aware of the limitations they have. Know what case folding it supports for instance. I'd also suggest not claiming to have unicode support unless you are very explicit with what you support, or know in advance what the user expects. I would be inclined to ask "Can you develop that point please?" when faced with this question. 
