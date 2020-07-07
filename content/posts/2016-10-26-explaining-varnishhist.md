@@ -23,17 +23,19 @@ In short, you want as many `|` symbols as possible and you want everything far t
 
 A small guide,
 
-<pre>'|' is cache HIT
+```
+'|' is cache HIT
 '#' is cache MISS
 'n:m' numbers in left top corner is vertical scale
 'n = 2000' is number of requests that are being displayed (from 1 to 2000)
-</pre>
+```
 
 The X-axis is logarithmic time between request request from kernel to Varnish and response from Varnish to kernel.
 
 The times on the X-axis are as such,
 
-<pre>1e1 = 10 sec
+```
+1e1 = 10 sec
 1e0 = 1 sec
 1e-1 = 0.1 secs or 100 ms (milliseconds)
 1e-2 = 0.01 secs or 10 ms
@@ -41,7 +43,7 @@ The times on the X-axis are as such,
 1e-4 = 0.0001 secs or 0.1 ms or 100 µs
 1e-5 = 0.00001 secs or 0.01 ms or 10 µs
 1e-6 = 0.000001 secs or 0.001 ms or 1 µs or 1000 ns (nanoseconds)
-</pre>
+```
 
 Below is the varnishhist for searchcode.com showing that while most responses are served in about 100ms not many are cached. This can mean one of a few things.
 
@@ -49,7 +51,8 @@ Below is the varnishhist for searchcode.com showing that while most responses ar
   * The cache timeout for the back-end responses isn't high enough to ensure that later requests are served from cache.
   * There isn't a large enough cache to hold all the responses (that's the problem in this case).
 
-<pre>1:20, n = 2000
+```
+1:20, n = 2000
 
 
 
@@ -74,5 +77,4 @@ Below is the varnishhist for searchcode.com showing that while most responses ar
             ||  |    #      #   ##########
 +------+------+------+------+------+------+------+------+------
 |1e-6  |1e-5  |1e-4  |1e-3  |1e-2  |1e-1  |1e0   |1e1   |1e2
-
-</pre>
+```
