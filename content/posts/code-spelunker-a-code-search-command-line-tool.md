@@ -1,6 +1,6 @@
 ---
 title: Code Spelunker a Code Search Command Line Tool
-date: 2020-06-15
+date: 2050-06-15
 ---
 
 Code Spelunker (cs) or code search is a new command line tool I have been working on and off over the last few months. The idea came about while watching a work colleague continually opening Visual Studio Code in order to search over files recursively in a directory. I asked why he didn't use a tool like ripgrep with the context flag to which he replied that he liked the interactivity the UI gave him. Having wanted to work on a terminal UI application for a while, also being interested in code search and having always wanted to build a real search ranking algorithm it seemed like a overlap of goals to try and build a tool just for him.

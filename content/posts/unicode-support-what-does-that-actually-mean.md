@@ -98,7 +98,7 @@ func main() {
 
 Keep in mind this is just scratching the surface of the edge cases in unicode. I'm sure there are heap of additional cases I have not yet run into nor covered (I was only trying to solve a single small problem) but this should at least give an idea as to the sort of problems you need to consider.
 
-There are also security implications to consider when working with unicode such at the ones rasied here https://eng.getwisdom.io/hacking-github-with-unicode-dotless-i/ where blindly lower casing email addresses results in security a security issue.
+There are also security implications to consider when working with unicode such at the ones rasied here https://eng.getwisdom.io/hacking-github-with-unicode-dotless-i/ where blindly lower casing email addresses results in a security issue.
 
 One last thing to consider is the performance cost of supporting unicode, which unless you pay special attention can be non trivial. Probably best illustrated by the ripgrep introduction blog https://blog.burntsushi.net/ripgrep/#linux_unicode_word and specifically the unicode aware test where some of the tools get a non trivial order of magnitude slow down cost by supporting it. 
 
