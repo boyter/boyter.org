@@ -119,7 +119,8 @@ func main() {
 
 And the results. All were run in the WSL for Linux on a Surface Book 2 against a recent checkout of the Linux kernel with there being 67359 files in the directory.
 
-<pre>$ hyperfine './cwalk' && hyperfine './godirwalk' && hyperfine './nativewalk' && hyperfine './walk'
+```
+$ hyperfine './cwalk' && hyperfine './godirwalk' && hyperfine './nativewalk' && hyperfine './walk'
 Benchmark #1: ./cwalk
   Time (mean ± σ):      1.812 s ±  0.059 s    [User: 368.4 ms, System: 6545.8 ms]
   Range (min … max):    1.753 s …  1.934 s
@@ -135,7 +136,7 @@ Benchmark #1: ./nativewalk
 Benchmark #1: ./walk
   Time (mean ± σ):      1.674 s ±  0.071 s    [User: 399.7 ms, System: 6383.3 ms]
   Range (min … max):    1.571 s …  1.769 s
-</pre>
+```
 
 For comparison ripgrep which is probably the fastest disk scanner comes in at ~600ms. That is not a fair comparison though as it ignores certain directories but it gives you an idea of the upper bounds of useful performance.
 
