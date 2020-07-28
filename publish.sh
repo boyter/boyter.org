@@ -1,1 +1,1 @@
-hugo && rsync -avzh ./public/ root@searchcodeserver.com:/var/www/boyter.org/
+hugo && rsync -avzh ./public/ root@boyter.org:/var/www/boyter.org/

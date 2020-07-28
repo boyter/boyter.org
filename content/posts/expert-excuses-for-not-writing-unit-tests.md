@@ -9,6 +9,9 @@ I also mentioned that I was seriously considering writing content for the "Exper
 
 Anyway I did write some content, which I have cleaned up and included below.
 
+Or if you like you can get it here in a nice PDF or EBook format. It is free, (or you can kick me some cash if you like) https://leanpub.com/expertexcusesfornotwritingunittests and perfect for dropping into the company chat without context and see what sort of a fuss you can kick up.
+
+
 -----
 
 ![Book Cover](/static/books/CeZu1YjUsAEfhcP.jpg#center)
