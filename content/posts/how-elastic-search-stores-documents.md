@@ -3,6 +3,13 @@ title: How Elasticsearch Stores Documents
 date: 2019-10-10
 ---
 
+
+![The Ultimate Quickstart Guide to Elasticsearch for Developers](/static/elastic/hero.jpg#center)
+
+Developer? Need to know how to use Elasticsearch? Want to know how to get working with it quickly? This is the book for you! [Buy now using Leanpub](https://leanpub.com/elasticsearch-guide/)
+
+***
+
 It is useful to understand is how elasticsearch stores documents. Documents that are indexed need to go into an index and have a type. Indexes can contain one or more types. This may sound limiting but you can search over all indexes or all types within an index or just one type within an index if you require.
 
 Consider it logically like the below. You can search at any part of the tree which will search across all children, or pull back a specific document if you know the key.

@@ -16,23 +16,7 @@ nkweb_Use_Custom:
 
 ![Decoding CAPTCHA's Book](/static/decoding-captchas/booksmall.jpeg)
 
-Looking for a practical guide to CAPTCHA decoding? All About CAPTCHA&#8217;s. This eBook will teach you how to identify weaknesses and exploit CAPTCHA&#8217;s from beginning to end.
-
-<table>
-  <tr>
-    <td>
-      <center>
-        <br /> <a style="font-weight:bold;" href="https://leanpub.com/decodingcaptchas/" target="_blank">Buy now using LeanPub</a><br />
-      </center>
-    </td>
-    
-    <td>
-      <center>
-        <br /> <a style="font-weight:bold;" href="https://gumroad.com/l/fJpHj" target="_blank">Buy now using Gumroad</a><br />
-      </center>
-    </td>
-  </tr>
-</table>
+Looking for a practical guide to CAPTCHA decoding? All About CAPTCHA&#8217;s. This eBook will teach you how to identify weaknesses and exploit CAPTCHA&#8217;s from beginning to end. [Buy now using Leanpub](https://leanpub.com/decodingcaptchas/)
 
 Most people don’t know this but my honors thesis was about using a computer program to read text out of web images. My theory was that if you could get a high level of successful extraction you could use it as another source of data which could be used to improve search engine results. I was even quite successful in doing it, but never really followed my experiments up. My honors adviser [Dr Junbin Gao http://csusap.csu.edu.au/~jbgao/][1] had suggested the following writing my thesis I should write some form of article on what I had learnt. Well I finally got around to doing it. While what follows is not exactly what I was studying it is something I wish had existed when I started looking around. 
 

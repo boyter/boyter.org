@@ -3,6 +3,12 @@ title: Elasticsearch mappings - How to add Facets and Aggregations
 date: 2019-10-12
 ---
 
+![The Ultimate Quickstart Guide to Elasticsearch for Developers](/static/elastic/hero.jpg#center)
+
+Developer? Need to know how to use Elasticsearch? Want to know how to get working with it quickly? This is the book for you! [Buy now using Leanpub](https://leanpub.com/elasticsearch-guide/)
+
+***
+
 In elasticsearch mappings define type and values in documents. You use them to specify that fields within your document should be treated as numbers, dates, geo-locations and whatever other types elasticsearch supports. You can also define the stemming algorithm used and other useful index fields.
 
  > You have to define a mapping if you want to provide functionality such as aggregations or facets. You cannot add a mapping after indexing any document. To add one afterwards requires dropping the index and re-indexing the content.
