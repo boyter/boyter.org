@@ -20,7 +20,7 @@ A quick collection of all the fake Orly book covers I find around on the interne
 
 I am seriously considering writing content for the "Expert Excuses for Not Writing Unit Tests" one.
 
-EDIT - I actually did write some content for it https://boyter.org/posts/expert-excuses-for-not-writing-unit-tests/
+EDIT - I actually did write content and publish it as a book! [Expert Excuses for Not Writing Unit Tests](https://leanpub.com/expertexcusesfornotwritingunittests)
 
 
 ![Book Cover](/static/books/Cj0Up_hUUAAn8-g.jpg)
