@@ -42,10 +42,10 @@ Actually it can be more complex than the above. The above is dealing with simple
 Let's look at the German character [ß](https://en.wikipedia.org/wiki/%C3%9F). Which under full-case folding rules actually has two mappings, one to a single character and one to two characters.
 
 ```
-groß -> GROß | GROSS
+groß -> GROẞ | GROSS
 ```
 
-When you upper-case groß you can get either GROß or GROSS. Depending on how old the person you are working with one might be considered correct or according to Council for German Orthography both can be correct.
+When you upper-case groß you can get either GROẞ or GROSS. Depending on how old the person you are working with one might be considered correct or according to Council for German Orthography both can be correct.
 
 Another good example to consider is the character [Æ](https://en.wikipedia.org/wiki/%C3%86). Mostly because I have some personal experience with it.
 
