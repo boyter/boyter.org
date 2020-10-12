@@ -17,23 +17,29 @@ Thankfully crawling is one of the things that you really don't have to put any w
 
 Indexing is where things get difficult. The first problem is knowing how to split terms. Most index engines are designed to work with words, and when it comes to words its fairly easy to determine what is considered at term by looking at spaces. In code this is far more difficult. This is best illustrated with an example. Take the following search term,
 
-<pre>i++</pre>
+```
+i++
+```
 
 and then consider the following code snippets which should all match,
 
-<pre>for(i=0; i++; i&lt;100) {
+```
+for(i=0; i++; i&lt;100) {
 for(i=0;i++;i&lt;100) {
-spliti++;</pre>
+spliti++;
+```
 
 How do you split them into terms? By spaces results in the following,
 
-<pre>for(i=0; 
+```
+for(i=0; 
 i++; 
 i&lt;100) 
 {
 for(i=0;i++;i&lt;100) 
 {
-spliti++;</pre>
+spliti++;
+```
 
 Using a naive split via spaces you will notice that none of the above actually match. Hence a search for i++ on the above will result in no matches. There are a few ways to get around this but suffice to say its not as straight forward as just applying Lucene/Sphinx/Solr over the data.
 
