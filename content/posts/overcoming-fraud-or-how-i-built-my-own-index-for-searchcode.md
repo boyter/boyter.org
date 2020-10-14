@@ -1,6 +1,6 @@
 ---
 title: Overcoming personal fraud, how I built my own index for searchcode.com
-date: 2040-10-10
+date: 2020-10-10
 ---
 
 So admission. I have felt like a fraud for a while. I get a lot of questions about indexing code due to searchcode.com and generally my answer has always been I use Sphinx search. Recently that has changed, as I moved over to manticore search. For the record manticore is an excellent successor to sphinx and I really do recommend it. I like elasticsearch as well for enterprise search solutions.
@@ -55,6 +55,7 @@ Requirements
  - We need to be able to search special characters
  - We want to be able to update quickly as its a write heavy workload
  - We need to support filters on source, language and repository
+ - Its a free website, so we can deal with some downtime or inaccruacy
 
 Constraints
 
@@ -131,6 +132,8 @@ Firstly though, lets get an estimate of how much storage each is going to requir
 Inside searchcode there is about 300 million code files. Ignoring duplicates give around 200 million code files that we want to search, broken up by 200+ languages.
 
 There is probably about 5kb of code in most of those files, with each having about 500 unique terms. This gives us about 1.5 TB of code, which is actually in the ballpark, although I do compress the content at rest.
+
+The nice thing about this number is that its not stupidly big. It should be possible to run this on a single machine, and frankly its possible to brute force it given a powerful enough machine. Its certainly not a web scale problem in the sense that Google or Bing are.
 
 So given that, we can work out roughly how large the indexes might need to be. Im going to ignore most of the overhead of the implementation and just use the known sizes. In other words im going to assume a map, slice or other data structure is free for these estimates although that is far from the case.
 
@@ -212,7 +215,7 @@ If we then order the chunks such that they contain mostly code of a single langu
 00110000
 10000001
 10010001
-10110001
+10100001
 ```
 
 We can then store a single | of all the bits which produces
@@ -228,3 +231,109 @@ Get it working, get it right, make it fast. In that order.
 Which means we also need the TF frequencies for each document. However we can save some space here. If we have a word with a single occurance in the document we don't need to store that, because we already know the word could be in there and can then just assume 1. This should cut down the TF size considerably!
 
 Interesting to note that bing also stores the TF seperately. I was wondering how they knew what documents to send to their ranking oracle for queries such as "about" as clearly they are not sending half their corpus to it. There has to be some sort of pre-ranking going on to send the best candidate documents first.
+
+
+
+# Facets
+
+So what about facets. Which searchcode has for filtering down by language, repository or source. These need to be calculated for each search. 
+
+The filter itself can be done with a very small bloom filter, since it only needs to store 3 keywords in it. But it does raise an interesting property. Generally inside sphinx/manticore/elasticsearch/lucene you can only have a single filter value per filter for any document. This works well for things that sit in one category such as what language is this code written in. But what about things like what licence is this under? Its possible something is dual licenced, so it could be both MIT or BSD for example. This is something that the bloom filter can work with because you can assign it to both! In traditional indexes you create a new field, and put the values in there and then use regular AND/OR queries to deal with, which is what the bloom filter is doing in effect.
+
+So anyway back to facets. Given our 200 million documents how long does it take to determine what languages are in the result set.
+
+{{<highlight go>}}
+// hold the facet in memory where we assume 300 languages and randomly assign each document as to one
+codeFacet := []int{}
+for i:=0;i<200_000_000;i++ {
+    codeFacet = append(codeFacet, rand.Intn(300))
+}
+
+// lets simulate a search of which found 1 million matching documents in our result set
+filters := map[int]bool{}
+for i:=0;i<1_000_000;i++ {
+    filters[rand.Intn(200_000_000)] = true
+}
+
+// now lets count how many times we see each "language" filtered by the search
+// we start timing from here
+realLangCount := map[int]int{}
+for i:=0;i<len(codeFacet);i++ {
+    _, ok := filters[i]
+    if ok {
+        realLangCount[codeFacet[i]]++
+    }
+}
+{{</highlight>}}
+
+So we try the above, and it takes roughly 11 seconds to aggregate. That's not going to work. Especially as it pegs a single core while doing it. It uses about 2 GB of RAM as well which is fine for our purposes, as 3 such lists for each of the current filters will be around 6 GB in total when implemented. Annoyingly there isn't much we can do to speed this up. Its a straight line loop which is about as fast as things get and ints into a map. There are some faster map implementations in Go but even if they are twice as fast it isn't going to solve our issue. We could possibly do some some processing in parallel but thats going to lower our QPS since we would be pegging more CPU cores while doing it.
+
+How do Google/Bing do this? Turns out they don't. Well for a start they don't have facets over the web index. It is in the afore mentioned sphinx/manticore/elasticsearch/lucene however... the Java ones are pretty annoying to read and my C++ is not good enough to understand what im reading. What about Bleve? its written in Go!
+
+Looking at index_impl.go (around [line 495](https://searchcode.com/file/158345498/vendor/github.com/blevesearch/bleve/index_impl.go/)) shows how the facets are constructed if on the supplied query. Turns out its doing roughly the same thing. A loop putting things into a map. I don't know what I was expecting, but it would have been a nice find to see some fancy way of speeding this up. I guess it means you can do filters using Bleve for 200 million items, but it won't work well.
+
+
+
+
+So what if we estimate? Turns out this is how Bing and Google work anyway. Not for facets but for search in general.
+
+Don't belive me? Try searching for a fairly unique term. In my case I chose "boyter" on both. Google says it has 590,000 results for this and Bing says 107,000 results. However if you try to page though... Bing caps out on page 43 (interesrtingly they don't have a fixed number of results per page, possibly due to that false positive issue of bitfunnel) with 421 results. It shows more pages but won't let you access them. Google by contrast caps out on page 16 with 158 results. 
+
+![google lies](/static/how-i-built-index-searchcode/google1.png)
+![bing lies](/static/how-i-built-index-searchcode/bing1.png)
+![google lies](/static/how-i-built-index-searchcode/google2.png)
+![bing lies](/static/how-i-built-index-searchcode/bing2.png)
+
+Clearly they are estimating here. What if I do the same? What if I get a sample of the index then estimate? Am I willing to sacrifice some accuracy for speed?
+
+Heck yeah I am! If its good enough for Google and Bing then its good enough for me! Besides if we are going with the bit signature approach its not 100% accurate anyway, so a little more fuzzying cannot hurt too much.
+
+The nice thing about this approach is that I can probably get a good estimate because I should know the relation of how common some terms are and be able to get a reasonable one. The best part about this is we can check if the server is busy and adjust the accuracy up or down depending on how busy the server is. Its also a case of not being 2x faster, but MUCH faster.
+
+The question is how to skip over? I thought about firstly working out the sample size needed using your usual population calculation. But I realised it might be better to just change the increment on the loop. But what to increment to set? What you want is to randomly hit items, so a regular number such as 50 is no good. What about using a prime number? We could then pick two primes, iterate twice (and since we are using primes not hit the same records on average) and then average them? We can then pick one lower level prime, and one higher for not much cost. 
+
+Sure its lossy, and we might miss some of the records, but at least it should run quickly. In addition we can adjust our prime numbers based on how busy the server is. Higher primes for less accuracy when busy and lower when not. A quick check...
+
+I created our 200 million records, and then put in some weighted counts so we got clusters of numbers.
+
+```
+sample filter time 97
+
+2 sample filter time 87
+
+real filter time 8450
+
+comparing sample sample
+avg delta 120.11343253308269
+missing 14
+
+comparing 2 sample
+avg delta 97.12998639702377
+missing 19
+```
+
+Not the best result. Far more accurage to the real value while being faster but missing some values. Trying again with a 3 sample.
+
+```
+sample filter time 105
+
+3 sample filter time 125
+
+real filter count 9070
+
+comparing 1 sample
+avg delta 122.16727741384564
+missing 14
+
+comparing 3 sample
+avg delta 100.78212739814019
+missing 8
+```
+
+Thats what we are looking for. Much faster, almost as fast as the single sample (low prime number) but almost accurate guesses and missing far fewer. Probably good enough for saying yep this is possible.
+
+Of course this needs to be done for each facet, but thats fine, we can adjust it down to make it faster if required.
+
+This works for large values... but what about small ones?
+
+Of course it wont. At that point we should probably just count them all.
