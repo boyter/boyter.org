@@ -45,49 +45,60 @@ Anyway in short, while sphinx/manticore are excellent, I really want build my ow
 
 For the record I do not have a PhD in applied search or an real world experience building web indexes. I don't even work in the space professionally. I can use elastic search pretty well! Really I'm just some numb-nut who grew up in Western Sydney (up the riff!) and apparently dreams about flying close to the sun. Clearly I have no business writing my own indexer. But the nice thing about the internet is you really don't need anyones permission to do a lot of things, and so lets roll up our [flanno](https://www.urbandictionary.com/define.php?term=flanno) sleeves, roll a [durrie](https://www.urbandictionary.com/define.php?term=durrie)* and get coding. As such take anything below with a massive grain of salt before you start hurling the internet abuse at me.
 
-* For the record I don't smoke not ever have
+*NB* For the record I don't smoke
 
-However before we start lets have a think about our requirements and constraints.
+However before we start lets have a think about our requirements and constraints. One thing to consider early on is how to do searches in your index you have two options. The first is to allow searches in parallel and the latter is to not. However the choice between might not be as simple as you would think. It also greatly impacts the design of the system.
+
+Most would think, of course do it in parallel! Process in parallel so that way people wait less. But do they? As more searches come in the average time for each search goes up. Consider the situation that 10 people all search at the same time. Lets also assume that each search takes 1 second. Given limited resources which is true for most cases it means all 10 searches are shared across the system. As such everyone gets 1/10th of the system to search with and end up waiting 10 seconds for a result.
+
+However consider doing it in serial. While all came in at once only one can go first, and that persons search returns in 1 second. The second was waiting on the first and their search takes 2 seconds. The third takes 3 seconds etc... till the last one who had a 10 second wait. Which is the better result? I would argue the latter.
+
+There are a few other advantage to doing your searches in serial. You can attempt to consume all the resources you have at your disposal to give a good result, you don't have to worry about memory issues since you should know how much memory you need at any one time. As such I am going to make the choice to limit searches in the system to one at a time.
+
+That decided lets list down the requirements and constraints we have.
 
 Requirements
- - We have a higher that normal term count per document than web
+
  - We don't need to support wildcard queries or OR search, AND by default
  - We need to be able to search special characters
  - We want to be able to update quickly as its a write heavy workload
  - We need to support filters on source, language and repository
- - Its a free website, so we can deal with some downtime or inaccruacy
+ - Its a free website, so we can deal with some downtime or inaccuracy
+ - Only one search allowed at at time
+ - We want searches to return in 0.5 seconds so a 500 ms time budget with no cache
+ - Want to embed into searchcode itself to avoid those dreaded network calls
 
 Constraints
 
+- We have a higher that normal term count per document than web
  - We want to store the entire index in RAM, cos RAM is cheap yeah?
  - We are using Go so we have to think about the impact of GC
  - We only index terms longer than 3 characters, and trim long ones down to 20 characters
 
 So there are a few talked about ways to build an index (that I could find).
 
-Brute Force, not this isn't an index strategy but worth discussing. Assuming you can get the entire corpus you are search into RAM it is possible to brute force search. Im including it here so I have the advantages and disadvantages, but suffice to say I have about 60 GB of RAM I can use to hold the index, which is nowhere near enough to hold the searchcode corpus.
+Brute Force, not this isn't an index strategy but worth discussing. Assuming you can get the entire corpus you are search into RAM it is possible to brute force search. Im including it here so I have the advantages and disadvantages, but suffice to say I have about 60 GB of RAM I can use to hold the index, which is nowhere near enough to hold the searchcode corpus. That said the problem is pretty brute forcible given enough CPU and RAM.
 
 Advantages
- - Space efficient!!!!
+ - 100% space efficient (for the index anyway) since there isn't one
  - Easy to query/write
  - Can determine TF easily
+ - Scales (assuming you are prepared to pay)
 
 Disadvantages
  - Slow... at scale IE not in RAM
  - Harder to scale because gotta duplicate all the data
-
-Inverted index.
+ 
+Inverted index. Pretty much building a map of terms to documents and then intersecting them and ranking.
 
 Advantages
- - Space efficient
  - Easy to query
  - Does not miss terms
- - Can store TF alongside terms
+ - Can store TF alongside terms making ranking easier
 
 Disadvantages
- - Harder to do wildcard queries
- - Hard to update documents and avoid false positives
-
+ - Harder to do wildcard queries OR use more space for them
+ - Hard to update documents and avoid false positives, usually have to rebuild the index or do delta + merge
 
 Trie EG https://github.com/typesense/typesense which uses Adaptive Radix Tree https://stackoverflow.com/questions/50127290/data-structure-for-fast-full-text-search
 
@@ -101,22 +112,22 @@ Disadvantages
  - Can take up more space if lots of prefixes
  - Not friendly to GC due to the use of pointers
 
-
 Ngrams. Not something I am very familiar with. Which bothers me. Its one of those things I am not going to use mostly because of that reason, but hey I can always swap it out later if I want.
 
 Advantages
- - Can do regular expression search!
+ - Can do regular expression search easily
+ - Easier to index terms
 
 Disadvantages
  - Not space efficient?
-
+ - Probably produces more false positives
 
 Bit Signatures. This is something I remember reading about years ago, and found this link to prove I had not lost my mind https://www.stavros.io/posts/bloom-filter-search-engine/ At the time I thought it was neat but not very practical... However then it turns out that Bing has been using this technique over its entire web corpus http://bitfunnel.org/ https://www.youtube.com/watch?v=1-Xoy5w5ydM
 
 
 Advantages 
  - Stupidly fast if careful (bitwise operations are insanely fast)
- - Space/Memory efficient!!!
+ - Space/Memory efficient
  - Easy to update/delete modify existing terms
 
 Disadvantages
@@ -124,12 +135,9 @@ Disadvantages
  - Produces false positive matches
 
 
+So with the above I had a further think and decided I should try either an inverted index, a trie or bitsignatures. Before I quickly create some simple implementations of each to establish how they perform, lets get an estimate of how much storage each is going to require.
 
-So with the above I had a further think and decided I should try either an inverted index, a trie or bitsignatures. I quickly created some simple implementations of each to establish how they performed.
-
-Firstly though, lets get an estimate of how much storage each is going to require.
-
-Inside searchcode there is about 300 million code files. Ignoring duplicates give around 200 million code files that we want to search, broken up by 200+ languages.
+Inside searchcode there is about 300 million code files (as I write this). Ignoring duplicates gives around 200 million code files that we want to search, broken up by about 240 languages.
 
 There is probably about 5kb of code in most of those files, with each having about 500 unique terms. This gives us about 1.5 TB of code, which is actually in the ballpark, although I do compress the content at rest.
 
@@ -139,7 +147,7 @@ So given that, we can work out roughly how large the indexes might need to be. I
 
 For the inverted index we need in effect a large map of string to integer arrays, representing a word and which documents have it. Thats the bare minimum to work, but for Go large maps with strings are the devil causing high GC pauses. 
 
-So lets assume there is a "free" mapping of strings to integers somewhere allowing us to use a integer for the words. We can worry about implementation later. Lets also assume we have less than 4 billion terms so we can use a 32 bit integer to save some space. However we do want to know what the count of each term is so lets add that too. 
+So lets assume there is a "free" mapping of strings to integers somewhere allowing us to use a integer for the words. We don't but for the moment while working things out lets assume so. Lets also assume we have less than 4 billion terms (I think Bing/Google have something like 10 billion) so we can use a 32 bit integer to save some space. However we do want to know what the count of each term is so lets add that too. 
 
 So we end up with a map of 32 bit ints to a struct containing a 32 bit int (we have 300 million documents we might need to store so easily less that 4 billion) which gives us the following,
 
@@ -152,7 +160,7 @@ type ind struct {
 map[uint32][]int
 {{</highlight>}}
 
-So we now know we need 4 bytes to store each term and 5 to track each position of it in a document.
+So we now know we need 4 bytes to store each term and 5 to track the number of them in a document.
 
 So for our example document of 500 unique terms, to store it in the index takes 500 * 5 + 4 bytes. 2504 bytes. For our 200 million documents that's 500800000000 bytes which is about 500 GB.
 
@@ -234,9 +242,10 @@ Interesting to note that bing also stores the TF seperately. I was wondering how
 
 
 
+
 # Facets
 
-So what about facets. Which searchcode has for filtering down by language, repository or source. These need to be calculated for each search. 
+So what about facets. Which searchcode has for filtering down by language, repository or source. These need to be calculated for each search. Also this turned out to be really painful. Working with 200 millon of anything is a serious pain. It was easily the most annoying bit of code I ran into that was just not fast enough no matter what I did.
 
 The filter itself can be done with a very small bloom filter, since it only needs to store 3 keywords in it. But it does raise an interesting property. Generally inside sphinx/manticore/elasticsearch/lucene you can only have a single filter value per filter for any document. This works well for things that sit in one category such as what language is this code written in. But what about things like what licence is this under? Its possible something is dual licenced, so it could be both MIT or BSD for example. This is something that the bloom filter can work with because you can assign it to both! In traditional indexes you create a new field, and put the values in there and then use regular AND/OR queries to deal with, which is what the bloom filter is doing in effect.
 
@@ -246,7 +255,19 @@ So anyway back to facets. Given our 200 million documents how long does it take 
 // hold the facet in memory where we assume 300 languages and randomly assign each document as to one
 codeFacet := []int{}
 for i:=0;i<200_000_000;i++ {
-    codeFacet = append(codeFacet, rand.Intn(300))
+    t := rand.Intn(10)
+    
+    // attempt to distribute them such that some are more common than others
+    // which reflects reality to an extent
+    if t == 0 {
+        codeFacet = append(codeFacet, rand.Intn(10))
+    } else if t < 3 {
+        codeFacet = append(codeFacet, rand.Intn(50))
+    } else if t < 7 {
+        codeFacet = append(codeFacet, rand.Intn(100))
+    } else {
+        codeFacet = append(codeFacet, rand.Intn(300))
+    }
 }
 
 // lets simulate a search of which found 1 million matching documents in our result set
@@ -266,18 +287,53 @@ for i:=0;i<len(codeFacet);i++ {
 }
 {{</highlight>}}
 
-So we try the above, and it takes roughly 11 seconds to aggregate. That's not going to work. Especially as it pegs a single core while doing it. It uses about 2 GB of RAM as well which is fine for our purposes, as 3 such lists for each of the current filters will be around 6 GB in total when implemented. Annoyingly there isn't much we can do to speed this up. Its a straight line loop which is about as fast as things get and ints into a map. There are some faster map implementations in Go but even if they are twice as fast it isn't going to solve our issue. We could possibly do some some processing in parallel but thats going to lower our QPS since we would be pegging more CPU cores while doing it.
+So we try the above, and it takes roughly 11 seconds to aggregate. That's not going to work. Especially as it pegs a single core while doing it. It uses about 2 GB of RAM as well which is fine for our purposes, as 3 such lists for each of the current filters will be around 6 GB in total when implemented (unless we can mush them into the same list or something). 
 
-How do Google/Bing do this? Turns out they don't. Well for a start they don't have facets over the web index. It is in the afore mentioned sphinx/manticore/elasticsearch/lucene however... the Java ones are pretty annoying to read and my C++ is not good enough to understand what im reading. What about Bleve? its written in Go!
+Annoyingly there isn't much we can do to speed this up. Its a straight line loop which is about as fast as things get which puts ints into a map. There are some faster map implementations in Go but even if they are twice as fast it isn't going to solve our issue. Well unless they are 20x times faster (and they arent, I checked). However remember how I said we are limiting searches to one at a time? Lets break the list apart and see what we get.
 
-Looking at index_impl.go (around [line 495](https://searchcode.com/file/158345498/vendor/github.com/blevesearch/bleve/index_impl.go/)) shows how the facets are constructed if on the supplied query. Turns out its doing roughly the same thing. A loop putting things into a map. I don't know what I was expecting, but it would have been a nice find to see some fancy way of speeding this up. I guess it means you can do filters using Bleve for 200 million items, but it won't work well.
+{{<highlight go>}}
+cores := runtime.NumCPU()
+shard := len(codeFacet)/cores
+langCount := map[int]int{}
+var langCountMutex sync.Mutex
+var wg sync.WaitGroup
 
+for c:=0;c<cores;c++ {
+    wg.Add(1)
 
+    from := shard * c
+    to := shard * (c+1)
+    if c == cores - 1 {
+        to = len(codeFacet)
+    }
 
+    fmt.Println(from, to)
+
+    go func(f int, t int) {
+        for i:=f; i<t;i++ {
+            _, ok := filters[i]
+            if ok {
+                langCountMutex.Lock()
+                langCount[codeFacet[i]]++
+                langCountMutex.Unlock()
+            }
+        }
+        wg.Done()
+    }(from, to)
+}
+
+wg.Wait()
+{{</highlight>}}
+
+Its a bit more bookkeeping and one of my main complaints about Go but it works mostly. It runs in about 200ms and uses all my cores while doing it.
+
+How do Google/Bing do this? Turns out they don't. For a start they don't have facets over the web index. It is the afore mentioned sphinx/manticore/elasticsearch/lucene which do. Time to go code spelunking. The Java ones are pretty annoying to read (I got bored) and my C++ is not good, but it looks like it does the same facet deal I was considering and relies on straight line speed. Of course they also tend to shard the index at 200 million documents. What about Bleve? its written in Go! Lets have a look at how it works.
+
+Looking at index_impl.go (around [line 495](https://searchcode.com/file/158345498/vendor/github.com/blevesearch/bleve/index_impl.go/)) shows how the facets are constructed if on the supplied query. Turns out its doing roughly the same thing I was. A loop putting things into a map. I don't know what I was expecting, but it would have been a nice find to see some fancy way of speeding this up. I guess it means you cannot realisticly do filters using Bleve for 200 million items on a single core. Or you can, but be prepared to wait a bit for it to finish.
 
 So what if we estimate? Turns out this is how Bing and Google work anyway. Not for facets but for search in general.
 
-Don't belive me? Try searching for a fairly unique term. In my case I chose "boyter" on both. Google says it has 590,000 results for this and Bing says 107,000 results. However if you try to page though... Bing caps out on page 43 (interesrtingly they don't have a fixed number of results per page, possibly due to that false positive issue of bitfunnel) with 421 results. It shows more pages but won't let you access them. Google by contrast caps out on page 16 with 158 results. 
+Don't belive me? Try searching for a fairly unique term. In my case I chose "boyter" on both. Google says it has 590,000 results for this and Bing says 107,000 results. However if you try to page though... Bing caps out on page 43 (interestingly Bing does not have a fixed number of results per page, possibly due to that false positive issue of bitfunnel) with 421 results. It shows more pages but won't let you access them. Google by contrast caps out on page 16 with 158 results. 
 
 ![google lies](/static/how-i-built-index-searchcode/google1.png)
 ![bing lies](/static/how-i-built-index-searchcode/bing1.png)
@@ -294,7 +350,7 @@ The question is how to skip over? I thought about firstly working out the sample
 
 Sure its lossy, and we might miss some of the records, but at least it should run quickly. In addition we can adjust our prime numbers based on how busy the server is. Higher primes for less accuracy when busy and lower when not. A quick check...
 
-I created our 200 million records, and then put in some weighted counts so we got clusters of numbers.
+I created our 200 million records, and then put in some weighted counts so we got clusters of numbers. The smallest prime I used here was about 89 which sped things up.
 
 ```
 sample filter time 97
@@ -336,4 +392,105 @@ Of course this needs to be done for each facet, but thats fine, we can adjust it
 
 This works for large values... but what about small ones?
 
-Of course it wont. At that point we should probably just count them all.
+Of course it wont. At that point we should probably just count them all. Or we could combine approaches.
+
+Lets run it in parallel, but with the prime filters. But do it on a sliding scale, so we look at more elements for smaller matches since it faster and if we have say 1 million matches we look every other one. We in effect use the idea that for a larger sample size its more likely we will get representation of what we are measuring, which makes logical sense. Plus if we really want to be a snot about it we can use one of those faster map implementations to cut 20-50% off our map runtime.
+
+In fact when I tried a version of the server its going to be deployed on it was many times faster than the machine I am working with. 15 million matching results ran in ~10ms.
+
+That is a seriously cool result. Filter problem solved. We can process single filters in under 100 ms and probably all of them in that same time budget. Plus we can speed it up trivially if we need (even dynamically as it turns out) at the expense of some accuracy.
+
+
+# Ranking
+
+What about ranking?
+
+We don't actually need anything too fancy for searchcode really. While web search engines tend to use thousands of signals in order to know how to rank searchcode can get by with something simple such as TF/IDF or BM25. Thankfully I have already implemented both (including the Lucene TF/IDF variant) for other projects, so moving over is a case of lift and shift.
+
+The question of course is can my implementation of it work fast enough over millions of matches. At what point is it too low and eating into our 500 ms time budget.
+
+Thankfully both are based on simple lookups, basic math, an assignment and then a sort. Which would do you think would be slowest? Turns out it was not the ranking, but the sort. Once again thankfully sort algorithms are well understood and the Go one is obviously slow because of using interface. There are a few alternatives you can use such as https://github.com/twotwotwo/sorts/ or https://github.com/jfcg/sorty
+
+Of course I need to work with my own type, so it was a matter of again copy paste and modify due to the lack of Go generics.
+
+However it did raise an interesting question. If you search for a common term such as boom on Bing or Google, both report over 50 million results. However the search still comes back instantly. Google claims it looked at 548,000,000. That number as I already established is lie, so lets assume it actually looked at 100 million. Its a common term so I will assume it was less overestimated than the other ones. That amount of results if we go by our calculations of about 500 terms per document and then 2504 bytes to store the terms of that document in the index,
+
+`2504 bytes * 100000000 = ~250 GB`
+
+This roughly works out to be about 250 GB of data you need to filter through and then sort. Lets say Google actually did the full range it reported that works out to 5x that result so 1.2 TB of data.
+
+Now is it possible to rank and sort that much data in under 500 ms which Google returns in? 
+
+There is the terasort benchmark which allows us to at least get an idea about this. Its a benchmark based on sorting 1 TB of random data as quickly as possible. I tried to find a recent result for this, but this https://www.wired.com/insights/2012/11/breaking-the-minute-barrier-for-terasort/ from 2012 shows that Google was able to sort the 1 TB of data in 54 seconds, using 4000+ CPU cores.
+
+Lets assume it could be done in half the time with current CPU's. So 1 TB in 27 seconds, then lets do it for the 250 GB of data divided by 5 gives us 5.4 seconds. At this point I am fairly skeptical that Google is actually ranking the entire set. Even if they threw 5x the servers at it. Plus think of the cost. It was said that at the time the terasort record cost about $9. Lets assume it gets massively more efficient over time and say that it costs $1 for every search on Google for a common term to rank.
+
+Apparently Google did over 2 trillion searches in 2016. They also made about $90 billion dollars that same year. Pretty clearly that isn't going to work out even in silicon value make your losses up in volume land. You really need to be processing that sort for cents.
+
+Its a similar story on Bing. Even if it is losing money for Microsoft I doubt its losing money that quickly. While they have multiple machines which might solve the time issue, I doubt any company is going to let customers burn 10c to $1 per user action.
+
+So how do they do it? I only have theories as I have never worked on a commercial search engine but I suspect there is some sort of pre-ranking going on or caching of some query terms with ranking, and on top of that smaller set is the actual ranking which then includes your user data and whatever other signals they use in the secret sauce. This makes some sense really because while PageRank is apparently not the most important signal used today some form of it still is, and pagerank is very much a pre ranking algorithm.
+
+I have a theory that some of the reason that Google's search isn't as good as it used to be is the above. I suspect so much pre ranking goes on that when your query comes along you just get a custom ranked version of what was already pre ranked. As such its less about your query now and more about those pre ranks. If true I don't think the problem is going to get better anytime soon as the web keeps growing exponentially making it almost impossible for a new player to enter the market with a new algorithm. Meanwhile Google has no real reason to adjust its algorithms since its making more money than it know whats to do. The only thing that might change this is if someone comes up with seriously clever and is able to index at a cheaper price. Which I guess is what Cuil did, but they didn't get the ranking done very well. 
+
+So back to my problem trying out on my local machine a rank and sort for 1 million documents. Pre-ranking sounds resonable, but we arent talking about hundreds of millions of ranks here on average. For 1 million matching documents ranking takes 80 ms and sorting 264 ms. Thats without attempting to make it go any faster, IE my first cut of the code. Not bad, but not good enough.
+
+Ranking is the easy one to speed up. We run it in parallel. That brings it down to 10 ms for 1 million documents. We can also flip from [Lucene TF/IDF](https://opensourceconnections.com/blog/2015/10/16/bm25-the-next-generation-of-lucene-relevation/) to pure TF/IDF for a small saving, changing the line
+
+`weight += math.Sqrt(tf) * idf * (1 / math.Sqrt(float64(results[i].wordCount)))`
+
+to
+
+`weight += tf * idf`
+
+which for very large cases saves a few ms of time. It reduces quality a bit, but generally if someone search for `for` there isnt anything useful to show them, so its probably acceptable to cut some corners there in the interest of speed.
+
+Thats ranking taken care of.
+
+Now for speeding up the sorting. There are faster sorting algorithms than what Go ships with. Some trading memory for speed. But first lets try doing something else. The ranking algorithm returns a float with 0 being the lowest possible rank and the highest some number way higher than than. If we iterate through the slice and find the highest number, we could then loop though looking for ranks close to that, shove that into a new list and sort that. The reason this works is looping over a slice in Go is really fast. 
+
+We could also use our prime number trick to step through the list twice and on average we should find the highest number in the list.
+
+The loops look something like this,
+
+{{<highlight go>}}
+var maxScore float32
+for i:=0;i<len(results);i += 263 {
+    if results[i].score > j {
+        maxScore = results[i].score
+    }
+}
+for i:=0;i<len(results);i += 251 {
+    if results[i].score > j {
+        maxScore = results[i].score
+    }
+}
+{{</highlight>}}
+
+Note that the values of 263 and 251 are just ones I picked. They actually need to scale based on how many results we are iterating over in order to run fast enough.
+
+With that done, we can then work out the spread. With that in place we know that the top score might be say 43.01 or something. We can then iterate over our list looking for values higher than say 90% of this value. Then keep reducing it till we get whatever count of items we need. 
+
+This has the double bonus of making the list mostly sorted in reverse order, which should help with the final sort.
+
+It's actually fairly easy to code up as well.
+
+{{<highlight go>}}
+var topResults []*doc
+aboveScore := (maxScore / 100) * 95
+for len(topResults) <= 1_000 {
+    for i:=0;i<len(results);i++ {
+        if results[i].score > aboveScore {
+            topResults = append(topResults, results[i])
+
+            if len(topResults) >= 1_000 {
+                break
+            }
+        }
+    }
+
+    aboveScore = aboveScore * 0.9
+}
+{{</highlight>}}
+
+The results? Well for 5 million documents, the ranking takes about 80 ms. The finding of the top results and sorting takes 26 ms. Looks like the sorting issue is solved. Also this leaves us with a huge time budget for putting additional ranking on top if we want. Maybe I can put BM25 in there after all.
