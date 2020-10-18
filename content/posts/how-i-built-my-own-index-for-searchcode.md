@@ -67,14 +67,14 @@ Requirements
  - We need to support filters on source, language and repository
  - Its a free website, so we can deal with some downtime or inaccuracy
  - Only one search allowed at at time
- - We want searches to return in 0.5 seconds so a 500 ms time budget with no cache
+ - We want searches to return in 0.2 seconds so a 200 ms time budget with no cache (lower is better though)
  - Want to embed into searchcode itself to avoid those dreaded network calls
  - No stopwords
 
 Constraints
 
  - We have a higher that normal term count per document than web
- - We want to store the entire index in RAM, cos RAM is cheap yeah?
+ - We want to store as much of the index in RAM as possible, cos RAM is cheap now?
  - We are using Go so we have to think about the impact of GC
  - We only index terms longer than 3 characters, and trim long ones down to 20 characters
 
@@ -175,6 +175,8 @@ It gets back to that issue that code tends to also have very long termlists. For
 
 Incidentally I also tried a trie using the above and some random data to fit, and my goodness the Go GC really did not like it, taking seconds to walk the pointers. It also took a lot more memory than I would have thought and ended up filling my laptops RAM before crashing. Its possible a Adaptive Radix Tree would reduce this but I doubt it would be enough to fit conveniently in RAM.
 
+There are techniques to reduce the size of the posting list though. Elias-Fano being one of the most well known, and Progressive Elias-Fano being perhaps even more efficient than bit signatures in terms of storage size. However you still need to keep the term list in something like a skip list or some other data structure, which is a little more complexity than I am willing to commit to.
+
 So that leaves me with bit signatures from my original lists, cool. 
 
 One of the things I was most curious about was how many bits they used for the bloom filters in bitfunnel. While it's entirely dependent on how large the documents are (since large documents have more terms) just having an idea helps when it comes to guessing. It took a while for me to pick it up but it was mentioned that they are around 1500 bits. Interesting. Well using our guesstimate of 500 unique terms, its pretty easy to use python to guess how many bits we might need, assuming we want a 1% false positive rate which should reduce the space requirements.
@@ -216,9 +218,11 @@ Running the above gives a time of about 80 ms on the laptop I was using at the t
 
 For a simple brute force loop thats astonishingly fast. Its also using a single core to do it. I then tried it with 12 goroutines all running together and runtime as you would expect dropped to about 20 ms. However this is still a brute force algorithm, and as such we are still marching though all of the memory of the index. Can we reduce it?
 
-The technique used by bitfunnel to avoid looking at all memory is cool. Using higher ranked rows, and the rotation of the bit vectors to reduce memory access is super neat.
+The technique used by bitfunnel to avoid looking at all memory is cool. Using higher ranked rows.
 
 But it also looks hard to implement. Reading the bitfunnel blog suggests the same, and the people writing that all have PhD's. So this technique is probably out of reach for most, and especially for a single person working on things in their spare time, and more so if that person is me.
+
+However the rotation of the bit vectors to reduce memory access is super neat. Something that seems fairly easy to implement too. Lets look at that later.
 
 So lets have a think. Can exploit the code we are searching? For example, we know that its unlikely for a Go file to have any matching code for `System.out.println` from Java, and Java is unlikely to have many matches for `fmt.println`.
 
@@ -262,6 +266,44 @@ It depends on how much of a false positive rate we are willing to accept. I thin
 The other thing we need to keep with this is per document its term frequency or TF. We need this for ranking, BUT we have a nice property about the bit signatures. Because if we get a match, we know there is at least one match, we can ignore storing any term that occurs only once in the document. This is an advantage again over the the term lists of an inverted index.
 
 So this is getting a bit complex at this point, but hey nothing worth doing is usually easy.
+
+Lastly bit vector rotation. Because all the examples used in bitfunnel were using the same number of documents to vectors it took a while for this to sink in. Here is an example of it in ascii which makes more sense to me.
+
+3 documents.
+8 bit vector.
+Single hash function, so each term added is hashed once and flips one bit.
+
+```
+Normal view,
+
+document1 10111010
+document2 01100100
+document3 00100111
+
+Rotated view
+
+term1 001
+term2 101
+term3 011
+term4 000
+term5 100
+term6 110
+term7 010
+term8 100
+```
+
+So when you search for a term such as "dog" all you need do is hash that term, and fetch that row. So assuming it hashed to the 5th bit we would know that row 5 would be the one to look at and that only the first document potentially contains dog. Two or more terms is just as easy. Assuming you have "cat dog" where cat hashs to term 2, you get those rows,
+
+```
+101
+100
+```
+
+Then & them together, which leaves only document 1 which looks like it has both cat and dog. This works out to be an amazing saving in the amount of memory you need to read (assuming you account for how CPU's and RAM work).
+
+Now the above confused me for a while. In your normal view the row is constrained by the size of your bloom filter, and the number of documents is unbound. Which of course if flipped means you have these huge million long rows to worry about. The trick is to restrict the number of documents per "block". If you restrict it to say 64 documents you all of a sudden can store everything using 64 bit integers in a list of whatever works out to be the best size for your bloom filter.
+
+The above sounds like a bloody good idea. We also have an idea about how optimal this can be based on the talk from [Dan Luu](https://www.youtube.com/watch?v=80LKF2qph6I). Where the above with the other tweaks gives about ~3900 QPS from a single server with 10 million documents. He mentions being close to that as well.
 
 
 
@@ -370,6 +412,10 @@ The nice thing about this approach is that I can probably get a good estimate be
 
 The question is how to skip over? I thought about firstly working out the sample size needed using your usual population calculation. But I realised it might be better to just change the increment on the loop. But what to increment to set? What you want is to randomly hit items, so a regular number such as 50 is no good. What about using a prime number? We could then pick two primes, iterate twice (and since we are using primes not hit the same records on average) and then average them? We can then pick one lower level prime, and one higher for not much cost. 
 
+> Primes, however, intersect at the last possible moment. 5 and 7, for example, only coincide at 35 (5*7). There's no intermediate value where they both show up. You'd think a lack of rhythm would be a bad thing, but in nature it can be an advantage. The cicada insect sprouts from the ground every 13 or 17 years. This means it has a smaller chance of "overlapping" with a predator's cycle, which could be at a more common 2 or 4-year cycle.
+
+So lets model it on the life cycle of the cicada, which I am hoping to hear soon as I write this being in Australia and entering summer soon.
+
 Sure its lossy, and we might miss some of the records, but at least it should run quickly. In addition we can adjust our prime numbers based on how busy the server is. Higher primes for less accuracy when busy and lower when not. A quick check...
 
 I created our 200 million records, and then put in some weighted counts so we got clusters of numbers. The smallest prime I used here was about 89 which sped things up.
@@ -429,7 +475,7 @@ What about ranking?
 
 We don't actually need anything too fancy for searchcode really. While web search engines tend to use thousands of signals in order to know how to rank searchcode can get by with something simple such as TF/IDF or BM25. Thankfully I have already implemented both (including the Lucene TF/IDF variant) for other projects, so moving over is a case of lift and shift.
 
-The question of course is can my implementation of it work fast enough over millions of matches. At what point is it too low and eating into our 500 ms time budget.
+The question of course is can my implementation of it work fast enough over millions of matches. At what point is it too low and eating into our 200 ms time budget.
 
 Thankfully both are based on simple lookups, basic math, an assignment and then a sort. Which would do you think would be slowest? Turns out it was not the ranking, but the sort. Once again thankfully sort algorithms are well understood and the Go one is obviously slow because of using interface. There are a few alternatives you can use such as https://github.com/twotwotwo/sorts/ or https://github.com/jfcg/sorty
 
