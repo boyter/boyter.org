@@ -75,15 +75,18 @@ Requirements
  - We want searches to return in 0.2 seconds so a 200 ms time budget with no cache (lower is better though)
  - Want to embed into searchcode itself to avoid those dreaded network calls
  - No stopwords
-
+ 
 Constraints
 
  - We have a higher that normal term count per document than web
  - We want to store as much of the index in RAM as possible, cos RAM is cheap now?
  - We are using Go so we have to think about the impact of GC
  - We only index terms longer than 3 characters, and trim long ones down to 20 characters
+ - This is a side project, so whatever is done needs to be achievable out of hours
 
 Why using Go I hear you ask? Well I know 3 languages reasonably well those being Java, C# and Go. The current version of searchcode.com is written in Go which is the main reason for using it. I don't know of anyone else using it but blekko back in the day was supposedly using Perl. Plus I would really like to get this embedded into the application itself to avoid those pesky expensive slow network calls.
+
+It might surprise some reading this to learn that searchcode.com is the work of one person in their spare time. As such I write this pretty frankly. There is no money to be make in the free online code search market (just ask Google or Ohloh), so by all means feel free to take whats here and enter the "market" and loose money as well. There is a market in enterprise search though, so feel free to compete with sourcegraph if you like.
 
 So there are a few talked about ways to build an index that I am aware of or could easily find and document.
 
@@ -320,7 +323,9 @@ Now the above confused me for a while. In your normal view the row is constraine
 
 The above sounds like a bloody good idea. We also have an idea about how optimal this can be based on the talk from [Dan Luu](https://www.youtube.com/watch?v=80LKF2qph6I). Where the above with the other tweaks gives about ~3900 QPS from a single server with 10 million documents. He mentions being close to that as well on their production system. 3900 QPS means about 0.2 milliseconds to process a query. Keep in mind that bitfunnel also uses higher rank rows to improve performance.
 
-Considering I am storing 20x the documents, am working in a far slower language compared to C++ id be happy if I can get down to 10 ms for each query, which seems doable for the main query.
+Considering I am storing 20x the documents, am working in a far slower language compared to C++ id be happy if I can get down to 10 ms for each query, which seems doable I guess?
+
+However the annoying thing is that there is only so much you can do with "simuluations". Because I am just randomly picking 
 
 
 
