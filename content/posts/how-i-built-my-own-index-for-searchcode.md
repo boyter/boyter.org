@@ -375,7 +375,84 @@ for i:=0;i<len(codeFacet);i++ {
 
 So we try the above, and it takes roughly 11 seconds to aggregate. That's not going to work. Especially as it pegs a single core while doing it. It uses about 2 GB of RAM as well which is fine for our purposes, as 3 such lists for each of the current filters will be around 6 GB in total when implemented (unless we can mush them into the same list or something). 
 
-Annoyingly there isn't much we can do to speed this up. Its a straight line loop which is about as fast as things get which puts ints into a map. There are some faster map implementations in Go but even if they are twice as fast it isn't going to solve our issue. Well unless they are 20x times faster (and they arent, I checked). However remember how I said we are limiting searches to one at a time? Lets break the list apart and see what we get.
+I was curious to see how much Go was the problem. So I wrote a braindead implementation in Rust. Because of course no Go blog is complete without some comparison to Rust. Also my C/C++ game is especially bad. Also note that my Rust is also pretty poor at best. I then copied my implementation to Go to see how each fared. 
+
+{{<highlight go>}}
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+    // hold the facet in memory where we assume 300 languages and randomly assign each document as to one
+    codeFacet := []int{}
+    for i:=0;i<200_000_000;i++ {
+        codeFacet = append(codeFacet, i%300)
+    }
+
+    // lets simulate a search of which found 1 million matching documents in our result set
+    filters := map[int]bool{}
+    for i:=0;i<1_000_000;i++ {
+        filters[i%200_000_000] = true
+    }
+
+    start := time.Now().UnixNano() / int64(time.Millisecond)
+    // now lets count how many times we see each "language" filtered by the search
+    // we start timing from here
+    realLangCount := map[int]int{}
+    for i:=0;i<len(codeFacet);i++ {
+        _, ok := filters[i]
+        if ok {
+            realLangCount[codeFacet[i]]++
+        }
+    }
+    fmt.Println("time:", (time.Now().UnixNano() / int64(time.Millisecond)) - start, "ms")
+}
+
+{{</highlight>}}
+
+{{<highlight rust>}}
+use std::collections::HashMap;
+use std::time::Instant;
+
+fn main() {
+    let mut codefacet = Vec::new();
+    for n in 1..200_000_000 {
+        codefacet.push(n % 300);
+    }
+
+    let mut matching_results = HashMap::new();
+    for n in 1..1_000_000 {
+        matching_results.insert(n % 200_000_000, true);
+    }
+
+    let start = Instant::now();
+    let mut facet_count = HashMap::new();
+    for codeid in codefacet.iter() {
+        if matching_results.contains_key(codeid) {
+            facet_count.entry(codeid).or_insert(0);
+            *facet_count.get_mut(codeid).unwrap() += 1;
+        }
+    }
+    println!("time: {} ms", start.elapsed().as_millis());
+}
+{{</highlight>}}
+
+Followed by a quick compile and run,
+
+```
+$ go run main.go && cargo run --release
+time: 11205 ms
+    Finished release [optimized] target(s) in 0.03s
+     Running `target/release/rusttest`
+time: 8412 ms
+```
+
+Interesting. Rust is faster as you would expect, but not so much faster that you still wouldn't have a problem.
+
+Annoyingly there isn't much we can do to speed this up either. Its a straight line loop which is about as fast as things get which puts ints into a map. There are some faster map implementations in Go but even if they are twice as fast it isn't going to solve our issue. Well unless they are 40x times faster (and they arent, I checked). However remember how I said we are limiting searches to one at a time? That means we can use all our cores to break the list apart and process using all our cores.
 
 {{<highlight go>}}
 cores := runtime.NumCPU()
@@ -411,7 +488,7 @@ for c:=0;c<cores;c++ {
 wg.Wait()
 {{</highlight>}}
 
-Its a bit more bookkeeping and one of my main complaints about Go but it works mostly. It runs in about 200ms and uses all my cores while doing it.
+Its a bit more bookkeeping then it should be IMHO and one of my main complaints about Go but it works mostly. It runs in about 200ms and uses all my cores while doing it. Note that I am using a mutex around a normal Go map, which is actually faster than the inbuilt sync map for cases such as this.
 
 How do Google/Bing do this? Turns out they don't. For a start they don't have facets over the web index. It is the afore mentioned sphinx/manticore/elasticsearch/lucene which do. Time to go code spelunking. The Java ones are pretty annoying to read (I got bored) and my C++ is not good, but it looks like it does the same facet deal I was considering and relies on straight line speed. Of course they also tend to shard the index at 200 million documents. What about Bleve? its written in Go! Lets have a look at how it works.
 
@@ -432,28 +509,28 @@ Heck yeah I am! If its good enough for Google and Bing then its good enough for 
 
 The nice thing about this approach is that I can probably get a good estimate because I should know the relation of how common some terms are and be able to get a reasonable one. The best part about this is we can check if the server is busy and adjust the accuracy up or down depending on how busy the server is. Its also a case of not being 2x faster, but MUCH faster.
 
-The question is how to skip over? I thought about firstly working out the sample size needed using your usual population calculation. But I realised it might be better to just change the increment on the loop. But what to increment to set? What you want is to randomly hit items, so a regular number such as 50 is no good. What about using a prime number? We could then pick two primes, iterate twice (and since we are using primes not hit the same records on average) and then average them? We can then pick one lower level prime, and one higher for not much cost. 
+The question is how to skip over? I thought about firstly working out the sample size needed using your usual population calculation. But I realised it might be better to just change the increment on the loop. But what to increment to set? What you want is to randomly hit items, so a regular number such as 50 is no good. What about using a prime number? We could then pick two primes, iterate twice and then average them? We can then pick one lower level prime, and one higher for not much cost. 
 
-> Primes, however, intersect at the last possible moment. 5 and 7, for example, only coincide at 35 (5*7). There's no intermediate value where they both show up. You'd think a lack of rhythm would be a bad thing, but in nature it can be an advantage. The cicada insect sprouts from the ground every 13 or 17 years. This means it has a smaller chance of "overlapping" with a predator's cycle, which could be at a more common 2 or 4-year cycle.
+Why primes you ask? Well I found the follow online which describes why they are useful more elegantly than I can.
+
+> Primes, intersect at the last possible moment. 5 and 7, for example, only coincide at 35 (5*7). There's no intermediate value where they both show up. You'd think a lack of rhythm would be a bad thing, but in nature it can be an advantage. The cicada insect sprouts from the ground every 13 or 17 years. This means it has a smaller chance of "overlapping" with a predator's cycle, which could be at a more common 2 or 4-year cycle.
 
 So lets model it on the life cycle of the cicada, which I am hoping to hear soon as I write this being in Australia and entering summer soon.
 
-Sure its lossy, and we might miss some of the records, but at least it should run quickly. In addition we can adjust our prime numbers based on how busy the server is. Higher primes for less accuracy when busy and lower when not. A quick check...
+Sure we might miss some of the records, but at least it should run very quickly. In addition we can adjust our prime numbers based on how busy the server is. Higher primes for less accuracy when busy and lower when not.
 
 I created our 200 million records, and then put in some weighted counts so we got clusters of numbers. The smallest prime I used here was about 89 which sped things up.
 
 ```
 sample filter time 97
-
 2 sample filter time 87
-
 real filter time 8450
 
-comparing sample sample
+comparing sample filter to real filter
 avg delta 120.11343253308269
 missing 14
 
-comparing 2 sample
+comparing 2 sample filter to real filter
 avg delta 97.12998639702377
 missing 19
 ```
@@ -462,9 +539,7 @@ Not the best result. Far more accurage to the real value while being faster but 
 
 ```
 sample filter time 105
-
 3 sample filter time 125
-
 real filter count 9070
 
 comparing 1 sample
@@ -476,20 +551,19 @@ avg delta 100.78212739814019
 missing 8
 ```
 
-Thats what we are looking for. Much faster, almost as fast as the single sample (low prime number) but almost accurate guesses and missing far fewer. Probably good enough for saying yep this is possible.
+Thats what we are looking for. Much faster, almost as fast as the single sample (low prime number) but almost accurate guesses and missing far fewer. Probably good enough for saying yep this is a good idea.
 
 Of course this needs to be done for each facet, but thats fine, we can adjust it down to make it faster if required.
 
 This works for large values... but what about small ones?
 
-Of course it wont. At that point we should probably just count them all. Or we could combine approaches.
+Naturally I did not work. If you say only wanted to count 100 items... it missed everything. At that point we should probably just count them all. Or we could combine approaches.
 
-Lets run it in parallel, but with the prime filters. But do it on a sliding scale, so we look at more elements for smaller matches since it faster and if we have say 1 million matches we look every other one. We in effect use the idea that for a larger sample size its more likely we will get representation of what we are measuring, which makes logical sense. Plus if we really want to be a snot about it we can use one of those faster map implementations to cut 20-50% off our map runtime.
+Lets run it in parallel, with the prime filters, and do it on a sliding scale, so we look at more elements when we have smaller matches since it fast enough (probably because its branch predictor friendly) and if we have say 1 million matches we look every other one using a prime number skip. We in effect use the idea that for a larger sample size its more likely we will get representation of what we are measuring, which makes logical sense. Plus if we really want to be a snot about it we can use one of those faster map implementations to cut 20-50% off our map runtime.
 
 In fact when I tried a version of the server its going to be deployed on it was many times faster than the machine I am working with. 15 million matching results ran in ~10ms.
 
-That is a seriously cool result. Filter problem solved. We can process single filters in under 100 ms and probably all of them in that same time budget. Plus we can speed it up trivially if we need (even dynamically as it turns out) at the expense of some accuracy.
-
+That is a seriously cool result. Filter problem solved. We can process single filters in under 100 ms and probably all three of them in that same time budget. Plus we can speed it up trivially if we need (even dynamically as it turns out) at the expense of some accuracy.
 
 # Ranking
 
