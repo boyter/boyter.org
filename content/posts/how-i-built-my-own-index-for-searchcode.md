@@ -452,7 +452,9 @@ time: 8412 ms
 
 Interesting. Rust is faster as you would expect, but not so much faster that you still wouldn't have a problem.
 
-Annoyingly there isn't much we can do to speed this up either. Its a straight line loop which is about as fast as things get which puts ints into a map. There are some faster map implementations in Go but even if they are twice as fast it isn't going to solve our issue. Well unless they are 40x times faster (and they arent, I checked). However remember how I said we are limiting searches to one at a time? That means we can use all our cores to break the list apart and process using all our cores.
+For comparison a mate of mine tried in C++ with -O3 and got a runtime of around 2 seconds. Not sure what voodoo its doing to achive that. We compared the output to ensure it was the same and it was. Our best guess was it unrolls the loop to fit the CPU/RAM best. This is rather annoying because if I were using C++ I would be very close to being doing with that sort of performance.
+
+Annoyingly there isn't much we can do to speed this up either. At least none that I am aware of. It's a straight line loop (which is about as fast as things get) which puts int values into a map. There are some faster map implementations in Go that it isn't going to solve our issue. Unless they are 40x times faster and they arent, I checked. However remember how I said we are limiting searches to one at a time? That means we can use all our cores to break the list apart and process using all our cores.
 
 {{<highlight go>}}
 cores := runtime.NumCPU()
@@ -535,7 +537,7 @@ avg delta 97.12998639702377
 missing 19
 ```
 
-Not the best result. Far more accurage to the real value while being faster but missing some values. Trying again with a 3 sample.
+Not the best result. Far more accurate to the real value while being faster but missing some values. Trying again with a 3 sample.
 
 ```
 sample filter time 105
@@ -564,6 +566,23 @@ Lets run it in parallel, with the prime filters, and do it on a sliding scale, s
 In fact when I tried a version of the server its going to be deployed on it was many times faster than the machine I am working with. 15 million matching results ran in ~10ms.
 
 That is a seriously cool result. Filter problem solved. We can process single filters in under 100 ms and probably all three of them in that same time budget. Plus we can speed it up trivially if we need (even dynamically as it turns out) at the expense of some accuracy.
+
+But just to be complete. Lets just rethink how we organise the data. 
+
+We know we want the filters following a search. We also know we want to look up those exact keys. Clearly a map is a better solution for this. Why bother looking through all 200 million when we can just select the million we want. O(1) lookups plus no annoying if conditions. We can also store each facet in that map so that we calculate each one at the same time!
+
+Of course there is no free lunch and its going to eat more memory... but how much...
+
+So our parallel estimate filter uses 1200 MB of RAM and takes about 18 ms to process 1 million matches, with a 2% error margin over its real counts and no missing. We can also cut that RAM usage down a lot, because we don't need to use an int to store it, nor 32 bit int. In fact we could use a int8, but just in case we add a lot more languages lets go with a int16. This brings it down to 300 MB of RAM.
+
+By contrast the map is accurate, but uses 10000 MB of RAM and takes 1542 ms to process 1 million matches. However if we have 3 maps... we could also copy the int16 trick and see how that goes.
+
+Wow. Thats an improvement. Down to 2000 MB of RAM but 3 ms to process.
+
+The interesting thing is that the map method is order of magnitude faster for low counts, while the straight line is much faster for filters of over a million. They converge around the 50,000 mark.
+
+So we have a choice... do we use extra RAM to speed this up.
+
 
 # Ranking
 
