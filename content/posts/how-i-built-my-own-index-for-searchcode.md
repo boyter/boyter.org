@@ -12,6 +12,8 @@ Anyway what follows are my notes while thinking about this from start to impleme
 
 # The Problem
 
+So I decided to build my own index/search for searchcode. Why would anyone consider doing this when there are, lucene, sphinx, solr, elasticsearch, manticore, xaipan, gigablast, bleve, bludge, mg4j, mnoGoSearch... you get the idea. There is a lot of them out there. Most of them however are focussed on text and not source code.
+
 So lets think, what are the problems with searching source code. I have written about this before, but consider the following,
 
 A query term,
@@ -46,15 +48,15 @@ The second thing to observe is that we need to index those special characters. I
 
 Another pain point is that special searches that most full test search engines offer. For example consider `*` which normally expands out terms. However in searchcode you might actually want to search for that, say looking up the use of pointers or some such.
 
-Also stop words, which are the words you don't index because they arent that useful. There aren't really any stop words in code. Things that would normally be stop words such as `for and or not` are actually pretty useful to search for. Also the repetition of patterns means you end up with enormous term lists for common terms.
+Also stop words, which are the words you don't index because they aren't that useful. There aren't really any stop words in code... well I guess maybe import statements? Things that would normally be stop words such as `for and or not` are actually pretty useful to search for. Also the repetition of patterns means you end up with enormous term lists for common terms.
 
-Anyway in short, while sphinx/manticore are excellent, I really want build my own index. Honestly mostly because of the technical challenge and how fun it should be. Secondly because I think I cam improve on how searchcode works. Lastly because I doubt I will ever get to work on a large scale web index (its just too expensive to do yourself these days) so this at least lets me live large.
+Anyway in short, while sphinx/manticore or whatever you favorite choice is are excellent, I really want build my own index. Honestly mostly because of the technical challenge and how fun it should be. Secondly because I think I cam improve on how searchcode works. Lastly because I doubt I will ever get to work on a large scale web index (its just too expensive to do yourself these days, and I doubt Google nor Microsoft are that interested in me) and this gets me close.
 
 For the record I do not have a PhD in applied search or an real world experience building web indexes. I don't even work in the space professionally. I can use elastic search pretty well though! Really I'm just some numb-nut who grew up in Western Sydney (up the riff!) and apparently dreams about flying close to the sun. Clearly I have no business writing my own indexer. But the nice thing about the internet is you really don't need permission to do a lot of things, so lets roll up our [flanno](https://www.urbandictionary.com/define.php?term=flanno) sleeves, roll a [durrie](https://www.urbandictionary.com/define.php?term=durrie)* and get coding. As such take anything below with a massive grain of salt before you implement or start hurling internet abuse at me.
 
 *NB* BTW I don't smoke
 
-However before we start lets have a think about our requirements and constraints. One thing to consider early on is how to do searches in your index you have two options. The first is to allow searches in parallel and the latter is to not. However the choice between might not be as simple as you would think. It also greatly impacts the design of the system.
+Ahem. However before we start lets have a think about our requirements and constraints. One thing to consider early on is how to do searches in your index you have two options. The first is to allow searches in parallel and the latter is to not. However the choice between might not be as simple as you would think. It also greatly impacts the design of the system.
 
 Most would think, of course do it in parallel! Process in parallel so that way people wait less. But do they? As more searches come in the average time for each search goes up. Consider the situation that 10 people all search at the same time. Lets also assume that each search takes 1 second. Given limited resources which is true for most cases it means all 10 searches are shared across the system. As such everyone gets 1/10th of the system to search with and end up waiting 10 seconds for a result.
 
@@ -75,6 +77,7 @@ Requirements
  - We want searches to return in 0.2 seconds so a 200 ms time budget with no cache (lower is better though)
  - Want to embed into searchcode itself to avoid those dreaded network calls
  - No stopwords
+ - Would be nice to get a spelling corrector in there too
  
 Constraints
 
@@ -333,7 +336,9 @@ However the annoying thing is that there is only so much you can do with "simulu
 
 So what about facets. Which searchcode has for filtering down by language, repository or source. These need to be calculated for each search. Also this turned out to be really painful. Working with 200 millon of anything is a serious pain. It was easily the most annoying bit of code I ran into that was just not fast enough no matter what I did.
 
-The filter itself can be done with a very small bloom filter, since it only needs to store 3 keywords in it. But it does raise an interesting property. Generally inside sphinx/manticore/elasticsearch/lucene you can only have a single filter value per filter for any document. This works well for things that sit in one category such as what language is this code written in. But what about things like what licence is this under? Its possible something is dual licenced, so it could be both MIT or BSD for example. This is something that the bloom filter can work with because you can assign it to both! In traditional indexes you create a new field, and put the values in there and then use regular AND/OR queries to deal with, which is what the bloom filter is doing in effect.
+It turns out though that this is a semi solved problem with papers such as https://en.wikipedia.org/wiki/HyperLogLog https://github.com/axiomhq/hyperloglog around to help with this. But who has time to read dusty old papers when we could code! Seriously though don't do that. I did have a quick look through these and I don't think my data sets are at a large enough level to need them... yet.
+
+The filter itself can be done with a very small bloom filter, since it only needs to store 3 keywords in it. But it does raise an interesting property. Generally inside sphinx/manticore/elasticsearch/lucene you can only have a single filter value per filter for any document. This works well for things that sit in one category such as what language is this code written in. But what about things like what licence is this under? Its possible something is dual licenced, so it could be both MIT or BSD for example. This is something that the bloom filter can work with because you can assign it to both! In traditional indexes you create a new field, and put the values in there and then use regular AND/OR queries to deal with, which is what the bloom filter is doing in effect. Something for me to consider later.
 
 So anyway back to facets. Given our 200 million documents how long does it take to determine what languages are in the result set.
 
@@ -375,7 +380,7 @@ for i:=0;i<len(codeFacet);i++ {
 
 So we try the above, and it takes roughly 11 seconds to aggregate. That's not going to work. Especially as it pegs a single core while doing it. It uses about 2 GB of RAM as well which is fine for our purposes, as 3 such lists for each of the current filters will be around 6 GB in total when implemented (unless we can mush them into the same list or something). 
 
-I was curious to see how much Go was the problem. So I wrote a braindead implementation in Rust. Because of course no Go blog is complete without some comparison to Rust. Also my C/C++ game is especially bad. Also note that my Rust is also pretty poor at best. I then copied my implementation to Go to see how each fared. 
+I was curious to see how much Go was the problem. So I wrote a braindead implementation in Rust. Because of course no blog that mentiones Go is complete without some comparison to Rust either directly or in the comments. Also note that my Rust is also pretty poor at best. I then copied my implementation to Go to see how each fared. 
 
 {{<highlight go>}}
 package main
@@ -452,9 +457,9 @@ time: 8412 ms
 
 Interesting. Rust is faster as you would expect, but not so much faster that you still wouldn't have a problem.
 
-For comparison a mate of mine tried in C++ with -O3 and got a runtime of around 2 seconds. Not sure what voodoo its doing to achive that. We compared the output to ensure it was the same and it was. Our best guess was it unrolls the loop to fit the CPU/RAM best. This is rather annoying because if I were using C++ I would be very close to being doing with that sort of performance.
+For comparison a mate of mine tried in C++ with -O3 and got a runtime of around 2 seconds. Not sure what voodoo its doing to achive that. We compared the output to ensure it was the same and it was. Our best guess was it unrolls the loop to fit the CPU/RAM best. This is rather annoying because if I were using C++ I would be very close to being done with that sort of performance.
 
-Annoyingly there isn't much we can do to speed this up either. At least none that I am aware of. It's a straight line loop (which is about as fast as things get) which puts int values into a map. There are some faster map implementations in Go that it isn't going to solve our issue. Unless they are 40x times faster and they arent, I checked. However remember how I said we are limiting searches to one at a time? That means we can use all our cores to break the list apart and process using all our cores.
+Annoyingly there isn't much we can do to speed this up either. At least none that I am aware of. Certainly not with the way the data is laid out as it is. It's a straight line loop (which is about as fast as things get) which puts int values into a map. There are some faster map implementations in Go that it isn't going to solve our issue. Unless they are 40x times faster and they arent, I checked. However remember how I said we are limiting searches to one at a time? That means we can use all our cores to break the list apart and process using all our cores.
 
 {{<highlight go>}}
 cores := runtime.NumCPU()
@@ -565,24 +570,29 @@ Lets run it in parallel, with the prime filters, and do it on a sliding scale, s
 
 In fact when I tried a version of the server its going to be deployed on it was many times faster than the machine I am working with. 15 million matching results ran in ~10ms.
 
-That is a seriously cool result. Filter problem solved. We can process single filters in under 100 ms and probably all three of them in that same time budget. Plus we can speed it up trivially if we need (even dynamically as it turns out) at the expense of some accuracy.
+That is a seriously cool result. Filter problem solved. Well maybe. Keep in mind thats just a locally optimal result. While we can process single filters in under 100 ms and probably all three of them in that same time budget, and speed it up trivially if we need (even dynamically as it turns out) at the expense of some accuracy, perhaps we should trudge on looking at other solutions.
 
 But just to be complete. Lets just rethink how we organise the data. 
 
 We know we want the filters following a search. We also know we want to look up those exact keys. Clearly a map is a better solution for this. Why bother looking through all 200 million when we can just select the million we want. O(1) lookups plus no annoying if conditions. We can also store each facet in that map so that we calculate each one at the same time!
 
-Of course there is no free lunch and its going to eat more memory... but how much...
+Of course there is no free lunch and its going to eat more memory... but how much... A few minutes later to code up a version and test.
 
-So our parallel estimate filter uses 1200 MB of RAM and takes about 18 ms to process 1 million matches, with a 2% error margin over its real counts and no missing. We can also cut that RAM usage down a lot, because we don't need to use an int to store it, nor 32 bit int. In fact we could use a int8, but just in case we add a lot more languages lets go with a int16. This brings it down to 300 MB of RAM.
+So our parallel estimate filter uses 1200 MB of RAM and takes about 18 ms to process 1 million matches, with a 2% error margin over its real counts and no missing. We can also cut that RAM usage down a lot, because we don't need to use a int to store it, nor 32 bit int. In fact we could use a int8, but just in case we add a lot more languages lets go with a int16. This brings it down to 300 MB of RAM.
 
-By contrast the map is accurate, but uses 10000 MB of RAM and takes 1542 ms to process 1 million matches. However if we have 3 maps... we could also copy the int16 trick and see how that goes.
+By contrast the map is accurate, but uses 10,000 MB of RAM and takes 1542 ms to process 1 million matches. However if we have 3 maps one for each filter... we could also copy the int16 trick and see how that goes.
 
 Wow. Thats an improvement. Down to 2000 MB of RAM but 3 ms to process.
 
 The interesting thing is that the map method is order of magnitude faster for low counts, while the straight line is much faster for filters of over a million. They converge around the 50,000 mark.
 
-So we have a choice... do we use extra RAM to speed this up.
+So we have a choice... do we use extra RAM to speed this up and forget the large results, or settle for a decent average case. Maybe there is some hybrid model we can implement and get the best of both worlds?
 
+How about if we create a slice as long as there are documents in the database, then use the slice index as the docid and whatever it holds as the value? Then lookups are O(1) because its just referring to the slice index. Better yet it should only be slowed down by the number of documents we need to lookup, so performance should be fast and accurate on small lookups and fast and accurate on large with a linear slowdown. The only real downside is that we waste some RAM because we need store the duplicate code indexes to ensure it all works out, but thats only going to double the slice, so about 600 MB of RAM. Even better this scales pretty nicely assuming you want to shard out. Store the offset, then a little math and you can shard to 20 machines with each holding 1/20th of the count.
+
+In fact trying out the above takes 600 MB of RAM and processes 50,000 matches calculates in 3 ms. Thats a pretty sweet result. So we have improved the cut off for the worst case and we are using less RAM. Adding some parallel processing, and it takes longer. Presumably because most of the time is spent fighting over the lock... how about doing using their own maps and them merging them together at the end? Seemed to make no difference... One interesting property about the parallel one is that it seems to take the same amount of time no matter the number of results... I probably made a mistake with this.
+
+So this is annoying because over some amount of results it slows down enough we need to do something about it. But I think we can use the approximation we tried before to solve this problem. When over some value we flip into the approximation mode using primes.
 
 # Ranking
 
