@@ -12,15 +12,15 @@ Anyway what follows are my notes while thinking about this from start to impleme
 
 # The Problem
 
-So I decided to build my own index/search for searchcode. Why would anyone consider doing this when there are, lucene, sphinx, solr, elasticsearch, manticore, xaipan, gigablast, bleve, bludge, mg4j, mnoGoSearch... you get the idea. There is a lot of them out there. Most of them however are focussed on text and not source code.
+So I decided to build my own index/search for searchcode. Why would anyone consider doing this when there are so many projects that can do this for you. Off the top of my head we have code available for lucene, sphinx, solr, elasticsearch, manticore, xaipan, gigablast, bleve, bludge, mg4j, mnoGoSearch... you get the idea. There is a lot of them out there. Most of them however are focused on text and not source code. Also its worth noting that the really large scale engines such as Bing and Google have their own indexing engines which gives you the ability to wring more performance out of the system since you know where you can cut corners or save space, assuming you have the skill or patience.
 
 So lets think, what are the problems with searching source code. I have written about this before, but consider the following,
 
 A query term,
 
-```
+{{<highlight java>}}
 i++
-```
+{{</highlight>}}
 
 and then consider the following code snippets which should have a match,
 
@@ -29,7 +29,7 @@ for(i=0; i++; i<100) {
 for(i=0;i++;i<100) {
 {{</highlight>}}
 
-How do you split them into terms? By spaces results in the following,
+How do you split them into terms? By spaces which is what most engines do (for English language documents) results in the following,
 
 {{<highlight java>}}
 for(i=0; 
@@ -50,9 +50,15 @@ Another pain point is that special searches that most full test search engines o
 
 Also stop words, which are the words you don't index because they aren't that useful. There aren't really any stop words in code... well I guess maybe import statements? Things that would normally be stop words such as `for and or not` are actually pretty useful to search for. Also the repetition of patterns means you end up with enormous term lists for common terms.
 
-Anyway in short, while sphinx/manticore or whatever you favorite choice is are excellent, I really want build my own index. Honestly mostly because of the technical challenge and how fun it should be. Secondly because I think I cam improve on how searchcode works. Lastly because I doubt I will ever get to work on a large scale web index (its just too expensive to do yourself these days, and I doubt Google nor Microsoft are that interested in me) and this gets me close.
+Anyway in short, while sphinx/manticore or whatever you favorite choice is are excellent, I really want build my own index. Honestly mostly because of the technical challenge and how fun it should be. Secondly because I think I cam improve on how searchcode works with that deep level integration. Lastly because I doubt I will ever get to work on a large scale web index (its just too expensive to do yourself these days, and I doubt Google nor Microsoft are that interested in me personally) and this gets me close to living that dream.
 
-For the record I do not have a PhD in applied search or an real world experience building web indexes. I don't even work in the space professionally. I can use elastic search pretty well though! Really I'm just some numb-nut who grew up in Western Sydney (up the riff!) and apparently dreams about flying close to the sun. Clearly I have no business writing my own indexer. But the nice thing about the internet is you really don't need permission to do a lot of things, so lets roll up our [flanno](https://www.urbandictionary.com/define.php?term=flanno) sleeves, roll a [durrie](https://www.urbandictionary.com/define.php?term=durrie)* and get coding. As such take anything below with a massive grain of salt before you implement or start hurling internet abuse at me.
+Also on occasion I get something like this, which is the manticore/sphinx process going a little crazy due to some search running in the system.
+
+![bad sphinx](/static/how-i-built-index-searchcode/bad_sphinx.png)
+
+Not what you want on your server when normally the load average is ~0.1. Hopefully I can ensure this never happens again.
+
+For the record I do not have a PhD in applied search or an real world experience building web indexes. I don't even work in the space professionally. I can use elastic search pretty well though! Really I'm just some numb-nut who grew up in Western Sydney (up the riff!) and apparently dreams about flying close to the sun. Clearly I have no business writing my own indexer. But the nice thing about the internet is you really don't need permission to do a lot of things, so lets roll up our [flanno](https://www.urbandictionary.com/define.php?term=flanno) sleeves, then a [durrie](https://www.urbandictionary.com/define.php?term=durrie)* and get coding. As such take anything below with a massive grain of salt before you implement or start hurling internet abuse at me.
 
 *NB* BTW I don't smoke
 
@@ -78,16 +84,16 @@ Requirements
  - Want to embed into searchcode itself to avoid those dreaded network calls
  - No stopwords
  - Would be nice to get a spelling corrector in there too
+ - We want to store as much of the index in RAM as possible, cos RAM is cheap now?
+ - We only index terms longer than 3 characters, and trim long ones down to 20 characters
  
 Constraints
 
  - We have a higher that normal term count per document than web
- - We want to store as much of the index in RAM as possible, cos RAM is cheap now?
- - We are using Go so we have to think about the impact of GC
- - We only index terms longer than 3 characters, and trim long ones down to 20 characters
- - This is a side project, so whatever is done needs to be achievable out of hours
+ - We are using Go so we have to think about the impact of GC and that its slower than other languages
+ - This is a side project, so whatever is done needs to be achievable out of hours by a single person who is not a 10x developer
 
-Why using Go I hear you ask? Well I know 3 languages reasonably well those being Java, C# and Go. The current version of searchcode.com is written in Go which is the main reason for using it. I don't know of anyone else using it but blekko back in the day was supposedly using Perl. Plus I would really like to get this embedded into the application itself to avoid those pesky expensive slow network calls.
+Why using Go I hear you ask? Well I know 3 languages reasonably well. Those being Java, C# and Go. The current version of searchcode.com is written in Go which is the main reason for using it. I don't know of anyone else using it but blekko back in the day was supposedly using Perl. Plus I would really like to get this embedded into the application itself to avoid those pesky expensive slow network calls.
 
 It might surprise some reading this to learn that searchcode.com is the work of one person in their spare time. As such I write this pretty frankly. There is no money to be make in the free online code search market (just ask Google or Ohloh), so by all means feel free to take whats here and enter the "market" and loose money as well. There is a market in enterprise search though, so feel free to compete with sourcegraph if you like.
 
@@ -155,7 +161,7 @@ So with the above I had a further think and decided I should try either an inver
 
 Inside searchcode there is about 300 million code files (as I write this). Ignoring duplicates gives around 200 million code files that we want to search, broken up by about 240 languages across 40 million repositories.
 
-There is probably about 5kb of code in most of those files, with each having about 500 unique terms. This gives us about 1.5 TB of code, which is actually in the ballpark, although I do compress the content at rest.
+There is probably about 5kb of code in most of those files, with each having about 500 unique terms. This gives us about 1.5 TB of code, which is actually in the ballpark, although I do compress the content at rest. However to be sure I wrote a simple program to loop through most of whats there to actually calculate this. Not as a true average, but a rolling average over every 10,000 files it was able to process. I am still waiting on the results but for the first 150,000 files the average shows about 330 unique terms which is bearing up to my back of napkin calculations.
 
 The nice thing about this number is that its not stupidly big. It should be possible to run this on a single machine, and frankly its possible to brute force it given a powerful enough machine. Its certainly not a web scale problem in the sense that Google or Bing are.
 
@@ -328,7 +334,7 @@ The above sounds like a bloody good idea. We also have an idea about how optimal
 
 Considering I am storing 20x the documents, am working in a far slower language compared to C++ id be happy if I can get down to 10 ms for each query, which seems doable I guess?
 
-However the annoying thing is that there is only so much you can do with "simuluations". Because I am just randomly picking 
+However the annoying thing is that there is only so much you can do with "simuluations". Because I am just randomly picking ints it produces almost no matches. So I refined my simulation to try and get close to a real index.
 
 
 
@@ -664,9 +670,9 @@ Note that the values of 263 and 251 are just ones I picked. They actually need t
 
 With that in place we know that the top score might be say 43.01 or some other value. We can then iterate over our list looking for values higher than say 95% of this value. Then keep reducing that percentage size till we get whatever count of items we need. 
 
-This has the double bonus of making the list mostly sorted in reverse order, which should help with the final sort as well.
+This has the double bonus of making the list mostly sorted in reverse order, which should help with speeding up the final sort as well depending on what sort algorithm Go uses under the hood. Im assuming insertion sort for short slices and timsort otherwise, but should probably verify that assumption.
 
-It's actually fairly easy to code this.
+Regardless this new idea is actually fairly easy to code.
 
 {{<highlight go>}}
 var topResults []*doc
@@ -690,4 +696,4 @@ The results? Well for 5 million documents, the ranking takes about 80 ms. The fi
 
 In fact after all the above and some other tweaks I was able to get it ranking 50 million documents in 800ms and the sorting and selection done in under 30 ms.
 
-The reality is though that I am likely to cut off any further processing if we get something like 1 million terms. The reason being its unlikely there is any point going beyond that. It's not like web search where if you search for facebook and facebook happens to be the 2 millionth document people are going to notice that its not in your search results. Also at 1 million documents on my laptop I can rank collect and sort in ~30 ms which is probably fast enough for my purposes.
+The reality is though that I am likely to cut off any further processing if we get something like 100,000 or something documents. Its not like I let you page through them anyway. It's not like web search where if you search for facebook and facebook happens to be the 2 millionth document people are going to notice that its not in your search results. Also at 100,000 documents on my laptop I can rank, collect and sort in ~3 ms which is probably fast enough for my purposes.
