@@ -50,6 +50,8 @@ Another pain point is that special searches that most full test search engines o
 
 Also stop words, which are the words you don't index because they aren't that useful. There aren't really any stop words in code... well I guess maybe import statements? Things that would normally be stop words such as `for and or not` are actually pretty useful to search for. Also the repetition of patterns means you end up with enormous term lists for common terms.
 
+One way to get around the above is to index ngrams. This is how Google Code Search worked back in the day. However this technique has a few downsides. The first is you end up with really long posting lists. This also produces a lot of false positive matches which need to be filtered out. However the advantage is you can then use use those ngrams to provide some level of regular expression search on top which can be useful.
+
 Anyway in short, while sphinx/manticore or whatever you favorite choice is are excellent, I really want build my own index. Honestly mostly because of the technical challenge and how fun it should be. Secondly because I think I cam improve on how searchcode works with that deep level integration. Lastly because I doubt I will ever get to work on a large scale web index (its just too expensive to do yourself these days, and I doubt Google nor Microsoft are that interested in me personally) and this gets me close to living that dream.
 
 Also on occasion I get something like this, which is the manticore/sphinx process going a little crazy due to some search running in the system.
@@ -111,7 +113,7 @@ Disadvantages
  - Slow... at scale IE not in RAM
  - Harder to scale because gotta duplicate all the data
  
-Inverted index. Pretty much building a map of terms to documents and then intersecting them and ranking. One issue with this technique is that you end up with enormous term lists for common terms. As mentioned previously we cannot use stop words to reduce this, and even if we did there is a lot of repetition in code so you tend to get a lot of huge term lists.
+Inverted index. Pretty much building a map of terms to documents and then intersecting them and ranking. One issue with this technique is that you end up with enormous term lists, known as posting lists for common terms. As mentioned previously we cannot use stop words to reduce this, and even if we did there is a lot of repetition in code so you tend to get a lot of huge posting lists.
 
 Advantages
  - Easy to query
@@ -134,16 +136,6 @@ Advantages
 Disadvantages
  - Can take up more space if lots of prefixes
  - Not friendly to GC due to the use of pointers
-
-Ngrams. Not something I am very familiar with. Which bothers me. Its one of those things I am not going to use mostly because of that reason, but hey I can always swap it out later if I want.
-
-Advantages
- - Can do regular expression search easily
- - Easier to index terms
-
-Disadvantages
- - Not space efficient, as your index grows larger than what you are searching
- - Probably produces more false positives
 
 Bit Signatures. This is something I remember reading about years ago, and found this link to prove I had not lost my mind https://www.stavros.io/posts/bloom-filter-search-engine/ At the time I thought it was neat but not very practical... However then it turns out that Bing has been using this technique over its entire web corpus http://bitfunnel.org/ https://www.youtube.com/watch?v=1-Xoy5w5ydM
 
