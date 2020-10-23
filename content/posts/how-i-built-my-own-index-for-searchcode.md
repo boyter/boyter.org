@@ -50,7 +50,7 @@ Another pain point is that special searches that most full test search engines o
 
 Also stop words, which are the words you don't index because they aren't that useful. There aren't really any stop words in code... well I guess maybe import statements? Things that would normally be stop words such as `for and or not` are actually pretty useful to search for. Also the repetition of patterns means you end up with enormous term lists for common terms.
 
-One way to get around the above is to index ngrams. This is how Google Code Search worked back in the day. However this technique has a few downsides. The first is you end up with really long posting lists. This also produces a lot of false positive matches which need to be filtered out. However the advantage is you can then use use those ngrams to provide some level of regular expression search on top which can be useful.
+One way to get around the above is to index ngrams. This is how Google Code Search worked back in the day. However this technique has a few downsides. The first is you end up with really long posting lists. Usually compared to keywords its 4-5 times the number of keywords for ngrams of length 3. They also produce a lot of false positive matches which need to be filtered out. However the advantage is you can then use use those ngrams to provide some level of regular expression search on top which can be useful.
 
 Anyway in short, while sphinx/manticore or whatever you favorite choice is are excellent, I really want build my own index. Honestly mostly because of the technical challenge and how fun it should be. Secondly because I think I cam improve on how searchcode works with that deep level integration. Lastly because I doubt I will ever get to work on a large scale web index (its just too expensive to do yourself these days, and I doubt Google nor Microsoft are that interested in me personally) and this gets me close to living that dream.
 
@@ -119,11 +119,13 @@ Advantages
  - Easy to query
  - Does not miss terms
  - Can store TF alongside terms as a positional index
- - Fast and easy; intersecting termlists is something you can hand off to your most junior developer (at least initially)
+ - Fast and easy; intersecting posting lists is something you can hand off to your most junior developer (at least initially)
+ - Query execution time is related to the number of returned results
 
 Disadvantages
  - Harder to do wildcard queries OR use more space for them
  - Hard to update documents and avoid false positives, usually have to rebuild the index or do delta + merge
+ - Need to implement skip lists or compression on the posting lists at scale
 
 Trie for example https://github.com/typesense/typesense which uses Adaptive Radix Tree https://stackoverflow.com/questions/50127290/data-structure-for-fast-full-text-search
 
@@ -136,6 +138,7 @@ Advantages
 Disadvantages
  - Can take up more space if lots of prefixes
  - Not friendly to GC due to the use of pointers
+ - Need to implement skip lists or compression on the posting lists at scale
 
 Bit Signatures. This is something I remember reading about years ago, and found this link to prove I had not lost my mind https://www.stavros.io/posts/bloom-filter-search-engine/ At the time I thought it was neat but not very practical... However then it turns out that Bing has been using this technique over its entire web corpus http://bitfunnel.org/ https://www.youtube.com/watch?v=1-Xoy5w5ydM
 
@@ -147,13 +150,14 @@ Advantages
 Disadvantages
  - Cannot store TF information along terms as its a non-positional index
  - Produces false positive matches
-
+ - Query execution time is linear in the collection size (bitfunnel is all about reducing this to an extent)
+ - Memory bandwidth of the machine limits how large the index can grow on a single machine
 
 So with the above I had a further think and decided I should try either an inverted index, a trie or bitsignatures. Before I quickly create some simple implementations of each to establish how they perform, lets get an estimate of how much storage each is going to require.
 
 Inside searchcode there is about 300 million code files (as I write this). Ignoring duplicates gives around 200 million code files that we want to search, broken up by about 240 languages across 40 million repositories.
 
-There is probably about 5kb of code in most of those files, with each having about 500 unique terms. This gives us about 1.5 TB of code, which is actually in the ballpark, although I do compress the content at rest. However to be sure I wrote a simple program to loop through most of whats there to actually calculate this. Not as a true average, but a rolling average over every 10,000 files it was able to process. I am still waiting on the results but for the first 150,000 files the average shows about 330 unique terms which is bearing up to my back of napkin calculations.
+There is probably about 5kb of code in most of those files, with each having about 500 unique terms. This gives us about 1.5 TB of code, which is actually in the ballpark, although I do compress the content at rest. However to be sure I wrote a simple program to loop through most of whats there to actually calculate this. Not as a true average, but a rolling average over every 10,000 files it was able to process. I am still waiting on the results but for the first 150,000 files the average shows about 330 unique terms which is bearing up to my back of napkin calculations. I also had this work out ngrams for length of 3 to see how it would fare and it was about 4 times the results.
 
 The nice thing about this number is that its not stupidly big. It should be possible to run this on a single machine, and frankly its possible to brute force it given a powerful enough machine. Its certainly not a web scale problem in the sense that Google or Bing are.
 
