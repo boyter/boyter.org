@@ -88,6 +88,7 @@ Requirements
  - Would be nice to get a spelling corrector in there too
  - We want to store as much of the index in RAM as possible, cos RAM is cheap now?
  - We only index terms longer than 3 characters, and trim long ones down to 20 characters
+ - We don't need to do any term rewriting (where you map NY to new york and or search for both)
  
 Constraints
 
@@ -150,7 +151,7 @@ Advantages
 Disadvantages
  - Cannot store TF information along terms as its a non-positional index
  - Produces false positive matches
- - Query execution time is linear in the collection size (bitfunnel is all about reducing this to an extent)
+ - Query execution time is linear in the collection size (bitfunnel is about reducing this to an extent)
  - Memory bandwidth of the machine limits how large the index can grow on a single machine
 
 So with the above I had a further think and decided I should try either an inverted index, a trie or bitsignatures. Before I quickly create some simple implementations of each to establish how they perform, lets get an estimate of how much storage each is going to require.
@@ -208,11 +209,15 @@ print len(BloomFilter(capacity=500, error_rate=0.01).bitarray.tobytes())
 
 There isn't mention of the number of hashes in there, but the result came back as using `1199`. Thats an impressive space saving there. Lets bump it up to 1536 bytes so its nicely divisible by 64. That works out to be 192 bytes to store each document. Of course we don't have the count of each term, and need to store that somewhere else, but that's a far more approachable problem, as you only ever need that when it comes to ranking. Also by bumping up the number of bits to 1536 you get about a half a percent false positive error rate.
 
+The other useful thing about bloom filters is that they grow linearly to the benefit you get from the length. This means as you make it longer, you and drive down the false positive rate. Neat!
+
 So back of napkin, 192 bytes per filter times 200 million then converted into gigabytes,
 
 `192 * 200000000 == 38400000000 == ~38.4 GB`
 
-Ok thats still not going to fit totally into my RAM budget unless I scale out and half the index per machine with what I am using now. However the searchcode machines have been running for a while, I could look at getting some new ones and get more CPU/RAM to boot!
+Ok thats still not going to fit totally into my RAM budget unless I scale out and half the index per machine with what I am using now. However the searchcode machines have been running for a while, I could look at getting some new ones and get more CPU/RAM to boot! Or we could increase the size of the filter and drive down the error rate. If we increase the bit size to say ~7000 we can get a 1 in 1000 false positive.
+
+Alternatively we could store ngrams in the index. This triples the number of terms in the bloom filter, meaning we need about ~13000 bits in the filter for a 1% error rate. This is going to really blow up the size of our index though.
 
 Anyway in terms of space we have a reasonable winner. But how feasible is it to do an & operation on 200 million slices in memory? I am about to assume that we don't implement any of the memory lookup savings that bitfunnel does, but it gives a nice idea of the sort of performance we can expect. Besides at this point after reviewing how bitfunnel worked I just itching to write a version of it. After all there is only so many papers you can read about something before wanting to do it. 
 
@@ -322,16 +327,25 @@ So when you search for a term such as "dog" all you need do is hash that term, a
 100
 ```
 
-Then & them together, which leaves only document 1 which looks like it has both cat and dog. This works out to be an amazing saving in the amount of memory you need to read. Of course you need to keep in mind cache lines and how memory is fetched for the CPU. Short note is to keep it to multiples of 64 bits for the CPU and 512 bits for RAM. It's actually more involved then that, but this simplification works well enough.
+Then & them together, which leaves only document 1 which looks like it has both cat and dog. This works out to be an amazing saving in the amount of memory you need to read. Of course you need to keep in mind cache lines and how memory is fetched for the CPU. Short note is to keep it to multiples of 64 bits for the CPU and 512 bits for RAM. It's actually more involved then that, but this gross over-simplification works well enough.
 
 Now the above confused me for a while. In your normal view the row is constrained by the size of your bloom filter, so its fixed to 1500 bits or something. But the number of documents is unbound. So if flipped means you have these huge million long rows to worry about. The trick is to restrict the number of documents per "block". If you restrict it to say 64 documents you all of a sudden can store everything using 64 bit integers in a list of whatever works out to be the best size for your bloom filter. It also means that the row is only 64 bits long and is far more manageable.
 
 The above sounds like a bloody good idea. We also have an idea about how optimal this can be based on the talk from [Dan Luu](https://www.youtube.com/watch?v=80LKF2qph6I). Where the above with the other tweaks gives about ~3900 QPS from a single server with 10 million documents. He mentions being close to that as well on their production system. 3900 QPS means about 0.2 milliseconds to process a query. Keep in mind that bitfunnel also uses higher rank rows to improve performance.
 
-Considering I am storing 20x the documents, am working in a far slower language compared to C++ id be happy if I can get down to 10 ms for each query, which seems doable I guess?
+Considering I am storing 20x the documents, am working in a far slower language compared to C++ id be happy if I can get down to 10 ms for each query, which seems doable I guess? I suspect that most of it comes down to memory bandwidth. The CPU's I use for searchcode have about 17 GB per second bandwidth. So avoiding scanning all the memory is the main thing you have to worry about.
+
+The other thing thats really useful to note is that the number of hash functions per term added varies. So you hash rare terms more than you hash common terms. This helps drive out the noise you get from the bloom filter. You can find details about this here https://www.clsp.jhu.edu/events/mike-hopcroft-microsoft/ and the video within.
 
 However the annoying thing is that there is only so much you can do with "simuluations". Because I am just randomly picking ints it produces almost no matches. So I refined my simulation to try and get close to a real index.
 
+I was looking into bloom filters and was wondering if having say a single hash function with salt was as effective as multiple hashes? A bit of searching around unearthed this https://news.ycombinator.com/item?id=14740032 and https://www.eecs.harvard.edu/~michaelm/postscripts/rsa2008.pdf which suggests that X hash fuctions, having two and a salt is good enough which saves the effort of finding different functions. Can use murmur3 and one of the fnv hashes.
+
+Success! Hash 6ff1f8ad7c933c3942d75e43382bc00a59f208a5 I am now able to index and search against the filesystem. Its quite fast too! This is done with trigrams and against the linux kernel it searches in 1 ms or so compared to 400 ms for ripgrep (with warm disk cache). Pretty happy with that. All single core too which is the real suprise. I think this is looking fairly doable.
+
+Even better Hash b0a30670c2d20e0ed19c4d444f8b4746bd43b8c3 has it working with a higher filter! This seems to cut down on a processing time for the rare terms, meaning we can skip huge chunks of the index without too much cost. It also means we can just load those chunks in from disk when needed keeping the index mostly on disk, and allowing the OS disk cache to look after it for us.
+
+It seems to work reasonably well with the higher level filter. However results vary. I think it might need to be split by language as I thought it should have been from the beginning.
 
 
 # Facets
