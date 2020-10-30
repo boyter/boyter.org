@@ -221,7 +221,37 @@ Alternatively we could store ngrams in the index. This triples the number of ter
 
 Anyway in terms of space we have a reasonable winner. But how feasible is it to do an & operation on 200 million slices in memory? I am about to assume that we don't implement any of the memory lookup savings that bitfunnel does, but it gives a nice idea of the sort of performance we can expect. Besides at this point after reviewing how bitfunnel worked I just itching to write a version of it. After all there is only so many papers you can read about something before wanting to do it. 
 
-So lets write a simulation. I chose to make the filter be only 512 bits because thats easy to represent with a single 64 bit int.
+Slight tangent.
+
+While I have understood the purpose of a bloom filter (and some of its uses) I have never actually implemented one myself. Turns out it was easier than I thought. Assuming you have some hash function that works on your string in JavaScript the following is all you need.
+
+{{<highlight javascript>}}
+// start out filter out with 16 0's indicating its empty
+// note that this is wasteful because we are using numbers
+// ideally you would use boolean or bits to reduce the space
+// and using bits allows you to do all sorts of interesting things...
+var bloom = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0];
+
+// add some words to the filter using a single hash
+// we use % to convert our 32 bit number into one of 16 values
+// for the length of our bloom filter
+// assumes we added hashCode to string which returns a number
+bloom["something".hashCode() % bloom.length] = 1;
+bloom["another".hashCode() % bloom.length] = 1;
+
+
+// lets check if not-in is in the filter
+if (bloom["not-in".hashCode() % bloom.length] == 1) {
+    console.log("not-in may be in set...");
+} else {
+    console.log("not-in is not in set");
+}
+{{</highlight>}}
+
+This is useful because at some point I am going to have to implement this myself. Why? Well for the search index to work we need to be able to logical AND against the bits. While we can simulate a lot of this its not ideal.
+
+
+Right with that tangent over. Lets write a simulation. I chose to make the filter be only 64 bits because thats easy to represent with a single 64 bit int. Probably not very useful for most things but easy to code.
 
 {{<highlight go>}}
 // setup 200 million 512 bit (64 byte) ints to represent each document with a bloom filter
@@ -244,9 +274,9 @@ Running the above gives a time of about 80 ms on the laptop I was using at the t
 
 For a simple brute force loop thats astonishingly fast. Its about as fast as you can iterate the array nearly! Its also using a single core to do it. I then tried it with 12 goroutines all running together and runtime as you would expect dropped to about 20 ms. However this is still a brute force algorithm, and as such we are still marching though all of the memory of the index. Can we reduce it?
 
-The technique used by bitfunnel to avoid looking at all memory is cool. Using higher ranked rows.
+The techniques used by bitfunnel to avoid looking at all memory is cool. Which makes sense because CPU is not the limiting factor of the algorithm. Its actually how much memory you can pump through the CPU. As such you want to touch as little memory as possible. They do this by rotating the bit vectors and using higher ranked rows.
 
-But it also looks hard to implement. Reading the bitfunnel blog suggests the same, and the people writing that all have PhD's. So this technique is probably out of reach for most, and especially for a single person working on things in their spare time, and more so if that person is me.
+Higher ranked rows is neat but it also looks hard to implement. It's also more useful when you shard your index on multiple machines which I am not doing. Reading the bitfunnel blog suggests the same, and the people writing that all have PhD's. So this technique is probably out of reach for most, and especially for a single person working on things in their spare time, and more so if that person is me.
 
 However the rotation of the bit vectors to reduce memory access is super neat. Something that seems fairly easy to implement too. Lets look at that later once we thinking about it some more.
 
@@ -269,7 +299,7 @@ We can then store a single | of all the bits which produces
 10110001
 ```
 
-And then check out queries against that. If we have a potential match, then we go and look inside the store. Assuming we break these into logical blocks of a good chunk of documents we can potentially skip most of the index for many queries! Even if its only 50%b efficent it allows us to skip half the index! However this is just a theory, and for now lets just get it working. Incidently if you break the chunks up by language it gets even better when working with filters because you can skip even more blocks!
+And then check out queries against that. If we have a potential match, then we go and look inside the store. Assuming we break these into logical blocks of a good chunk of documents we can potentially skip most of the index for many queries! Even if its only 50% efficent it allows us to skip half the index! However this is just a theory, and for now lets just get it working. Incidently if you break the chunks up by language it gets even better when working with filters because you can skip even more blocks!
 
 Get it working, get it right, make it fast. In that order. Lets start by just getting it working for the most basic version and see how it looks.
 
@@ -345,7 +375,80 @@ Success! Hash 6ff1f8ad7c933c3942d75e43382bc00a59f208a5 I am now able to index an
 
 Even better Hash b0a30670c2d20e0ed19c4d444f8b4746bd43b8c3 has it working with a higher filter! This seems to cut down on a processing time for the rare terms, meaning we can skip huge chunks of the index without too much cost. It also means we can just load those chunks in from disk when needed keeping the index mostly on disk, and allowing the OS disk cache to look after it for us.
 
-It seems to work reasonably well with the higher level filter. However results vary. I think it might need to be split by language as I thought it should have been from the beginning.
+Some examples of the higher hash in process,
+
+```
+$ customindex
+indexing...
+index time (ms): 90442
+
+search 70364 documents: *(hp)
+
+drivers/pci/hotplug/acpiphp.h
+
+drivers/tty/serial/pmac_zilog.c
+
+drivers/tty/vt/vt.c
+
+tools/virtio/linux/dma-mapping.h
+17: 	*(hp) = (unsigned long)__dma_alloc_coherent_p; \
+
+4 results in 0 (ms) with 3 false positives shard skipped 63 shards read 6
+
+search 70364 documents:
+```
+
+The interesting part is the `skipped 63 shards read 6` where of the 69 shards it only processed 6 of them.
+
+In short it skipped ~80% of the index! For common terms of course it skips nothing, but this is to be expected as some terms are likely to be so common they occur in every other document. For rare terms however this is a massive win. Keep in mind this is without any grouping of languages either so if we are prepared to complicate the indexing process. Worth it? Maybe. One thing to keep in mind is that when indexing they will be grouped by language naturally because most projects have only a few languages. So perhaps an alturnative is to split the shards where they are constantly being processed.
+
+The best case (for performance not being useful) is where you don't hit any of the index,
+
+```
+search 70364 documents: boyter
+
+0 results in 0 (ms) with 0 false positives shard skipped 69 shards read 0
+```
+
+and the worst case where you hit everything for a super common term such as "test",
+
+```
+16133 results in 2 (ms) with 7322 false positives shard skipped 0 shards read 69
+```
+
+Also of note it takes about 90 seconds to index everything there (single threaded), which is the following hash ed8780e3f2ecc82645342d070c6b4e530532e680 checkout of the linux kernal. For fun I tried running the same search using ripgrep and got a time after a few runs. Note not a fair comparison, it needs to start etc... but for a rough idea...
+
+```
+$ time rg "\*\(hp\)"
+tools/virtio/linux/dma-mapping.h
+18:	*(hp) = (unsigned long)__dma_alloc_coherent_p; \
+rg "\*\(hp\)"  1.07s user 2.77s system 968% cpu 0.397 total
+```
+
+possibly unfair so lets compare it to a similar tool I wrote (and need to finish one of these days)
+
+```
+$ time cs \*\(hp\)
+tools/virtio/linux/dma-mapping.h Lines 11-24 (0.021)
+E = 1,
+	DMA_FROM_DEVICE = 2,
+	DMA_NONE = 3,
+};
+
+#define dma_alloc_coherent(d, s, hp, f) ({ \
+	void *__dma_alloc_coherent_p = kmalloc((s), (f)); \
+	*(hp) = (unsigned long)__dma_alloc_coherent_p; \
+	__dma_alloc_coherent_p; \
+})
+
+#define dma_free_coherent(d, s, p, h) kfree(p)
+
+#define dma_map_page(d, p,
+
+cs \*\(hp\)  5.75s user 4.59s system 574% cpu 1.801 total
+```
+
+So the index is in the region of 400-2000 times faster. Which you would expect with it being an index. What is interesting though is that the index is also single threaded, and with no performance tweaks yet, so there is a lot of opportunity to improve both the indexing time and the searching without too much work.
 
 
 # Facets
