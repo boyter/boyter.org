@@ -217,11 +217,13 @@ So back of napkin, 192 bytes per filter times 200 million then converted into gi
 
 Ok thats still not going to fit totally into my RAM budget unless I scale out and half the index per machine with what I am using now. However the searchcode machines have been running for a while, I could look at getting some new ones and get more CPU/RAM to boot! Or we could increase the size of the filter and drive down the error rate. If we increase the bit size to say ~7000 we can get a 1 in 1000 false positive.
 
+Also in reality putting everything into memory isn't the universal panacea to improving performance that many think it is. CPU's are fast, very fast! But getting data to them is comparatively slow. The "feed the cores" problem is why memory bandwidth is important for certain workloads. Stuffing your index into RAM might be one of those problems if for instance you needed to inspect most of the index, which bit signatures if done in a naieve way needs. I think the CPU's in searchcode have something like 20 GB/s memory bandwidth, so even if I was able to get the whole index into the 30 GB I want to use it would still take over a second to scan. Thankfully there are ways we can cut down the memory access which we will discuss later. Incidentally getting new CPU's and RAM would speed this up, but even if it was double or triple its still a limiting factor. 
+
 Alternatively we could store ngrams in the index. This triples the number of terms in the bloom filter, meaning we need about ~13000 bits in the filter for a 1% error rate. This is going to really blow up the size of our index though.
 
 Anyway in terms of space we have a reasonable winner. But how feasible is it to do an & operation on 200 million slices in memory? I am about to assume that we don't implement any of the memory lookup savings that bitfunnel does, but it gives a nice idea of the sort of performance we can expect. Besides at this point after reviewing how bitfunnel worked I just itching to write a version of it. After all there is only so many papers you can read about something before wanting to do it. 
 
-Slight tangent.
+Time for a slight tangent.
 
 While I have understood the purpose of a bloom filter (and some of its uses) I have never actually implemented one myself. Turns out it was easier than I thought. Assuming you have some hash function that works on your string in JavaScript the following is all you need.
 
@@ -248,8 +250,7 @@ if (bloom["not-in".hashCode() % bloom.length] == 1) {
 }
 {{</highlight>}}
 
-This is useful because at some point I am going to have to implement this myself. Why? Well for the search index to work we need to be able to logical AND against the bits. While we can simulate a lot of this its not ideal.
-
+This is useful because at some point I am going to have to implement this myself. Why? Well for the search index to work we need to be able to logical AND against the bits. I also need to be able do do it quickly over arrays of bits so knowing how to implement one is useful because I can do it based on what is needed from a performance perspective.
 
 Right with that tangent over. Lets write a simulation. I chose to make the filter be only 64 bits because thats easy to represent with a single 64 bit int. Probably not very useful for most things but easy to code.
 
