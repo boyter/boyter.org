@@ -265,7 +265,7 @@ for i:=0;i<200_000_000;i++ {
 query := rand.Uint64()
 
 // now we "search" and start timing from here
-for i:=0;i<len(index);i++ {
+for i:=0; i<len(index); i++ {
     // perform the AND operation
     _ = index[i] & query
 }
@@ -364,7 +364,7 @@ Now the above confused me for a while. In your normal view the row is constraine
 
 The above sounds like a bloody good idea. We also have an idea about how optimal this can be based on the talk from [Dan Luu](https://www.youtube.com/watch?v=80LKF2qph6I). Where the above with the other tweaks gives about ~3900 QPS from a single server with 10 million documents. He mentions being close to that as well on their production system. 3900 QPS means about 0.2 milliseconds to process a query. Keep in mind that bitfunnel also uses higher rank rows to improve performance.
 
-Considering I am storing 20x the documents, am working in a far slower language compared to C++ id be happy if I can get down to 10 ms for each query, which seems doable I guess? I suspect that most of it comes down to memory bandwidth. The CPU's I use for searchcode have about 17 GB per second bandwidth. So avoiding scanning all the memory is the main thing you have to worry about.
+Considering I am storing 20x the documents, am working in a far slower language compared to C++ id be happy if I can get down to 10 ms for each query, which seems doable I guess? I suspect that most of it comes down to memory bandwidth. The CPU's I use for searchcode have about 20 GB/s bandwidth. So avoiding scanning all the memory is the main thing you have to worry about.
 
 The other thing thats really useful to note is that the number of hash functions per term added varies. So you hash rare terms more than you hash common terms. This helps drive out the noise you get from the bloom filter. You can find details about this here https://www.clsp.jhu.edu/events/mike-hopcroft-microsoft/ and the video within.
 
@@ -376,7 +376,7 @@ Success! Hash 6ff1f8ad7c933c3942d75e43382bc00a59f208a5 I am now able to index an
 
 Even better Hash b0a30670c2d20e0ed19c4d444f8b4746bd43b8c3 has it working with a higher filter! This seems to cut down on a processing time for the rare terms, meaning we can skip huge chunks of the index without too much cost. It also means we can just load those chunks in from disk when needed keeping the index mostly on disk, and allowing the OS disk cache to look after it for us.
 
-Some examples of the higher hash in process,
+Some examples of the "higher hash" in process,
 
 ```
 $ customindex
@@ -399,7 +399,7 @@ tools/virtio/linux/dma-mapping.h
 search 70364 documents:
 ```
 
-The interesting part is the `skipped 63 shards read 6` where of the 69 shards it only processed 6 of them.
+The interesting part is the `skipped 63 shards read 6` where of the 69 shards that are in the index it only read 6 of them to run this query.
 
 In short it skipped ~80% of the index! For common terms of course it skips nothing, but this is to be expected as some terms are likely to be so common they occur in every other document. For rare terms however this is a massive win. Keep in mind this is without any grouping of languages either so if we are prepared to complicate the indexing process. Worth it? Maybe. One thing to keep in mind is that when indexing they will be grouped by language naturally because most projects have only a few languages. So perhaps an alturnative is to split the shards where they are constantly being processed.
 
