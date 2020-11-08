@@ -417,7 +417,7 @@ and the worst case where you hit everything for a super common term such as "tes
 16133 results in 2 (ms) with 7322 false positives shard skipped 0 shards read 69
 ```
 
-Also of note it takes about 90 seconds to index everything there (single threaded), which is the following hash ed8780e3f2ecc82645342d070c6b4e530532e680 checkout of the linux kernal. For fun I tried running the same search using ripgrep and got a time after a few runs. Note not a fair comparison, it needs to start etc... but for a rough idea...
+Also of note it takes about 90 seconds to index everything there (single threaded), which is the following hash ed8780e3f2ecc82645342d070c6b4e530532e680 checkout of the linux kernal. I tried it on some more code, over 300,000 files For fun I tried running the same search using ripgrep and got a time after a few runs. Note not a fair comparison, it needs to start etc... but for a rough idea...
 
 ```
 $ time rg "\*\(hp\)"
@@ -449,8 +449,51 @@ E = 1,
 cs \*\(hp\)  5.75s user 4.59s system 574% cpu 1.801 total
 ```
 
-So the index is in the region of 400-2000 times faster. Which you would expect with it being an index. What is interesting though is that the index is also single threaded, and with no performance tweaks yet, so there is a lot of opportunity to improve both the indexing time and the searching without too much work.
+So the index is in the region of 400-2000 times faster. Which you would expect with it being an index. What is interesting though is that the index is also single threaded, and with no performance tweaks yet, so there is a lot of opportunity to improve both the indexing time and the searching without too much work. It also means we have an indexing speed of about 1,000 records a second, per core.
 
+So then I started work on persisting the index to disk. My first thought was to use SQLite for this seeing as it can be open then fopen, but it was dragging in a huge dependancy when I didn't really need much. So I quickly replaced it with Go's Gob for the encoder and saving to disk. I then tried it out 1cfe1cc09e309e156cfb4bbb91bd0988dffea52c and... all the performance that was there was gone. Searches that used to take 1 ms were taking 500 ms or worse.
+
+My first thought was that encoding was the issue. Turns out it was.
+
+![gob slow](/static/how-i-built-index-searchcode/gob_slow.png)
+
+I had actually added the following comment above the code
+
+```
+TODO investigate trying faster encoders https://github.com/alecthomas/go_serialization_benchmarks
+```
+
+Of the linked Gotiny seemed to have the fastest decoder... but what about we go with flatbuffers? https://rwinslow.com/posts/use-flatbuffers-in-golang/ Except that fails with arrays in Go straight away. How about https://github.com/pascaldekloe/colfer? Well that had issues with slices of int64.
+
+Fine... ill do it myself. How hard can it possibly be?
+
+Actually doing it myself makes a lot of sense. Because I can lay out the file to match the bloom filter and then only seek to the portions of the file I actually care about and then read just those bytes. This should be an easy performance win for two reasons, the first being I don't need to decode the entire file and secondly I don't need to read the whole file. In effect we are replicating what the memory does, just with some disk seeks, which shouldn't be too bad on a SSD. Plus I can lay out the file to make it as efficent as I can. Presumably that involves working with the SSD's block sizes so 512B or 4KB in order to make it do as little work as possible.
+
+So the plan is to lay out a huge block of bytes, stuff the things needed into it and then write it out in one huge chunk. Nicely in Go `binary.BigEndian.PutUint64` or `binary.LittleEndian.Uint64` are stupidly fast to run. In the order of 0.257 ns per operation on this machine so there will almost no overhead from the encoding. Incidently for persisting to disk I don't belive there is any difference in big/little endian so either should be fine.
+
+So it was not too hard to implement. Mostly just dealing with byte offsets being the most painful part. Once done however, it was time to try it out. The results? Rather promising. As expected searches were not as fast as pyre memory however they were much faster than before. In order of 12 ms on the same test which was previously taking 500 ms. I actually implemented this using memory maps as well and tried to ensure that the files on disk fit into 512 KB blocks that should be friendly to the SSD.
+
+```
+-rw-r--r--  1 bb100123  wheel   489K  5 Nov 17:10 s_168.ind
+```
+
+Of course this was because it was simple. In reality you don't want to open hundreds of files like this becuase you spend forever opening and closing the files which eats into your time budget. To verify this I hooked everything up to a real world test. I deployed a version onto searchcode itself and tried it out on a subset of the data.
+
+So for 16 million documents the index is about 8 GB on disk, which is pretty good. However is it fast? Given a very sparse term I ran it and posted a very favrourable search to it which should be very sparse across the index. Which returned not a bad time.
+
+```
+search 16437336 documents: *(hp)
+690 results in 27 (ms) with shard skipped 16588 shards read 535
+```
+
+However for a more common term, it was much much much slower. So much slower as to not be useful.
+
+```
+search 16437336 documents: test
+4391832 results in 9770 (ms) with shard skipped 109 shards read 17014
+```
+
+Sadly its not as fast for more common terms, say test which returns in 9000 ms. Profiles suggest thats mostly down to opening and closing files, which makes sense because I stored the index in a few thousand 484 KB files. Next plan of attack is merge those into a few really large files and store those together. Then keep the file handles open to avoid the open/close issue. At that point its just down to seeks.
 
 # Facets
 
