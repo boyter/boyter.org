@@ -1,6 +1,6 @@
 ---
 title: How I built my own search index for searchcode.com
-date: 2020-10-10
+date: 2050-10-10
 ---
 
 So admission. I have felt like a fraud for a while. I get a lot of questions about indexing code due to searchcode.com and generally my answer has always been I use [sphinx search](http://sphinxsearch.com/). Recently that has changed, as I moved over to its forked version [manticore search](https://manticoresearch.com/). Manticore is an excellent successor to sphinx and I really do recommend it. I also like elasticsearch as well for enterprise search solutions since it does things out of the box that sphinx/manticore are still catching up on.

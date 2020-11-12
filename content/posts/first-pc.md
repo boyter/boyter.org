@@ -1,0 +1,83 @@
+---
+title: My First PC
+date: 2020-11-12
+---
+
+At my current workplace we have been doing themed Friday stand-ups. The most recent was about your first PC love, or whatever technology you look back on fondly. What follows is my one. 
+
+My first PC was a I think Commodore PC40-III.
+
+This is pretty close to what it looked like, although mine had to 5 1/4 floppy drives, the branded screen and did NOT run Windows. Headline specs? 286 CPU, which I think was clocked at 12 MHz, 1 MB of RAM and in my case 2, 20 MB hard disks. I think mine were set as C and D in DOS from memory.
+
+![first pc](/static/first-pc/first_pc.png)
+
+Of course while the PC was pretty cool it was all about the software. Ours actually booted into some software long forgotten that I have been unable to find. It was a simple ASCII interface allowing you to configure applications, where you pressed spacebar to move around and then enter to run whatever it was. I wish I knew what it was, and maybe one day I will find out. I tended to prefer going into XTreeGold or straight to DOS however as I liked learning how to move around the command line.
+
+![xtree](/static/first-pc/xtreegold.png)
+
+This is a fancier XTree than I had because I can clearly see Doom2 and Windows on there, and my machine was not able to play Doom2 being a 16 bit machine. What games I did have however ignited my passion for games and computing in general.
+
+Interestingly we also had a mouse on our PC. This allowed at first to use of a paint program called Dr Halo, but it also allowed games which supported it. The below is the actual mouse I had. I probably agree with that lifetime warranty by the way. That mouse was solid, and worked till the day I no longer had a port to plug it into.
+
+![xtree](/static/first-pc/mouse.png)
+![xtree](/static/first-pc/drhalo.png)
+
+One game that did support that mouse, and also got me interested in history, especially that of the Greeks and Romans. Centurion Defender of Rome.
+
+![xtree](/static/first-pc/centurion.png)
+![xtree](/static/first-pc/centurion2.png)
+
+I don't know how long I spent playing this game, but it was clearly a long time. I do remember being able to use diplomatic victory one twice. Once against Cleopatra, where you had to approach by ship and have a high enough rank, and the other in Mesopotamia I think. It took me a long time however to learn how to move legions off the ship, and for a very long time Britan remained Roman free.
+
+![xtree](/static/first-pc/wordstar.png)
+![xtree](/static/first-pc/wordstar2.png)
+
+
+Text editing was something else. Wordstar. Which apparently GRR still uses to write the Game of Thrones series. I remember a story written in there by my parents about myself and my brother, where we were trapped on an island and managed to eventually escape because of there being an Abrams battle tank lying around. Which brings us nicely to...
+
+![xtree](/static/first-pc/abrams.gif)
+![xtree](/static/first-pc/abrams2.png)
+![xtree](/static/first-pc/abrams3.jpeg)
+![xtree](/static/first-pc/abrams4.jpeg)
+
+Abrams Battle tank. Another game with countless hours spent in it. I also had 15 Strike Eagle and a helicopter simulation, but Abrams was my favorite. Open ended gameplay, lots of enemies and the ability to run over infantry with sagger or spigot missiles was always fun.
+
+![xtree](/static/first-pc/pop.png)
+
+Of course this needs no real introduction, and I tended to play it the the flag `prince megahit` so I could of course give myself lots of health. I was 5 at the time and frankly its a hard game, especially if you are 5. 
+
+Some other random games,
+
+![xtree](/static/first-pc/secret.jpeg)
+
+Secret Agent. Shareware, and looking at it now very primitive, but damn it was fun. I never had Commander Keen for some reason, and such my fond memories of that style of game was this one, and Crystal Caves.
+
+![xtree](/static/first-pc/ironman.jpeg)
+
+You controlled the red car like a remote controlled one and upgraded it between races with the prize money. It took a while, but I ended up skillful enough to end up maxing out everyting and being able to finish first every time.
+
+![xtree](/static/first-pc/spelling.gif)
+
+Spelling fun one. An educational game, but it was actually quite fun and helped me learn to type. I think I learn to spell better due to Space Quest 2 however as that was less forgiving of mistakes.
+
+![xtree](/static/first-pc/simcity.jpeg)
+
+Simcity. I remember first seeing this being played at the school I attended at some after school class. I used to race ahead so I could play it having noted which PC had it. However they moved it around which really disappointed me. It was then that I used Dr Halo and the mouse to build my own paint cities. I would then print them out on the dot matrix printer we had. I think the day I finally got my own copy of simcity was one of the happiest of my life. I also remember when I went to a new school I was hailed as some sort of gaming god because I knew how to get traffic in my city.
+
+![xtree](/static/first-pc/wolf3d.png)
+
+Ahh Wolf3d. No Doom for me, but you know what, I think I enjoyed this just as much.
+
+![xtree](/static/first-pc/jordan.jpeg)
+
+The late 80's early 90's wouldn't be complete without some Michael Jordan worship. I was never any good at the 1 on 1 portion of the game, but I did love the dunk contests it had. Looking back on this it actually looks better than I remember.
+
+![xtree](/static/first-pc/ducktales.jpg)
+
+Duck Tales: The Quest for Gold. This became a contest between my father and I. Who could get the largest pile of treasure at the end of the game? It also prompted me to spend a lot of school time drawing massive piles of treasure in many of my books.
+
+![qbasic](/static/first-pc/qbasic.png)
+
+Basic, or in my case QBasic was probably the starting point for a lot of people who are now programmers or work in IT. It was for me as well. I remember reading the QBasic book that came with the install and trying to fathom out how loops and such worked. I also edited the source of gorilla.bas and others trying to tease out how it all worked. Good times.
+
+I have to thank whoever came up with the idea for that stand-up. Gave my a nice trip down memory lane. I also found this https://ancientelectronics.wordpress.com/2019/08/11/commodore-select-edition-286/ which has a reasonable overview of the internals of the machine.
