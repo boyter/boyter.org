@@ -58,7 +58,7 @@ You controlled the red car like a remote controlled one and upgraded it between 
 
 ![xtree](/static/first-pc/spelling.gif)
 
-Spelling fun one. An educational game, but it was actually quite fun and helped me learn to type. I think I learn to spell better due to Space Quest 2 however as that was less forgiving of mistakes.
+Spelling fun one. An educational game, but it was actually quite fun and helped me learn to type. I think I learnt to type and spell due to Space Quest 2 however as that was less forgiving of mistakes.
 
 ![xtree](/static/first-pc/simcity.jpeg)
 
