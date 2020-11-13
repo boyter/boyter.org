@@ -39,7 +39,7 @@ Text editing was something else. Wordstar. Which apparently GRR still uses to wr
 ![abrams](/static/first-pc/abrams3.jpeg)
 ![abrams](/static/first-pc/abrams4.jpeg)
 
-Abrams Battle tank. Another game with countless hours spent in it. I also had F-15 Strike Eagle and a helicopter simulation, but Abrams was my favorite. Open ended gameplay, lots of enemies and the ability to run over infantry with sagger or spigot missiles was always fun.
+Abrams Battle tank. Another game with countless hours spent in it. I also had F-15 Strike Eagle and a helicopter simulation, but Abrams was my favorite. Open ended gameplay, lots of enemies and the ability to run over infantry who were armed with sagger or spigot missiles was always fun.
 
 ![pop](/static/first-pc/pop.png)
 
@@ -57,7 +57,7 @@ Ironman Offroad Racing. You controlled the red car like a remote controlled one 
 
 ![spelling](/static/first-pc/spelling.gif)
 
-Spelling fun one. An educational game, but it was actually quite fun and helped me learn to type. I think I learnt to type and spell due to Space Quest 2 however as that was less forgiving of mistakes.
+Spelling fun one. An educational game, but it was actually quite fun and helped me learn to type. I probably learnt to type and spell mostly due to Space Quest 2 however as that was less forgiving of mistakes.
 
 ![simcity](/static/first-pc/simcity.jpeg)
 
