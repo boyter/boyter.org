@@ -61,7 +61,7 @@ Spelling fun one. An educational game, but it was actually quite fun and helped 
 
 ![simcity](/static/first-pc/simcity.jpeg)
 
-Simcity. I remember first seeing this being played at the school I attended at some after school class. I used to race ahead so I could play it having noted which PC had it. However they moved it around which really disappointed me. It was then that I used Dr Halo and the mouse to build my own paint cities. I would then print them out on the dot matrix printer we had. I think the day I finally got my own copy of simcity was one of the happiest of my life. I also remember when I went to a new school I was hailed as some sort of gaming god because I knew how to get traffic in my city.
+Simcity. I remember first seeing this being played at the school I attended at some after school class. I used to race ahead so I could play it having noted which PC had it. However they moved it around which really disappointed me. The alturnative being some Garfield game where you could paint him and Odie on the screen. It was then that I used Dr Halo and the mouse to build my own paint cities. I would then print them out on the dot matrix printer we had. I think the day I finally got my own copy of simcity was one of the happiest of my life. I also remember when I went to a new school I was hailed as some sort of gaming god because I knew how to get traffic in my city.
 
 ![wolf3d](/static/first-pc/wolf3d.png)
 
@@ -78,5 +78,7 @@ Duck Tales: The Quest for Gold. This became a contest between my father and I. W
 ![qbasic](/static/first-pc/qbasic.png)
 
 Basic, or in my case QBasic was probably the starting point for a lot of people who are now programmers or work in IT. It was for me as well. I remember reading the QBasic book that came with the install and trying to fathom out how loops and such worked. I also edited the source of gorilla.bas and others trying to tease out how it all worked. Good times.
+
+There was also some Loony Tunes game where you could drop the characters into a video editor like thing and have them act out your own skits. I was never good ad it, but I would love to find it an have another go one day.
 
 I have to thank whoever came up with the idea for that stand-up. Gave my a nice trip down memory lane. I also found this https://ancientelectronics.wordpress.com/2019/08/11/commodore-select-edition-286/ which has a reasonable overview of the internals of the machine. A;so I realised when doing this that I am nostalgic for a time that most people I work with were not even born into.
