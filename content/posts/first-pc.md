@@ -5,7 +5,7 @@ date: 2020-11-12
 
 At my current workplace we have been doing themed Friday stand-ups. The most recent was about your first PC love, or whatever technology you look back on fondly. What follows is my one. 
 
-My first PC was I think a Commodore PC40-III. I'm a little fuzzy on the details and its hard to find it based on pictures.
+My first PC was I think a Commodore PC40-III. I'm a little fuzzy on the details and its hard to find it based on pictures. Was not my first taste of technology, but the one I look on back most fondly.
 
 This is pretty close to what it looked like, although mine had two 5 1/4 floppy drives (such luxury!), the branded screen and did NOT run Windows. Headline specs? 286 CPU, which I think was clocked at 12 MHz, 1 MB of RAM and in my case two 20 MB hard disks. I think mine were set as C and D in DOS from memory.
 
@@ -79,6 +79,6 @@ Duck Tales: The Quest for Gold. This became a contest between my father and I. W
 
 Basic, or in my case QBasic was probably the starting point for a lot of people who are now programmers or work in IT. It was for me as well. I remember reading the QBasic book that came with the install and trying to fathom out how loops and such worked. I also edited the source of gorilla.bas and others trying to tease out how it all worked. Good times.
 
-There was also some Loony Tunes game where you could drop the characters into a video editor like thing and have them act out your own skits. I was never good ad it, but I would love to find it an have another go one day.
+There was also some Loony Tunes game where you could drop the characters into a video editor like thing and have them act out your own skits. I was never good at it, but I would love to find it and have another go one day.
 
 I have to thank whoever came up with the idea for that stand-up. Gave my a nice trip down memory lane. I also found this https://ancientelectronics.wordpress.com/2019/08/11/commodore-select-edition-286/ which has a reasonable overview of the internals of the machine. A;so I realised when doing this that I am nostalgic for a time that most people I work with were not even born into.
