@@ -31,6 +31,7 @@ pre {
 }
 code { background: #f9f9f9; }
 pre code { background: none; }
+div.highlight > pre { border-radius: 10px; }
 
 /* misc elements */
 img, iframe, video { max-width: 100%; }
