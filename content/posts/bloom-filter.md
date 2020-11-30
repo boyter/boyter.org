@@ -83,11 +83,39 @@ The idea of sharing reasonable proof of ownership is an interesting use case for
 
 You can also use bloom filters to make a search engine. I first read about this idea on Hacker News https://www.stavros.io/posts/bloom-filter-search-engine/ with the idea being you build a bloom filter per document you want to index and then loop over each filter to check if terms are in each. This works at a small scale of a few thousand 
 
+This is a fairly primitive version of a bloom filter search engine. You can make this far smarter. See the nice thing about bloom filters is that you can query them using bitwise operations. In effect if you store each document in a filter of the same size, you end up with a collection of filters in a block that looks like the below for 3 documents with 8 bit bloom filters for each one.
+
+```
+document1 10111010
+document2 01100100
+document3 00100111
+```
+
+This is great because say you have search for a term with the hash `10010000` (note as long as the document) you can then step through each document applying bitwise OR operations to see if the result is zero and if not it means we might have a matching document. The catch being you need to step through every part of memory. There is a way to reduce this however. If you rotate the bit vectors you can then just check those which match your search term hash bit positions, so documents move from being rows to columns like so.
+
+```
+term1 100
+term2 010
+term3 111
+term4 100
+term5 100
+term6 011
+term7 101
+term8 001
+```
+
+Then given our search `10010000` you would look at the bits for term1 and term4 then OR them together and you get `1` indicating that document 1 is a possible match for the search. It also reduced the number of bits we looked at for this query from 24 to 9. This is more impressive when you have larger filters (which you would expect). 
+
+Whats really cool about this search technique is if you store the index in memory because bitwise operations are so cheap on the CPU as to be free you end up being limited by memory bandwidth, which means you can actually work out how long each search will take based on the number of documents in your index per machine.
+
+However part of the bing.com managed to improve this algorithm even more. It's well out of the scope of this document, but it involves using what they call higher ranked rows where they logically OR half of the filter against itself to reduce memory access. Along with the ability to shard filter lengths to differnt machines (possible because of scale) they are able to reduce memory access to a level where they can run thousands of searches on each machine per second. Its a very cool collection of techniques.
+
+
 ## Others
 
 There are modified versions of bloom filters, as well as other similar structures. 
 
-Variants include compressed bloom filters, and counting bloom filters.
+Variants include compressed bloom filters, expiring and counting bloom filters. They use less memory, expire old keys and record how many times keys were added (allowing removal if you do it right).
 
 The cuckoo filter for example works in a similar way to a bloom filter, except it has a inbuilt limit after which it will no longer add items, can delete items and has some different memory characteristics.
 
