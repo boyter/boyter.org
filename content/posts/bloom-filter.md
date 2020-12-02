@@ -110,6 +110,12 @@ Whats really cool about this search technique is if you store the index in memor
 
 However part of the bing.com managed to improve this algorithm even more. It's well out of the scope of this document, but it involves using what they call higher ranked rows where they logically OR half of the filter against itself to reduce memory access. Along with the ability to shard filter lengths to differnt machines (possible because of scale) they are able to reduce memory access to a level where they can run thousands of searches on each machine per second. Its a very cool collection of techniques.
 
+You can also use bloom filters as a spell checker. Add a dictionary of words to the filter and then run everything through it in order to determine if the word exists or not.
+
+You can also use bloom filters to mitigate cache busting attacks on your website. For any website its fairly common to use various cache levels in order to prevent multiple requests hitting your backend and overloading it. However most websites also allow parameters either in the URL itself or via GET parameters. Consider a ecommerce site where you have many product id's. While you can cache results for each product, what happens if someone malicious decides to request items for which there is no product? You can use bloom filters to hold all of the products, and only hit the backend for a full lookup if the filter says the item actually appears.
+
+Akami also uses bloom filters to avoid one hit wonder items filling the cache. However there is little benefit in populating your cache for items that are only requested once. Akami realised this and used a bloom filter to determine if the item in question had been requested before and only after being requsted the second time would the item be cached.
+
 
 ## Others
 
