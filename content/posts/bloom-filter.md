@@ -71,7 +71,13 @@ Note that the false positive rate is actually a feature, and there are situation
 
 But bloom filters can be so much more than a space efficient hashmap! Lets go though some common and less common use cases for them.
 
-The first of course is using like you might use a hashmap as lookup cache. Consider running a video/music store where you pull detailed information about the movie or song from a backend database or cache. With a bloom filter fronting it you could use a smallish amount of memory to filter requests to the backend by only looking where you know a result exists. Because each key you need to store can fit into ~9 bits of data thats an impressive space saving.
+The first of course is using like you might use a hashmap as lookup cache. Consider running a video/music store where you pull detailed information about the movie or song from a backend database or cache. With a bloom filter fronting it you could use a smallish amount of memory to filter requests to the backend by only looking where you know a result exists. Because each key you need to store can fit into ~9 bits of data thats an impressive space saving. Thus saving some backend requests.
+
+You can also use bloom filters to mitigate cache busting attacks on your website. For any website its fairly common to use various cache levels in order to prevent multiple requests hitting your backend and overloading it. However most websites also allow parameters either in the URL itself or via GET parameters. Consider a ecommerce site where you have many product id's. While you can cache results for each product, what happens if someone malicious decides to request items for which there is no product? You can use bloom filters to hold all of the products, and only hit the backend for a full lookup if the filter says the item actually appears.
+
+Akami also uses bloom filters to avoid one hit wonder items filling the cache. However there is little benefit in populating your cache for items that are only requested once. Akami realised this and used a bloom filter to determine if the item in question had been requested before and only after being requsted the second time would the item be cached.
+
+Spelling checkers were also a use case for bloom filters back in the day when you really had to worry about your memory usage. At 9 or 10 bits per term you could pack a lot of words into limited memory, with fast lookups to boot.
 
 Consider the properties of a bloom filter. Because you hash keys multiple times though a non reversible function, its possible to then share your bloom filter at the end as a way to share information that you hold without sharing the information itself. Its not even possible to brute force to get the information back because you can configure your filter to have a higher error rate and swamp the attacker with false positives.
 
@@ -82,12 +88,6 @@ You can extend this idea futher as well. Say I want to determine the overlap bet
 The idea of sharing reasonable proof of ownership is an interesting use case for bloom filters. Say for example you have obtained a list of hashed passwords and want to prove you have them without transmitting the hashes themselves. You could encode them all into a bloom filter configured with 
 
 You can also use bloom filters as a spell checker. Add a dictionary of words to the filter and then run everything through it in order to determine if the word exists or not.
-
-You can also use bloom filters to mitigate cache busting attacks on your website. For any website its fairly common to use various cache levels in order to prevent multiple requests hitting your backend and overloading it. However most websites also allow parameters either in the URL itself or via GET parameters. Consider a ecommerce site where you have many product id's. While you can cache results for each product, what happens if someone malicious decides to request items for which there is no product? You can use bloom filters to hold all of the products, and only hit the backend for a full lookup if the filter says the item actually appears.
-
-Akami also uses bloom filters to avoid one hit wonder items filling the cache. However there is little benefit in populating your cache for items that are only requested once. Akami realised this and used a bloom filter to determine if the item in question had been requested before and only after being requsted the second time would the item be cached.
-
-Spelling checkers were also a use case for bloom filters back in the day when you really had to worry about your memory usage. At 9 or 10 bits per term you could pack a lot of words into limited memory, with fast lookups to boot.
 
 You can also use bloom filters to make a search engine. I first read about this idea on Hacker News https://www.stavros.io/posts/bloom-filter-search-engine/ with the idea being you build a bloom filter per document you want to index and then loop over each filter to check if terms are in each. This works at a small scale of a few thousand documents.
 
