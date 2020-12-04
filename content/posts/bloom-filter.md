@@ -116,6 +116,7 @@ You can also use bloom filters to mitigate cache busting attacks on your website
 
 Akami also uses bloom filters to avoid one hit wonder items filling the cache. However there is little benefit in populating your cache for items that are only requested once. Akami realised this and used a bloom filter to determine if the item in question had been requested before and only after being requsted the second time would the item be cached.
 
+Spelling checkers were also a use case for bloom filters back in the day when you really had to worry about your memory usage. At 9 or 10 bits per term you could pack a lot of words into limited memory, with fast lookups to boot.
 
 ## Others
 
