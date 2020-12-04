@@ -79,11 +79,21 @@ Consider distributed social networks where I want to have two people determine i
 
 You can extend this idea futher as well. Say I want to determine the overlap between two user's social circles. Build two filters of the same size containing each users friends. Then compare the bits of the two filters. The more overlap the more shared bits. This also applies to finding distance between words or sentances, and it works regardless of how long the texts are. You split the document into ngrams (say trigrams), add each into your filter and compare them the same way. The more overlapping bits the closer they are.
 
-The idea of sharing reasonable proof of ownership is an interesting use case for bloom filters. I could for instance use it in order to 
+The idea of sharing reasonable proof of ownership is an interesting use case for bloom filters. Say for example you have obtained a list of hashed passwords and want to prove you have them without transmitting the hashes themselves. You could encode them all into a bloom filter configured with 
 
-You can also use bloom filters to make a search engine. I first read about this idea on Hacker News https://www.stavros.io/posts/bloom-filter-search-engine/ with the idea being you build a bloom filter per document you want to index and then loop over each filter to check if terms are in each. This works at a small scale of a few thousand 
+You can also use bloom filters as a spell checker. Add a dictionary of words to the filter and then run everything through it in order to determine if the word exists or not.
 
-This is a fairly primitive version of a bloom filter search engine. You can make this far smarter. See the nice thing about bloom filters is that you can query them using bitwise operations. In effect if you store each document in a filter of the same size, you end up with a collection of filters in a block that looks like the below for 3 documents with 8 bit bloom filters for each one.
+You can also use bloom filters to mitigate cache busting attacks on your website. For any website its fairly common to use various cache levels in order to prevent multiple requests hitting your backend and overloading it. However most websites also allow parameters either in the URL itself or via GET parameters. Consider a ecommerce site where you have many product id's. While you can cache results for each product, what happens if someone malicious decides to request items for which there is no product? You can use bloom filters to hold all of the products, and only hit the backend for a full lookup if the filter says the item actually appears.
+
+Akami also uses bloom filters to avoid one hit wonder items filling the cache. However there is little benefit in populating your cache for items that are only requested once. Akami realised this and used a bloom filter to determine if the item in question had been requested before and only after being requsted the second time would the item be cached.
+
+Spelling checkers were also a use case for bloom filters back in the day when you really had to worry about your memory usage. At 9 or 10 bits per term you could pack a lot of words into limited memory, with fast lookups to boot.
+
+You can also use bloom filters to make a search engine. I first read about this idea on Hacker News https://www.stavros.io/posts/bloom-filter-search-engine/ with the idea being you build a bloom filter per document you want to index and then loop over each filter to check if terms are in each. This works at a small scale of a few thousand documents.
+
+It is in effect a fairly primitive version of a bloom filter search engine. 
+
+You can make this far smarter however. See the nice thing about bloom filters is that you can query them using bitwise operations. In effect if you store each document in a filter of the same size, you end up with a collection of filters in a block that looks like the below for 3 documents with 8 bit bloom filters for each one.
 
 ```
 document1 10111010
@@ -110,13 +120,6 @@ Whats really cool about this search technique is if you store the index in memor
 
 However part of the bing.com managed to improve this algorithm even more. It's well out of the scope of this document, but it involves using what they call higher ranked rows where they logically OR half of the filter against itself to reduce memory access. Along with the ability to shard filter lengths to differnt machines (possible because of scale) they are able to reduce memory access to a level where they can run thousands of searches on each machine per second. Its a very cool collection of techniques.
 
-You can also use bloom filters as a spell checker. Add a dictionary of words to the filter and then run everything through it in order to determine if the word exists or not.
-
-You can also use bloom filters to mitigate cache busting attacks on your website. For any website its fairly common to use various cache levels in order to prevent multiple requests hitting your backend and overloading it. However most websites also allow parameters either in the URL itself or via GET parameters. Consider a ecommerce site where you have many product id's. While you can cache results for each product, what happens if someone malicious decides to request items for which there is no product? You can use bloom filters to hold all of the products, and only hit the backend for a full lookup if the filter says the item actually appears.
-
-Akami also uses bloom filters to avoid one hit wonder items filling the cache. However there is little benefit in populating your cache for items that are only requested once. Akami realised this and used a bloom filter to determine if the item in question had been requested before and only after being requsted the second time would the item be cached.
-
-Spelling checkers were also a use case for bloom filters back in the day when you really had to worry about your memory usage. At 9 or 10 bits per term you could pack a lot of words into limited memory, with fast lookups to boot.
 
 ## Others
 
