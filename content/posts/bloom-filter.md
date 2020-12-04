@@ -77,7 +77,7 @@ Consider the properties of a bloom filter. Because you hash keys multiple times 
 
 Consider distributed social networks where I want to have two people determine if there is any overlap in their contact lists, without having to share the lists. You could build a filter for each users contacts and then check against that in order to determine if we have an overlap, without the possibility of you being able to reconstruct either list were you to hold even both filters. Assuming I am worried about someone getting a copy of these filters I can also drive up the false positive rate to thwart the attack. If you are more 
 
-You can extend this idea futher as well. Say I want to determine the overlap between two user's social circles. Build two filters of the same size containing each users friends. Then compare the bits of the two filters. The more overlap the more shared bits.
+You can extend this idea futher as well. Say I want to determine the overlap between two user's social circles. Build two filters of the same size containing each users friends. Then compare the bits of the two filters. The more overlap the more shared bits. This also applies to finding distance between words or sentances, and it works regardless of how long the texts are. You split the document into ngrams (say trigrams), add each into your filter and compare them the same way. The more overlapping bits the closer they are.
 
 The idea of sharing reasonable proof of ownership is an interesting use case for bloom filters. I could for instance use it in order to 
 
