@@ -10,3 +10,5 @@ https://www.igvita.com/2008/04/22/mysql-conf-memcached-internals/
 https://memcached.org/blog/modern-lru/
 
 https://redis.io/topics/lru-cache
+https://www.reddit.com/r/redis/comments/3tcfuz/why_lots_of_memory_management_problems_just/
+https://redis.io/topics/ARM
