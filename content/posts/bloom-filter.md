@@ -1,17 +1,17 @@
 ---
 title: Bloom Filters - Much, much more than a space efficient hashmap!
-date: 2020-11-23
+date: 2020-12-10
 ---
 
-A bloom filter is one of those data structures you are probably already aware of. For those looking for a simple recap, they are a probablistic data structure which can be used to determine if something is in a set or not, giving a slight chance of returning a false positive result but while using less space.
+A bloom filter is one of those data structures you are probably already aware of, or have at least heard about. For those looking for a simple recap, they are a probabilistic data structure which can be used to determine if something is in a set or not, giving a slight chance of returning a false positive result for some checks but while using less space than a full hashmap.
 
-What you may not know is that while you can use them as a space efficent hash/dictionary there are other use cases you might not be aware of. However to do some of those things you need to be able to lay out how the bloom filter works in memory
+What you may not know is that while you can use them as a space efficient hash/dictionary there are other use cases you might not be aware of. However to do some of those things you need to be able to lay out how the bloom filter works in memory
 
-## Implementation
+## Implementation of a bloom filter
 
-However before going though those, a quick moment to build one. Turns out a bloom filter is actually really easy to build if you don't mind doing it inefficently (at least at first). I am going to implment one using JavaScript because anyone reading this can follow along using the browser console. Why? Well I find a simple bit of code 
+However before going though usage though, lets take a quick moment to build one. Turns out a bloom filter is actually really easy to build if you don't mind doing it inefficiently (at least at first). I am going to implement one using JavaScript because anyone reading this can follow along using the browser console. Why? Well I find a simple bit of code 
 
-The first thing you need is a hash function. Ideally for a bloom filter you want to use something like Murmur3 and FNV-1a because you want the hash to be as fast as possible and yet have a good distrubution. See [this excellent stackexchange](https://softwareengineering.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed) question and the first comment for more detail.
+The first thing you need is a hash function. Ideally for a bloom filter you want to use something like Murmur3 and FNV-1a because you want the hash to be as fast as possible and yet have a good distribution. See [this excellent stackexchange](https://softwareengineering.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed) question and the first comment for more detail.
 
 However because JavaScript in the browser does not come with hash, here is a port of the Java string hash which gets us moving without needing to implement anything too difficult. You can copy and paste the below into your console, which will add a hash function to strings.
 
@@ -31,9 +31,9 @@ Object.defineProperty(String.prototype, 'hashCode', {
 });
 {{</highlight>}}
 
-So with that done lest create our filter. At it's heart the filter itself is just an array of bits. You only need to store two states for every entry in the array. Note that in many languages using a boolean is not backed by a bit so using boolean's as your backing array might not be as efficent as you expect. You tend to need to use a bitset implementation or bit packing into an integer for efficency but thats out of the scope of what we need here.
+So with that done lest create our filter. At it's heart the filter itself is just an array of bits. You only need to store two states for every entry in the array. Note that in many languages using a boolean is not backed by a bit so using boolean's as your backing array might not be as efficient as you expect. You tend to need to use a bitset implementation or bit packing into an integer for efficiency but that's out of the scope of what we need here.
 
-Lets create a bloom filter which contains 16 booleans to represent out bits and then hash two words and put them into the filter.
+Lets create a bloom filter which contains 16 boolean's to represent out bits and then hash two words and put them into the filter.
 
 {{<highlight javascript>}}
 // start out our bloom filter out with 16 0's indicating its empty
@@ -57,43 +57,45 @@ As you can see positions 7 and 15 in this filter are now set. In order to check 
 
 {{<highlight javascript>}}
 if (bloom["something".hashCode() % bloom.length] == 1) {
-	// something might be in the filter
+  // something might be in the filter
 }
 {{</highlight>}}
 
 Note the comment that says it "might" be in the filter due to the false positive properties of a bloom filter.
 
-The above is pretty much all you need to get started with bloom filters. For a real implementation swap out for a better hash function, in fact use two of them with salts in order to get more than 2 hashes which you will need to drive down the false positive rates. You also need to increase the size of the filter itself for anything non trival. Use [this calculator](https://hur.st/bloomfilter/) in order to determine how large a filter you need to achieve your desired false positive rate.
+The above is pretty much all you need to get started with bloom filters. For a real implementation swap out for a better hash function, in fact use two of them with salts in order to get more than 2 hashes which you will need to drive down the false positive rates. You also need to increase the size of the filter itself for anything non trivial. Use [this calculator](https://hur.st/bloomfilter/) in order to determine how large a filter you need to achieve your desired false positive rate.
 
-Note that the false positive rate is actually a feature, and there are situations where you might want to drive it up or down to achive your goal.
+Note that the false positive rate is actually a feature, and there are situations where you might want to drive it up or down to achieve your goal.
 
-## Usage
+If you are looking for bit more detail about how to implement one here is a gist https://gist.github.com/boyter/0cffa9ff8e2e7259d455594d744f1164 which has a bit more details and examples.
 
-But bloom filters can be so much more than a space efficient hashmap! Lets go though some common and less common use cases for them.
+Note that bloom filters don't have any inbuilt limit to how many terms you can add. You can add as many terms to them as you want, but at some point it drives the false positive rate close to 100% making the filter effectively useless, so knowledge of how many terms you are going to store in it up front is a requirement of using them effectively.
 
-The first of course is using like you might use a hashmap as lookup cache. Consider running a video/music store where you pull detailed information about the movie or song from a backend database or cache. With a bloom filter fronting it you could use a smallish amount of memory to filter requests to the backend by only looking where you know a result exists. Because each key you need to store can fit into ~9 bits of data thats an impressive space saving. Thus saving some backend requests.
+## Interesting use cases of bloom filter's
 
-You can also use bloom filters to mitigate cache busting attacks on your website. For any website its fairly common to use various cache levels in order to prevent multiple requests hitting your backend and overloading it. However most websites also allow parameters either in the URL itself or via GET parameters. Consider a ecommerce site where you have many product id's. While you can cache results for each product, what happens if someone malicious decides to request items for which there is no product? You can use bloom filters to hold all of the products, and only hit the backend for a full lookup if the filter says the item actually appears.
+Bloom filters can be so much more than a space efficient hashmap! Lets go though some of the more and less common use cases for them.
 
-Akami also uses bloom filters to avoid one hit wonder items filling the cache. However there is little benefit in populating your cache for items that are only requested once. Akami realised this and used a bloom filter to determine if the item in question had been requested before and only after being requsted the second time would the item be cached.
+The first and most obvious is to use it as a lookup cache. This is the same idea as a hashmap but more space efficient. Consider running a video/music e-store where you pull detailed information about the movie or song from a back-end database or cache. With a bloom filter fronting it you could use a smallish amount of memory to filter requests to the back-end by only looking where you are confident that a result exists. Because each key you need to store can fit into ~10 bits of data you can trade a small amount of memory to avoid overloading your backend systems.
 
-Spelling checkers were also a use case for bloom filters back in the day when you really had to worry about your memory usage. At 9 or 10 bits per term you could pack a lot of words into limited memory, with fast lookups to boot.
+You can also use bloom filters to mitigate cache busting attacks on your website. For any website its fairly common to use various cache levels in order to prevent multiple requests hitting your back-end and overloading it. However most websites also allow parameters either in the URL itself or via GET parameters. Consider a e-commerce site where you have many product id's, and by fiddling with the URL someone can iterate though them all. While you can cache results for each product, what happens if someone malicious decides to request items for which there is no product? You have to check your back-end in order to actually check if its there, which at scale can case contention on your system. You can use bloom filters to hold all of the product id's, and only hit the back-end for a full lookup if the filter says the item actually appears.
 
-Consider the properties of a bloom filter. Because you hash keys multiple times though a non reversible function, its possible to then share your bloom filter at the end as a way to share information that you hold without sharing the information itself. Its not even possible to brute force to get the information back because you can configure your filter to have a higher error rate and swamp the attacker with false positives.
+Akami also uses bloom filters to avoid one hit wonder items filling the cache. There is little benefit in populating your cache for items that are only requested once, and the long tail of the internet is very large. Akami realised this and used a bloom filter to determine if the item in question had been requested before and only after being requested the second time would the item be cached. A similar technique can be used by any cache system to avoid populating your cache with rarely requested items.
 
-Consider distributed social networks where I want to have two people determine if there is any overlap in their contact lists, without having to share the lists. You could build a filter for each users contacts and then check against that in order to determine if we have an overlap, without the possibility of you being able to reconstruct either list were you to hold even both filters. Assuming I am worried about someone getting a copy of these filters I can also drive up the false positive rate to thwart the attack. If you are more 
+Spelling checkers were also a use case for bloom filters back in the day when you really had to worry about your memory usage. At ~10 bits per term you could pack a lot of words into limited memory, with fast lookups to determine if a word was a real word or not.
 
-You can extend this idea futher as well. Say I want to determine the overlap between two user's social circles. Build two filters of the same size containing each users friends. Then compare the bits of the two filters. The more overlap the more shared bits. This also applies to finding distance between words or sentances, and it works regardless of how long the texts are. You split the document into ngrams (say trigrams), add each into your filter and compare them the same way. The more overlapping bits the closer they are.
+One thing to consider is the properties of a bloom filter. Because you hash keys multiple times through a non reversible function, it's possible to then share your bloom filter at the end as a way to share information that you hold without sharing the information itself. You can even make it impossible to brute force to get the information back because you can configure your filter to have a higher error rate and swamp the attacker with false positives as they brute force things.
 
-The idea of sharing reasonable proof of ownership is an interesting use case for bloom filters. Say for example you have obtained a list of hashed passwords and want to prove you have them without transmitting the hashes themselves. You could encode them all into a bloom filter configured with 
+Consider a distributed social network where I want to have two people determine if there is any overlap in their contact lists. I want to do so without having to share the lists because of privacy reasons. You could build a filter for each users contacts, and swap them. Then check against the filter in order to determine if we have an overlap, without the possibility of you being able to reconstruct either list even were you to hold even both filters. Assuming I am worried about someone getting a copy of these filters I can also drive up the false positive rate to thwart the potential attack.
 
-You can also use bloom filters as a spell checker. Add a dictionary of words to the filter and then run everything through it in order to determine if the word exists or not.
+You can extend this idea further as well. Say I want to determine the overlap between two user's social circles. Build two filters of the same size containing each users friends. Then compare the bits of the two filters. The more overlap the more shared bits. This also applies to finding distance between words or sentences, and it works regardless of how long the text is as its driven more closely by the words/terms and not how often they appear. You split the document into ngrams (say trigrams), add each into your filter and compare them the same way. The more overlapping bits the closer they are.
 
-You can also use bloom filters to make a search engine. I first read about this idea on Hacker News https://www.stavros.io/posts/bloom-filter-search-engine/ with the idea being you build a bloom filter per document you want to index and then loop over each filter to check if terms are in each. This works at a small scale of a few thousand documents.
+The idea of sharing reasonable proof of ownership is an interesting use case for bloom filters. Say for example you have obtained a list of hashed passwords and want to prove you have them without transmitting the hashes themselves. You could encode them all into a bloom filter configured with a high error rate.
 
-It is in effect a fairly primitive version of a bloom filter search engine. 
+You can also use bloom filters to make a search engine. I first read about this idea on Hacker News https://www.stavros.io/posts/bloom-filter-search-engine/ with the idea being you build a bloom filter per document you want to index and then loop over each filter to check if terms are in each. This works at a small scale of a few thousand documents. 
 
-You can make this far smarter however. See the nice thing about bloom filters is that you can query them using bitwise operations. In effect if you store each document in a filter of the same size, you end up with a collection of filters in a block that looks like the below for 3 documents with 8 bit bloom filters for each one.
+However this is a fairly primitive version of a bloom filter search engine. You can do much better as it turns out.
+
+The nice thing about bloom filters is that you can query them using bitwise operations. In effect if you store each document in a filter of the same size, you end up with a collection of filters in a block that looks like the below for 3 documents with 8 bit bloom filters for each one.
 
 ```
 document1 10111010
@@ -101,7 +103,11 @@ document2 01100100
 document3 00100111
 ```
 
-This is great because say you have search for a term with the hash `10010000` (note as long as the document) you can then step through each document applying bitwise OR operations to see if the result is zero and if not it means we might have a matching document. The catch being you need to step through every part of memory. There is a way to reduce this however. If you rotate the bit vectors you can then just check those which match your search term hash bit positions, so documents move from being rows to columns like so.
+This is great because say you have search for a term with the hash `10010000` (note that the search filter must be as long as the documents you are searching) you can then step through each document applying bitwise OR operations to see if the result is zero and if not it means we might have a matching document. Bitwise operations are very fast on any CPU so the actual check is effectively free from a CPU point of view. The catch being you need to step through every part of memory for your whole corpus. 
+
+There is a way to reduce this however. If you rotate the bit vectors you can then just check those which match your search term hash bit positions, so documents move from being rows to columns like so.
+
+In the below document 1 is now represented by column 1.
 
 ```
 term1 100
@@ -114,21 +120,52 @@ term7 101
 term8 001
 ```
 
-Then given our search `10010000` you would look at the bits for term1 and term4 then OR them together and you get `1` indicating that document 1 is a possible match for the search. It also reduced the number of bits we looked at for this query from 24 to 9. This is more impressive when you have larger filters (which you would expect). 
+Then given our search `10010000` you would look at the bits for term1 and term4 (as bit position 1 and 4 are set). Then OR them together and you get `1` indicating that document 1 is a possible match for the search. It also reduced the number of bits we looked at for this query from 24 to 9. This is more impressive when you have larger filters (which you would expect).
 
-Whats really cool about this search technique is if you store the index in memory because bitwise operations are so cheap on the CPU as to be free you end up being limited by memory bandwidth, which means you can actually work out how long each search will take based on the number of documents in your index per machine.
+It looks like this,
 
-However part of the bing.com managed to improve this algorithm even more. It's well out of the scope of this document, but it involves using what they call higher ranked rows where they logically OR half of the filter against itself to reduce memory access. Along with the ability to shard filter lengths to differnt machines (possible because of scale) they are able to reduce memory access to a level where they can run thousands of searches on each machine per second. Its a very cool collection of techniques.
+```
+search 10010000
 
+positions 1 and 4 are set so we want to use those
 
-## Others
+take from our filter positions term1 and term4
+
+term1 100
+term4 100
+
+then OR them together
+
+100
+
+which means document1 which was in the first column might be a match
+
+```
+
+What's really cool about this search technique is that because bitwise operations are so fast you can consider them free you end up being limited only by memory bandwidth, which means you can actually work out how long each search will take based on the number of documents in your index per machine.
+
+However part of the bing.com managed to improve this algorithm even more. It's well out of the scope of this document, but it involves using what they call higher ranked rows where they logically OR half of the filter against itself to reduce memory access. Along with the ability to shard filter lengths to different machines (possible because of scale) they are able to reduce memory access to a level where they can run thousands of searches on each machine per second. Its a very cool collection of techniques.
+
+The links you need to get started on how Bing does this are below,
+
+ - http://bitfunnel.org/
+ - https://www.youtube.com/watch?v=1-Xoy5w5ydM
+ - https://www.youtube.com/watch?v=80LKF2qph6I
+ - https://www.clsp.jhu.edu/events/mike-hopcroft-microsoft/
+ - https://danluu.com/bitfunnel-sigir.pdf
+
+They are worth looking at!
+
+## Similar data structures
 
 There are modified versions of bloom filters, as well as other similar structures. 
 
-Variants include compressed bloom filters, expiring and counting bloom filters. They use less memory, expire old keys and record how many times keys were added (allowing removal if you do it right).
+Variants of bloom filters include compressed bloom filters, expiring and counting bloom filters. They use less memory, expire old keys and record how many times keys were added (allowing removal if you implement it correctly at the expense of memory).
 
-The cuckoo filter for example works in a similar way to a bloom filter, except it has a inbuilt limit after which it will no longer add items, can delete items and has some different memory characteristics.
+Another similar one is the cuckoo filter which works in a similar way to a bloom filter, except it has a inbuilt limit after which it will no longer add items, can delete items and has some different memory characteristics.
 
 
-https://www.perl.com/pub/2004/04/08/bloom_filters.html/
-https://gist.github.com/boyter/0cffa9ff8e2e7259d455594d744f1164
+## Conclusion
+
+So started as me wanting to implement bitfunnel myself turned into a longer than I expected look at bloom filters in general. I have to admit they are now my new favourite data structure (wow... how much of a nerd do you have to be to have one of those) supplanting my previous which was the vector space. While I don't really have any use for bloom filters in much of what I do from day to day I'm hoping like https://boyter.org/posts/media-clipping-using-ffmpeg-with-cache-eviction-2-random-for-disk-caching-at-scale/ 2 random cache eviction I might get to use it one of these days.
+
