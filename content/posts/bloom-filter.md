@@ -11,7 +11,7 @@ What you may not know is that while you can use them as a space efficient hash/d
 
 However before going though usage though, lets take a quick moment to build one. A lot of people seem to lack this understanding and assume that bloom filters are more complex or mysterious than they actually are.
 
-Turns out a bloom filter is actually really easy to build if you don't mind doing it inefficiently (at least at first). I am going to implement one using JavaScript because anyone reading this can follow along using the browser console. Why? Well I find a simple bit of code 
+Turns out a bloom filter is actually really easy to build if you don't mind doing it inefficiently (at least at first). I am going to implement one using JavaScript because anyone reading this can follow along using the browser console. Why? Well I find a simple bit of code tends to be mostly unambiguous and communicates meaning quite well.
 
 The first thing you need is a hash function. Ideally for a bloom filter you want to use something like Murmur3 and FNV-1a because you want the hash to be as fast as possible and yet have a good distribution. See [this excellent stackexchange](https://softwareengineering.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed) question and the first comment for more detail.
 
