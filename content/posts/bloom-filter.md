@@ -5,11 +5,13 @@ date: 2020-12-10
 
 A bloom filter is one of those data structures you are probably already aware of, or have at least heard about. For those looking for a simple recap, they are a probabilistic data structure which can be used to determine if something is in a set or not, giving a slight chance of returning a false positive result for some checks but while using less space than a full hashmap.
 
-What you may not know is that while you can use them as a space efficient hash/dictionary there are other use cases you might not be aware of. However to do some of those things you need to be able to lay out how the bloom filter works in memory
+What you may not know is that while you can use them as a space efficient hash/dictionary there are other use cases you might not be aware of.
 
 ## Implementation of a bloom filter
 
-However before going though usage though, lets take a quick moment to build one. Turns out a bloom filter is actually really easy to build if you don't mind doing it inefficiently (at least at first). I am going to implement one using JavaScript because anyone reading this can follow along using the browser console. Why? Well I find a simple bit of code 
+However before going though usage though, lets take a quick moment to build one. A lot of people seem to lack this understanding and assume that bloom filters are more complex or mysterious than they actually are.
+
+Turns out a bloom filter is actually really easy to build if you don't mind doing it inefficiently (at least at first). I am going to implement one using JavaScript because anyone reading this can follow along using the browser console. Why? Well I find a simple bit of code 
 
 The first thing you need is a hash function. Ideally for a bloom filter you want to use something like Murmur3 and FNV-1a because you want the hash to be as fast as possible and yet have a good distribution. See [this excellent stackexchange](https://softwareengineering.stackexchange.com/questions/49550/which-hashing-algorithm-is-best-for-uniqueness-and-speed) question and the first comment for more detail.
 
