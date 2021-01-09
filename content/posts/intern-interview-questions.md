@@ -1,6 +1,6 @@
 ---
 title: Intern interview questions
-date: 2050-12-25
+date: 2021-01-03
 ---
 
 Recently my workplace has been accepting some interns as part of contributing back to the industry in general, as well as promoting the brand and hopefully being able to grow and grab excellent candidates in the future when they graduate. One recently wanted some time to sit down with me to ask a few questions. In order to give him the best use of time I asked to have the questions written in advance so I could respond to them before chatting and then build out my answers verbally.
@@ -15,7 +15,7 @@ Honestly, I just don’t see too many other things I would be interested in. Its
 
 > What are you looking forward to working? 
 
-I am enjoying CPA, and hoping we get a crack at the large search problems in the future. I have no idea how to search over terabytes of genetic data beyond some abstract ways using bloom filters so it sounds cool.
+I am enjoying the current project I am on now, where we are storing large amounts of genetic and clinical data. Really hoping we get a crack at the large search problems in the future. I have no idea how to search over terabytes of genetic data beyond some abstract ways using bloom filters so it sounds cool. I have been reading up on how others have solved it in anticipation, which might be jumping the gun a little.
 
 > What would be the best project to work on? 
 
@@ -27,7 +27,7 @@ Probably JavaScript… because I am not very good with it, don’t like the pack
 
 > The Kablamo culture, what makes it different from other places you have worked at?
 
-So the first is that at Kablamo im a profit center. Which I think makes my appreciated more than say in a business where you are a cost center. There is an incentive to keep you around so long as you generate income.
+So the first is that at Kablamo I am a profit center. Which I think makes me appreciated more than say in a business where you are a cost center. There is an incentive to keep you around so long as you generate income.
 
 What I really like is that the people here are brilliant. There is nobody in the company who does not have something to offer me technically I can learn from. What's the saying, If you are the best musician in your band, find another band? That’s what it feels like here, the other band, where everyone is pushing you to learn more.
 
@@ -43,19 +43,21 @@ No. I just wanted to be a developer and keep working on code because I enjoy it 
  
 > Are you working on any side projects of your own?
  
-So many… searchcode.com searchcodeserver.com scc are probably the main ones. Otherwise I have been looking into building an indexing engine for searchcode using bloom filters which is keeping me interested. Other things have been building a general purpose duplicate code detector, and a bitbucket cloud plugin (which I finished but need them to launch pay via atlassian before I launch it). Oh and I also have a command line search tool called cs im working on in my spare time sometimes. Oh also a licence checker command line application which I should get back into one of these days.
+So many… searchcode.com searchcodeserver.com scc are probably the main ones. Otherwise I have been looking into building an indexing engine for searchcode using bloom filters which is keeping me interested. Other things have been building a general purpose duplicate code detector, and a bitbucket cloud plugin (which I finished but need them to launch pay via atlassian before I launch it). Oh and I also have a command line search tool called cs im working on in my spare time sometimes. Finally a licence checker command line application which I should get back into one of these days.
+
+Too many really, but its my time so its fine :)
  
 > How do you keep yourself updated about the new trends in the industry?
 
-I don’t for the most part. A lot of things are cyclic, and you see the same things over and over. Consider everyone going on about the Nodejs event loop for example. I had people tell me “It’s new and fast!” with a straight face. Ignoring that event loops go back to Windows 1 days and Nodejs is NOT fast by any stretch of the imagination. It did solve certain harder problems at the time.
+I don’t for the most part. A lot of things are cyclic, and you see the same things over and over. Consider everyone going on about the Nodejs event loop for example. I had people tell me “It’s new and fast!” with a straight face. Ignoring that event loops go back to Windows 1 days and Nodejs is NOT fast by any stretch of the imagination. It did solve certain harder problems at the time though.
 
-Otherwise I tend to see what’s trending on things like HN, I follow a lot of interesting tech leaders on twitter, I keep an eye out on what’s interesting on the company slack. 
+Otherwise I tend to see what’s trending on things like HackerNews. I also follow a lot of interesting tech leaders on twitter, I also keep an eye out on what’s interesting on the company slack. 
  
 > What’s the most recent thing that you have learned?
 
 That SLOCCount came before CLOC. Otherwise probably in depth details of how bloom filters actually work, how to implement them and a host of interesting problems they can solve that you wouldn’t really consider. 
 
-I have a habit of writing down anything I learn on my blog these days, boyter.org	so the most recent post there is usually what I have been thinking about recently.
+I have a habit of writing down anything I learn on my blog these days, this one, so the most recent post there is usually what I have been thinking about recently.
  
 > What’s hard about coding?
 	
@@ -75,9 +77,9 @@ All things being equal though, Go, TypeScript, React, Lambda, S3, RDS, Fargate, 
 
 > What is the best implementation or debugging you have done in the past?
 
-Im fairly happy with this code go-string/index.go at master · boyter/go-string (github.com) which is pretty well documented, fast and easyish to understand.
+Im fairly happy with this code https://github.com/boyter/go-string/blob/master/index.go which is pretty well documented, fast and easyish to understand.
 
-As for debugging… the most exciting thing I have debugged recently was a branch prediction fail in scc. It was running slow in some cases and I was wondering why. Turned out by recording the IF statements after suspecting it was a branch prediction fail resolved it and it was much faster. I felt like a programming god for about an hour afterwards.
+As for debugging… the most exciting thing I have debugged recently was a branch prediction fail in scc. It was running slow in some cases and I was wondering why. Turned out by recording the if statements after suspecting it was a branch prediction fail resolved it and it was much faster. I felt like a programming god for about an hour afterwards.
 
 Oh! Or there was a bug in searchcode.com where some pages would return slowly, and cause a CPU to peg at 100%. I spend a lot of time tracking it down and eventually put a profiler into the real web application to catch it. It turned out it was a problem in a library I depended on that needed to use a non RE2 regular expression engine, and as such was running into a backtracking issue. It was easy enough to fix once I knew the issue. 
 
@@ -91,7 +93,6 @@ Oh one other one was how symlinks work and how to deal with them in code. That w
 
 So I don’t tend to look at programming once, but this one https://boyter.org/2017/03/golang-solution-faster-equivalent-java-solution/ was especially fun. Otherwise looking into how how unicode search works https://boyter.org/posts/faster-literal-string-matching-in-go/ and https://boyter.org/posts/unicode-support-what-does-that-actually-mean/ was pretty fun. Recently its been all about learning how Bitfunnel works which is how the fresh index in Bing works using bloom filters.
  
-
 > Are there any disadvantages to GraphQL?
 
 Building a robust GraphQL endpoint that is performant, scalable, secure, etc, is much more difficult than REST. GraphQL is optimised for front-end developers over all else. Also if you aren't fully aware of your data up-front it can quickly become a big ball of mud.
