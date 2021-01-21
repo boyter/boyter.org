@@ -101,7 +101,7 @@ The scale is the one I am most worried about personally. REST tends to return a 
 
 But yes, database load is a big problem with GraphQL. In theory it can be more performant but that’s hard to get right.
 
-Keep in mind there is nothing special about GraphQL. You can implement a REST style API that works in a very similar way if you want, see LINK HERE You can do joins in REST, restrict fields etc...
+Keep in mind there is nothing special about GraphQL. You can implement a REST style API that works in a very similar way if you want, see https://www.vinaysahni.com/best-practices-for-a-pragmatic-restful-api You can do joins in REST, restrict fields etc...
 
 I think GraphQL tends to make hard things easier, but easy things harder. The returning of the schema in GraphQL is pretty neat though.
  
