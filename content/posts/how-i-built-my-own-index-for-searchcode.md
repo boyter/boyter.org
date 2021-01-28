@@ -495,6 +495,8 @@ search 16437336 documents: test
 
 Sadly its not as fast for more common terms, say test which returns in 9000 ms. Profiles suggest thats mostly down to opening and closing files, which makes sense because I stored the index in a few thousand 484 KB files. Next plan of attack is merge those into a few really large files and store those together. Then keep the file handles open to avoid the open/close issue. At that point its just down to seeks.
 
+So after turning the index into a huge file on disk I started trying again. However slight tangent. I was curious to see how compression would apply to the index as built. My inital guess was not very well considering how random the data should be, but its worth trying. The index when built over the linux kernel source code was 36 MB in size. Because performance is really the most important thing I tried compressing using lz4 -9. This reduced the index size to 31 MB. Not a great saving. For comparison gzip -9 produced a 29 MB file. Probably not really worth considering then.
+
 # Facets
 
 So what about facets. Which searchcode has for filtering down by language, repository or source. These need to be calculated for each search. Also this turned out to be really painful. Working with 200 millon of anything is a serious pain. It was easily the most annoying bit of code I ran into that was just not fast enough no matter what I did.
