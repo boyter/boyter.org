@@ -17,89 +17,95 @@ This is part 5 of a 5 part series.
 
 So we need to convert the indexer to a method that wont consume as much memory. Looking at how it works now we can determine a few areas that could be improved before we implement out new method.
 
-<pre>public function index(array $documents) {
-		$documenthash = array(); // so we can process multiple documents faster
+```
+public function index(array $documents) {
+	$documenthash = array(); // so we can process multiple documents faster
 
-		foreach($documents as $document) {
-			$con = $this-&gt;_concordance($this-&gt;_cleanDocument($document));
-			$id = $this-&gt;documentstore-&gt;storeDocument(array($document));
+	foreach($documents as $document) {
+		$con = $this->_concordance($this->_cleanDocument($document));
+		$id = $this->documentstore->storeDocument(array($document));
 
-			foreach($con as $word =&gt; $count) {
-				if(!$this-&gt;_inStopList($word)) {
-					if(!array_key_exists($word,$documenthash)) {
-						$ind = $this-&gt;index-&gt;getDocuments($word);
-						$documenthash[$word] = $ind;
-					}
+		foreach($con as $word => $count) {
+			if(!$this->_inStopList($word)) {
+				if(!array_key_exists($word,$documenthash)) {
+					$ind = $this->index->getDocuments($word);
+					$documenthash[$word] = $ind;
+				}
 
-					// Rank the Document
-					$rank = $this-&gt;ranker-&gt;rankDocument($word,$document);
+				// Rank the Document
+				$rank = $this->ranker->rankDocument($word,$document);
 
-					if(count($documenthash[$word]) == 0) {
-						$documenthash[$word] = array(array($id,$rank,0));
-					}
-					else {
-						$documenthash[$word][] = array($id,$rank,0);
-					}
+				if(count($documenthash[$word]) == 0) {
+					$documenthash[$word] = array(array($id,$rank,0));
+				}
+				else {
+					$documenthash[$word][] = array($id,$rank,0);
 				}
 			}
 		}
+	}
 
-		foreach($documenthash as $key =&gt; $value) {
-			usort($value, array($this-&gt;ranker, 'rankIndex'));
-			$this-&gt;index-&gt;storeDocuments($key,$value);
-		}
-		return true;
-	}</pre>
+	foreach($documenthash as $key => $value) {
+		usort($value, array($this->ranker, 'rankIndex'));
+		$this->index->storeDocuments($key,$value);
+	}
+	return true;
+}
+```
 
 The above is our index method. The first thing I noticed is that during the main foreach over the documents we can free memory by unsetting each document after it has been processed. Doing this is a fairly simple change to the foreach loop. We just change the foreach loop to the following,
 
-<pre>for($i=0;$i&lt;$cnt = count($documents); $i++) {
-		$document = $documents[$i];
-		unset($documents[$i]);</pre>
+```
+for($i=0;$i&lt;$cnt = count($documents); $i++) {
+	$document = $documents[$i];
+	unset($documents[$i]);
+```
 
 We are now unsetting everything as we go. This should free some memory as we go along. The next thing to do is convert it over to storing the index on disk rather then memory. I was thinking about this for a while and came up with the idea that for each new word we find we load the existing index from disk and flush it to a scratchpad. We then append the new details and keep a handle to the file. If its an existing word we append to the file. After we are done we loop over each file pointer, read the whole thing into memory, sort it and then save it into the index. Keep in mind you cannot actually keep the file pointer open at all times and just append as there is usually a limit of how many open files exist. Below is the final implementation,
 
-<pre>public function index(array $documents) {
-		if(!is_array($documents)) {
-			return false;
-		}
+```
+public function index(array $documents) {
+	if(!is_array($documents)) {
+		return false;
+	}
 
-		$indexcache = array(); // So we know if the flush file exists
+	$indexcache = array(); // So we know if the flush file exists
 
-		foreach($documents as $document) {
-			// Clean up the document and create stemmed text for ranking down the line
-			$con = $this-&gt;_concordance($this-&gt;_cleanDocument($document));
+	foreach($documents as $document) {
+		// Clean up the document and create stemmed text for ranking down the line
+		$con = $this->_concordance($this->_cleanDocument($document));
 
-			// Save the document and get its ID
-			$id = $this-&gt;documentstore-&gt;storeDocument(array($document));
+		// Save the document and get its ID
+		$id = $this->documentstore->storeDocument(array($document));
 
-			foreach($con as $word =&gt; $count) {
+		foreach($con as $word => $count) {
 
-				if(!$this-&gt;_inStopList($word) && strlen($word) &gt;= 2) {
-					if(!array_key_exists($word, $indexcache)) {
-						$ind = $this-&gt;index-&gt;getDocuments($word);
-						$this-&gt;_createFlushFile($word, $ind);
-						$indexcache[$word] = $word;
-					}
-
-					// Rank the Document
-					$rank = $this-&gt;ranker-&gt;rankDocument($word,$document);
-
-					$this-&gt;_addToFlushFile($word,array($id,$rank,0));
+			if(!$this->_inStopList($word) && strlen($word) >= 2) {
+				if(!array_key_exists($word, $indexcache)) {
+					$ind = $this->index->getDocuments($word);
+					$this->_createFlushFile($word, $ind);
+					$indexcache[$word] = $word;
 				}
+
+				// Rank the Document
+				$rank = $this->ranker->rankDocument($word,$document);
+
+				$this->_addToFlushFile($word,array($id,$rank,0));
 			}
 		}
+	}
 
-		foreach($indexcache as $word) {
-			$ind = $this-&gt;_readFlushFile($word);
-			unlink(INDEXLOCATION.$word.INDEXER_DOCUMENTFILEEXTENTION);
+	foreach($indexcache as $word) {
+		$ind = $this->_readFlushFile($word);
+		unlink(INDEXLOCATION.$word.INDEXER_DOCUMENTFILEEXTENTION);
 
-			usort($ind, array($this-&gt;ranker, 'rankIndex'));
-			$this-&gt;index-&gt;storeDocuments($word,$ind);
-		}
+		usort($ind, array($this->ranker, 'rankIndex'));
+		$this->index->storeDocuments($word,$ind);
+	}
 
-		return true;
-	}</pre>
+	return true;
+}
+```
 
 The createFlushFile method and addToFlushFile methods are pretty much copies of the methods used in the multifolderindex class. They could presumably be combined at some point, however this is fine for the moment. This takes care of the memory issues with any luck. The results were&#8230; promising. It ended up working and using far less memory they before, but because of its constant disk thrashing ended up being more disk bound then CPU. Which is not a good sign when it comes to indexers. This is pretty easy to rectify though, we just buffer the results to flush to disk till they hit some threshold and then dump the lot to disk and start over again.
 

@@ -49,54 +49,58 @@ This approach is more scale-able, but has the issue that the index is not search
 
 So in the list of improvements I identified two ways to speed things up and increase our ability to scale. The first being holding the index in memory while processing and flushing it to disk at the end of the process. Thankfully we already catered for this in the design. When we call the indexers index method we don't have to pass one document, we can actually pass multiple. To implement the in memory saving we just need to change the indexer method to look like the below.
 
-<pre>public function index(array $documents) {
-		if(!is_array($documents)) {
-			return false;
-		}
+```
+public function index(array $documents) {
+	if(!is_array($documents)) {
+		return false;
+	}
 
-		$documenthash = array(); // so we can process multiple documents faster
+	$documenthash = array(); // so we can process multiple documents faster
 
-		foreach($documents as $document) {
+	foreach($documents as $document) {
 
-			// Save the document and get its ID then clean it up for processing
-			$id = $this-&gt;documentstore-&gt;storeDocument(array($document));
-			$con = $this-&gt;_concordance($this-&gt;_cleanDocument($document));
+		// Save the document and get its ID then clean it up for processing
+		$id = $this->documentstore->storeDocument(array($document));
+		$con = $this->_concordance($this->_cleanDocument($document));
 
-			foreach($con as $word =&gt; $count) {
-				// Get and cache the word if we dont have it
-				if(!array_key_exists($word,$documenthash)) {
-					$ind = $this-&gt;index-&gt;getDocuments($word);
-					$documenthash[$word] = $ind;
-				}
+		foreach($con as $word => $count) {
+			// Get and cache the word if we dont have it
+			if(!array_key_exists($word,$documenthash)) {
+				$ind = $this->index->getDocuments($word);
+				$documenthash[$word] = $ind;
+			}
 
-				if(count($documenthash[$word]) == 0) {
-					$documenthash[$word] = array(array($id,$count,0));
-				}
-				else {
-					$documenthash[$word][] = array($id,$count,0);
-				}
+			if(count($documenthash[$word]) == 0) {
+				$documenthash[$word] = array(array($id,$count,0));
+			}
+			else {
+				$documenthash[$word][] = array($id,$count,0);
 			}
 		}
+	}
 
-		foreach($documenthash as $key =&gt; $value) {
-			$this-&gt;index-&gt;storeDocuments($key,$value);
-		}
+	foreach($documenthash as $key => $value) {
+		$this->index->storeDocuments($key,$value);
+	}
 
-		return true;
-	}</pre>
+	return true;
+}
+```
 
 The changes here are to store all the index shards in memory using $documentcash and then at the end dump them all to disk. This means rather then reading a writing to disk all the time we only do it in a single step per index. Of course it does mean we need to change our additions to the index like the below.
 
-<pre>$indexer-&gt;index(
-		array(
-			'Setting the AuthzUserAuthoritative directive explicitly to Off allows for user authorization to be passed on to lower level modules (as defined in the modules.c files) if there is no user matching the supplied userID.',
-			'The Allow directive affects which hosts can access an area of the server. Access can be controlled by hostname, IP address, IP address range, or by other characteristics of the client request captured in environment variables.',
-			'This directive allows access to the server to be restricted based on hostname, IP address, or environment variables. The arguments for the Deny directive are identical to the arguments for the Allow directive.',
-			'The Order directive, along with the Allow and Deny directives, controls a three-pass access control system. The first pass processes either all Allow or all Deny directives, as specified by the Order directive. The second pass parses the rest of the directives (Deny or Allow). The third pass applies to all requests which do not match either of the first two.',
-			'The AuthDBDUserPWQuery specifies an SQL query to look up a password for a specified user.  The users ID will be passed as a single string parameter when the SQL query is executed.  It may be referenced within the query statement using a %s format specifier.',
-			'The AuthDBDUserRealmQuery specifies an SQL query to look up a password for a specified user and realm. The users ID and the realm, in that order, will be passed as string parameters when the SQL query is executed.  They may be referenced within the query statement using %s format specifiers.'
-		)
-	);</pre>
+```
+$indexer->index(
+	array(
+		'Setting the AuthzUserAuthoritative directive explicitly to Off allows for user authorization to be passed on to lower level modules (as defined in the modules.c files) if there is no user matching the supplied userID.',
+		'The Allow directive affects which hosts can access an area of the server. Access can be controlled by hostname, IP address, IP address range, or by other characteristics of the client request captured in environment variables.',
+		'This directive allows access to the server to be restricted based on hostname, IP address, or environment variables. The arguments for the Deny directive are identical to the arguments for the Allow directive.',
+		'The Order directive, along with the Allow and Deny directives, controls a three-pass access control system. The first pass processes either all Allow or all Deny directives, as specified by the Order directive. The second pass parses the rest of the directives (Deny or Allow). The third pass applies to all requests which do not match either of the first two.',
+		'The AuthDBDUserPWQuery specifies an SQL query to look up a password for a specified user.  The users ID will be passed as a single string parameter when the SQL query is executed.  It may be referenced within the query statement using a %s format specifier.',
+		'The AuthDBDUserRealmQuery specifies an SQL query to look up a password for a specified user and realm. The users ID and the realm, in that order, will be passed as string parameters when the SQL query is executed.  They may be referenced within the query statement using %s format specifiers.'
+	)
+);
+```
 
 All of the documents are now indexed in a single step. Of course with such a small case such as our 6 documents the overhead is very little. However when you compare this implementation with 100 or even 10,000 documents its considerably faster. It still slows down as you add more documents however. IE adding 1 document to an index containing 10,000 documents is going to be slower then 1 document to an index with 10.
 
@@ -108,17 +112,19 @@ The above change is probably enough for us to go and test with. Assuming it hold
 
 So with the above simple fix lets load it up and see how it goes. I ran the following code to input 100,000 documents and it managed to finish in about 20 minutes (on a very under-powered virtual machine running in VirtualBox).
 
-<pre>$toindex = array();
-	for($j=0;$j&lt;100000; $j++) {
-		$toindex[] = 'The AuthDBDUserRealmQuery specifies an SQL query to look up a password for a specified user and realm. The users ID and the realm, in that order, will be passed as string parameters when the SQL query is executed.  They may be referenced within the query statement using %s format specifiers.';
-	}
-	$indexer-&gt;index($toindex);</pre>
+```
+$toindex = array();
+for($j=0;$j&lt;100000; $j++) {
+	$toindex[] = 'The AuthDBDUserRealmQuery specifies an SQL query to look up a password for a specified user and realm. The users ID and the realm, in that order, will be passed as string parameters when the SQL query is executed.  They may be referenced within the query statement using %s format specifiers.';
+}
+$indexer->index($toindex);
+```
 
 Keep in mind this is saving the documents to disk as well which we will remove in our final version and the performance isn't too bad.
 
 Searches work as well, however you need to add a time limit of 0
 
-<pre>set_time_limit(0);</pre>
+```set_time_limit(0);```
 
 To avoid hitting timeouts. This is because any search actually then goes on to display 100,000 results.
 
@@ -130,26 +136,28 @@ One of the other issues we have is where duplicate results are returned when sea
 
 The implementation is basically a copy of naievesearch and we modify the dosearch method like so
 
-<pre>function dosearch($searchterms) {
-		$indresult = array();
-		foreach($this-&gt;_cleanSearchTerms($searchterms) as $term) {
+```
+function dosearch($searchterms) {
+	$indresult = array();
+	foreach($this->_cleanSearchTerms($searchterms) as $term) {
 
-			$ind = $this-&gt;index-&gt;getDocuments($term);
-			if($ind != null) {
-				usort($ind, array($this-&gt;ranker, 'rankDocuments'));
-				foreach($ind as $i) {
-					$indresult[$i[0]] = $i[0];
-				}
+		$ind = $this->index->getDocuments($term);
+		if($ind != null) {
+			usort($ind, array($this->ranker, 'rankDocuments'));
+			foreach($ind as $i) {
+				$indresult[$i[0]] = $i[0];
 			}
 		}
+	}
 
-		$doc = array();
-		foreach($indresult as $i) {
-			$doc[] = $this-&gt;documentstore-&gt;getDocument($i);
-		}
+	$doc = array();
+	foreach($indresult as $i) {
+		$doc[] = $this->documentstore->getDocument($i);
+	}
 
-		return $doc;
-	}</pre>
+	return $doc;
+}
+```
 
 In this case all we need to do loop through each of the results for each term, sort them and add them to a hash based on the id. This ensures we get no duplicate results. Because the sorting takes place for each term however documents are ranked according to their frequency for the first term, then the second etc&#8230; Not ideal but good enough for the moment. This also means our engine is still an OR engine by default.
 

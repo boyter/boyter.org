@@ -27,26 +27,28 @@ So previously we had 4 main issues identified. Im going to go with low hanging f
 
 Probably the easiest way to remove porn at this point is to just blacklist it unless someone explicitly asks to see it. I had a quick look at the sort of terms that ranked for porn and came up with the following blacklist, using what I had seen and some terms from here [porn blacklist keyword filter http://www.gnutellaforums.com/limewire-tips-tricks/60590-keywords-filter.html][8]
 
-<pre>porn|naked|teens|pussy|sex|nasty|mature|crossdresser|couples|girlfriend|wives|pornstar|cock|fuck|shit|cunt|nude|lesbian|sexy|ass|ladyboy|granny|cum|boob|breast|exposing|milf|erotic|bdsm|live|penis|horny|slut|nudist|upskirt|boobs|tits|amateur|hottest|adult|teen|babe|1yo|2yo|3yo|4yo|5yo|6yo|7yo|8yo|9yo|10yo|11yo|12yo|13yo|14yo|15yo|16yo|17yo|incest|jailbait|kdv|kiddie|kiddy|kinder|Lolita|lsm|mbla|molested|ninfeta|pedo|phat|pjk|pthc|ptsc|premature|preteen|pthc|qsh|qwerty|r@ygold|raped|teensex|yovo|Pr0nStarS|tranny|transvest|XXX|Anal|Asshole|Bangbros|Barely|Blow|Blowjob|Bondage|brazzers|Camera_Phone|Centerfold|Clitoris|Cock|Cum|Cunt|Deepthroat|Diaper|Drilled|EROTRIX|Facial|Femjoy|Fetish|Fisting|fotos|FTV|Fuck|Gangbang|Gay|Handjob|Hardcore|Headjob|hidden_cam|Hustler|Jenna|Lesbo|Masturbat|MILF|nackte|naken|Naturals|Nipple|Nubile|Onlytease|Orgasm|Orgy|Penis|Penthouse|Playboy|Porn|Profileasian|Profileblond|Pussy|Scroops|selfpic|spunky_teens|strapon|strappon|Suck|TeenTraps|tittie|titty|tranny|transvest|twat|vagina|webcam|Whore|XPUSS|Amateur|Blonde|Brunette|Naked|Naughty|Private|Redhead|Sex|Slut|Strips|Teen|Young|wet|girl|video|taboo|nastiest</pre>
+```porn|naked|teens|pussy|sex|nasty|mature|crossdresser|couples|girlfriend|wives|pornstar|cock|fuck|shit|cunt|nude|lesbian|sexy|ass|ladyboy|granny|cum|boob|breast|exposing|milf|erotic|bdsm|live|penis|horny|slut|nudist|upskirt|boobs|tits|amateur|hottest|adult|teen|babe|1yo|2yo|3yo|4yo|5yo|6yo|7yo|8yo|9yo|10yo|11yo|12yo|13yo|14yo|15yo|16yo|17yo|incest|jailbait|kdv|kiddie|kiddy|kinder|Lolita|lsm|mbla|molested|ninfeta|pedo|phat|pjk|pthc|ptsc|premature|preteen|pthc|qsh|qwerty|r@ygold|raped|teensex|yovo|Pr0nStarS|tranny|transvest|XXX|Anal|Asshole|Bangbros|Barely|Blow|Blowjob|Bondage|brazzers|Camera_Phone|Centerfold|Clitoris|Cock|Cum|Cunt|Deepthroat|Diaper|Drilled|EROTRIX|Facial|Femjoy|Fetish|Fisting|fotos|FTV|Fuck|Gangbang|Gay|Handjob|Hardcore|Headjob|hidden_cam|Hustler|Jenna|Lesbo|Masturbat|MILF|nackte|naken|Naturals|Nipple|Nubile|Onlytease|Orgasm|Orgy|Penis|Penthouse|Playboy|Porn|Profileasian|Profileblond|Pussy|Scroops|selfpic|spunky_teens|strapon|strappon|Suck|TeenTraps|tittie|titty|tranny|transvest|twat|vagina|webcam|Whore|XPUSS|Amateur|Blonde|Brunette|Naked|Naughty|Private|Redhead|Sex|Slut|Strips|Teen|Young|wet|girl|video|taboo|nastiest```
 
 Keep in mind the above is a VERY agressive filter and will most likely filter out some non porn sites as well.
 
 Chucking this though a simple regex inside the search class allows us to eliminate 99% of the porn results based on my simple tests. The relevent chage is below,
 
-<pre>preg_match_all(SEARCH_PORNFILTER, $document[0][1].$document[0][2], $matches);
+```
+preg_match_all(SEARCH_PORNFILTER, $document[0][1].$document[0][2], $matches);
 
-	// if they want to see porn, or its not porn
-	if($seeporn || count($matches[0]) &lt;= 1) {
-		$doc[] = $document;
-		$count++;
-		if($count == SEARCH_DOCUMENTRETURN) {
-			break;
-		}
-	}</pre>
+// if they want to see porn, or its not porn
+if($seeporn || count($matches[0]) &lt;= 1) {
+	$doc[] = $document;
+	$count++;
+	if($count == SEARCH_DOCUMENTRETURN) {
+		break;
+	}
+}
+```
 
 Pretty easy, we check if the user wants to see porn and if so just add it otherwise we check using the above blacklist. If there are 2 or more matches in the blacklist then we consider the match porn and ignore it. The seeporn variable is set in the constructor like so,
 
-<pre>function dosearch($searchterms,$seeporn=SEARCH_DISPLAYPORN)</pre>
+```function dosearch($searchterms,$seeporn=SEARCH_DISPLAYPORN)```
 
 Trying it out on some questionable searches shows that it works fairly well. One example I tried was "sex" and the first few results were,
 
@@ -74,44 +76,46 @@ Ranking however isn't the easiet thing in the world. Google and Bing use hundred
 
 All of the above look good to me. Lets do the lot. Our ranker interface probably needs to have an additional method added which can rank an individual document based on the term. This is defined in the iranker like so,
 
-<pre>public function rankDocument($term, $document);</pre>
+```public function rankDocument($term, $document);```
 
 And now for the implementation.
 
-<pre>define('RANKER_TITLEWEIGHT', 1000);
-	define('RANKER_URLWEIGHT', 6000);
-	define('RANKER_URLWEIGHTLOOSE', 2000);
-	define('RANKER_TERMWEIGHT', 100);
+```
+define('RANKER_TITLEWEIGHT', 1000);
+define('RANKER_URLWEIGHT', 6000);
+define('RANKER_URLWEIGHTLOOSE', 2000);
+define('RANKER_TERMWEIGHT', 100);
 
-	public function rankDocument($term, $document) {
-		$cleanurl = $this-&gt;_cleanString($document[0]);
-		$cleantitle = $this-&gt;_cleanString($document[1]);
-		$cleanmeta = $this-&gt;_cleanString($document[2]);
-		$rank = $document[3];
+public function rankDocument($term, $document) {
+	$cleanurl = $this->_cleanString($document[0]);
+	$cleantitle = $this->_cleanString($document[1]);
+	$cleanmeta = $this->_cleanString($document[2]);
+	$rank = $document[3];
 
-		preg_match_all('/ '.$term.' /i', $cleanurl, $urlcount);
-		preg_match_all('/'.$term.'/i', $cleanurl, $urlcountloose);
-		preg_match_all('/ '.$term.' /i', $cleantitle, $titlecount);
-		preg_match_all('/ '.$term.' /i', $cleanmeta, $pagecount);
+	preg_match_all('/ '.$term.' /i', $cleanurl, $urlcount);
+	preg_match_all('/'.$term.'/i', $cleanurl, $urlcountloose);
+	preg_match_all('/ '.$term.' /i', $cleantitle, $titlecount);
+	preg_match_all('/ '.$term.' /i', $cleanmeta, $pagecount);
 
-		$words_in_url 			= count($urlcount[0]);
-		$words_in_url_loose 	= count($urlcountloose[0]);
-		$words_in_title 		= count($titlecount[0]);
-		$words_in_meta 			= count($pagecount[0]);
+	$words_in_url 			= count($urlcount[0]);
+	$words_in_url_loose 	= count($urlcountloose[0]);
+	$words_in_title 		= count($titlecount[0]);
+	$words_in_meta 			= count($pagecount[0]);
 
-		$weight = (   $words_in_meta * RANKER_TERMWEIGHT
-					+ $words_in_title * RANKER_TITLEWEIGHT
-					+ $words_in_url * RANKER_URLWEIGHT
-					+ $words_in_url_loose * RANKER_URLWEIGHTLOOSE
-				);
+	$weight = (   $words_in_meta * RANKER_TERMWEIGHT
+				+ $words_in_title * RANKER_TITLEWEIGHT
+				+ $words_in_url * RANKER_URLWEIGHT
+				+ $words_in_url_loose * RANKER_URLWEIGHTLOOSE
+			);
 
-		// Normalise between 1 and 10 and then invert so
-		// top 100 sites are 9.9 something and bottom 100 are 0.1
-		$normailise = 10-(1 + ($rank-1)*(10-1)) / (1000000 - 1);
-		$newweight = intval($weight * $normailise);
+	// Normalise between 1 and 10 and then invert so
+	// top 100 sites are 9.9 something and bottom 100 are 0.1
+	$normailise = 10-(1 + ($rank-1)*(10-1)) / (1000000 - 1);
+	$newweight = intval($weight * $normailise);
 
-		return $newweight;
-	}</pre>
+	return $newweight;
+}
+```
 
 We just break things up and based on how many terms we find increase the rank. This means that this search is keyword heavy, IE if you want to rank highly for anything just keyword stuff your URL, Title and Meta tags with the term you are targeting. The reason we normalize the URLs is to create a basic pagerank algorithm, except rather then calculate our own page rank we will use the ranks we already know about.
 
