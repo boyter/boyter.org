@@ -151,7 +151,7 @@ You can see from the above image we have successfully extracted the text from th
 
 Building Disjoint Sets of Pixels algorithm
 
-<pre>
+```
 for each binary image:
   for each pixel in the binary image:
     if the pixel is on:
@@ -159,7 +159,7 @@ for each binary image:
         add to the same set
       else:
         add to a new set
-</pre>
+```
     
 At the end of this algorithm you will have a collection of sets which can be considered a letter. Then all you need do is compare the bounds of each one of the sets, in comparison to other sets and see if they line up. If so, then jackpot because it looks like you have identified some letters next to each other. You can also check the size and dimensions, or just run this separate image through your recognition algorithm and see if you can identify which a high level of certainty if it is pixel text. For our simple example I am going to take another route. Notice that each letter is separate to the next one? None of them are joined. By taking horizontal slices of the image we can test where each image starts and finishes, and extract them into separate images. By doing this we now have a collection of letters ready to recognise. 
     
@@ -213,7 +213,7 @@ print letters
       
 Using our input image the output of the above is,
 
-<pre>[(6, 14), (15, 25), (27, 35), (37, 46), (48, 56), (57, 67)]</pre>
+```[(6, 14), (15, 25), (27, 35), (37, 46), (48, 56), (57, 67)]```
 
 These are the positions horizontally along the image where each letter starts and stops.
 </div>
@@ -386,7 +386,7 @@ Now we have everything put together lets run it,
 
 Input file, &#8220;captcha.gif&#8221; Expected output 7s9t9j
       
-<pre>
+```
 python crack.py
  (0.96376811594202894, '7')
  (0.96234028545977002, 's')
@@ -394,7 +394,7 @@ python crack.py
  (0.98350370609844473, 't')
  (0.96751165072506273, '9')
  (0.96989711688772628, 'j')
-</pre>
+```
 
 The first number is the degree of certainty we have when identifying the letter. This is on a scale of 0 (no confidence) to 1 (very high confidence). The second part is what letter we believe the image to contain.
 
@@ -403,23 +403,23 @@ Looks like we have the correct output, with a high degree of certainty on each o
 
 This is just the above crack.py script modified to run over each of the files in the examples directory which contains example CAPTCHA&#8217;s</p> 
       
-<pre>
+```
 python crack_test.py
   Correct Guesses -  11.0
   Wrong Guesses -  37.0
   Percentage Correct -  22.9166666667
   Percentage Wrong -  77.0833333333
-</pre>
+```
 
 Most of the bad results come from the letter O and number 0 being confused, and other instances of similar looking letters and numbers. Considering this is also an issue for humans its not totally unexpected. We also have some issues where letters in the CAPTCHA are joined and our technique is unable to split them correctly. This again is pretty easy to fix as we could just look at the size of each image to compare and break it up. However even with these issues we can break this CAPTCHA about 22% of the time. This can then be considered cracked since the computer can just churn through the CAPTCHA’s solving many hundreds before a human can solve even one. 
 
 Running this code on a Core 2 Duo E6550 gives the following run time.
       
-<pre>
+```
 real    0m5.750s
 user    0m0.015s
 sys     0m0.000s
-</pre>
+```
       
 Since there are 48 examples CAPTCHA&#8217;s in the directory we can work out it takes on average about 0.12 seconds to crack each CAPTCHA. With 5 successful cracks per second we can perform about 432,000 cracks per day, with 95,040 sucessful attempts. Simply running another instance of the program will double these numbers.
 
