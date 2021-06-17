@@ -12,6 +12,7 @@ So the question is, have you ever wanted to script mysqldump to dump each databa
 
 The below script is what I use for backing up multiple databases, and does the above.
 
+```
     #!/bin/sh
     date=`date -I`</pre>
 
@@ -19,5 +20,6 @@ The below script is what I use for backing up multiple databases, and does the a
     do
        mysqldump -u root -pPASSWORD $I | gzip &gt; "$date-$I.sql.gz";
     done
+```
 
 Its a simple bash script, which connects to MySQL, prints out all the databases and then uses each line as a separate argument for mysqldump. All the databases are saved in their own file and restoring a single database is easy.
