@@ -97,3 +97,4 @@ EDIT - I actually did write content and publish it as a book! [Expert Excuses fo
 ![Book Cover](/static/books/new4.jpeg)
 ![Book Cover](/static/books/new5.png)
 ![Book Cover](/static/books/containers.jpg)
+![Infinidash Book Cover](/static/books/infinidash.png)
