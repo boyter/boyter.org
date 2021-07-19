@@ -1,7 +1,23 @@
 ---
-title: Memcached Redis
+title: Memcached vs Redis Deep Dive
 date: 2050-11-12
 ---
+
+Most of us have used either redis or memcached at some point in our career. However I have seen a lot of misinformation about which one you should be using, including some incredibly heated arguments over it without any in depth detail. Saying you should use redis because IndieJoe239 said its newer and better on StackOverflow is not a good reason to pick on thing over another.
+
+Lets do a brief trip through time.
+
+Memcached released in 2003.
+Written in Perl then rewritten in C.
+Originally for livejournal, now used by youtube, reddit, facebook, pinterest, twitter, wikipedia
+
+Redis released in 2009.
+Prototyped in TCL and then translated to C.
+Originally to speed up Salvatore's startup used by github, instagram, stackoverflow 
+
+So things to keep in mind. Most CPU's in those days had 1-2 cores. I suspect this influenced the design of them a lot.
+
+
 
 https://www.adayinthelifeof.nl/2011/02/06/memcache-internals/
 https://xuri.me/2017/10/07/memcache-internals.html
@@ -12,3 +28,19 @@ https://memcached.org/blog/modern-lru/
 https://redis.io/topics/lru-cache
 https://www.reddit.com/r/redis/comments/3tcfuz/why_lots_of_memory_management_problems_just/
 https://redis.io/topics/ARM
+
+
+
+
+https://redis.io/topics/lru-cache
+https://memcached.org/blog/modern-lru/
+    https://info.varnish-software.com/blog/introducing-varnish-massive-storage-engine
+https://web.archive.org/web/20210328200630/https://www.adayinthelifeof.nl/2011/02/06/memcache-internals/
+https://holmeshe.me/understanding-memcached-source-code-X-consistent-hashing/
+https://www.infoworld.com/article/3063161/why-redis-beats-memcached-for-caching.html
+https://www.imaginarycloud.com/blog/redis-vs-memcached/
+https://software.intel.com/content/www/us/en/develop/articles/enhancing-the-scalability-of-memcached.html
+
+https://stackoverflow.com/questions/17759560/what-is-the-difference-between-lru-and-lfu
+https://github.com/memcached/memcached/wiki/ConfiguringServer#threading
+https://redis.io/topics/cluster-spec
