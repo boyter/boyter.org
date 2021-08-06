@@ -14,7 +14,8 @@ The first had an interesting coding test. Rather then asking me to solve Fizzbu
 
 You created your service, hosted it online (heroku was suggested as its free) passed in the URL to a form, submitted and it hit your service looking for error codes and correct responses/output to input. Since you got to implement it in any language you want I went with Python/Django and produced the following code.
 
-<pre>def parse_json(self, data):
+{{<highlight python>}}
+def parse_json(self, data):
 	filtered = self.filter_drm(data['payload'])
 	filtered = self.filter_episode_count(filtered)
 
@@ -42,7 +43,8 @@ def format_return(self, data):
 				"slug": x['slug'],
 				"title": x['title']} for x in data 
 				if 'image' in x and 'slug' in x and 'title' in x]
-	return {"response": result}</pre>
+	return {"response": result}
+{{</highlight>}}
 
 Essentially its the code from the model I created. It takes in some JSON data, filters it by the field DRM and Episode count, then returns a subset of the data in it. The corresponding view is very simple, with just some JSON parsing (with error checks) and then calling the above code. I did throw in quite a few unit tests though to ensure it was all working correctly.
 
@@ -52,10 +54,12 @@ As for the second interview, it raised a good question which highlights the fact
 
 For the first, I was right about a lambda, which is just an anonymous function. As for the second part a closure is a function which closes over the environment allowing it to access variables not in its function list. An example would be,
 
-<pre>def function1(h):
+{{<highlight python>}}
+def function1(h):
     def function2():
         return h
-    return function2()</pre>
+    return function2()
+{{</highlight>}}
 
 In the above function2 closes over function1 allowing it to access the the variables in function1's environment such as h.
 
@@ -67,7 +71,8 @@ I came up with the following which is ugly for two reasons,
   
 2. it has very bad  O(N^2) runtime performance.
 
-<pre>var csv1 = [
+{{<highlight javascript>}}
+var csv1 = [
     {'name': 'one'},
     {'name': 'two'}
 ];
@@ -91,6 +96,7 @@ function joinem(csv1, csv2) {
     return ret;
 }
 
-var res1 = joinem(csv1, csv2);</pre>
+var res1 = joinem(csv1, csv2);
+{{</highlight>}}
 
 Assuming I get some more time later I want to come back to this. I am certain there is a nice way to do this in Javascript using underscore.js or something similar which is just as expressive as the LINQ version.

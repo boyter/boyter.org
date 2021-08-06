@@ -3,7 +3,16 @@ title: Memcached vs Redis Deep Dive
 date: 2050-11-12
 ---
 
-Most of us have used either redis or memcached at some point in our career. However I have seen a lot of misinformation about which one you should be using, including some incredibly heated arguments over it without any in depth detail. Saying you should use redis because IndieJoe239 said its newer and better on StackOverflow is not a good reason to pick on thing over another.
+Most of us have used either redis or memcached at some point in our career. However I have seen a lot of misinformation about which one you should be using, including some incredibly heated arguments over it without any in depth detail. Saying you should use redis because IndieJoe239 said its newer and better on StackOverflow is not a good reason to pick one thing over another.
+
+But lets get the obvious stuff out of the way first.
+
+Redis is not just a key value store, although thats how most use it.
+
+It supports other data types, such as strings, lists, sets, hashes, sorted sets, bitmaps and hyperloglogs.
+
+
+
 
 Lets do a brief trip through time.
 
@@ -44,3 +53,11 @@ https://software.intel.com/content/www/us/en/develop/articles/enhancing-the-scal
 https://stackoverflow.com/questions/17759560/what-is-the-difference-between-lru-and-lfu
 https://github.com/memcached/memcached/wiki/ConfiguringServer#threading
 https://redis.io/topics/cluster-spec
+
+
+https://redis.io/topics/cluster-spec
+https://alibaba-cloud.medium.com/redis-vs-memcached-in-memory-data-storage-systems-3395279b0941
+https://www.imaginarycloud.com/blog/redis-vs-memcached/
+https://aws.amazon.com/elasticache/redis-vs-memcached/
+https://www.baeldung.com/memcached-vs-redis
+https://stackoverflow.com/questions/10558465/memcached-vs-redis

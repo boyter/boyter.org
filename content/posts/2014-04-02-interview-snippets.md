@@ -12,21 +12,25 @@ Since I wrote the code to these snippets I thought I may as well add them here i
 
 Q. Write a function to reverse each word in a string.
 
-<pre>def reverse_each_word(words):
+{{<highlight python>}}
+def reverse_each_word(words):
     '''
     Reverse each word in a string 
     '''
-    return " ".join([x[::-1] for x in words.split(' ')])</pre>
+    return " ".join([x[::-1] for x in words.split(' ')])
+{{</highlight>}}
 
 The only thing of note in here is the x[::-1] which is extended slice syntax which reverses a string. You could also to reversed(x) although I believe at the time of writing it is MUCH slower.
 
 Q. Given two arrays find which elements are not in the second.
 
-<pre>def find_not_in_second(first, second): 
+{{<highlight python>}}
+def find_not_in_second(first, second): 
     '''
     Find which numbers are not in the
     second array
     '''
-    return [x for x in first if x not in second]</pre>
+    return [x for x in first if x not in second]
+{{</highlight>}}
 
 I am especially proud of the second snippet as it is very easy to read and rather Pythonic. It takes in two lists such as [1,2,3] and [2,3,6] and returns a new list with the missing elements.
