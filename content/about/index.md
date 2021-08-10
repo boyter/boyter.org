@@ -46,6 +46,10 @@ Also here are a few press write ups I have received for my project searchcode.co
   * YourStory [How this Aussie coder is making life easy for techies around the world with searchcode][7]
   * Sphinx Blog [Sphinx Searches Code at Searchcode.com][8]
 
+And some random other things that I had a hand in
+
+  * https://www.functionize.com/blog/a-toolkit-to-empower-developers-and-testers/
+
 Want to hire me? Have a look at my attached [resume][9] and email me at bboyte01@gmail.com
 
  [1]: http://www.boyter.org/wp-content/uploads/2013/07/headshot.jpg
