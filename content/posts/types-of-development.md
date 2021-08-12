@@ -57,3 +57,36 @@ Where you use real users to drive your development methodology and end up delive
 
 You split into front-end and back-end teams who build ivory tower solutions and then blame each other for not conforming when the integration fails. Examples include most companies that adopt a micro-service architecture.
 
+----------
+
+### Types of Development #8
+
+*Bug Driven Development*
+
+Management looking for a promotion forces arbitrary changes that cause the application to break in odd ways. You spend the rest of your tenure fixing bugs as reported by users. Examples include database merges for cost saving purposes.
+
+----------
+
+### Types of Development #9
+
+*Billable Hours Development*
+
+Promise everything without any intent to deliver any value. Only the production of billable hours matters. Examples include any projects where they are contracted out to bum on seat consultancies.
+
+----------
+
+### Types of Development #10
+
+*Legal Driven Development*
+
+Any change to the system has been voted in by a government or parliament. It includes no less than 68 pages of legalese with no technical information. Development must be done paired with a legal advisor who usually does not understand computers is paid 6x what the developer is and questions every change. Examples include any government initiative such as electronic census collection, voting or park website.
+
+----------
+
+### Types of Development #11
+
+*Despair Driven Development*
+
+A refactoring of a project started with wholesome intentions. Alas the project was built on the foundations of multiple other projects that sank into the swamp, and any change takes at least 10x the effort over re-implementing from scratch. Business loves the application because it solves a legitimate business problem albeit at the cost of developer sanity. The refactor never finishes, and despair consumes the next batch of wide eyed developers. Usually followed by the developer moving to Resume Driven Development. Examples include any custom internal large enterprise application written using WebForms and C# 2.0 that for some reason have 2 service layers.
+
+
