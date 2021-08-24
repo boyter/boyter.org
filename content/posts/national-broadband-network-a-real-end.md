@@ -67,5 +67,5 @@ When WiFi6 no longer costs an arm and a leg I will upgrade the router to that. I
 
 The connection itself has been rock solid, with no slowdowns/dropouts anymore and even with a huge amount of rain there as been no noticeable difference. Previously this would ruin my internet connection.
 
-So with that done, thats the end of NBN for me. I have achieved the end state, with the best possible connection that you can get on the network. I didn't like how I had to get there, but I am at least and can focus on other problems in life. 
+So with that done, thats the end of NBN for me. I have achieved the end state, with the best possible connection that you can get on the network. I didn't like how I had to get there, but I am at least and can focus on other problems in life. A fairy tale ending? Almost. Certainly a bittersweet one.
 
