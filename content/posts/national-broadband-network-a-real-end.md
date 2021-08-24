@@ -35,7 +35,7 @@ Of course, nothing would be complete in 2021 without mentioning COVID-19. Which 
 ![nbn install](/static/nbn/install3.jpg)
 ![nbn install](/static/nbn/ntd.jpg)
 
-After the NTD install, and a little diagnostics, the little light went green indicating that the fibre was active. At this point its a matter of waiting for NBN to do some tweaks on their side. A few days later I got this email,
+After the NTD install, and a little diagnostics, the little light went green indicating that the fibre was active. It should be noted NBN does not seem to install the battery backup anymore. This isn't a huge issue for me, as I would have pulled the battery instantly to avoid it beeping at some point. I asked about this and it seems its only installed now for premises that need a 24/7 connection. At this point its a matter of waiting for NBN to do some tweaks on their side. A few days later I got this email,
 
 ![nbn progress](/static/nbn/emailprogress.png)
 
