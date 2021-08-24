@@ -47,6 +47,10 @@ Which indicates that the progress has reverted? Are NBN coming to rip things out
 
 Thankfully, Aussie Broadband was able to tell, and I quickly signed up in the application and the next morning everything was done. I had previously bought a Google Wifi Nest Mesh network to run everything, as it was recommended by Aussie themselves and reviews indicated it to be one of the most hassle free Wifi Mesh networks.
 
+A few days later NBN updated its progress as well.
+
+![nbn progress](/static/nbn/completion2.png)
+
 So the final result? On the router itself, the speed test is very promising. 
 
 ![nbn router](/static/nbn/router-speed.png)
