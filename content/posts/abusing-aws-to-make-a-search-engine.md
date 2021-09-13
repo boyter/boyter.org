@@ -34,6 +34,8 @@ It will probably slide under the AWS Lambda Free tier as well for running even i
 
 If not, perhaps AWS will reach out and offer me some credits for being such a good sport, or so I can iterate on the idea and build it out further.
 
+Incidentally searching around found this blog post https://www.morling.dev/blog/how-i-built-a-serverless-search-for-my-blog/ about building something similar using lucene, but without storing the content and only on a single lambda.
+
 ## Proving the idea...
 
 So the first thing I considered was putting content directly into lambda's, and then brute force searching across that content. Considering our guess of storing ~100,000 items in a lambda, a modern CPU brute force string searching in memory should return in a few hundred milliseconds. Modern CPU's are very fast.
@@ -249,6 +251,12 @@ _, _ = file.WriteString(fmt.Sprintf(`{Url:"%s",Title:"%s",Content:"%s",Score:%.4
 
 Once the block is written, it is then compiled and uploaded into AWS replacing the previous lambda. If its a new lambda, its deployed into AWS and the controller lambda has its environment variables update to know about the new lambda, at which point new searches will hit it and the index grows.
 
+The result? Something like the below, where you can see multiple lambda's deployed.
+
+![aws lambda search deployment](/static/abusing-aws-lambda/deployment.png)
+
+There is some room for improvement here to make more optimal use of the lambda size. I purposely made the indexer not push the limits as its is a little dumb and can make mistakes. It should be easy to resolve when I get the time. It should improve the number of documents stored in each lambda by about 15% if done correctly. 
+
 ## Putting it all together
 
 I have been a bit remiss in my devop's skills recently. Seriously the last time I seriously touched cloudformation I was using JSON though a custom template processor (don't laugh we all do it at some point).
@@ -263,16 +271,23 @@ Pretty simple.
 
 Deploying the API Gateway and controller is done through cloudformation. Workers however are deployed directly using AWS API. This is done because they need to be updated and created fairly often and cloudformation was just too slow.
 
-Of course we also need a website to serve it all up. I want to protect index itself, so rather than fire AJAX requests at the endpoint allowing anyone access, I quickly coded a small HTTP server which calls back to the endpoint and performs a search.
+Of course we also need a website to serve it all up. I want to protect index itself, so rather than fire AJAX requests at the endpoint allowing anyone access, I quickly coded a small HTTP server which calls back to the endpoint and performs a search. I then turned to [mvp css](https://andybrewer.github.io/mvp/) to make it not offensively ugly and produced this result.
 
-Considering all of the media search laws going on in Australia we can make this an Australian search engine.
+![bonzamate](/static/abusing-aws-lambda/1.png)
+![bonzamate](/static/abusing-aws-lambda/2.png)
+
+Considering all of the media search laws going on in Australia we can make this an Australian search engine, and maybe get some attention from someone willing to invest more into this.
+
+Anyway seeing as I was going to the effort, I also added a quick info box output similar to the ones you see on Bing/Google/Duckduckgo which present some information for you based on wikipedia entries. Same idea as the workers, with the content compiled into a binary. The final bit was a news lambda, which pulls in news from
 
 
-Seeing as I was going to the effort, I also added a quick info box output similar to the ones you see on Bing/Google/Duckduckgo which present some information for you based on wikipedia entries. Same idea as the workers, with the content compiled into a binary. The final bit was a news lambda, which pulls in news from
+
+
+
 
 Also I can copy a lot of this post https://artem.krylysov.com/blog/2020/07/28/lets-build-a-full-text-search-engine/ which is a pretty decent 
 
-Also while this is not totally original the scale out appears to be https://www.morling.dev/blog/how-i-built-a-serverless-search-for-my-blog/
+Also while this is not totally original the scale out appears to be 
 
 
 
