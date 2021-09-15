@@ -81,4 +81,4 @@ Basic, or in my case QBasic was probably the starting point for a lot of people 
 
 There was also some Loony Tunes game where you could drop the characters into a video editor like thing and have them act out your own skits. I was never good at it, but I would love to find it and have another go one day.
 
-I have to thank whoever came up with the idea for that stand-up. Gave my a nice trip down memory lane. I also found this https://ancientelectronics.wordpress.com/2019/08/11/commodore-select-edition-286/ which has a reasonable overview of the internals of the machine. A;so I realised when doing this that I am nostalgic for a time that most people I work with were not even born into.
+I have to thank whoever came up with the idea for that stand-up. Gave my a nice trip down memory lane. I also found this https://ancientelectronics.wordpress.com/2019/08/11/commodore-select-edition-286/ which has a reasonable overview of the internals of the machine. Also I realised when doing this that I am nostalgic for a time that most people I work with were not even born into.
