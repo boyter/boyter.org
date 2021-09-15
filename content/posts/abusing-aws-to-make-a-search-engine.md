@@ -15,7 +15,7 @@ Without persistance it makes lambda a non starter. But, there is a saying in com
 
 > Never do at runtime what you can do at compile time.
 
-I decided to see how far I can take that idea, by using AWS Lambda to build a search engine. How to we get get around the lack of persistance? By baking the index into the lambda themselves. In other words, generate code which contains the index and compile that into the lambda binary. Do it at compile time.
+I decided to see how far I can take that idea, by using AWS Lambda to build a search engine. How do we get get around the lack of persistance? By baking the index into the lambda themselves. In other words, generate code which contains the index and compile that into the lambda binary. Do it at compile time.
 
 The plan, is then to shard the index using individual lambda's. Each one holds a portion of the index compiled into the binary that we deploy. Then then we call each lambda using a controller which invokes all of them, collects all the results, sorts by rank, gets the top results and returns them.
 
@@ -120,7 +120,7 @@ Then I started reading about early termination algorithms and stumbled into a hu
  - https://www.researchgate.net/profile/Zemani-Imene-Mansouria/publication/333435122_MWAND_A_New_Early_Termination_Algorithm_for_Fast_and_Efficient_Query_Evaluation/links/5d0606a5a6fdcc39f11e3f0f/MWAND-A-New-Early-Termination-Algorithm-for-Fast-and-Efficient-Query-Evaluation.pdf
  - https://dl.acm.org/doi/10.1145/1060745.1060785
 
-I didn't know there was so much research about this. The more you learn the more you realise you know so little. Seems a lot of people get a PhD out of research in this area. I quickly backed away from some of the techniques above (they are way above my pay grade) and just wrote a simple implementation to bail out once it had enough results, but with a guess as to how many would have been found had we kept going.
+I didn't know there was so much research about this. The more you learn the more you realise you know so little. Seems a lot of people get a Ph.D. out of research in this area. I quickly backed away from some of the techniques above (they are way above my pay grade) and just wrote a simple implementation to bail out once it had enough results, but with a guess as to how many would have been found had we kept going.
 
 With this done, searches worked well enough in a lambda, returning in under 100 ms for most searches I tried. So I moved on to the next few problems.
 
@@ -356,9 +356,9 @@ The final thing needed to be a legitimate search engine was a news feed. Because
 
 Well firstly, building a search engine is hard. Runtime systems are hard. Algorithms are hard. You have to do both. In addition you need to build a crawler which is being fought against by the modern internet, design an index format, ensure its fast and ensure everything scales. You need to work on ranking algorithms, for which all the big players have buildings full of very smart people working on. Heck they don't even know how their ranking works since they are trained using AI these days. You need to fight against spammers and SEO optimizers, categorize text pages (a very hard problem) while fighting against the constraints of time.
 
-Heck even picking the snippet of text to plonk on the page is a hard problem. While any of the above issues are possible to have solved quickly by the most junior memory of your team solving them in a way that people actually expect is indeed very hard.
+Heck even picking the snippet of text to plonk on the page is a hard problem. While any of the above issues are possible to have solved quickly by the most junior member of your team solving them in a way that people actually expect is indeed very hard.
 
-Oh and bandwidth limits are a big blocker. If you behave like a good internet bot, respecting HTTP 429 and crawling gently, you need a LOT of machines to do it effectively. Something like common crawl could help with this, but the 
+Oh and bandwidth limits are a big blocker. If you behave like a good internet bot, respecting HTTP 429 and crawling gently, you need a LOT of machines to do it effectively. Something like common crawl could help with this, but they don't refresh the index very often, so it seems to be more useful for research than a search engine.
 
 Thankfully using lambda takes away a some of the hard issues for you. So AWS working as expected. Scale is less a problem for instance. By limiting myself to Australian sites worrying about global DNS, local servers and such is less of an issue too, since I only need to worry about my primary audience.
 
@@ -366,7 +366,7 @@ Speaking of lambda, there are as I write this 250 lambdas powering the search. T
 
 Assuming I wanted to move to 1000 lambda's I would modify the design having 200 or so lambdas per controller. This seems like a reasonable amount to control per lambda, as I suspect having 1000 under one might cause serious overhead problems. Just a matter of spinning up another stack though which is pretty easy.
 
-Anyway you can try the result for yourself at [Bonzamate https://bonzamate.com.au/](https://bonzamate.com.au/) The name came to me when I was looking at possible domains to host under and seemed to be suitably Australian.
+Anyway you can try the result for yourself at [Bonzamate](https://bonzamate.com.au/) The name came to me when I was looking at possible domains to host under and seemed to be suitably Australian.
 
 For those who don't speak Aussie it means "first rate" or "excellent" + mate. It's something you might say to your buddies.
 
