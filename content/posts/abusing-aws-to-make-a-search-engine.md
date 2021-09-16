@@ -270,7 +270,7 @@ I had previously worked on this for another project (which I should finish one o
 
 The results for our sample search "ten thousand a year" returns the below snippet,
 
-> of his having **ten thousand a year**. The gentlemen pronounced him to be a fine
+> before. I hope he will overlook it. Dear, dear Lizzy. A house in town! Every thing that is charming! Three daughters married! **Ten thousand a year**! Oh, Lord! What will become of me. I shall go distracted.” This was enough to prove that her approbation need not be
 
 For "stranger parents" the result is what I consider perfect.
 
@@ -278,7 +278,7 @@ For "stranger parents" the result is what I consider perfect.
 
 Another good example which has multiple candidates, "poor nerves".
 
-> You take delight in vexing me. You have no compassion for my **poor nerves**
+> your own children in such a way? You take delight in vexing me. You have no compassion for my **poor nerves**.” “You mistake me, my dear. I have a high respect for your **nerves**. They are my old friends. I have heard you mention them with consideration these last
 
 To save you a click, it works by passing the document content to extract the snippet from and all of the match locations for each term. It then looks though each location for each word, and checks on either side looking for terms close to it. It then ranks on the term frequency for the term we are checking around and rewards rarer terms. It also rewards more matches, closer matches, exact case matches and matches that are whole words. The results turned out to be better than expected for my sample text of Pride and Prejudice, and so I was happy to move on.
 
