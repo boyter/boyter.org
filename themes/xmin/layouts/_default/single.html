@@ -1,6 +1,8 @@
 {{ partial "header.html" . }}
 <div class="article-meta">
-<h1><span class="title">{{ .Title }}</span> <small>({{ .WordCount }} words)</small></h1>
+<h1><span class="title">{{ .Title }}</span><br>
+<small>{{ .Date.Format "2006/01/02" }}</small>
+<small>({{ .WordCount }} words)</small></h1>
 </div>
 
 <main>
