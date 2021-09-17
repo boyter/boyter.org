@@ -348,7 +348,7 @@ Since I run my blog (this one) on a VPS in Australia, and use Caddy as the main 
 
 Seeing as I was going to the effort, I also added a quick info box output similar to the ones you see on Bing/Google/DuckDuckGo which present some information for you based on wikipedia entries. Same idea as the workers, with the content compiled into a binary. 
 
-I pulled down the wikipedia abstracts data set and then kept anything mentioning Australian content. The abstracts data set is actually pretty bad with lots of broken content so I had to put some effort in to filter that out. I have plans to try processing wikipedia itself at some point to produce this.
+I pulled down the wikipedia abstracts data set and then kept anything mentioning Australian content. The abstracts data set is actually pretty bad with lots of broken content so I had to put some effort in to filter that out. I have plans to try processing wikipedia itself at some point to produce this in the future.
 
 The final thing needed to be a legitimate search engine was a news feed. Because I didn't want to run afoul of the news payment laws that passed in Australia I only hit independent and publicly funded news organizations. It runs on a schedule every 15 minutes pulling a variety of RSS feeds, sorting them and saving the content to S3 and to a global value. The lambda when called looks at the global value, and if something is there returns that, otherwise it fetches the content from S3, sets the global value and returns it. It also accepts the search values so you can filter the news down.
 
@@ -358,11 +358,11 @@ Well firstly, building a search engine is hard. Runtime systems are hard. Algori
 
 Heck even picking the snippet of text to plonk on the page is a hard problem. While any of the above issues are possible to have solved quickly by the most junior member of your team solving them in a way that people actually expect is indeed very hard.
 
-Oh and bandwidth limits are a big blocker. If you behave like a good internet bot, respecting HTTP 429 and crawling gently, you need a LOT of machines to do it effectively. Something like common crawl could help with this, but they don't refresh the index very often, so it seems to be more useful for research than a search engine.
+Oh and bandwidth limits are a big blocker. If you behave like a good internet bot, respecting HTTP 429 and crawling gently, you need a LOT of machines to do it effectively. Something like common crawl could help with this, but they don't refresh the crawl very often, so it seems to be more useful for research than a search engine. Although combining it with freshly crawled results could produce a good result and is something I am now considering.
 
-Thankfully using lambda takes away a some of the hard issues for you. So AWS working as expected. Scale is less a problem for instance. By limiting myself to Australian sites worrying about global DNS, local servers and such is less of an issue too, since I only need to worry about my primary audience.
+Thankfully using lambda takes away a some of the hard issues for you. So AWS working as expected. Scale is less a problem for instance. By limiting myself to Australian sites, worrying about global DNS, local servers and such is less of an issue, since I only need to worry about my primary audience.
 
-Speaking of lambda, there are as I write this 250 lambdas powering the search. The index itself is about 12 million pages. Improvements to the indexing code could reduce that number of lambdas to about 200 given some effort, so it looks like 100 million documents using the full 1,000 lambdas seems possible, but more likely it would be close to 80 million when done. The only reason I have not done so is since I am still waiting on my crawlers.
+Speaking of lambda, as I write this there are 250 lambdas powering the search. The index itself is about 12 million pages. Improvements to the indexing code could reduce that number of lambdas to about 200 given some effort, so it looks like 100 million documents using the full 1,000 lambdas seems possible, but more likely it would be close to 80 million when done. The only reason I have not done so is since I am still waiting on my crawlers.
 
 Assuming I wanted to move to 1000 lambda's I would modify the design having 200 or so lambdas per controller. This seems like a reasonable amount to control per lambda, as I suspect having 1000 under one might cause serious overhead problems. Just a matter of spinning up another stack though which is pretty easy.
 
@@ -374,9 +374,9 @@ For those who don't speak Aussie it means "first rate" or "excellent" + mate. It
 >
 > "It was bonza mate!"
 
-It also passes my test of being describable to someone over the phone, which non of my other choices did.
+It also passes my test of being able to explain to someone over the phone, which none of my other choices did.
 
-Anyway, while looking to write a post about search engines that run their own index I found this page [A look at search engines with their own indexes](https://seirdy.one/2021/03/10/search-engines-with-own-indexes.html) which is pretty much what I would have liked to have written. It has some interesting search tests, which alas aren't really applicable to my search since its not general purpose.
+Anyway, while looking to write a post about search engines that run their own index I found this page [A look at search engines with their own indexes](https://seirdy.one/2021/03/10/search-engines-with-own-indexes.html) which is pretty much what I would have liked to have written. It has some interesting search tests, which alas aren't really applicable to my search since its not general purpose. Or rather region specific, making it hard to reuse the same criteria.
 
 So I came up with some of my own tests. The first being a search I try on every search engine. A search for [viaga](https://bonzamate.com.au/?q=viagra). The reason being that its usually highly SEO gamed and full of spam results. The results? Honestly not too bad. No real spam, although there are highly SEO optimized pages in there.
 
@@ -405,18 +405,18 @@ A few other interesting searches I tried that seemed to produce results I would 
  - https://bonzamate.com.au/?q=having+baby+in+canberra
  - https://bonzamate.com.au/?q=asian+history
 
-What I do find about the above searches is that they are as you would expect Australian centric. So searching for asian history produces results that finds [this page](https://www.asianaustralianleadership.com.au/eminent-asian-australians).
+What I do find about the above searches is that they are as you would expect Australian centric. So searching for asian history produces results that finds [this page](https://www.asianaustralianleadership.com.au/eminent-asian-australians), which is something I wouldn't find as easily on Google/Bing even with the region set.
 
-So what about that porn filter? Well a search for porn itself https://bonzamate.com.au/?q=porn produces nothing that I would describe as porn. Books about food porn and such. Trying some other search for swear words and such seemed to work as expected, so that seems reasonable.
+So what about that porn filter? Well a search for porn itself https://bonzamate.com.au/?q=porn produces nothing that I would describe as porn. Books about food porn and such. Trying some other search for swear words and such seemed to work as expected, so that seems reasonable. Of course you can always switch into mixed results, or inverse the search to only browse them.
 
-Searches for news are useful too, although as the results are ephemeral harder to link to. Please forgive the subject choice, but I am fairly confident at time of posting they will have something to show.
+Searches for news are useful too, although as the results being ephemeral are harder to link to. Please forgive the subject choice, but I am fairly confident at time of posting they will have something to show.
 
  - https://bonzamate.com.au/news/?q=covid
  - https://bonzamate.com.au/news/?q=wine
  - https://bonzamate.com.au/news/?q=china
  - https://bonzamate.com.au/news/?q=darwin
 
-Clearly there are a few bugs. The highlighting of quoted search for example does not work, although the search does. There are some issues with duplicate content as both www and non www are treated as different domains, which they are but anyway. Something I will get around to resolving later.
+Clearly there are a few bugs. The highlighting of quoted search for example does not work, although the search does do it as expected. There are some issues with duplicate content as both www and non www are treated as different domains, which they are but anyway. Something I will get around to resolving later.
 
 For those trying their own searches, remember that this harkens back to the days of old school keyword search engines. You type terms, and the engine matches only documents that contain those exact terms. There are no keyword substitutions such as converting `pub chatswood` into `(pub || tavern || bar || nightclub || hotel) chatswood` which is what happens in Google and Bing. Query expansion like this is something I would like to add as an option that can be controlled by the user, assuming of course I can find a decent list to allow this. Gigablast appears to have one, but it looks less than exhaustive [mysynonyms.txt](https://github.com/gigablast/open-source-search-engine/blob/master/mysynonyms.txt). 
 
