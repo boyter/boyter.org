@@ -3,7 +3,7 @@ title: Abusing AWS Lambda to make an Aussie Search Engine
 date: 2021-09-14
 ---
 
-**TL/DR** I wrote an Australian search engine. You can view it at [bonzamate.com.au](https://bonzamate.com.au). It's interesting because it runs its own index, only indexes Australian websites, is written by an Australian for Australian's and hosted in Australia. It's interesting technically because it runs almost entirely serverless using AWS Lambda, and uses bit slice signatures or bloom filters for the index similar to Bing. I also found out the most successful code I have ever written is PHP, despite never being a professional PHP developer.
+**TL/DR** I wrote an Australian search engine. You can view it at [bonzamate.com.au](https://bonzamate.com.au). It's interesting because it runs its own index, only indexes Australian websites, is written by an Australian for Australians and hosted in Australia. It's interesting technically because it runs almost entirely serverless using AWS Lambda, and uses bit slice signatures or bloom filters for the index similar to Bing. I also found out the most successful code I have ever written is PHP, despite never being a professional PHP developer.
 
 ## The idea...
 
