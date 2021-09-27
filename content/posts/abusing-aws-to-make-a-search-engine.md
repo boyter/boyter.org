@@ -104,6 +104,8 @@ Checking cloudwatch with the above implemented shows the following runtime's for
 
 The larger times are usually caused by a search for a really common term, which produces more results, hence more work. This can actually be cut down with some early termination logic, which I implemented later. Keep in mind that the above times include ranking and snippet extraction as well and the result is ready to show to the user. Its not just the time for the core search.
 
+It keeps getting mentioned to me that you can use docker images with lambda to get 10 GB of storage. I did consider this, but my early experiments suggested that there isn't enough CPU in lambda to use the storage. Besides this feels like a nice hack :)
+
 ## Early Termination Logic
 
 So early termination was something I was aware of but never really investigated. I assumed it was a simple case of,
