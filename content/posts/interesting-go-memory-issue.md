@@ -13,6 +13,6 @@ So in order to test it I used a 128 GB virtual machine on Digital Ocean, freshly
 
 I ended up putting in a `runtime.GC` inside the core loop to resolve the issue and was able to finish my tests.
 
-However I wouldn't have thought it possible. The application should never have hit that 128 GB threshold. I suspect because the Go GC triggers every time the heap doubles, it runs into OOM (no swap-file setup by default) when it gets to just over 64 GB of heap, and then doubles again without first running GC. Then crashes. Checking the following https://blog.twitch.tv/en/2019/04/10/go-memory-ballast-how-i-learnt-to-stop-worrying-and-love-the-heap-26c2462549a2/ suggests that might be it as well, but would love someone else to have a theory of deny/confirm my one.
+However I wouldn't have thought it possible. The application should never have hit that 128 GB threshold. I suspect because the Go GC triggers every time the heap doubles, it runs into OOM (no swap-file setup by default) when it gets to just over 64 GB of heap, and then doubles again without first running GC. Then crashes. Checking the following https://blog.twitch.tv/en/2019/04/10/go-memory-ballast-how-i-learnt-to-stop-worrying-and-love-the-heap/ suggests that might be it as well, but would love someone else to have a theory of deny/confirm my one.
 
 I suspect given a real workload this will be less of an issue because the creation will be slower than the 2 mins or so due to network and other impacts, but thats a problem for later when I actually fully implement it.
