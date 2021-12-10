@@ -157,3 +157,4 @@ EDIT - I actually did write content and publish it as a book! [Expert Excuses fo
 ![Book Cover](/static/books/f7598a1d0e03c6bcaab55ca4160898ac.jpeg)
 ![Book Cover](/static/books/f8153cfdbe0a117e6386fa7051976063-2.jpeg)
 ![Book Cover](/static/books/fe79f4a4b464936db0762e1ee53427c7.png)
+![Book Cover](/static/books/FGMeVj7VEAM7Zni.png)
