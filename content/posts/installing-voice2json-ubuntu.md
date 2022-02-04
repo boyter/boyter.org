@@ -1,6 +1,6 @@
 ---
 title: Installing voice2json on Ubuntu
-date: 2021-02-03
+date: 2022-02-03
 ---
 
 I have been playing around with offline non cloud tool replacements for doing things like speech to text and the like. One that I found which looked promising was voice2json which is a command line tool for turning speech intent into text. It can do generic conversion too, but a review of that is not the subject of this post.
