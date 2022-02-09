@@ -25,4 +25,4 @@ Problem solved, and I was able to run it.
 voice2json transcribe-wav --open < test.wav
 ```
 
-With the output working as expected. I did notice it seems to take as long to run as the audio itself is, but thats not a huge issue for my case.
+With the output working as expected. I did notice it seems to take as long to run as the audio itself is, but thats not a huge issue for my case. Next on my list is to investigate the newish https://github.com/petewarden/spchcat
