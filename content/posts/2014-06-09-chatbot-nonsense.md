@@ -14,7 +14,8 @@ Naturally I had to give it a try and frankly I can't see how something like this
 
 For fun I scripted it up against a copy of the Eliza chat-bot and had them talk among themselves. A quick excerpt is included below and is rather amusing.
 
-<pre>Eliza: Is it important to you that your attitude to I ?
+```
+Eliza: Is it important to you that your attitude to I ?
 Eugene: It is highly possible. It is highly possible.
 Eliza: Lets discuss further why your feelings right now.
 Eugene: Just because 2 plus 2 is 5! Wonna ask me something more?
@@ -29,7 +30,7 @@ Eugene: Who knows... Well, let's go on though.
 Eliza: Have you asked such questions before ?
 Eugene: I would rather not talk about it if you don't mind. Oh, what a fruitful conversation;-)
 Eliza: What would you do if I don't mind ?
-</pre>
+```
 
 I think it would be even more amusing to wash the results through an automated translator from English to Japanese and back between each step.
 
