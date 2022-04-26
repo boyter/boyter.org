@@ -24,27 +24,16 @@ I am not aware of anyone else solving this issue in this way. This may or may no
 
 If you would like to see some examples of what sort of reports Portfold can produce please see the following detailed report outputs.
 
-[Prescription Drugs Suicide Link
-  
-][4] [Risperidone][5]
-  
+[Prescription Drugs Suicide Link][4] 
+[Risperidone][5]
 [Dichloro Diphenyl Trichloroethane][6]
-  
 [Backup And Recovery Approaches Using Aws][7]
-  
 [Australia Privacy Laws][8]
-  
 [Oil Gas Pipeline Failure Rates][2]
-  
-[Hydroelectric Dam Environmental Impacts
-  
-][3] [Democrat Candidates Republican Candidates Equal Pay
-  
-][9] [Migration And Maritime Powers Legislation Amendment (Resolving The Asylum Legacy Caseload) Bill 2014
-  
-][10] [Man Haron Monis][11][
-  
-][3]
+[Hydroelectric Dam Environmental Impacts][3] 
+[Democrat Candidates Republican Candidates Equal Pay][9] 
+[Migration And Maritime Powers Legislation Amendment (Resolving The Asylum Legacy Caseload) Bill 2014][10] 
+[Man Haron Monis][11]
 
  [1]: https://portfold.com/
  [2]: http://www.boyter.org/wp-content/uploads/2014/12/Oil-Gas-Pipeline-Failure-Rates.pdf
