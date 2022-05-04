@@ -15,7 +15,6 @@ func main() {
 
 	if len(os.Args) > 1 {
 		return s.getSomething(context.TODO(), events.APIGatewayProxyRequest{})
-		return
 	}
 
 	lambda.Start(s.Handler)
