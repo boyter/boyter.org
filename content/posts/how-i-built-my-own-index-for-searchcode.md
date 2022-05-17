@@ -1,7 +1,16 @@
 ---
 title: How I built my own search index for searchcode.com
-date: 2050-10-10
+date: 2022-05-10
 ---
+
+**Abstract TL/DR**
+
+I present what I belive is a unique index implementation for indexing and searching source code. It copies ideas from Bing and Debian Code Search fusing parts of the Bing bitfunnel index with the positional index ideas used in Debian Code Search to create a very fast memory efficent trigram index over source code.
+
+ - The index for searchcode.com has been moved to a custom built index
+ - The index is based on bloom filters split by document size
+
+
 
 So admission. I have felt like a fraud for a while. I get a lot of questions about indexing code due to searchcode.com and generally my answer has always been I use [sphinx search](http://sphinxsearch.com/). Recently that has changed, as I moved over to its forked version [manticore search](https://manticoresearch.com/). Manticore is an excellent successor to sphinx and I really do recommend it. I also like elasticsearch as well for enterprise search solutions since it does things out of the box that sphinx/manticore are still catching up on.
 
@@ -10,7 +19,7 @@ However this still is me outsourcing the core functionality of searchcode to a t
 Anyway what follows are my notes while thinking about this from start to implementation. A lot of random thoughts, ideas and such going on. It's not in chronological order, but grouped by what I was thinking about at the time.
 
 
-# The Problem
+# The Problem with Source Code
 
 So I decided to build my own index/search for searchcode. Why would anyone consider doing this when there are so many projects that can do this for you. Off the top of my head we have code available for lucene, sphinx, solr, elasticsearch, manticore, xaipan, gigablast, bleve, bludge, mg4j, mnoGoSearch... you get the idea. There is a lot of them out there. Most of them however are focused on text and not source code. Also its worth noting that the really large scale engines such as Bing and Google have their own indexing engines which gives you the ability to wring more performance out of the system since you know where you can cut corners or save space, assuming you have the skill or patience.
 
@@ -29,7 +38,7 @@ for(i=0; i++; i<100) {
 for(i=0;i++;i<100) {
 {{</highlight>}}
 
-How do you split them into terms? By spaces which is what most engines do (for English language documents) results in the following,
+How do you split them into terms? By spaces which is what most index tools do (for English language documents) which results in the following,
 
 {{<highlight java>}}
 for(i=0; 
@@ -60,49 +69,40 @@ Also on occasion I get something like this, which is the manticore/sphinx proces
 
 Not what you want on your server when normally the load average is ~0.1. Hopefully I can ensure this never happens again.
 
-For the record I do not have a PhD in applied search or an real world experience building web indexes. I don't even work in the space professionally. I can use elastic search pretty well though! Really I'm just some numb-nut who grew up in Western Sydney (up the riff!) and apparently dreams about flying close to the sun. Clearly I have no business writing my own indexer. But the nice thing about the internet is you really don't need permission to do a lot of things, so lets roll up our [flanno](https://www.urbandictionary.com/define.php?term=flanno) sleeves, then a [durrie](https://www.urbandictionary.com/define.php?term=durrie)* and get coding. As such take anything below with a massive grain of salt before you implement or start hurling internet abuse at me.
+For the record I do not have a PhD in applied search or any real world experience building web indexes. I don't even work in the space professionally. Nor am I ever likely too since I doubt what I am presenting here holds a candle to the work of Google/Bing/Facebook Search or any other work by companies who work on these problems full time.
 
-*NB* BTW I don't smoke
-
-Ahem. However before we start lets have a think about our requirements and constraints. One thing to consider early on is how to do searches in your index you have two options. The first is to allow searches in parallel and the latter is to not. However the choice between might not be as simple as you would think. It also greatly impacts the design of the system.
-
-Most would think, of course do it in parallel! Process in parallel so that way people wait less. But do they? As more searches come in the average time for each search goes up. Consider the situation that 10 people all search at the same time. Lets also assume that each search takes 1 second. Given limited resources which is true for most cases it means all 10 searches are shared across the system. As such everyone gets 1/10th of the system to search with and end up waiting 10 seconds for a result.
-
-However consider doing it in serial. While all came in at once only one can go first, and that persons search returns in 1 second. The second was waiting on the first and their search takes 2 seconds. The third takes 3 seconds etc... till the last one who had a 10 second wait. Which is the better result? I would argue the latter.
-
-There are a few other advantage to doing your searches in serial. You can attempt to consume all the resources you have at your disposal to give a good result, you don't have to worry about memory issues since you should know how much memory you need at any one time. As such I am going to make the choice to limit searches in the system to one at a time.
+I can use elastic search pretty well though! Really I'm just some dude who grew up in Western Sydney (thats considered the bad side of Sydney) and apparently dreams about flying close to the sun. Clearly I have no business writing my own indexer. But the nice thing about the internet is you really don't need permission to do a lot of things, so lets roll up our [flanno](https://www.urbandictionary.com/define.php?term=flanno) sleeves and get coding. As such take anything below with a massive grain of salt before you implement or start hurling internet abuse at me. This is about how I built an index, and not about how you should build one.
 
 That decided lets list down the "requirements" and constraints we have.
 
-Requirements
+### Requirements
 
  - We don't need to support wildcard queries or OR search, AND by default but be able to implement them later...
  - We need to be able to search special characters
  - We want to be able to update quickly as its a write heavy workload
- - We need to support filters on source, language and repository
+ - We need to support filters on source (github/bitbucket etc...) and code language
  - Its a free website, so we can deal with some downtime or inaccuracy
- - Only one search allowed at at time
  - We want searches to return in 0.2 seconds so a 200 ms time budget with no cache (lower is better though)
  - Want to embed into searchcode itself to avoid those dreaded network calls
  - No stopwords
- - Would be nice to get a spelling corrector in there too
- - We want to store as much of the index in RAM as possible, cos RAM is cheap now?
- - We only index terms longer than 3 characters, and trim long ones down to 20 characters
+ - We want to store as much of the index in RAM as possible, since RAM is cheap
  - We don't need to do any term rewriting (where you map NY to new york and or search for both)
  
-Constraints
+### Constraints
 
- - We have a higher that normal term count per document than web
- - We are using Go so we have to think about the impact of GC and that its slower than other languages
- - This is a side project, so whatever is done needs to be achievable out of hours by a single person who is not a 10x developer
+ - We have a higher that normal term count per document than web documents
+ - We are using Go so we have to think about the impact of GC and its performance
+ - This is a side project, so whatever is done needs to be achievable by a single person who is not a 10x developer in this spare time
 
-Why using Go I hear you ask? Well I know 3 languages reasonably well. Those being Java, C# and Go. The current version of searchcode.com is written in Go which is the main reason for using it. I don't know of anyone else using it but blekko back in the day was supposedly using Perl. Plus I would really like to get this embedded into the application itself to avoid those pesky expensive slow network calls.
+Why using Go I hear you ask? Well I know 3 languages reasonably well. Those being Java, C# and Go. The current version of searchcode.com is written in Go which is the main reason for using it. Blekko back in the day was supposedly written using Perl so I don't think performance should be an issue here. Plus I would really like to get this embedded into the application itself to avoid those pesky expensive slow network calls.
 
 It might surprise some reading this to learn that searchcode.com is the work of one person in their spare time. As such I write this pretty frankly. There is no money to be make in the free online code search market (just ask Google or Ohloh), so by all means feel free to take whats here and enter the "market" and loose money as well. There is a market in enterprise search though, so feel free to compete with sourcegraph if you like.
 
-So there are a few talked about ways to build an index that I am aware of or could easily find and document.
+So there are a few talked about ways to search across content or build an index that I am aware of. Lets discuss each in term with its advantages and disadvantages
 
-Brute Force, not this isn't an index strategy but worth discussing. Assuming you can get the entire corpus you are search into RAM it is possible to brute force search. Im including it here so I have the advantages and disadvantages, but suffice to say I have about 30 GB of RAM I can use to hold the index, which is nowhere near enough to hold the searchcode corpus. That said the problem is pretty brute forcible given enough CPU and RAM.
+### Brute Force
+
+Brute Force, note that this isn't an index strategy per say, but worth discussing anyway. Assuming you can get the entire corpus you are search into RAM it is possible to brute force search. I'm including it here so I have the advantages and disadvantages, but suffice to say I have about 30 GB of RAM I can use to hold the index, which is nowhere near enough to hold the searchcode corpus. That said the problem is pretty brute forcible given enough CPU and RAM. Note that I do not have enough CPU/RAM to achive this.
 
 Advantages
  - 100% space efficient (for the index anyway) since there isn't one
@@ -111,15 +111,18 @@ Advantages
  - Scales (assuming you are prepared to pay)
 
 Disadvantages
- - Slow... at scale IE not in RAM
+ - Slow... at scale if you cannot fit your corpus in RAM
  - Harder to scale because gotta duplicate all the data
+ - Writing high performance string searches is a very hard problem
  
-Inverted index. Pretty much building a map of terms to documents and then intersecting them and ranking. One issue with this technique is that you end up with enormous term lists, known as posting lists for common terms. As mentioned previously we cannot use stop words to reduce this, and even if we did there is a lot of repetition in code so you tend to get a lot of huge posting lists.
+### Inverted Index
+
+Inverted index. This is pretty much building a map of terms to documents and then intersecting them and ranking. One issue with this technique is that you end up with enormous term lists, known as posting lists for common terms. As mentioned previously we cannot use stop words to reduce this, and even if we did there is a lot of repetition in code so you tend to get a lot of huge posting lists.
 
 Advantages
  - Easy to query
  - Does not miss terms
- - Can store TF alongside terms as a positional index
+ - Can store TF alongside terms creating a positional index
  - Fast and easy; intersecting posting lists is something you can hand off to your most junior developer (at least initially)
  - Query execution time is related to the number of returned results
 
@@ -127,6 +130,9 @@ Disadvantages
  - Harder to do wildcard queries OR use more space for them
  - Hard to update documents and avoid false positives, usually have to rebuild the index or do delta + merge
  - Need to implement skip lists or compression on the posting lists at scale
+ - Queries can be slow due to the complexity of the list structures
+
+### Trie
 
 Trie for example https://github.com/typesense/typesense which uses Adaptive Radix Tree https://stackoverflow.com/questions/50127290/data-structure-for-fast-full-text-search
 
@@ -138,13 +144,15 @@ Advantages
 
 Disadvantages
  - Can take up more space if lots of prefixes
- - Not friendly to GC due to the use of pointers
+ - Not friendly to GC due to the use of pointers (problem for Go)
  - Need to implement skip lists or compression on the posting lists at scale
 
-Bit Signatures. This is something I remember reading about years ago, and found this link to prove I had not lost my mind https://www.stavros.io/posts/bloom-filter-search-engine/ At the time I thought it was neat but not very practical... However then it turns out that Bing has been using this technique over its entire web corpus http://bitfunnel.org/ https://www.youtube.com/watch?v=1-Xoy5w5ydM
+### Bit Signatures
+
+This is something I remember reading about years ago, and found this link to prove I had not lost my mind https://www.stavros.io/posts/bloom-filter-search-engine/ At the time I thought it was neat but not very practical... However then it turns out that Bing has been using this technique over its entire web corpus http://bitfunnel.org/ https://www.youtube.com/watch?v=1-Xoy5w5ydM
 
 Advantages 
- - Stupidly fast if careful (bitwise operations are insanely fast)
+ - Stupidly fast if careful (bitwise operations are almost free from a CPU point of view)
  - Space/Memory efficient
  - Easy to update/delete modify existing terms
 
@@ -154,19 +162,21 @@ Disadvantages
  - Query execution time is linear in the collection size (bitfunnel is about reducing this to an extent)
  - Memory bandwidth of the machine limits how large the index can grow on a single machine
 
+### Inverted Index Calculations
+
 So with the above I had a further think and decided I should try either an inverted index, a trie or bitsignatures. Before I quickly create some simple implementations of each to establish how they perform, lets get an estimate of how much storage each is going to require.
 
 Inside searchcode there is about 300 million code files (as I write this). Ignoring duplicates gives around 200 million code files that we want to search, broken up by about 240 languages across 40 million repositories.
 
-There is probably about 5kb of code in most of those files, with each having about 500 unique terms. This gives us about 1.5 TB of code, which is actually in the ballpark, although I do compress the content at rest. However to be sure I wrote a simple program to loop through most of whats there to actually calculate this. Not as a true average, but a rolling average over every 10,000 files it was able to process. I am still waiting on the results but for the first 150,000 files the average shows about 330 unique terms which is bearing up to my back of napkin calculations. I also had this work out ngrams for length of 3 to see how it would fare and it was about 4 times the results.
+There is probably about 5kb of code in most of those files, with each having about 500 unique terms. This gives us about 1.5 TB of code, which is actually fairly close to what I can see on disk, although I do compress the content. However to be sure I wrote a simple program to loop through most of whats there to actually calculate this. Not as a true average, but a rolling average over every 10,000 files it was able to process. The average shows about 330 unique terms per document which is bearing up to my back of napkin calculations. I also had this work out ngrams for length of 3 to see how it would fare and it was about 4 times the results, so about 1320 ngrams per document.
 
-The nice thing about this number is that its not stupidly big. It should be possible to run this on a single machine, and frankly its possible to brute force it given a powerful enough machine. Its certainly not a web scale problem in the sense that Google or Bing are.
+The nice thing about this number is that its not stupidly big. It should be possible to run this on a single machine, and frankly its possible to brute force it given a powerful enough machine. 
 
 So given our rough numbers, we can work out roughly how large the indexes might need to be. Im going to ignore most of the overhead of the implementation and just use the known sizes. In other words im going to assume a map, slice or other data structure is free for these estimates although that is far from the case.
 
 For the inverted index we need in effect a large map of string to integer arrays, representing a word and which documents have it. Thats the bare minimum to work. Any index worth spit though is compressing the integer arrays somehow, either using Elias-Fano, just storing offsets or some other technique and using a skip list allowing you to step through it very quickly. If you don't do this you have problems when someone searches for a really common and a really rare term.
 
-So lets assume there is a "free" mapping of strings to integers somewhere allowing us to use a integer for the words. We don't have one but for the moment while working things out lets assume so. Lets also assume we have less than 4 billion terms (I think Bing/Google have something like 10 billion per shard but we are simplifying here) so we can use a 32 bit integer to save some space. However we do want to know what the count of each term is so lets add that too, in other words we are making a positional index. 
+So lets assume there is a "free" mapping of strings to integers somewhere allowing us to use a integer for the words. We don't have one but for the moment while working things out lets assume so. Lets also assume we have less than 4 billion terms (I think Bing/Google have something like 10 billion per shard but we are simplifying here) so we can use a 32 bit integer to save some space. However we do want to know what the count of each term is so lets add that too.
 
 So we end up with a map of 32 bit ints to a struct containing a 32 bit int (we have 300 million documents we might need to store so easily less that 4 billion) which gives us the following,
 
@@ -193,11 +203,11 @@ There are techniques to reduce the size of the posting list though. Elias-Fano b
 
 So that leaves me with bit signatures from my original choices, cool. Which is the one I wanted to implement anyway because it sounds so interesting. 
 
-# Bit Signatures
+## Bit Signatures Background
 
 So there is a bit of background reading needed here. But in short, you use a bloom filter which is a space efficient way of saying something is NOT in a set or MIGHT be in a set.
 
-One of the things I was most curious about was how many bits Bing used for the bloom filters in bitfunnel. While it's entirely dependent on how large the documents are (since large documents have more terms) just having an idea helps when it comes to guessing. It took a while for me to pick it up but it was mentioned that they are around 1500 bits. Interesting. Well using our guesstimate of 500 unique terms, its pretty easy to use python to guess how many bits we might need, assuming we want a 1% false positive rate which should reduce the space requirements.
+One of the things I was most curious about was how many bits Bing used for the bloom filters in bitfunnel. While it's entirely dependent on how large the documents are (since large documents have more terms) just having an idea helps when it comes to guessing. It took a while for me to pick it up but it was mentioned that they are around 1500 bits. Using our guesstimate of 500 unique terms, its pretty easy to use python to guess how many bits we might need, assuming we want a 1% false positive rate which should reduce the space requirements.
 
 I had some Python code lying around which lets you do this.
 
@@ -275,9 +285,9 @@ Running the above gives a time of about 80 ms on the laptop I was using at the t
 
 For a simple brute force loop thats astonishingly fast. Its about as fast as you can iterate the array nearly! Its also using a single core to do it. I then tried it with 12 goroutines all running together and runtime as you would expect dropped to about 20 ms. However this is still a brute force algorithm, and as such we are still marching though all of the memory of the index. Can we reduce it?
 
-The techniques used by bitfunnel to avoid looking at all memory is cool. Which makes sense because CPU is not the limiting factor of the algorithm. Its actually how much memory you can pump through the CPU. As such you want to touch as little memory as possible. They do this by rotating the bit vectors and using higher ranked rows.
+The techniques used by bitfunnel to avoid looking at all memory are very neat, and don't actually impact CPU at all but instead reduce memory access. Which makes sense because CPU is not the limiting factor of the algorithm. It's actually how much memory you can pump through the CPU thats the limiting factor. As such you want to touch as little memory as possible. They do this through two techniques of rotating the bit vectors, using higher ranked rows, early termination and sharding on document size.
 
-Higher ranked rows is neat but it also looks hard to implement. It's also more useful when you shard your index on multiple machines which I am not doing. Reading the bitfunnel blog suggests the same, and the people writing that all have PhD's. So this technique is probably out of reach for most, and especially for a single person working on things in their spare time, and more so if that person is me.
+Higher ranked rows is neat but also hard to implement. Reading the bitfunnel blog suggests the same, and the people writing that all have PhD's. So this technique is probably out of reach for most, and especially for a single person working on things in their spare time, and more so if that person happens to be me.
 
 However the rotation of the bit vectors to reduce memory access is super neat. Something that seems fairly easy to implement too. Lets look at that later once we thinking about it some more.
 
@@ -304,6 +314,10 @@ And then check out queries against that. If we have a potential match, then we g
 
 Get it working, get it right, make it fast. In that order. Lets start by just getting it working for the most basic version and see how it looks.
 
+
+
+### Thinking about Term Frequencies
+
 Thinking about TF frequencies for each document. We can save some space here. If we have a word with a single occurance in the document we don't need to store that, because we already know the word could be in there and can then just assume 1. This should cut down the TF size considerably!
 
 Interesting to note that bing also stores the TF seperately in a forward index which stores a list of words for each document. I was wondering how they knew what documents to send to their ranking oracle for queries such as "about" as clearly they are not sending half their corpus to it. There has to be some sort of pre-ranking going on to send the best candidate documents first.
@@ -324,7 +338,10 @@ The other thing we need to keep with this is per document its term frequency or 
 
 So this is getting a bit complex at this point, but hey nothing worth doing is usually easy. Before doing anything else lets consider the rotation.
 
-Bit vector rotation. Because all the examples used in bitfunnel were using the same number of documents to vectors it took a while for this to sink in, as all the examples are a perfect square. Here is an example of it in ASCII which makes more sense... to me at least.
+
+### Bit Vector Rotation
+
+This took me a bit to understand because all the examples used in bitfunnel were done using the same number of documents to vectors. Here is an example of it in ASCII which makes more sense... to me at least.
 
 Lets consider an index with the following properties.
 
@@ -351,20 +368,28 @@ term7 010
 term8 100
 ```
 
-So when you search for a term such as "dog" all you need do is hash that term, and fetch that row. So assuming it hashed to the 5th bit we would know that row 5 would be the one to look at and that document1 potentially contains dog. Two or more terms is just as easy. Assuming you have "cat dog" where cat hashs to term 2, you get those rows,
+So when you search for a term such as "dog" all you need do is hash that term, and fetch that row. So assuming it hashed to the 5th bit we would know that row 5 would be the one to look at and that document1 potentially contains dog. 
+
+Working with two or more terms is just as easy. Assuming you have "cat dog" where cat hashes to term 2, you get rows 5 for dog and 2 for cat.
 
 ```
 101
 100
 ```
 
-Then & them together, which leaves only document 1 which looks like it has both cat and dog. This works out to be an amazing saving in the amount of memory you need to read. Of course you need to keep in mind cache lines and how memory is fetched for the CPU. Short note is to keep it to multiples of 64 bits for the CPU and 512 bits for RAM. It's actually more involved then that, but this gross over-simplification works well enough.
+Then you logically & them together and look for which column remains set.
 
-Now the above confused me for a while. In your normal view the row is constrained by the size of your bloom filter, so its fixed to 1500 bits or something. But the number of documents is unbound. So if flipped means you have these huge million long rows to worry about. The trick is to restrict the number of documents per "block". If you restrict it to say 64 documents you all of a sudden can store everything using 64 bit integers in a list of whatever works out to be the best size for your bloom filter. It also means that the row is only 64 bits long and is far more manageable.
+```
+101 & 100 = 100
+```
 
-The above sounds like a bloody good idea. We also have an idea about how optimal this can be based on the talk from [Dan Luu](https://www.youtube.com/watch?v=80LKF2qph6I). Where the above with the other tweaks gives about ~3900 QPS from a single server with 10 million documents. He mentions being close to that as well on their production system. 3900 QPS means about 0.2 milliseconds to process a query. Keep in mind that bitfunnel also uses higher rank rows to improve performance.
+This leaves column 1 indicating that document 1 has both cat and dog. This works out to be an amazing saving in the amount of memory you need to read. Of course you need to keep in mind cache lines and how memory is fetched for the CPU. In short keep it to multiples of 64 bits for the CPU and 512 bits for RAM to lower your access issues. It's actually more involved then that, but this gross over-simplification works well enough.
 
-Considering I am storing 20x the documents, am working in a far slower language compared to C++ id be happy if I can get down to 10 ms for each query, which seems doable I guess? I suspect that most of it comes down to memory bandwidth. The CPU's I use for searchcode have about 20 GB/s bandwidth. So avoiding scanning all the memory is the main thing you have to worry about.
+Now the above confused me for a while. In your normal view the row is constrained by the size of your bloom filter, so its fixed to 1500 bits or something. But the number of documents is unbound. So if flipped means you have these huge million long rows to worry about. The trick I implemented is to restrict the number of documents per "block". If you restrict it to say 64 documents you all of a sudden can store everything using 64 bit integers in a list of whatever works out to be the best size for your bloom filter. It also means that the row is only 64 bits long and is far more manageable.
+
+We also have an idea about how optimal this can be based on the talk from [Dan Luu](https://www.youtube.com/watch?v=80LKF2qph6I). Where the above with the other tweaks gives about ~3900 QPS from a single server with 10 million documents. He mentions being close to that as well on their production system. 3900 QPS means about 0.2 milliseconds to process a query. Keep in mind that bitfunnel also uses higher rank rows to improve performance and it written in C++ which probably helps.
+
+Considering I am storing 20x the documents, am working in a far slower language compared to C++ id be happy if I can get down to 10 ms for each query, which seems doable I guess? I suspect that most of it comes down to memory bandwidth. The CPU's I used for searchcode have about 20 GB/s bandwidth. So avoiding scanning all the memory is the main thing you have to worry about.
 
 The other thing thats really useful to note is that the number of hash functions per term added varies. So you hash rare terms more than you hash common terms. This helps drive out the noise you get from the bloom filter. You can find details about this here https://www.clsp.jhu.edu/events/mike-hopcroft-microsoft/ and the video within.
 
@@ -763,19 +788,19 @@ So this is annoying because over some amount of results it slows down enough we 
 
 What about ranking?
 
-We don't actually need anything too fancy for searchcode really. I doubt anyone is trying to game its search results, so spam isnt an issue nor is keyword stuffind. Anything that affects the ranking can just be deleted too. While web search engines tend to use thousands of signals in order to know how to rank searchcode can get by with something simple such as TF/IDF or a BM25 variant. Thankfully I have already implemented both (including the Lucene TF/IDF variant) for other projects, so moving over is a case of lift and shift.
+We don't actually need anything too fancy for searchcode really. I doubt anyone is trying to game its search results, so spam isnt an issue nor is keyword stuffing. Anything that affects the ranking in a negative way can just be removed from the index. While web search engines tend to use thousands of signals in order to know how to rank searchcode can get by with something simple such as TF/IDF or BM25. Thankfully I have already implemented both (including the Lucene TF/IDF variant) for other projects, so moving over is a case of lift and shift.
 
 The question being can my implementation of it work fast enough over millions of matches. At what point is it too slow and eating into our 200 ms time budget.
 
-Thankfully both are based on simple lookups, basic math, an assignment and then a sort. Which part  do you think would be slowest? Turns out it was not the ranking, but the sort. Thankfully sort algorithms are well understood and the Go one is slow because of using interface. There are a few alternatives you can use such as https://github.com/twotwotwo/sorts/ or https://github.com/jfcg/sorty to solve this although for structs you will need to modify as you see fit. Again the lack of generics bits us.
+Thankfully both are based on simple lookups, basic math, an assignment and then a sort. Which part  do you think would be slowest? Turns out it was not the ranking, but the sort. Thankfully sort algorithms are well understood and the Go one is slow because of using interface. There are a few alternatives you can use such as https://github.com/twotwotwo/sorts/ or https://github.com/jfcg/sorty to solve this although for structs you will need to modify as you see fit.
 
-However it did raise an interesting question. If you search for a common term such as boom on Bing or Google, both report over 50 million results. However the search still comes back instantly. Google claims it looked at 548,000,000. That number as I already established is lie, so lets assume it actually looked at 100 million. Its a common term so I will assume it was less overestimated than the other ones. That amount of results if we go by our calculations of about 500 terms per document and then 2504 bytes to store the terms of that document in the index,
+However it did raise an interesting question. If you search for a common term such as boom on Bing or Google, both report over 50 million results. However the search still comes back instantly. Google claims it looked at 548,000,000 results. That number as I already established is lie, so lets assume it actually looked at 100 million. If it's searching for a common term so I will assume it was less overestimated than the other ones. That amount of results if we go by our calculations of about 500 terms per document and then 2504 bytes to store the terms of that document in the index,
 
 `2504 bytes * 100000000 = ~250 GB`
 
 This roughly works out to be about 250 GB of data you need to filter through and then sort. Lets say Google actually did the full range it reported that works out to 5x that result so 1.2 TB of data.
 
-Now is it possible to rank and sort that much data in under 500 ms which Google returns in? 
+Now is it even possible to rank and sort that much data in under 500 ms which Google returns in? 
 
 There is the terasort benchmark which allows us to at least get an idea about this. Its a benchmark based on sorting 1 TB of random data as quickly as possible. I tried to find a recent result for this, but this https://www.wired.com/insights/2012/11/breaking-the-minute-barrier-for-terasort/ from 2012 shows that Google was able to sort the 1 TB of data in 54 seconds, using 4000+ CPU cores.
 
@@ -785,9 +810,9 @@ Apparently Google did over 2 trillion searches in 2016. They also made about $90
 
 Its a similar story on Bing. Even if it is losing money for Microsoft I doubt its losing money that quickly. While they have multiple machines which might solve the time issue, I doubt any company is going to let customers burn 10c to $1 per user action, unless charging $2 per action.
 
-So how do they do it? I only have theories as I have never worked on a commercial search engine but I suspect there is some sort of pre-ranking going on or caching of some query terms with ranking, and on top of that smaller set is the actual ranking which then includes your user data and whatever other signals they use in the secret sauce. This makes some sense really because while PageRank is apparently not the most important signal used today some form of it still is, and pagerank is very much a pre ranking algorithm.
+So how do they do it? I only have theories as I have never worked on a commercial search engine but I suspect there is some sort of pre-ranking going on or caching of some query terms with ranking, and on top of that smaller set is the actual ranking which then includes your user data and whatever other signals they use in the secret sauce. This makes some sense really because while PageRank is apparently not the most important signal used today some form of it still runs inside google, and pagerank is very much a pre ranking algorithm.
 
-I have a theory that some of the reason that Google's search isn't as good as it used to be is the above. I suspect so much pre ranking goes on that when your query comes along you just get a custom ranked version of what was already pre ranked. As such its less about your query now and more about those pre ranks. If true I don't think the problem is going to get better anytime soon as the web keeps growing exponentially making it almost impossible for a new player to enter the market with a new algorithm. Meanwhile Google has no real reason to adjust its algorithms since its making more money than it know whats to do. The only thing that might change this is if someone comes up with seriously clever and is able to index at a cheaper price. Which I guess is what Cuil did, but they didn't get the ranking done very well. 
+I have a theory that some of the reason that Google's search isn't as good as it used to be is the above. I suspect so much pre ranking goes on that when your query comes along you just get a custom ranked version of what was already pre ranked. As such its less about your query now and more about those pre ranks. If true I don't think the problem is going to get better anytime soon as the web keeps growing exponentially making it almost impossible for a new player to enter the market with a new algorithm. Meanwhile Google has no real reason to adjust its algorithms since its making more money than it know whats to do with. The only thing that might change this is if someone comes up with seriously clever and is able to index at a cheaper price. Which I guess is what Cuil did, but they didn't get the ranking done very well. 
 
 So back to my problem trying out on my local machine a rank and sort for 1 million documents. Pre-ranking sounds resonable, but we aren't talking about hundreds of millions of ranks here. We just arent in the same level of scale. For 1 million matching documents ranking takes 80 ms and sorting 264 ms. Thats without attempting to make it go any faster, on my first cut of the code.
 
@@ -856,3 +881,14 @@ The results? Well for 5 million documents, the ranking takes about 80 ms. The fi
 In fact after all the above and some other tweaks I was able to get it ranking 50 million documents in 800ms and the sorting and selection done in under 30 ms.
 
 The reality is though that I am likely to cut off any further processing if we get something like 100,000 or something documents. Its not like I let you page through them anyway. It's not like web search where if you search for facebook and facebook happens to be the 2 millionth document people are going to notice that its not in your search results. Also at 100,000 documents on my laptop I can rank, collect and sort in ~3 ms which is probably fast enough for my purposes.
+
+
+### Parallel or Serial Searching
+
+Lets have a think about our requirements and constraints. One thing to consider early on is how to do searches in your index. You have two main options. The first is to allow searches in parallel and the latter is to not. However the choice between might not be as simple as you would think. It also greatly impacts the design of the system.
+
+Most would think, of course do it in parallel! Process in parallel so that way people wait less. But do they? As more searches come in the average time for each search goes up. Consider the situation that 10 people all search at the same time. Lets also assume that each search takes 1 second. Given limited resources which is true for most cases it means all 10 searches are shared across the system. As such everyone gets 1/10th of the system to search with and end up waiting 10 seconds for a result.
+
+However consider doing it in serial. While all came in at once only one can go first, and that persons search returns in 1 second. The second was waiting on the first and their search takes 2 seconds. The third takes 3 seconds etc... till the last one who had a 10 second wait. Which is the better result? I would argue the latter.
+
+There are a few other advantage to doing your searches in serial. You can attempt to consume all the resources you have at your disposal to give a good result, you don't have to worry about memory issues since you should know how much memory you need at any one time. As such I am going to make the choice to limit searches in the system to one at a time.
