@@ -172,6 +172,8 @@ func allHandler(dir string, w http.ResponseWriter, r *http.Request) {
 		cmdArgs = append(cmdArgs, "get")
 		if len(getParams) != 0 {
 			cmdArgs = append(cmdArgs, strings.Join(getParams, ","))
+		} else {
+			cmdArgs = append(cmdArgs, `""`)
 		}
 	case "DELETE":
 		fallthrough

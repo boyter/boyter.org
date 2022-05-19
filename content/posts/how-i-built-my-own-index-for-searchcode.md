@@ -1,6 +1,6 @@
 ---
 title: How I built my own search index for searchcode.com
-date: 2022-05-10
+date: 2050-05-10
 ---
 
 **Abstract TL/DR**
