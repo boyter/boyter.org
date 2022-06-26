@@ -27,6 +27,4 @@ cassette soft gold dice collectibles
 {ca55e77e-50f7-901d-d1ce-c011ec71b1e5}
 ```
 
-Very zen. Some rough back of napkin calculations gives my program something like 10,000,000,000,000 combinations of GUID's based on the word list I supplied. I may just turn it into a online GUID generator like this one http://www.guidgenerator.com/
-
-EDIT &#8211; You can now get these guids at <https://searchcode.com/guid/>
+Very zen. Some rough back of napkin calculations gives my program something like 10,000,000,000,000 combinations of GUID's based on the word list I supplied. I may just turn it into a online GUID generator like this one http://www.guidgenerator.com/
