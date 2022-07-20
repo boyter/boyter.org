@@ -38,9 +38,13 @@ Some notable projects and blog posts of mine,
   * [Code a search engine in PHP][6]
   * Sloc Cloc and Code https://boyter.org/posts/sloc-cloc-code/ https://github.com/boyter/scc/
   * License Checker https://boyter.org/2018/03/licensechecker-command-line-application-identifies-software-license/ https://github.com/boyter/lc
+  * Hashit - A cross platform tool to compute hashes of files quickly. Similar to hashdeep. https://github.com/boyter/hashit
   * How to start a Go Project in 2018 https://boyter.org/posts/how-to-start-go-project-2018/
   * What is Chaos Testing/Engineering https://boyter.org/2016/07/chaos-testing-engineering/
   * Bogan Ipsum https://boganipsum.com.au/
+  * Bonzamate - An Australian Search Engine https://bonzamate.com.au/
+  * Abusing AWS Lambda to make an Aussie Search Engine https://boyter.org/posts/abusing-aws-to-make-a-search-engine/
+  * Unicode support. What does that actually mean? 😃 https://boyter.org/posts/unicode-support-what-does-that-actually-mean/
 
 Also here are a few press write ups I have received for my project searchcode.com, with most of the details provided by myself
 
