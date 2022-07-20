@@ -26,7 +26,7 @@ I am a professional software engineer who has been working in development with a
 * ETL systems processing millions of records every hour
 * Backend integration with SAP for large energy providers
 * Large scale deployment and management of AWS services and systems
-* Metadata Content Archive for 1500 TB of video/audio content with transcoding (2019)
+* Metadata Content Archive for 4500 TB of video/audio content with transcoding (2019)
 
 Some notable projects and blog posts of mine,
 
