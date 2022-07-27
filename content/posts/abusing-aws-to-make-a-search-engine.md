@@ -5,6 +5,8 @@ date: 2021-09-14
 
 **TL/DR** I wrote an Australian search engine. You can view it at [bonzamate.com.au](https://bonzamate.com.au). It's interesting because it runs its own index, only indexes Australian websites, is written by an Australian for Australians and hosted in Australia. It's interesting technically because it runs almost entirely serverless using AWS Lambda, and uses bit slice signatures or bloom filters for the index similar to Bing. I also found out the most successful code I have ever written is PHP, despite never being a professional PHP developer.
 
+If you like the content below, register your interest for a book on the subject https://leanpub.com/creatingasearchenginefromscratch/
+
 ## The idea...
 
 So I am in the middle of building a new index for [searchcode](https://searchcode.com/) from scratch. No real reason beyond I find it interesting. I mentioned this to a work colleague and he asked why I didn't use AWS as generally for work everything lands there. I mentioned something to the effect that you needed a lot of persistent storage, or RAM to keep the index around which is prohibitively expensive. He mentioned perhaps using Lambda? And I responded its lack of persistance is a problem... At that point I trailed off. Something occurred to me.

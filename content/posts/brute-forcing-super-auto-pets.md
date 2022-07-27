@@ -1,6 +1,6 @@
 ---
 title: Brute Forcing Super Auto Pets
-date: 250-05-02
+date: 2050-05-02
 ---
 
 Super auto pets describes itself as a friendly auto battler game. You build a team of pets, combining their powers and leveling them up and set them to battle other teams with the battle portion being automated and mostly random free. Free to play, on steam and iOS, it's also about as addictive as heroin laced malteasers.
