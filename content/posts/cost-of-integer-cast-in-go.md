@@ -18,14 +18,15 @@ Of course, belief and hope are not a plan. So I thought I would actually test it
 
 > To save you scrolling down, the answer is for a integer to integer cast it's as close to "free" as any other CPU operation. Intger to float is about 3x slower, but again for most things you can consider it free.
 
-I started by checking what the overhead of a logical & operation is. Since this is almost free from a CPU point of view, taking a single operation. 
+I started by checking what the overhead of a bitwise & operation is. Since this is almost free from a CPU point of view, taking a single operation. 
 
 {{<highlight go>}}
-func BenchmarkLogicalAnd(b *testing.B) {
+func BenchmarkBitwiseAnd(b *testing.B) {
 	var x int
 	for i := 0; i < b.N; i++ {
-		x += i & i
+		x += i & 7
 	}
+	b.StopTimer() 
 	fmt.Println(x)
 }
 {{</highlight>}}
@@ -35,7 +36,7 @@ We keep the result of the `i & i` to ensure the compiler is not optimising anyth
 Running on a 2020 M1 Macbook Air produced the following.
 
 ```
-BenchmarkLogicalAnd-8   	1000000000	         0.5148 ns/op
+BenchmarkBitwiseAnd-8   	1000000000	         0.5148 ns/op
 ```
 
 So about 0.5 ns for each operation. Which given the clock speed of the CPU means we are observing a single operation. With this as the baseline lets try the int to int32 cast.
@@ -44,8 +45,9 @@ So about 0.5 ns for each operation. Which given the clock speed of the CPU means
 func BenchmarkIntToInt32(b *testing.B) {
 	var x int32
 	for i := 0; i < b.N; i++ {
-		_ = int32(i)
+		x += int32(i)
 	}
+	b.StopTimer() 
 	fmt.Println(x)
 }
 
@@ -63,6 +65,7 @@ func BenchmarkIntToInt64(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		x += int64(i)
 	}
+	b.StopTimer() 
 	fmt.Println(x)
 }
 {{</highlight>}}
@@ -80,6 +83,7 @@ func BenchmarkIntToInt16(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		x += int16(i)
 	}
+	b.StopTimer() 
 	fmt.Println(x)
 }
 {{</highlight>}}
@@ -94,6 +98,7 @@ func BenchmarkIntToInt8(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		x += int8(i)
 	}
+	b.StopTimer() 
 	fmt.Println(x)
 }
 {{</highlight>}}
@@ -109,8 +114,9 @@ So, more or less free across the board! Which is as you would expect if you thin
 func BenchmarkIntToUInt32(b *testing.B) {
 	var x uint32
 	for i := 0; i < b.N; i++ {
-		_ = uint32(i)
+		x += uint32(i)
 	}
+	b.StopTimer() 
 	fmt.Println(x)
 }
 {{</highlight>}}
@@ -127,6 +133,7 @@ func BenchmarkIntToFloat32(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		x += float32(i)
 	}
+	b.StopTimer() 
 	fmt.Println(x)
 }
 {{</highlight>}}
@@ -141,6 +148,7 @@ func BenchmarkIntToFloat64(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		x += float64(i)
 	}
+	b.StopTimer() 
 	fmt.Println(x)
 }
 {{</highlight>}}
