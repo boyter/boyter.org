@@ -15,7 +15,7 @@ The three F's to open source development.
 
 ## Fix it.
 
-If you find a bug, notice missing, incorrect or misleading documentation, or want an enhancement, your first option is to make a request to fix it. Raise the issue in the bug/request tracker of choice. Heck even a tweet at the owner might be good enough. However that is not your only option. You can choose submit a patch and fix yourself, or if you lack the skills pay someone else to do so. You could also offer to pay the maintainer to resolve this for you. If there is enough value for you to raise the issue, perhaps there is enough value to pay to resolve it?
+If you find a bug, notice missing, incorrect or misleading documentation, or want an enhancement, your first option is to make a request to fix it. Raise the issue in the bug/request tracker of choice. Heck even a tweet at the owner might be good enough. However that is not your only option. You can choose submit a patch after you fix yourself, or if you lack the skills, pay someone else to do so. You could also offer to pay the maintainer to resolve this for you. If there is enough value for you to raise the issue, perhaps there is enough value to pay to resolve it?
 
 The maintainer however has all rights to reject your patch, close your bug ticket or turn down your offer of payment. It is their project. So should you get angry and start abusing them? No. You should move to the next F of open source software.
 
