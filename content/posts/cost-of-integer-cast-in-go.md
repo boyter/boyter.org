@@ -16,7 +16,7 @@ Which was interesting feedback. I don't believe that to be the case. You lose da
 
 Of course, belief and hope are not a plan. So I thought I would actually test it.
 
-> To save you scrolling down, the answer is for a integer to integer cast it's as close to "free" as any other CPU operation. Intger to float is about 3x slower, but again for most things you can consider it free.
+> To save you scrolling down, the answer is for a integer to integer cast it's as close to "free" as any other CPU operation. Integer to float is about 3x slower, but again for most things you can consider it free.
 
 I started by checking what the overhead of a bitwise & operation is. Since this is almost free from a CPU point of view, taking a single operation. 
 
