@@ -45,7 +45,7 @@ Function which allowed pushing to an external system was pushing the files into 
 
 ### Diagnosis 
 
-So this was a bit annoying to track down. This functionality has multiple touch points including duable queues, databases and multiple processes to read from and process each.
+So this was a bit annoying to track down. This functionality has multiple touch points including durable queues, databases and multiple processes to read from and process each.
 
 Looking through the code showed that there were no errors thrown, confirmed by inspecting the logs, and the entries in the database were correct. It was only on learning the next daythat there was a database change made, but only in one environment which had the problem that the penny dropped. 
 
