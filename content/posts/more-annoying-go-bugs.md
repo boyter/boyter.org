@@ -47,17 +47,17 @@ Function which allowed pushing to an external system was pushing the files into 
 
 So this was a bit annoying to track down. This functionality has multiple touch points including durable queues, databases and multiple processes to read from and process each.
 
-Looking through the code showed that there were no errors thrown, confirmed by inspecting the logs, and the entries in the database were correct. It was only on learning the next daythat there was a database change made, but only in one environment which had the problem that the penny dropped. 
+Looking through the code showed that there were no errors thrown, confirmed by inspecting the logs, and the entries in the database were correct. It was only on learning the next day that there was a database change made, but only in one environment which had the problem that the penny dropped. 
 
 The process when determining where to push the file reads from a SQS queue, and then pulls the matching record from the database. The database is where the location is contained, and so I zeroed in on that as the problem.
 
-When code was written whoever did so ignored the usual error from `rows.Scan`. The code was also written using `select *`. As such when the new column came in the scan broke, but with the error ignored it meant it continued on, and left the struct it was scanning into with the default values. The default for a string being an empty string. 
+When code was written, whoever did so ignored the usual error that comes from `rows.Scan`. The code was also written using `select *`. As such when the new column came in the scan broke, but with the error ignored it meant it continued on, and left the struct it was scanning into with the default values. The default for a string being an empty string, so the location was set to empty.
 
 The process then continued, and when determining where it should put the file used the empty string location pulled from the database. As a result all the files were pushed without issue, but landed in the root folder.
 
 ### Resolution
 
-Change back to explicit `select` targetting just the fields we want to ensure futher database changes would not be an issue, and to deal with the scan exception.
+Change back to explicit `select` targetting just the fields we want to ensure futher database changes would not be an issue, and to deal with the scan exception. Additional logging added around this exception as well.
 
 
 
