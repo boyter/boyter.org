@@ -3,7 +3,7 @@ title: Go install loop. The "clang" command requires the command line developer 
 date: 2022-09-28
 ---
 
-Recently on my M1 Macbook I ran into the following issue when trying to compile some Go code with C dependancies.
+Recently on my M1 Macbook I ran into the following issue when trying to compile some Go code with C dependencies.
 
 
 ![The clang command requires the command line developer tools](/static/the-clang-command-requires-command-line-developer-tools.png#center)
