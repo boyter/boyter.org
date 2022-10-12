@@ -20,6 +20,7 @@ Calculating the popularity of a page or article is something that usually comes 
 
 ```
 ((popularity-1)/power(((unix_timestamp(NOW())-unix_timestamp(datetime))/60)/60,1.8))```
+```
 
 The above produces a number which you can then sort on. It is based on the [Hacker News algorithm][1] and works well for items which change hourly. By removing one of the /60 you should get something which ranks based on days rather then hours. A full example is listed below,
 
