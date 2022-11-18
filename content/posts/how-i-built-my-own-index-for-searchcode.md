@@ -1,29 +1,32 @@
 ---
 title: How I built my own search index for searchcode.com
-date: 2050-05-10
+date: 2022-11-17
 ---
 
 **Abstract TL/DR**
 
-I present what I belive is a unique index implementation for indexing and searching source code. It copies ideas from Bing and Debian Code Search fusing parts of the Bing bitfunnel index with the positional index ideas used in Debian Code Search to create a very fast memory efficent trigram index over source code.
+I present what I belive is a unique index for indexing and searching source code. It copies ideas from Bing bitfunnel implementation to create a very fast memory efficent trigram index over source code.
 
- - The index for searchcode.com has been moved to a custom built index
- - The index is based on bloom filters split by document size
-
-
+ - searchcode.com is now using a custom built index
+ - The index works using bloom filters sharded by document size
+ - It borrows some of the ideas of bitfunnel from bing
+ - It uses trigrams instead of the abomination I was using before
+ - I had an absolute blast working on this
 
 So admission. I have felt like a fraud for a while. I get a lot of questions about indexing code due to searchcode.com and generally my answer has always been I use [sphinx search](http://sphinxsearch.com/). Recently that has changed, as I moved over to its forked version [manticore search](https://manticoresearch.com/). Manticore is an excellent successor to sphinx and I really do recommend it. I also like elasticsearch as well for enterprise search solutions since it does things out of the box that sphinx/manticore are still catching up on.
 
-However this still is me outsourcing the core functionality of searchcode to a third party, and I strongly believed you shouldn't outsource your core competency. Just its taken me about 10 years to do something about it in this case.
-
-Anyway what follows are my notes while thinking about this from start to implementation. A lot of random thoughts, ideas and such going on. It's not in chronological order, but grouped by what I was thinking about at the time.
+However this still is me outsourcing the core functionality of searchcode to a third party, and I strongly believe you shouldn't outsource your core competency. Since search is the core competency of searchcode I should do this myself.
 
 
 # The Problem with Source Code
 
-So I decided to build my own index/search for searchcode. Why would anyone consider doing this when there are so many projects that can do this for you. Off the top of my head we have code available for lucene, sphinx, solr, elasticsearch, manticore, xaipan, gigablast, bleve, bludge, mg4j, mnoGoSearch... you get the idea. There is a lot of them out there. Most of them however are focused on text and not source code. Also its worth noting that the really large scale engines such as Bing and Google have their own indexing engines which gives you the ability to wring more performance out of the system since you know where you can cut corners or save space, assuming you have the skill or patience.
+So why even build your own index? Why would anyone consider doing this when there are so many projects that can do this for you. Off the top of my head we have code available for lucene, sphinx, solr, elasticsearch, manticore, xaipan, gigablast, bleve, bludge, mg4j, mnoGoSearch... you get the idea. There are a lot of them out there. Most of them however are focused on text and not source code, and the difference between both is larger than you might expect.
 
-So lets think, what are the problems with searching source code. I have written about this before, but consider the following,
+Also its worth noting that the really large scale engines such as Bing and Google have their own indexing engines which gives you the ability to wring more performance out of the system since you know where you can cut corners or save space, assuming you have the skill or patience.
+
+I guess the saying "the thing about reinventing the wheel is you can get a round one" applies here.
+
+What are the problems with searching source code. I have written about this before, but consider the following,
 
 A query term,
 
@@ -31,7 +34,7 @@ A query term,
 i++
 {{</highlight>}}
 
-and then consider the following code snippets which should have a match,
+and then consider the following code snippets which contain a match,
 
 {{<highlight java>}}
 for(i=0; i++; i<100) {
@@ -49,31 +52,36 @@ for(i=0;i++;i<100)
 {
 {{</highlight>}}
 
-This is something I worked around in searchcode for years, by splitting the terms myself such that the search `i++` would work as expected.
+None of the terms match our term `i++` unless you start doing wildcard searches.
 
-So first takeaway is that there are more terms for source code compared to say normal text from a typical website, blog or document.
+This is something I worked around in searchcode for years, by splitting the terms myself such that the search `i++` would work as expected. This was done by replacing characters such as `{` with spaces, and then splitting on those spaces, feeding those tokens in the the index, then replacing other characters and repeating.
 
-The second thing to observe is that we need to index those special characters. If someone wants to search for `for(i=0;i++;i<100)` there is no good reason to not allow them to do so. As such I had to configure sphinx/manticore to index these characters, but that's still a pain.
+We also need to index those special characters. If someone wants to search for `for(i=0;i++;i<100)` there is no good reason to not allow them to do so. As such I had to configure sphinx/manticore to index these characters, which had issues because some of them have meaning to the query parser, but that's still a pain.
 
 Another pain point is that special searches that most full test search engines offer. For example consider `*` which normally expands out terms. However in searchcode you might actually want to search for that, say looking up the use of pointers or some such.
 
 Also stop words, which are the words you don't index because they aren't that useful. There aren't really any stop words in code... well I guess maybe import statements? Things that would normally be stop words such as `for and or not` are actually pretty useful to search for. Also the repetition of patterns means you end up with enormous term lists for common terms.
 
-One way to get around the above is to index ngrams. This is how Google Code Search worked back in the day. However this technique has a few downsides. The first is you end up with really long posting lists. Usually compared to keywords its 4-5 times the number of keywords for ngrams of length 3. They also produce a lot of false positive matches which need to be filtered out. However the advantage is you can then use use those ngrams to provide some level of regular expression search on top which can be useful.
+One way to get around the above is to index ngrams. This is how Google Code Search worked back in the day. This technique has a few downsides. The first is you end up with really long posting lists. Usually compared to keywords its 4-5 times the number of keywords. They also produce false positive matches, because `hello` when trigramed matches `helow yellow`.
 
-Anyway in short, while sphinx/manticore or whatever you favorite choice is are excellent, I really want build my own index. Honestly mostly because of the technical challenge and how fun it should be. Secondly because I think I cam improve on how searchcode works with that deep level integration. Lastly because I doubt I will ever get to work on a large scale web index (its just too expensive to do yourself these days, and I doubt Google nor Microsoft are that interested in me personally) and this gets me close to living that dream.
+
+
+
+So while sphinx/manticore/elastic or any other tool really are excellent. I really want build my own index. Mostly because of the technical challenge. Secondly because I think I cam improve on how searchcode works with a deep level integration. Lastly because I doubt I will ever get to work on a large scale web index (its just too expensive to do yourself these days, and I doubt Google nor Microsoft are that interested in me personally) and this gets me close to living that dream.
 
 Also on occasion I get something like this, which is the manticore/sphinx process going a little crazy due to some search running in the system.
 
 ![bad sphinx](/static/how-i-built-index-searchcode/bad_sphinx.png)
 
-Not what you want on your server when normally the load average is ~0.1. Hopefully I can ensure this never happens again.
+I have no idea what the root cause of the above is, but I suspect its due to the way I have abused it for years. I have never come across anyone using it as intented getting the same issue.
 
 For the record I do not have a PhD in applied search or any real world experience building web indexes. I don't even work in the space professionally. Nor am I ever likely too since I doubt what I am presenting here holds a candle to the work of Google/Bing/Facebook Search or any other work by companies who work on these problems full time.
 
-I can use elastic search pretty well though! Really I'm just some dude who grew up in Western Sydney (thats considered the bad side of Sydney) and apparently dreams about flying close to the sun. Clearly I have no business writing my own indexer. But the nice thing about the internet is you really don't need permission to do a lot of things, so lets roll up our [flanno](https://www.urbandictionary.com/define.php?term=flanno) sleeves and get coding. As such take anything below with a massive grain of salt before you implement or start hurling internet abuse at me. This is about how I built an index, and not about how you should build one.
+I can use elastic search pretty well though! Really I'm just some dude who grew up in Western Sydney (thats considered the bad side of Sydney) and apparently dreams about flying close to the sun. Clearly I have no business writing my own indexer. But the nice thing about the internet is you really don't need permission to do a lot of things, so lets roll up our [flanno](https://www.urbandictionary.com/define.php?term=flanno) sleeves and get coding. 
 
-That decided lets list down the "requirements" and constraints we have.
+Take anything below with a massive grain of salt before you implement or start hurling internet abuse at me. This is about how I built an index, and *not* about how you should build one.
+
+Listing down the "requirements" and constraints we have.
 
 ### Requirements
 
@@ -82,19 +90,18 @@ That decided lets list down the "requirements" and constraints we have.
  - We want to be able to update quickly as its a write heavy workload
  - We need to support filters on source (github/bitbucket etc...) and code language
  - Its a free website, so we can deal with some downtime or inaccuracy
- - We want searches to return in 0.2 seconds so a 200 ms time budget with no cache (lower is better though)
- - Want to embed into searchcode itself to avoid those dreaded network calls
- - No stopwords
- - We want to store as much of the index in RAM as possible, since RAM is cheap
+ - We want searches to process in a 200 ms time budget with no cache (lower is better though)
+ - Want to embed into searchcode itself to avoid network calls
+ - We want to store the entire index in RAM, since RAM is cheap (so they say...)
  - We don't need to do any term rewriting (where you map NY to new york and or search for both)
  
 ### Constraints
 
- - We have a higher that normal term count per document than web documents
- - We are using Go so we have to think about the impact of GC and its performance
- - This is a side project, so whatever is done needs to be achievable by a single person who is not a 10x developer in this spare time
+ - We have a higher that normal term count per document than normal web content
+ - We are using Go so we have to think about the impact of the garbage collector
+ - This is a side project, so whatever is done needs to be achievable by a single person who works on this in their spare time
 
-Why using Go I hear you ask? Well I know 3 languages reasonably well. Those being Java, C# and Go. The current version of searchcode.com is written in Go which is the main reason for using it. Blekko back in the day was supposedly written using Perl so I don't think performance should be an issue here. Plus I would really like to get this embedded into the application itself to avoid those pesky expensive slow network calls.
+Why using Go I hear you ask? Why not C++/Rust/C/Zig! I know 3 languages reasonably well. Those being Java, C# and Go. The current version of searchcode.com is written in Go which is the main reason for using it. Blekko back in the day was supposedly written using Perl so I don't think performance should be an issue here. Plus I would really like to get this embedded into the application itself to avoid those pesky slow network calls.
 
 It might surprise some reading this to learn that searchcode.com is the work of one person in their spare time. As such I write this pretty frankly. There is no money to be make in the free online code search market (just ask Google or Ohloh), so by all means feel free to take whats here and enter the "market" and loose money as well. There is a market in enterprise search though, so feel free to compete with sourcegraph if you like.
 
@@ -117,7 +124,7 @@ Disadvantages
  
 ### Inverted Index
 
-Inverted index. This is pretty much building a map of terms to documents and then intersecting them and ranking. One issue with this technique is that you end up with enormous term lists, known as posting lists for common terms. As mentioned previously we cannot use stop words to reduce this, and even if we did there is a lot of repetition in code so you tend to get a lot of huge posting lists.
+Inverted index. This is pretty much building a map of terms to documents and then intersecting them and ranking. One issue with this technique is that you end up with enormous term lists, known as posting lists for common terms. We cannot use stop words to reduce this because we need to index all the content, meaning we will get huge posting lists.
 
 Advantages
  - Easy to query
@@ -127,7 +134,6 @@ Advantages
  - Query execution time is related to the number of returned results
 
 Disadvantages
- - Harder to do wildcard queries OR use more space for them
  - Hard to update documents and avoid false positives, usually have to rebuild the index or do delta + merge
  - Need to implement skip lists or compression on the posting lists at scale
  - Queries can be slow due to the complexity of the list structures
@@ -155,6 +161,7 @@ Advantages
  - Stupidly fast if careful (bitwise operations are almost free from a CPU point of view)
  - Space/Memory efficient
  - Easy to update/delete modify existing terms
+ - Rasonably simple algorithms to code (good for one person)
 
 Disadvantages
  - Cannot store TF information along terms as its a non-positional index
@@ -164,17 +171,15 @@ Disadvantages
 
 ### Inverted Index Calculations
 
-So with the above I had a further think and decided I should try either an inverted index, a trie or bitsignatures. Before I quickly create some simple implementations of each to establish how they perform, lets get an estimate of how much storage each is going to require.
+So with the above I had a further think and decided I should try either an inverted index, a trie or bit signatures. Before I wrote any code, lets get an estimate of how much storage each is going to require.
 
-Inside searchcode there is about 300 million code files (as I write this). Ignoring duplicates gives around 200 million code files that we want to search, broken up by about 240 languages across 40 million repositories.
+Inside searchcode there is about 300 million code files (as I write this). Ignoring duplicates gives around 200 million code files that we want to search, broken up by about 240 languages across 40 million repositories (these numbers are always growing but work here).
 
-There is probably about 5kb of code in most of those files, with each having about 500 unique terms. This gives us about 1.5 TB of code, which is actually fairly close to what I can see on disk, although I do compress the content. However to be sure I wrote a simple program to loop through most of whats there to actually calculate this. Not as a true average, but a rolling average over every 10,000 files it was able to process. The average shows about 330 unique terms per document which is bearing up to my back of napkin calculations. I also had this work out ngrams for length of 3 to see how it would fare and it was about 4 times the results, so about 1320 ngrams per document.
+There is probably about 5kb of code in most of those files, with each having about 500 unique terms. This gives us about 1.5 TB of code, which is actually fairly close to what I can see on disk, although I do compress the content. To verify this I wrote a simple program to loop through the data to calculate this. The average shows about 330 unique terms per document which is bearing up to my back of napkin calculations. I also had this work out how many unique trigrams each document would have which was about 1320 ngrams per document.
 
-The nice thing about this number is that its not stupidly big. It should be possible to run this on a single machine, and frankly its possible to brute force it given a powerful enough machine. 
+So given our rough numbers, we can work out roughly how large the indexes might need to be. I'm going to ignore most of the overhead of the implementation and just use the known sizes for this. In other words im going to assume a map, slice or other data structure is free for these estimates although that is far from the case.
 
-So given our rough numbers, we can work out roughly how large the indexes might need to be. Im going to ignore most of the overhead of the implementation and just use the known sizes. In other words im going to assume a map, slice or other data structure is free for these estimates although that is far from the case.
-
-For the inverted index we need in effect a large map of string to integer arrays, representing a word and which documents have it. Thats the bare minimum to work. Any index worth spit though is compressing the integer arrays somehow, either using Elias-Fano, just storing offsets or some other technique and using a skip list allowing you to step through it very quickly. If you don't do this you have problems when someone searches for a really common and a really rare term.
+For the inverted index we need in effect a large map of string to integer arrays, representing a word and which documents have it. Thats the bare minimum to work. Any advanced index is compressing the integer arrays somehow, such as Elias-Fano, and is using a skip list allowing you to step through it very quickly. If you don't do this you have problems when someone searches for a really common and a really rare term.
 
 So lets assume there is a "free" mapping of strings to integers somewhere allowing us to use a integer for the words. We don't have one but for the moment while working things out lets assume so. Lets also assume we have less than 4 billion terms (I think Bing/Google have something like 10 billion per shard but we are simplifying here) so we can use a 32 bit integer to save some space. However we do want to know what the count of each term is so lets add that too.
 
@@ -193,15 +198,17 @@ So we now know we need 4 bytes to store each term and 5 to track the number of t
 
 So for our example document of 500 unique terms, to store it in the index takes 500 * 5 + 4 bytes. 2504 bytes. For our 200 million documents that's 500800000000 bytes which is about 500 GB. Even if we remove the positional portion of the index that about 400 GB.
 
-Ouch. That is not going to fit into our RAM budget. To confirm my numbers I had a look at the manticore index searchcode is using now, and you know what? Its about that size spread across two machines. So our estimates are pretty close, although manticore probably compresses the term lists and supports wildcards and such. Assuming basic gzip compression over a collection of ints you can probably reduce the size by 30% which is still way over our RAM limit.
+Ouch. 
+
+That is not going to fit into our RAM budget. To confirm my numbers I had a look at the manticore index searchcode is using now, and you know what? Its about that size spread across two machines. So our estimates are pretty close, although manticore probably compresses the term lists and supports wildcards and such. Assuming basic gzip compression over a collection of int's you can probably reduce the size by 30% which is still way over our RAM limit.
 
 It gets back to that issue that code tends to also have very long posting lists. For example the word `for` or `while` appears a lot in most code. This tends to old true for a LOT of terms you might want to search for. So you end up with a lot of the lookups for being a hundred million terms long. The only feasible way for that to work, is distribute it across your cluster.
 
 Incidentally I also tried implementing a trie using the above and some random data to fit, and my goodness the Go GC really did not like it, taking seconds to walk the pointers. It also took a lot more memory than I would have thought and ended up filling my laptops RAM before slowing down and being killed by me. Its possible a Adaptive Radix Tree would reduce this but I doubt it would be enough to fit conveniently in RAM.
 
-There are techniques to reduce the size of the posting list though. Elias-Fano being one of the most well known, and Progressive Elias-Fano being perhaps even more efficient than bit signatures in terms of storage size. I don't know if thats going to continue to hold true for my use case. Also you still need to keep the term list in something like a skip list or some other data structure, which is a little more complexity than I am willing to commit to.
+There are techniques to reduce the size of the posting list though. Elias-Fano being one of the most well known, and Progressive Elias-Fano being perhaps even more efficient than bit signatures in terms of storage size. I don't know if thats going to continue to hold true for my use case. Also you still need to keep the term list in something like a skip list, which is a little more complexity than I am willing to commit to.
 
-So that leaves me with bit signatures from my original choices, cool. Which is the one I wanted to implement anyway because it sounds so interesting. 
+So that leaves me with bit signatures from my original choices, cool. Which is the one I wanted to implement anyway because it they sound so interesting. 
 
 ## Bit Signatures Background
 
