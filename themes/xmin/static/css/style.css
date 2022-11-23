@@ -87,6 +87,7 @@ pre {
   box-shadow: 5px 5px 5px var(--shadow-color);
   padding: 1em;
   overflow-x: auto;
+  line-height: 1.2em !important;
 }
 code {
   background: var(--code-background-color);
