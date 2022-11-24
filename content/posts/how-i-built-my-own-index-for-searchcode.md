@@ -561,6 +561,24 @@ time: 8412 ms
 
 Interesting. Rust is faster as you would probably expect, but not so much faster that you still wouldn't have a problem.
 
+*NB* A kind reader emailed me about the above, and supplied a modified version of the Go code. Specificly changing one line to use empty structs for allocations and not bool, so,
+
+{{<highlight go>}}
+// lets simulate a search of which found 1 million matching documents in our result set
+filters := map[int]struct{}{}
+for i:=0;i<1_000_000;i++ {
+    filters[i%200_000_000] = struct{}{}
+}
+{{</highlight>}}
+
+Which speeds up the Go version a bit. In addition, I tried this with the latest version of Go 1.19 and it sped up yet again from my previous attempts running faster than the Rust version. I have no idea how to do a non allocation version in Rust, but even without on my machine Go is now faster for this task. Remember to upgrade your compiler people! Still not fast enough for my purposes, but hey free performance is always good.
+
+```
+$ go run 1/main.go && go run 2/main.go 
+time: 6383 ms                              <-- non allocating runtime here
+time: 6783 ms
+```
+
 For comparison a mate of mine tried C++ with -O3 compile option and got a runtime of around 2 seconds. Not sure what voodoo it's doing to achieve that. We compared the output to ensure it was the same and it was. Our best guess was it unrolls the loop to fit the CPU/RAM best. This is rather annoying because if I were using C++ I would be very close to being done with that sort of performance.
 
 How do Google/Bing do this? Turns out they don't. For a start they don't have facets over the web index. Enterprise search engines such as sphinx/manticore/elasticsearch/lucene do. Time to go code spelunking! See how someone else solved the issue. The Java codebases are pretty annoying to read (I actually like Java but got bored trying to understand it) and my C++ is not good, but it looks like they rely on straight line brute force speed. They then shard the index to keep that performance. What about Bleve? it's written in Go! Let's have a look at how it works.
