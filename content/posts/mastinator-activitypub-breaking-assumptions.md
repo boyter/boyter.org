@@ -83,7 +83,7 @@ The second is that people seem to have a lack of understanding of how this syste
 
 This lack of understanding applies to edits/deletes and other features of ActivityPub. They are a "should" option inside the specification. Meaning servers can ignore these requests, and as such your delete request does not have to be honoured.
 
-Scale is also a massive issue. Mastodon and other ActivityPub have a massive scaling issue. This was covered by Aral https://ar.al/2022/11/09/is-the-fediverse-about-to-get-fryed-or-why-every-toot-is-also-a-potential-denial-of-service-attack/ but even his take-away is a little flawed in my opinion.
+Scale is also a massive issue. Mastodon and other ActivityPub have a massive scaling issue. This was covered by Aral https://ar.al/2022/11/09/is-the-fediverse-about-to-get-fryed-or-why-every-toot-is-also-a-potential-denial-of-service-attack/ but his take-away is missing things in my opinion.
 
 While people with large followings should probably spin up their own servers so that they foot the bill for distributing posts, as I have shown there are no rate limits when it comes to creating users. The fediverse seems to be working on the assumption that there are external rate limits when it comes to accounts, and that is absolutely not the case.
 
