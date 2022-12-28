@@ -49,7 +49,7 @@ As a result mastinator.com was blocked fairly quickly by a few instances. You ca
 
 So is blocking the solution?
 
-Not really. A quick look at this link https://fba.ryona.agency/?domain=mastinator.com shows that some instances have blocked mastinator.com as well (I totally encourage you to do so if you want). However if you look at the list most do not block subdomains. Were I an evil actor I could create a subdomain and be back to following (or indeed messaging were I totally evil) very quickly.
+Not really. A quick look at this link https://fba.ryona.agency/?domain=mastinator.com shows that some instances have blocked mastinator.com as well (I totally encourage you to do so if you want, although it might be useful if you just block its ability to do follows, as then you can still @ it if you want). However if you look at the list most do not block subdomains. Were I an evil actor I could create a subdomain and be back to following (or indeed messaging were I totally evil) very quickly.
 
 Even blocking subdomains is limited. A new domain is fairly cheap. I certainly am not going to spend money to get around this, but I could see bad faith actors doing so.
 
