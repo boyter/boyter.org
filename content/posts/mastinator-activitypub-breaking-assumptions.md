@@ -91,6 +91,7 @@ This is a lot harder to solve, but I think the solution already exists. Perhaps 
 
 Applying this to follow requests, or indeed any other unsolicited request would massively drive the cost of these sort of operations. Indeed the idea itself was proposed by Microsoft to cut down on email spam. I suspect even using the public/private keys that exist within the system to encrypt/decrypt might be enough of a nude in this direction to increase the spam cost.
 
+Also worth noting, that every added user increases server costs. Want to cost someone a lot of money? Get as many people as you can to follow them. Every follower increases their server load. On a shared instance they are going to slow down the server, and the admins are going to ask for money to maintain it. If they are on their own instance they are going to have to upgrade it to ensure timely communication.
 
 ## My Takeawy
 
