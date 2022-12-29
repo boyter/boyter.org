@@ -89,7 +89,7 @@ While people with large followings should probably spin up their own servers so 
 
 This is a lot harder to solve, but I think the solution already exists. Perhaps for any interaction that is not requested, so a post to my inbox from another where I wanted to follow them, introduce a small proof of work system. Bitmessage https://wiki.bitmessage.org/ implemented this and while sadly that has its own issues, you were able to chose your own difficulty and cut down on spam.
 
-Applying this to follow requests, or indeed any other unsolicited request would massively drive the cost of these sort of operations. Indeed the idea itself was proposed by Microsoft to cut down on email spam. I suspect even using the public/private keys that exist within the system to encrypt/decrypt might be enough of a nude in this direction to increase the spam cost.
+Applying this to follow requests, or indeed any other unsolicited request would massively drive the cost of these sort of operations. Indeed the idea itself was proposed by Microsoft to cut down on email spam. I suspect even using the public/private keys that exist within the system to encrypt/decrypt might be enough of a nudge in this direction to increase the spam cost.
 
 Also worth noting, that every added user increases server costs. Want to cost someone a lot of money? Get as many people as you can to follow them. Every follower increases their server load. On a shared instance they are going to slow down the server, and the admins are going to ask for money to maintain it. If they are on their own instance they are going to have to upgrade it to ensure timely communication.
 
@@ -107,7 +107,7 @@ I think I totally get the uproar over quote re-tweets now. It seems there is a g
 
 Thats a direct quote from one of the responses I got BTW, and probably one of the nicer things that... individual wrote.
 
-Anyway tanget aside, expecting others to owe you their time and effort is not cool. I suspect it's not the technical argument against it, but that people have this mindset going in. I suspect a lot of it comes back to this post https://boyter.org/posts/the-three-f-s-of-open-source/ with the developers firmly in the third category at this point.
+Anyway tangent aside, expecting others to owe you their time and effort is not cool. I suspect it's not the technical argument against it, but that people have this mindset going in. I suspect a lot of it comes back to this post https://boyter.org/posts/the-three-f-s-of-open-source/ with the developers firmly in the third category at this point.
 
 So bringing this back to twitter, while I had an idea that dealing with people on any sort of scale was difficult, I now have new appreciation for not only the people previously running twitter, and some sympathy for Elon Musk.
 
