@@ -5,6 +5,8 @@ date: 2023-01-23
 
 I have been investigating how ActivityPub is meant to work. What follows is how a boost/announce/retweet works in Mastodon and any other system that implements against ActivityPub.
 
+You can find the full collection on github https://github.com/boyter/activitypub and contribute your own details.
+
 # ActivityPub -> Announce -> Post
 
 When a user clicks on bonk/boost/retweet the following sequence happens.
@@ -65,7 +67,7 @@ An example announce appears like the below. Actor is whoever did the boost, cc i
 }
 ```
 
-When fetching content for the above every remote instance needs to call back to the owner instance in order to fetch the content for display. Instances can require a signed request for this to ensure only followers can see the post. Although note that a copy still exists on remote instances once this is done.
+When fetching content for the above every remote instance needs to call back to the owner instance in order to fetch the content for display. Instances can require a signed request for this to ensure only followers can see the post, and return 404 generally 
 
 The fetch is done using the object value, with the appropriate header sent.
 
