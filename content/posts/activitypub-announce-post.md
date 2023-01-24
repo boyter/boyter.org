@@ -12,9 +12,7 @@ When a user clicks on bonk/boost/retweet the following sequence happens.
 The users intent is converted to an announce. This announce is sent to every follower they have as well as the owner
 of the post that the user is boosting.
 
-In the case of follower instances, they receive the announce, then fetch the content of the announce using the `object`
-field. This is done by fetching the outbox for the owner indicated in `cc` by looking through the inbox until a match is
-found and then storing that content.
+In the case of follower instances, they receive the announce, then fetch the content of the announce using the `object` field.
 
 In the case of the owner, they take the announce and increment their boost count.
 
@@ -69,8 +67,7 @@ from another instance named some.instance in this case.
 }
 ```
 
-When fetching content for the above every remote instance needs to call back to the owner instance in order to fetch the 
-content for display. Instances can require a signed request for this to ensure only followers can see the post. 
+When fetching content for the above every remote instance needs to call back to the owner instance in order to fetch the content for display. Instances can require a signed request for this to ensure only followers can see the post. 
 
 The fetch is done using the object value, with the appropriate header sent.
 
