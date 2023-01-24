@@ -78,9 +78,9 @@ curl --location --request GET 'https://some.instance/users/someuser/statuses/123
 Note that the header should be set to `application/activity+json` to be strictly correct, but that some instance 
 implementations such as honk will ignore `application/json` for this and not return JSON.
 
-Mastodon - works with both `application/activity+json` and `application/json`
+Mastodon - works with both `application/activity+json` and `application/json` and `application/ld+json; profile="https://www.w3.org/ns/activitystreams`
 Takahe - works with both `application/activity+json` and `application/json`
-Honk - only accepts `application/activity+json`
+Honk - withs with `application/activity+json` and `application/ld+json; profile="https://www.w3.org/ns/activitystreams`
 
 It is vital that the owner instance caches the result for these GET requests as popular content could be queried 
 many times before a copy being made on all the remote instances.
