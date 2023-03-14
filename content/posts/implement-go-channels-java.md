@@ -3,7 +3,7 @@ title: How to implement Go Channels in Java
 date: 2023-03-13
 ---
 
-I have been doing interviews recently, and whenever someone mentions knowing a lot of Go and Java one of the questions I put to them is how to implement Go channels in Java. Since there isn't anything online to suggest how to do this (that I could find) I thought I would write one.
+I have been doing interviews recently, and whenever someone mentions knowing a lot of Go and Java one of the questions I put to them is how to implement Go channels in Java. Since there isn't anything online to suggest how to do this that I liked reading (that I could find) I thought I would write one.
 
 Go channels are effectively a BufferedQueue (with size of 1 in the case of unbuffered) with some synatic sugar on top. To implement a Go channel like structure in Java you need a thread safe queue which when you want to close you add a poison value which tells the processing threads to quit. Threads need to be aware of this poison value and on getting it exit. 
 
