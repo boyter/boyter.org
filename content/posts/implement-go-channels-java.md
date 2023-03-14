@@ -18,7 +18,7 @@ public class Main {
 
     private int WORKERS = 2;
     private String POISON = "quit";
-    private ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(1000);
+    private ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(1000); // our buffered channel of 1000 elements
 
     public static void main(String[] args) throws IOException, InterruptedException {
         var m = new Main();
@@ -26,7 +26,7 @@ public class Main {
     }
 
     public void run() throws InterruptedException {
-        // spawn as many workers as we want to deal with the queue, similar to usage of the go keyword in go
+        // spawn as many workers as we want to deal with the queue, similar to usage of the go keyword in Go
         var threads = new ArrayList<Thread>(this.WORKERS);
         for (int i = 0; i < this.WORKERS; i++) {
             var processor = new Thread(this::process);
