@@ -16,9 +16,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 public class Main {
 
-    private int WORKERS = 2;
-    private String POISON = "quit";
-    private ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(1000); // our buffered channel of 1000 elements
+    private final int WORKERS = 2;
+    private final String POISON = "quit";
+    private final ArrayBlockingQueue<String> queue = new ArrayBlockingQueue<>(1000); // our buffered channel of 1000 elements
 
     public static void main(String[] args) throws IOException, InterruptedException {
         var m = new Main();
