@@ -36,14 +36,14 @@ public class Main {
 
         // add things to our queue, similar to <- syntax in Go
         for(int i=0;i<10000;i++) {
-            this.queue.offer(""+i);
+            this.queue.put(""+i);
         }
 
         // add a poison object, similar to close(channel) in Go
         // we need to offer as many objects as there are workers to ensure
         // that they all exit
         for (int i = 0; i < this.WORKERS; i++) {
-            this.queue.offer(POISON);
+            this.queue.put(POISON);
         }
 
 
