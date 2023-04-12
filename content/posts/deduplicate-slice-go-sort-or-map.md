@@ -26,7 +26,7 @@ func DedupeUint64Old(elements []uint64) []uint64 {
 }
 {{</highlight>}}
 
-*NB You could probably improve the above by using an interface rather than a bool to reduce the memory impact. If you need a function that preserves the order that might be a better implementation.*
+*NB You could probably improve the above by using an ~~interface~~ struct rather than a bool to reduce the memory impact. If you need a function that preserves the order that might be a better implementation.*
 
 Since I was trying to remove memory pressure I reimplemented it. By sorting the array first, then checking the previous element to see if its the same and if so don't add the current one. This is considered an optimal solution but requires a sorted slice. My guess was that it would ease the memory pressure, but be slower due to needing to sort. Note that this disturbs the order of the elements, but this was not a problem in my case. It looks like the below, and is much harder to understand.
 
@@ -50,7 +50,7 @@ func DedupeUint64(s []uint64) []uint64 {
 {{</highlight>}}
 
 
-Wondering if I was about to lose some performance but save on the memory pressure I wrote a few benchamrks. I could then determine if it was worth it.
+Wondering if I was about to lose some performance but save on the memory pressure I wrote a few benchmarks. I could then determine if it was worth it.
 
 The results for an array of length 10 with random integers.
 
@@ -97,7 +97,71 @@ BenchmarkDedupeUint64
 BenchmarkDedupeUint64-8             	   10000	    126301 ns/op
 ```
 
+Someone requested the benchmark code, and I have added what I think was as close as possible to what I had implemented below.
+
+{{<highlight go>}}
+func BenchmarkDedupeUint64_10(b *testing.B) {
+	r := rand.New(rand.NewSource(int64(b.N)))
+	rands := make([]uint64, 10)
+	for i := 0; i < 10; i++ {
+		rands[i] = r.Uint64()
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		DedupeUint64(rands)
+	}
+}
+
+func BenchmarkDedupeUint64_AllRandom(b *testing.B) {
+	r := rand.New(rand.NewSource(int64(b.N)))
+	rands := make([]uint64, b.N)
+	for i := 0; i < b.N; i++ {
+		rands[i] = r.Uint64()
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		DedupeUint64(rands)
+	}
+}
+
+func BenchmarkDedupeUint64_AllDuplicates(b *testing.B) {
+	rands := make([]uint64, b.N)
+	for i := 0; i < b.N; i++ {
+		rands[i] = 123
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		DedupeUint64(rands)
+	}
+}
+
+func BenchmarkDedupeUint64_Random100(b *testing.B) {
+	r := rand.New(rand.NewSource(int64(b.N)))
+	rands := make([]uint64, b.N)
+	for i := 0; i < b.N; i++ {
+		rands[i] = uint64(r.Int63n(100))
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		DedupeUint64(rands)
+	}
+}
+
+func BenchmarkDedupeUint64_Random2048(b *testing.B) {
+	r := rand.New(rand.NewSource(int64(b.N)))
+	rands := make([]uint64, b.N)
+	for i := 0; i < b.N; i++ {
+		rands[i] = uint64(r.Int63n(2048))
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		DedupeUint64(rands)
+	}
+}
+{{</highlight>}}
 
 I only have theories as to why this works, but I suspect the main one comes down to the sort impact being overshadowed by the increased cache hit rate, since there is no need to call out to a map to check the duplicate, and it probably fits nicely into the CPU cache. Map access being one of those things that can be slow in Go, hence some other implementations.
 
 I thought this slightly interesting, and it was unexpected. Which is the case for almost anything I profile. The results are almost never what I expect.
+
+**EDIT** Someone wisely pointed out you should use a struct not interface which actually uses 16 bytes of space. Someone else wisely wanted to check my benchmark code which I have now included.
