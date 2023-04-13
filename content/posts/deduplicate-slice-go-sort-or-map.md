@@ -165,3 +165,5 @@ I only have theories as to why this works, but I suspect the main one comes down
 I thought this slightly interesting, and it was unexpected. Which is the case for almost anything I profile. The results are almost never what I expect.
 
 **EDIT** Someone wisely pointed out you should use a struct not interface which actually uses 16 bytes of space. Someone else wisely wanted to check my benchmark code which I have now included.
+
+Hacker News Comments: https://news.ycombinator.com/item?id=35536250#35537552
