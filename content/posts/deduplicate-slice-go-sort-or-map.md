@@ -5,7 +5,7 @@ date: 2023-04-11
 
 **TL;DR:** If you don't need to preserve order of the elements, sort the slice first and dedupe.
 
-I have been working on searchcode.com a fair bit recently, having been dealing with memory issues which were causing it to crash with out of memory exceptions. The cause of that was due to backtracking regular expressions in the syntax highlighter, which will be the subject of another post sometime.
+I have been working on https://searchcode.com a fair bit recently, having been dealing with memory issues which were causing it to crash with out of memory exceptions. The cause of that was due to backtracking regular expressions in the syntax highlighter, which will be the subject of another post sometime.
 
 As a result of the above I have spent a fair amount of time looking at memory profiles. One thing that stood out to me when doing so was a call I made to remove duplicate values from an array/slice of uint64. A fairly simple fuction that appeared often enough in the output.
 
