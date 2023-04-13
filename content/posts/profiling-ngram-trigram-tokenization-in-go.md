@@ -81,4 +81,6 @@ Zooming in
 
 We have eliminated the grow `runtime.growslice`. A win! Also one that took less than 20 mins to diagnose.
 
-The result? When reindexing searchcode takes about 10% less time. When you consider a full reindex takes the better part of 24 hours thats a huge win.
+The result? When reindexing searchcode takes about 10% less time. When you consider a full reindex takes the better part of 24 hours thats a huge win. Especially when while its happening your CPU looks like the below.
+
+![searchcode.com cpu htop](/static/profile-ngram/searchcode_cpu.png)
