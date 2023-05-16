@@ -2,7 +2,7 @@
 title: Why Jason of TechZing is Wrong
 author: Ben E. Boyter
 type: post
-date: 2010-08-09T09:43:54+00:00
+date: 2100-08-09T09:43:54+00:00
 url: /2010/08/why-jason-of-techzing-is-wrong/
 
 ---

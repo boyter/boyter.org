@@ -8,7 +8,7 @@ categories:
   - Uncategorized
 
 ---
-Thought I would quickly post some hard numbers showing the number of searches since this site launched. The results surprised me somewhat actually.2011-7 13636
+Thought I would quickly post some hard numbers showing the number of searches since searchco.de launched. The results surprised me somewhat actually. 2011-7 13636
 
   * 2011-6 8154
   * 2011-5 6183

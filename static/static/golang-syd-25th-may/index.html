@@ -26,18 +26,27 @@
 			<div class="slides">
 				<section>
 					<h1>Use Go to annoy the fediverse</h1>
-					<h3>Or how I annoyed 9 million people and survived</h3>
+					<h3>How to make 9 million people VERY angry</h3>
 				</section>
 
 				<section>
 					<h2>Who are you?</h2>
 					<p>
-					"Officially" technical lead/principle at Kablamo really a "code monkey" at heart.
+					"Officially" technical lead/principle at Kablamo but a "code monkey" at heart.
 					
 					<pre><code style="font-size: 16px;">func produce(c Coffee, b Beer) (Code, Cloud, error)</code></pre>
 					<p>
 
 					<p>I blog <a href="https://boyter.org/">boyter.org</a> I free software <a href="https://github/boyter/">github/boyter/</a> I run <a href="https://searchcode.com/">searchcode.com</a> also on the twitter <a href="https://twitter.com/boyter">@boyter</a> activitypub <a href="https://honk.boyter.org/boyter">@boyter@honk.boyter.org</a></p>
+				</section>
+
+				<section>
+					<h2>Trigger Warning</h2>
+					<ul>
+						<li>I was never out to hurt anyone</li>
+						<li>I am actually really excited by ActivityPub</li>
+						<li>I have been at least aware of it for years</li>
+					</ul>
 				</section>
 
 				<section>
@@ -50,133 +59,104 @@
 				</section>
 
 				<section>
-					<h2>Mailinator</h2>
+					<h2><s>Mail</s>Mastinator</h2>
 					<ul>
 						<li>No sign up, no login, totally public</li>
 						<li>Accepts every possible address you can think of.</li>
-						<li>No accounts... it just accepts email</li>
+						<li>No accounts... it just accepts <s>email</s>messages</li>
 						<li>Insecure by default! Reasonable anonymity, but no privacy</li>
 						<li>Trillions and trillions and trillions of accounts</li>
 					</ul>
 				</section>
 
 				<section>
-					<h2>The Goal</h2>
-					<ul>
-						<li>Search across everything</li>
-						<li>Have a "future resistant" archive.</li>
-						<li>Merge metadata into golden records. (Customer)</li>
-					</ul>
-				</section>
+									<h2>Deterministic Keys</h2>
+<pre><code style="font-size: 10px; line-height: 1em;">func GetKeys(username string, primes []int) (string, string) {
+	hsh := fnv.New64()
+	_, err := hsh.Write([]byte(username))
+	if err != nil {
+		return "", ""
+	}
 
-				<section>
-					<h2>The Goal</h2>
-					<ul>
-						<li>Self serve.</li>
-						<li>Turn off old services</li>
-						<li>Be production ready in 6 months</li>
-						<li>+10 PB total data (?) eventually... (Disks, Tape etc..)</li>
-					</ul>
-				</section>
+	pubKey, priKey, _ := GenerateKey(int(hsh.Sum64()), primes)
+	return pubKey, priKey
+}
 
-				<section>
-					<h2>Tools</h2>
-					<ul>
-						<li>AWS (naturally)</li>
-						<li>S3 all the things.</li>
-						<li>Elastic search</li>
-						<li>React/Typescript</li>
-						<li>No choice of language. Go.</li>
-						<li>O365 for Authentication.</li>
-					</ul>
-				</section>
 
-				<section>
-					<h2>Architecture</h2>
-					<img src="./img/1.png" style="border: none; height: 500px;" />
-				</section>
+// GenerateKey Given a specific input returns a deterministic RSA key
+func GenerateKey(seed int, primes []int) (string, string, error) {
+	k, err := rsa.GenerateKey(NewDeterministicReader(seed, primes), 2048)
+	if err != nil {
+		return "", "", err
+	}
 
-				<section>
-					<h2>Choices</h2>
-					<ul>
-						<li>3 AZ ECS cluster</li>
-						<li>2 R-type instances per AZ. (Memory)</li>
-						<li>Elastic search for search + cache.</li>
-						<li>SQS / Step functions?</li>
-						<li>RDS.</li>
-						<li>Public / Private?</li>
-						<li>V4 Signed Upload 700 GB files!</li>
-						<li>Landing Bucket.</li>
-						<li>Glacier</li>
-					</ul>
-				</section>
+	pubkey, err := EncodeKey(&k.PublicKey)
+	if err != nil {
+		return "", "", err
+	}
 
-				<section>
-					<h2>Landing</h2>
-					<p>Retention policy on landing.</p>
-					<img src="./img/4.png" style="border: none; height: 500px;" />
-				</section>
+	seckey, err := EncodeKey(k)
+	if err != nil {
+		return "", "", err
+	}
 
-				<section>
-					<h2>Resilient Design</h2>
-
-					<p>Degrade Gracefully.</p>
-					<dl>
-						<dt>S3</dt>
-						<dd>Unable to add/edit records or download/view</dd>
-						<dt>SQS</dt>
-						<dd>Unable to add/edit records with new media</dd>
-						<dt>Elastic Search</dt>
-						<dd>Unable to search</dd>
-						<dt>RDS</dt>
-						<dd>Unable to view/edit/delete collections</dd>
-					</dl>
-
-					<p>Catch! Hides errors! Delete issue.</p>
-
-				</section>
-
-				<section>
-					<h2>AWS Elastic Search?</h2>
-					<p>It's not brilliant</p>
-					<ul>
-						<li>Choice of instance types limited</li>
-						<li>No scaling or monitoring work done for you</li>
-						<li>Forces you to snapshot even if you use it as a cache/search only solution!! (Day)</li>
-						<li>Multi AZ limited</li>
-						<li>Tended to have issues under load.</li>
-					</ul>
-				</section>
-
-				<section>
-					<h2>Why Elastic search?</h2>
-					<ul>
-						<li>Query syntax <code>"melbourne~1 -melbourne"</code></li>
-						<li>Performance</li>
-						<li>Power users requested VERY complex queries (FQM)</li>
-						<li>Resilience</li>
-					</ul>
-				</section>
-
-				<section>
-					<h2>Elastic Search Issues</h2>
-					<p>Main one. Queries across fields.</p>
-<pre><code style="font-size: 16px;">
-{
-  "query_string": {
-    "default_operator": "AND",
-    "fields": [
-      "person.name",
-      "fact",
-      "person.citizenship"
-    ],
-    "query": "keanu canada"
-  }
+	return pubkey, seckey, nil
 }
 </code></pre>
-				<p>Library support in Go not great. Stemming. Sorting. CPU bound.</p>
 				</section>
 
+				<section>
+									<h2>Deterministic Keys</h2>
+<pre><code style="font-size: 10px; line-height: 1em;">type Reader struct {
+	rnd    *rand.Rand
+	primes []int
+}
+
+func NewDeterministicReader(seed int, primes []int) *Reader {
+	rnd := rand.New(rand.NewSource(int64(seed)))
+	return &Reader{rnd, primes}
+}
+
+func (r *Reader) Read(p []byte) (n int, err error) {
+	i := 0
+	b := p
+
+	if len(p) == 1 {
+		// fmt.Println("maybeReadRand")
+		return 1, nil
+	}
+
+	for i < len(b) {
+		if len(b) < 4 {
+			b[0] = 7
+			b = b[1:]
+		} else {
+			binary.LittleEndian.PutUint32(b, uint32(r.primes[r.rnd.Intn(len(r.primes))]))
+			b = b[4:]
+		}
+	}
+
+	return len(p), nil
+}
+</code></pre>
+				</section>
+
+
+
+				<section>
+					<h2>Reaction</h2>
+					<img src="./img/abuse.jpg" style="border: none;" />
+				</section>
+
+				<section>
+					<h2>Reaction 2</h2>
+					<blockquote>the ethical thing to do is to go take your computer, make sure to pop open every single case, plug them in so you can make sure everything gets nice and fried, then give them all a long, long, long shower.</blockquote>
+				</section>
+
+
+
+
+				
 				<section>
 					<h2>GOPATH + Monorepo</h2>
 					<p>Exploit GOPATH for multiple entry points into application.</p>

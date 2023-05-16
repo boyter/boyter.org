@@ -8,6 +8,7 @@ categories:
   - Tip
 
 ---
+
 Just found this while testing http://www.bing.com/ and thought I should preserve it here to be dammed sure I can find if when I want it.
 
 If the relationship is clearly "is-a", I use inheritance. If it is more like "can-be", I use interfaces. Eg, TextBox "is-a" Control, ArrayList "can-be" enumerated (so it implements IEnumerable).

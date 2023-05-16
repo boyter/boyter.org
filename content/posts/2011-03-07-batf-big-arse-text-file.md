@@ -18,8 +18,6 @@ You can of course do this using SVN, GIT, or any other versioning system. The pr
 <center>
   <a href="http://dl.dropbox.com/u/21583935/searchcode/blog/batfscreenshot.png"><img alt="" src="http://dl.dropbox.com/u/21583935/searchcode/blog/batfscreenshot.png" width="300" height="200" /></a>
 </center>
-
-
   
 Behold the online BATF. Everything you add or modify is viewable in a nice timeline of versions. Explore your thought process as you add/modify things. Have something important you want to preserve for some amount of time? Tag it and it will always accessible. You can also explore changes through a simplistic diff viewer that diff's against the current version.
 

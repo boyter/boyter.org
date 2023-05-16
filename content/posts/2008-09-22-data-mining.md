@@ -8,7 +8,7 @@ categories:
   - Uncategorized
 
 ---
-So a quick update. I spent 2 hours or so yesterday working on the netflix data mining. I basically just tidied it up and started testing. I was almost finished and was about to post a blog with results, but decided I wasn't happy with the results. It turned out there was&#8230; not a bug but that my code which worked out how related users are wasn't as effective as I thought it would be. See I used the vector space index to calculate how similar users are. The catch being is that it found the users almost 100% similar in almost all cases. I was wondering about this and then realised it was working correctly, and my assumption on how it would work was wrong.
+So a quick update. I spent 2 hours or so yesterday working on the netflix data mining. I basically just tidied it up and started testing. I was almost finished and was about to post a blog with results, but decided I wasn't happy with the results. It turned out there was a bug but that my code which worked out how related users are wasn't as effective as I thought it would be. See I used the vector space index to calculate how similar users are. The catch being is that it found the users almost 100% similar in almost all cases. I was wondering about this and then realised it was working correctly, and my assumption on how it would work was wrong.
 
 What ended up happening was this,
 
