@@ -3,6 +3,8 @@ title: How to start a Go project in 2018
 date: 2018-05-10
 ---
 
+This post is fairly old. See the updated version [Starting a Go project in 2023](https://boyter.org/posts/how-to-start-go-project-2023/)
+
 Getting started with a Go project in 2018 is frankly a little more painful then getting anything else started IMHO. With that here is what I have been doing to get started.
 
 The first thing to do is download and install Go. I would suggest always installing from the Go website itself https://golang.org/ and following the instructions for your OS of choice. 
