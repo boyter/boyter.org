@@ -7,21 +7,20 @@ I previously wrote about [starting a Go project in 2018](https://boyter.org/post
 
 ## Quicklinks
 
- - [Install / Setup](#install--setup)
- - [Starting a Project](#starting-a-project)
- - [Learning Go](#learning-go)
- - [Searching](#searching)
- - [Building / Installing](#building--installing)
- - [Linting / Static Analysis / Security Scanning](#linting--static-analysis--security-scanning)
- - [Profiling](#profiling)
- - [Unit Testing](#unit-testing)
- - [Integration Testing](#integration-testing)
- - [Community](#community)
- - [Multiple Main Entry Points](#multiple-main-entry-points)
- - [OS Specific Code](#os-specific-code)
- - [Docker](#docker)
- - [Useful Tools/Packages](#useful-toolspackages)
-
+- [Install / Setup](#install--setup)
+- [Starting a Project](#starting-a-project)
+- [Learning Go](#learning-go)
+- [Searching](#searching)
+- [Building / Installing](#building--installing)
+- [Linting / Static Analysis / Security Scanning](#linting--static-analysis--security-scanning)
+- [Profiling](#profiling)
+- [Unit Testing](#unit-testing)
+- [Integration Testing](#integration-testing)
+- [Community](#community)
+- [Multiple Main Entry Points](#multiple-main-entry-points)
+- [OS Specific Code](#os-specific-code)
+- [Docker](#docker)
+- [Useful Tools/Packages](#useful-toolspackages)
 
 ## Install / Setup
 
@@ -31,7 +30,7 @@ Older guides will mention setting up your $GOPATH. This is something you can com
 
 One thing I do recommend is update your machines path to point to the `bin` directory of the default $GOPATH, `export PATH=$PATH:$(go env GOPATH)/bin` so that you can install anything you are working on quickly and have it available everywhere. For example, on my current machine it contains the following.
 
-```
+```shell
 # boyter @ Bens-MacBook-Air in ~/go/bin [10:04:57] 
 $ tree
 .
@@ -61,7 +60,6 @@ Visual Studio Code has come a long way and is a lot better than it was when I fi
 
 I still prefer to pay and use for Goland because I find it to be like pairing with a brilliant engineer who never sleeps and is almost never wrong. Its ability to generate table tests, and run individual ones saves a lot of time and the refactoring tools are great. However for this post I tried using Visual Studio Code for a few hours and I was very impressed, and have no problems recommending it now.
 
-
 ## Starting a Project
 
 Starting a project is as easy as starting a new directory and running `go mod init NAMEHERE` where `NAMEHERE` is the name of the package you want for your project. It used to be that you used a name that matched the location of your repository so for example `github.com/boyter/scc` but you can use whatever you want now. Using the full repo URL isn't a bad idea though and I still prefer it for most projects.
@@ -74,17 +72,16 @@ Where getting packages can be confusing is if the package maintainer has moved o
 
 For example my project `scc` is on version 3.1.0. If I were to import it without specifying the version,
 
-```
+```shell
 $ go get github.com/boyter/scc/  
 go: added github.com/boyter/scc v2.12.0+incompatible
 ```
 
 I would get a version 2.12 package which can be confusing to those new to Go. When adding the latest version,
 
-```
+```shell
 $ go get github.com/boyter/scc/v3
 go: added github.com/boyter/scc/v3 v3.1.0
-<SNIP>
 ```
 
 Which as you an see has pulled down the correct version which is what I would expect.
@@ -113,28 +110,34 @@ Note its best to not refer to the language as golang in casual conversation, as 
 
 For commands which have `package main`
 
-    go build   builds the command and leaves the result in the current working directory.
-    go install builds the command in a temporary directory then moves it to $GOPATH/bin.
+```shell
+go build   builds the command and leaves the result in the current working directory.
+go install builds the command in a temporary directory then moves it to $GOPATH/bin.
+```
 
 For packages
 
-    go build   builds your package then discards the results.
-    go install builds then installs the package in your $GOPATH/pkg directory.
+```shell
+go build   builds your package then discards the results.
+go install builds then installs the package in your $GOPATH/pkg directory.
+```
 
 If you want to cross compile, that is build on Linux for Windows or vice versa you can set what architecture your want to target and the OS through environment variables. You can view your defaults in `go env` but to change them you would do something like,
 
-    GOOS=darwin GOARCH=amd64 go build
-    GOOS=darwin GOARCH=arm64 go build
-    GOOS=windows GOARCH=amd64 go build
-    GOOS=windows GOARCH=arm64 go build
-    GOOS=linux GOARCH=amd64 go build
-    GOOS=linux GOARCH=arm64 go build
+```shell
+GOOS=darwin GOARCH=amd64 go build
+GOOS=darwin GOARCH=arm64 go build
+GOOS=windows GOARCH=amd64 go build
+GOOS=windows GOARCH=arm64 go build
+GOOS=linux GOARCH=amd64 go build
+GOOS=linux GOARCH=arm64 go build
+```
 
 ### Trimming Builds
 
 Go binaries are by default "fat" and larger than you might expect. There is an easy way to reduce the size,
 
-```
+```shell
 go build -ldflags="-s -w"
 ```
 
@@ -152,7 +155,7 @@ For linting and static analysis https://github.com/golangci/golangci-lint
 
 For security checks I like to use gitleaks https://github.com/gitleaks/gitleaks and run it with the following checks.
 
-```
+```shell
 gitleaks detect -v -c gitleaks.toml
 gitleaks protect -v -c gitleaks.tom
 ```
@@ -197,7 +200,7 @@ Putting the above behind a simple route dumps a snapshot of the heap to disk whi
 
 In either case the analysis of the profile is the same,
 
-```
+```shell
 go tool pprof -http=localhost:8090 profile.pprof
 ```
 
@@ -207,27 +210,37 @@ The above will open a http server on port 8090 which you can then inspect. This 
 
 To run all the unit tests for your code (with caching there is no reason to not run them all anymore) you should run the following which will run all the unit tests
 
-	go test ./...
+```shell
+go test ./...
+```
 
 To run benchmarks run the below inside the directory where the benchmark is. Say you have `./processor/` inside your project with a benchmark file inside there go to that directory and run,
 
-	go test --bench .
+```shell
+go test --bench .
+```
 
 To run the built in fuzz tests,
 
-	go test -fuzz .
+```shell
+go test -fuzz .
+```
 
 To create a test file you need only create a file with `_test` as a suffix in the name. For example to create a test for a file called `file.go` you might want to call the file `file_test.go`.
 
 If you want to run an individual test you can do so,
 
-	go test ./... -run NameOfTest
+```shell
+go test ./... -run NameOfTest
+```
 
 Which will attempt to any test in all packages that have the name `NameOfTest`. Keep in mind that the argument `NameOfTest` supports regular expressions so its possible to target groups of tests assuming you name them well. For general running you can use `.` which matches everything.
 
 If you find yourself wanting or needing to run tests ignoring the cache you can do the following,
 
-	GOCACHE=off go test ./...
+```shell
+GOCACHE=off go test ./...
+```
 
 The standard practice with Go tests is to put them next to the file you are testing. However this is not actually required. So long as you can import the code (that is it is made exposed with an uppercase prefix) you can put the tests anywhere you like. This of course means you cannot test the private code which some consider an anti-pattern anyway.
 
@@ -253,7 +266,7 @@ package mypackage
 
 You can then run them
 
-```
+```shell
 go test --tags=integration ./...
 ```
 
@@ -263,32 +276,32 @@ This will still run the untagged tests. You can also use this to split tests int
 
 Test results are cached by default which might not be ideal for integration tests. Where you want to override this `-count=1` can be added to your run command to run the test 1 time ignoring the cached results. You can replace 1 with a higher value if required.
 
-```
+```shell
 go test -count=1 --tags=integration ./...
 ```
 
-## Community 
+## Community
 
 Your best bet to hang out with other "Gophers" is either the [subreddit](https://www.reddit.com/r/golang/) or [slack](https://gophers.slack.com). Of the two I find the slack to be more accommodating and nicer to deal with.
 
 Twitter accounts I find useful, although some might have moved to the fediverse, but you can confirm via their profile.
 
- - https://twitter.com/go_perf
- - https://twitter.com/golangnews
- - https://twitter.com/golang_news
- - https://twitter.com/golang
- - https://twitter.com/golangweekly
- - https://twitter.com/goinggodotnet
- - https://twitter.com/_rsc
- - https://twitter.com/bradfitz
+- https://twitter.com/go_perf
+- https://twitter.com/golangnews
+- https://twitter.com/golang_news
+- https://twitter.com/golang
+- https://twitter.com/golangweekly
+- https://twitter.com/goinggodotnet
+- https://twitter.com/_rsc
+- https://twitter.com/bradfitz
 
 The following newsletter is worth subscribing to as well https://golangweekly.com/ and is a great way to keep an eye on the latest developments.
 
 The following websites/blogs tend to have quality Go content worth paying attention to
 
- - https://bitfieldconsulting.com/golang/
- - https://dave.cheney.net/
- - https://www.ardanlabs.com/categories/go-programing/
+- https://bitfieldconsulting.com/golang/
+- https://dave.cheney.net/
+- https://www.ardanlabs.com/categories/go-programing/
 
 ## Multiple Main Entry Points
 
@@ -296,7 +309,7 @@ There are times where you want to potentially have multiple entry points into an
 
 One common pattern for this is to have a directory inside the root of the application and place your main.go files in there. For example,
 
-```
+```shell
 SRC
 ├── cmd
 │   ├── commandline
@@ -323,7 +336,7 @@ With the above you can now call into code exposed by the repository package in t
 
 Occasionally you will require code in your application that will not compile or run on different operating systems. The most common way to deal with this is to have the following structure in your application,
 
-```
+```shell
 main_darwin.go
 main_linux.go
 main_windows.go
@@ -350,7 +363,7 @@ CMD ["./main"]
 
 The below would build and run from the one of the alternate entry point's for the application,
 
-```
+```shell
 FROM golang:1.20
 
 COPY ./ /go/src/bitbucket.code.company-name.com.au/scm/code/
@@ -363,7 +376,7 @@ CMD ["./main"]
 
 A few people who have read this post suggested using multi stage docker builds https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds which works well with Docker 17.05 or higher. More details here https://medium.com/travis-on-docker/multi-stage-docker-builds-for-creating-tiny-go-images-e0e1867efe5a An example would be,
 
-```
+```shell
 FROM golang:1.20
 COPY . /go/src/bitbucket.code.company-name.com.au/scm/code
 WORKDIR /go/src/bitbucket.code.company-name.com.au/scm/code/
@@ -383,21 +396,20 @@ A brief list of useful tools I like related to Go development, and packages that
 
 ### Tools
 
- - gow https://github.com/mitranim/gow - A watch mode command. Run it with your arguments, and it will hot recompile under the hood for you. Very useful for HTTP development. For example `gow -e=go,html,css run .` will watch for file changes to any Go, HTML or CSS file, and if found rerun the `go run .` command giving you a hot reload.
- - hyperfine https://github.com/sharkdp/hyperfine - A command line benchmarking tool. Think of it as a replacement for running `time` multiple times and averaging the results.
- - dcd https://github.com/boyter/dcd - Duplicate code detector. My own project (so I hesitate to add it) but you can run it to find examples of duplicated code in a project. Especially useful when looking to refactor.
- - gotestsum https://github.com/gotestyourself/gotestsum - Alternate test runner. Gives different test outputs with format options that you might prefer. Can produce junit output format to work with CI/CD systems.
- - https://mholt.github.io/json-to-go/ - JSON to Go generator. Goland can do this for you too, but this tool works pretty well for pasting in JSON and getting back a struct that can hold it.
- - gofumpt https://github.com/mvdan/gofumpt - A stricter formatter than gofmt. I personally have not used this, but had it suggested to me.
- - https://github.com/golangci/golangci-lint - Static type checker and lint enforcer. Apply this from day one of your project and it will save you a lot of cleanup. The suggestions it provides are always good and it helps when asked the usual sort of audit questions. Hook it into your CI/CD pipeline as a deployment gate for best results.
- - gitleaks https://github.com/gitleaks/gitleaks - SAST tool to find and identify checked in secrets, passwords and such. Again works well to help pass audit questions.
- - BFG Repo-Cleaner https://rtyley.github.io/bfg-repo-cleaner/ - Easiest way to remove large binaries or checked in secrets from a git repository. Very useful for fixing issues gitleaks finds.
+- gow https://github.com/mitranim/gow - A watch mode command. Run it with your arguments, and it will hot recompile under the hood for you. Very useful for HTTP development. For example `gow -e=go,html,css run .` will watch for file changes to any Go, HTML or CSS file, and if found rerun the `go run .` command giving you a hot reload.
+- hyperfine https://github.com/sharkdp/hyperfine - A command line benchmarking tool. Think of it as a replacement for running `time` multiple times and averaging the results.
+- dcd https://github.com/boyter/dcd - Duplicate code detector. My own project (so I hesitate to add it) but you can run it to find examples of duplicated code in a project. Especially useful when looking to refactor.
+- gotestsum https://github.com/gotestyourself/gotestsum - Alternate test runner. Gives different test outputs with format options that you might prefer. Can produce junit output format to work with CI/CD systems.
+- https://mholt.github.io/json-to-go/ - JSON to Go generator. Goland can do this for you too, but this tool works pretty well for pasting in JSON and getting back a struct that can hold it.
+- gofumpt https://github.com/mvdan/gofumpt - A stricter formatter than gofmt. I personally have not used this, but had it suggested to me.
+- https://github.com/golangci/golangci-lint - Static type checker and lint enforcer. Apply this from day one of your project and it will save you a lot of cleanup. The suggestions it provides are always good and it helps when asked the usual sort of audit questions. Hook it into your CI/CD pipeline as a deployment gate for best results.
+- gitleaks https://github.com/gitleaks/gitleaks - SAST tool to find and identify checked in secrets, passwords and such. Again works well to help pass audit questions.
+- BFG Repo-Cleaner https://rtyley.github.io/bfg-repo-cleaner/ - Easiest way to remove large binaries or checked in secrets from a git repository. Very useful for fixing issues gitleaks finds.
 
 ### Packages
 
- - https://github.com/tidwall/gjson - A quick way to get JSON values from a JSON document. Rather than deserialize into a struct you can just get the value you want. Especially useful for integration tests when running against your own endpoints. Since importing the struct you used to marshal out won't catch regressions, using this is a decent way to write non brittle tests. `g := gjson.Get(resp.Body, "response.someValue")`.
- - https://github.com/rs/zerolog/ - Structured JSON logs. A fast way to get structured logs that make sense. My preference is to use this with a unique code `date | md5 | cut -c 1-8` allowing you to track down errors to the exact line `log.Error().Str(common.UniqueCode, "9822f401").Err(err).Msg("")`. Add in context information to get the invoke details too giving you some level of observability through your logs.
- - https://github.com/gorilla/mux - A replacement for the standard Go router which is a bit janky. Annoyingly this code is now archived. While the code has not rusted and it still works finding something that is maintained should be a priority. The following blog post has a decent over view of the potential replacements https://mariocarrion.com/2022/12/19/gorilla-mux-archived-migration-path.html
- - https://github.com/google/go-cmp - Better than `reflect.DeepEqual` for equality checks.
- - https://github.com/google/uuid/ - Probably the defacto package for creating the various versions of UUID's.
-
+- https://github.com/tidwall/gjson - A quick way to get JSON values from a JSON document. Rather than deserialize into a struct you can just get the value you want. Especially useful for integration tests when running against your own endpoints. Since importing the struct you used to marshal out won't catch regressions, using this is a decent way to write non brittle tests. `g := gjson.Get(resp.Body, "response.someValue")`.
+- https://github.com/rs/zerolog/ - Structured JSON logs. A fast way to get structured logs that make sense. My preference is to use this with a unique code `date | md5 | cut -c 1-8` allowing you to track down errors to the exact line `log.Error().Str(common.UniqueCode, "9822f401").Err(err).Msg("")`. Add in context information to get the invoke details too giving you some level of observability through your logs.
+- https://github.com/gorilla/mux - A replacement for the standard Go router which is a bit janky. Annoyingly this code is now archived. While the code has not rusted and it still works finding something that is maintained should be a priority. The following blog post has a decent over view of the potential replacements https://mariocarrion.com/2022/12/19/gorilla-mux-archived-migration-path.html
+- https://github.com/google/go-cmp - Better than `reflect.DeepEqual` for equality checks.
+- https://github.com/google/uuid/ - Probably the defacto package for creating the various versions of UUID's.
