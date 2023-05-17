@@ -288,7 +288,7 @@ The following websites/blogs tend to have quality Go content worth paying attent
 
  - https://bitfieldconsulting.com/golang/
  - https://dave.cheney.net/
- - hhttps://www.ardanlabs.com/categories/go-programing/
+ - https://www.ardanlabs.com/categories/go-programing/
 
 ## Multiple Main Entry Points
 
@@ -389,6 +389,9 @@ A brief list of useful tools I like related to Go development, and packages that
  - gotestsum https://github.com/gotestyourself/gotestsum - Alternate test runner. Gives different test outputs with format options that you might prefer. Can produce junit output format to work with CI/CD systems.
  - https://mholt.github.io/json-to-go/ - JSON to Go generator. Goland can do this for you too, but this tool works pretty well for pasting in JSON and getting back a struct that can hold it.
  - gofumpt https://github.com/mvdan/gofumpt - A stricter formatter than gofmt. I personally have not used this, but had it suggested to me.
+ - https://github.com/golangci/golangci-lint - Static type checker and lint enforcer. Apply this from day one of your project and it will save you a lot of cleanup. The suggestions it provides are always good and it helps when asked the usual sort of audit questions. Hook it into your CI/CD pipeline as a deployment gate for best results.
+ - gitleaks https://github.com/gitleaks/gitleaks - SAST tool to find and identify checked in secrets, passwords and such. Again works well to help pass audit questions.
+ - BFG Repo-Cleaner https://rtyley.github.io/bfg-repo-cleaner/ - Easiest way to remove large binaries or checked in secrets from a git repository. Very useful for fixing issues gitleaks finds.
 
 ### Packages
 
