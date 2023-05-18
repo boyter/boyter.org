@@ -98,6 +98,8 @@ Cached artifacts from the Go build system can be stored on your local system and
 
 You can get to grips with Go pretty easily using the [go.dev learning tutorials](https://go.dev/learn/). This will get you up to speed with how to write code, and the syntax you need to be aware of. However for learning how to structure your own HTTP application, which is what most people are doing I strongly suggest the following book https://lets-go.alexedwards.net/ It does cost money, but it will short-cut your learning process by a few hours.
 
+I have a sample that I personally use for setting up new HTTP projects which you can find on github https://github.com/boyter/go-http-template
+
 One thing I strongly suggest reading however is the [50 Shades of Go](https://devs.cloudimmunity.com/gotchas-and-common-mistakes-in-go-golang/index.html) post. It covers a lot of the Go pitfalls you are likely to run into. Checking for this is something a lot of companies screen for when hiring, as exposure to these issues is a good indication of experience using Go.
 
 ## Searching
