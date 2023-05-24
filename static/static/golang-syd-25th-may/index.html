@@ -7,7 +7,7 @@
 		<title>Golang-Syd 25th May 2023</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
-		<link rel="stylesheet" href="css/theme/sky.css">
+		<link rel="stylesheet" href="css/theme/black.css">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="lib/css/zenburn.css">
@@ -51,27 +51,178 @@ It handles about 22 RPS mostly through the api, with some portion of those being
 				</section>
 
 				<section>
+					<h2>Requirements</h2>
+					<ul>
+						<li>Special characters <code>(i++)</code></li>
+						<li>Inline searches find <code>i++</code> in <code>for(i:=0;i<100;i++)</code></li>
+						<li>Site is free...</li>
+						<li>Embed into application must use Go</li>
+						<li>Entirely in RAM</li>
+						<li>Needs a cool name. Caisson!</li>
+						<li>Needs to be fun to work on!!!</li>
+					</ul>
+					<aside class="notes">So what were my requirements to build an index. This is important becauwse we can make design trade off decisions here
+
+Im searching source code. This impacts the design!
+ - special characters
+ - inline searches find i++ in for(i:=0;i<100;i++)
+ - no special search types (other than exact match)
+Its a free website.
+I want to embed into the application. So use Go!
+Store everything in RAM cos ram is cheap!
+We have TB's of code that we need to index...
+$$$ save money... cos I am cheap
+Want a single binary to deploy
+Needs a cool name. Caisson. Named after the watertight structure used for digging foundations underwater. They are designed to workunder pressure. Hence the name.</aside>
+				</section>
+
+				<section>
 					<h2>Search Lifecycle</h2>
 					<img src="./img/index.png" style="border: none;" />
 					<aside class="notes">
 So what is an index?
 In short, its something you feed in queries, and get back matching unique id's in some sort of order.
 There are a lot of bits that go into a search engine, crawlers, indexers, the index, query parsers, 
-data storage, etc... but its the index thats considered the "cool" thing to work on.</aside>
+data storage, etc... but its the index thats considered the "cool" thing to work on.
+
+So here is a brief diagram of the stuff that goes into a search engine, and the index is the tiny bit in the middle... If I had more time id walk you though all of this because there are interesting problems for literally every part you see here, but lets just focus on the index itself.</aside>
 				</section>
 
 				<section>
 					<h2>Why Go?</h2>
 					<ul>
-
+						<li>Reasonable performance</li>
+						<li>Low memory usage</li>
+						<li>Integer types int8, uint8, uint16, int32 etc...</li>
 					</ul>
+					<aside class="notes">So why Go? Most indexes are in C/C++/Rust 
+					
+Its actually by accident. I happened to write a tool to learn Go called scc, which counts programming code. Also there were decent syntax highlighters you can embed into your application such as chroma which, and I wanted both of those things without having to reimplement my own in Java...
+
+But it turned out that Go was a pretty decent choice for this.
+
+ - Reasonable performance (almost as fast as java)
+ - Memory usage (this becomes important later!)
+ - Decent libraries
+ - Support for multiple integer types (memory savings!)
+
+
+And as mentioned I wanted to run everything in a single binary, because it lowers latency and I wanted as simple a deployment as possible.
+
+It also turns out that Go fits well with how I think about things. Looking back on this I don't think I would have been able to build it as well as I had in Java or any other language im familar with.
+					</aside>
 				</section>
+
+
+				<section>
+					<h2>Searching code</h2>
+					<p>Trigrams</p>
+<pre><code style="font-size: 18px; line-height: 1em;">searchcode ->	sea
+		ear
+		arc
+		rch
+		chc
+		hco
+		cod
+		ode
+</code></pre>
+					<aside class="notes">So code search is in some ways easier than text, because you don't need to try to understand language in the way that you do when dealing with english, japanese or russian.
+
+You do this by indexing on whats known as trigrams, where you break the text apart into characters of 3 and index those. You can actually use any number you want for ngrams, but trigrams work best when indexing source code.
+
+One catch with this is that you get false positives, some inputs generate the same ngrams despite being different. You also have terms with low cardinality such as repeated works in a line. So the letter p 100 times is no more useful than 3 of them.
+
+Another issueis that you get really large posting lists... what are posting lists? Well lets have a look at how to build an index
+					</aside>
+				</section>
+
+				<section>
+					<h2>How to build an index</h2>
+					<p>Inverted index. Most common way to do it.</p>
+<pre><code style="font-size: 14px; line-height: 1em;">map[string][]struct{}
+map[string][]int64{} 
+</code></pre>
+					<ul>
+						<li>Posting lists</li>
+						<li>Need to implement skip lists or compression on the posting lists at scale</li>
+ 						<li>Supports a positional index</li>
+					</ul>
+
+					<aside class="notes">
+					Quickly a positional index is one that stores where the term was found in the document. In theory you can then use the index to reconstruct the document entirely. One catch with this is that your index becomes larger than the thing you are indexing.
+					Not fun to implement... so many details
+					</aside>
+				</section>
+
+				<section>
+					<h2>Trie</h2>
+					<p>Typesense uses this, its also written in C++</p>
+<img src="./img/trie.png" height="100px" style="border: none;" />
+					<ul>
+						<li>Big problem is not friendly to GC due to the use of pointers (problem for Go)</li>
+						<li>Need to implement skip lists or compression on the posting lists at scale</li>
+ 						<li>Supports a positional index</li>
+					</ul>
+
+					<aside class="notes">
+					I tried this, and the GC non friendly problem caused it to have massive delays while walking the pointers. I could have possibly done off heap tricks but I wanted to stick to normal Go.
+					So what about bitslice signatures?
+					</aside>
+				</section>
+
+				<section>
+					<h2>Bloom filter</h2>
+<img src="./img/bloom_example.png" style="border: none;" />
+					
+					<aside class="notes">
+					bitslice signatures are built on bloom filters. So whats a bloom filter?
+					So what is a bloom filter?
+
+In short a probablistic data structure, that you can use to test the existance of something. You add items, and can check if it was added. They never return false negatives, but they do occassionaly lie and report something being added when it was not.
+
+So lets look at this example,
+
+We have a 8 bit bloom filter, and hash two terms, golang and searchcode. Goland hashes to bit position 0 and searchcode to bit position 6. To add an item we do the hash, and then set the bit position to 1.
+
+If I want to check if searchcode was added, I hash it again and probe the bit position. If set to 1 it means it was possibly added. If I want to check for the existance of awesome I could hash that and get the position 2 and if I probe that I can see it was never set so I know it was never added.
+
+The lie part comes from the hash function, where it might hash to position 0. So if I was checking for the existance of "java" and it hashes to bit position 0 I would assume it was added. This is a false positive.
+
+For hashing you can use any hash that returns an integer. FNV and FNVa work well for this being fast enough and providing enough distribution. Murmur3 is meant to be good but I found it slower.
+					</aside>
+				</section>
+
+				<section>
+					<section>
+						<h2>Search</h2>
+	<img src="./img/bloomfilter.png" style="border: none;" />
+						<aside class="notes">
+						</aside>
+					</section>
+					<section>
+						<img src="./img/bloomfilter_1.png" style="border: none;" />
+					</section>
+					<section>
+						<img src="./img/bloomfilter_2.png" style="border: none;" />
+					</section>
+					<section>
+						<img src="./img/bloomfilter_3.png" style="border: none;" />
+					</section>
+					<section>
+						<img src="./img/bloomfilter_4.png" style="border: none;" />
+					</section>
+					<section>
+						<img src="./img/bloomfilter_match.png" style="border: none;" />
+					</section>
+				</section>
+
 
 
 
 				<section>
 									<h2>Optimise</h2>
-<pre><code style="font-size: 10px; line-height: 1em;">┌──────────────────┐    ┌───────────────────────────────────────────────────────────────────┐
+<pre><code style="font-size: 14px; line-height: 1em;">
+┌──────────────────┐    ┌───────────────────────────────────────────────────────────────────┐
 │      bucket      │───▶│                                                                   │
 └──────────────────┘    │ 0011100000000000000000000000000011010010000000000000010000111111  │
                         │ 0000100000000110001000000000000000000000001010001000001000000000  │
@@ -101,7 +252,7 @@ It would look like what you see. This ensures we are optimally using the space. 
 
 				<section>
 					<h2>Deterministic Keys</h2>
-<pre><code style="font-size: 10px; line-height: 1em;">
+<pre><code style="font-size: 14px; line-height: 1em;">
 ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
 │     caisson      ├─┬▶│  shard 512       ├┬─▶│     bucket-1     │
 └──────────────────┘ │ └──────────────────┘│  └──────────────────┘
@@ -166,180 +317,7 @@ func (ci *CaissonIndex) Trigrams(text string) []string {
 				</section>
 
 
-				<section>
-					<h2>Reaction</h2>
-					<img src="./img/abuse.jpg" style="border: none;" />
-				</section>
 
-				<section>
-					<h2>Reaction 2</h2>
-					<blockquote>the ethical thing to do is to go take your computer, make sure to pop open every single case, plug them in so you can make sure everything gets nice and fried, then give them all a long, long, long shower.</blockquote>
-				</section>
-
-
-
-
-				
-				<section>
-					<h2>GOPATH + Monorepo</h2>
-					<p>Exploit GOPATH for multiple entry points into application.</p>
-					<pre><code style="font-size: 16px;">.
-├── assets
-│   ├── imageproxy
-│   │   └── main.go
-│   ├── load
-│   │   └── main.go
-│   ├── merge
-│   │   ├── audio
-│   │   │   └── main.go
-│   │   ├── bulk
-│   │   │   └── main.go
-│   │   ├── cleanup
-│   │   │   └── main.go
-│   │   ├── oldvideo
-│   │   │   └── main.go
-│   │   ├── photo
-│   │   │   └── main.go
-│   │   ├── video
-│   │   │   └── main.go
-│   │   └── wvideo
-│   │       └── main.go
-│   ├── transcodeFinished
-│   │   └── commandline
-│   │       └── main.go
-│   └── transcodeStart
-│       └── commandline
-│           └── main.go
-					</code></pre>
-				</section>
-
-				<section>
-					<h2>Background Jobs</h2>
-					<ul>
-						<li>Load. Taxonomy. Graceful degrade. Restore.</li>
-						<li>Merge's.</li>
-						<li>Transcode Start/End.</li>
-						<li>Image Resize, watermark.</li>
-						<li>Many one off jobs.</li>
-						<li>Lambda?</li>
-						<li>Go memory usage a massive win.</li>
-					</ul>
-				</section>
-
-				<section>
-					<h2>Go for S3 copy</h2>
-					<p>Excellent with SQS support. But have to code own multipart.</p>
-<pre><code style="font-size: 16px;">
-for _, sqsmsg := range messages.Messages {
-	// We don't want to wait for these to finish anymore but let them run in the background
-	// and finish whenever they are done and naturally exit. As such no need for a waitgroup
-	// here anymore
-	go func(sqsmsg *sqs.Message) {
-</code></pre>
-				</section>
-
-				<section>
-					<h2>Go Image Resizing</h2>
-					<ul>
-						<li>Don't do it at runtime</li>
-						<li>Too slow! Watermarking.</li>
-						<li>Moved to pre-generating and storing.</li>
-						<li>API passes images though. Logging.</li>
-						<li>Thumbor is pretty good</li>
-					</ul>
-				</section>
-
-				<section>
-					<h2>Clipping</h2>
-					<img src="./img/2.png" style="border: none;" />
-					<ul>
-						<li>mediainfo, ffmpeg (mxf, mov, mp4).</li>
-						<li>Disk caching/issue.</li>
-						<li><a href="https://boyter.org/posts/media-clipping-using-ffmpeg-with-cache-eviction-2-random-for-disk-caching-at-scale/">2 random eviction (woo!)</a></li>
-						<li>AWS Transcode? Speed/Cost.</li>
-					</ul>
-				</section>
-
-				<section>
-					<h2>Clipping In Action</h2>
-					<p>Network bound. T3 burstable network really helps!!</p>
-					<img src="./img/3.png" style="border: none;" />
-				</section>
-
-
-				<section>
-					<h2>Glacier</h2>
-					<p>Annoying when many can request. Store in DB and on event update all matches. Expire after 24 hours. Hard to predict expiration.</p>
-				</section>
-
-				<section>
-					<h2>Really Helpful</h2>
-					<p>Have an endpoint that exposes <b>most</b> environment variables.</p>
-
-<pre><code style="font-size: 16px;">{
-  "environment": {
-    "AppEnvironment": "PROD",
-    "AudioMasterBucket": "archives.master.audio",
-    "AudioProxyBucket": "archives.proxy.audio",
-    "AwsRegion": "ap-southeast-2",
-    "DownloadExpiryMinutes": 1440,
-    "ElasticEndpoint": "https://elastic-archives.content/",
-    "FrontendEndpoint": "https://archive.content",
-    "HttpTimeoutSeconds": 20,
-    "LandingBucket": "archives.landing",
-    "MetadataBucket": "archives.records.prod",
-    "PhotoBucket": "archives.photo",
-    "PhotoBucketProxy": "archives.proxy.photo",
-    "PortNumber": 8080,
-    "SystemEnvironment": "Archive",
-    "SystemEnvironmentDisplayName": "Archive",
-    "UploadExpiryMinutes": 1440,
-    "VideoMasterBucket": "archives.master.video",
-    "VideoProxyBucket": "archives.proxy.video"
-  }
-}</code></pre>
-
-				</section>
-
-				<section>
-					<h2>What would we change?</h2>
-
-					<p>AWS Changes, Fargate (CPU), Private API-Gateway, Server-less Aurora, Bucket cleaning, Instance types R5</p>
-					<p>Taxonomy storage.</p>
-					<p>Probably more lambda. 15 min timeout.</p>
-					<p>S3 key names. Maybe GORM. Proxy!</p>
-				</section>
-
-				<section>
-					<h2>Results</h2>
-					<img src="./img/5.png" style="border: none;" />
-					<ul>
-						<li>Outages 0. Previously days/weeks.</li>
-						<li>976 audio master retrievals</li>
-						<li>4,008 video master retrievals. Glacier.</li>
-						<li>16,014 audio proxies played</li>
-						<li>157,281 video proxies played (28,469 in May)</li>
-						<li>593,085 searches performed</li>
-						<li>Average search time ~100 ms</li>
-					</ul>
-					<p>GA Jan. Culture change.</p>
-				</section>
-
-				<section>
-					<h2>Results Continued</h2>
-
-					<ul>
-						<li>3 months to production cut-over. Turn off.</li>
-						<li>132 TB data though API (so far)</li>
-						<li>1 PB of video data in S3 / Glacier</li>
-						<li>40 TB of audio data in S3</li>
-						<li>16,000 images</li>
-						<li>~327 days of video watching</li>
-						<li>Some joker... 60x700 GB videos in one hour.</li>
-						<li>Importing other systems.</li>
-						<li>On time + budget!</li>
-					</ul>
-				</section>
 
 				<section>
 					<h2>Thank You!</h2>

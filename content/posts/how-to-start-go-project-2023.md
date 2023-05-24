@@ -296,6 +296,7 @@ Twitter accounts I find useful, although some might have moved to the fediverse,
 - https://twitter.com/goinggodotnet
 - https://twitter.com/_rsc
 - https://twitter.com/bradfitz
+- https://twitter.com/golangch
 
 The following newsletter is worth subscribing to as well https://golangweekly.com/ and is a great way to keep an eye on the latest developments.
 
