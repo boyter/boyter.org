@@ -25,122 +25,145 @@
 		<div class="reveal">
 			<div class="slides">
 				<section>
-					<h1>Use Go to annoy the fediverse</h1>
-					<h3>How to make 9 million people VERY angry</h3>
+					<h1>Building a code search index in Go</h1>
 				</section>
 
 				<section>
 					<h2>Who are you?</h2>
 					<p>
-					"Officially" technical lead/principle at Kablamo but a "code monkey" at heart.
-					
-					<pre><code style="font-size: 16px;">func produce(c Coffee, b Beer) (Code, Cloud, error)</code></pre>
-					<p>
-
+					"Officially" technical lead/principle at Kablamo but a "code monkey" at heart.</p>
 					<p>I blog <a href="https://boyter.org/">boyter.org</a> I free software <a href="https://github/boyter/">github/boyter/</a> I run <a href="https://searchcode.com/">searchcode.com</a> also on the twitter <a href="https://twitter.com/boyter">@boyter</a> activitypub <a href="https://honk.boyter.org/boyter">@boyter@honk.boyter.org</a></p>
 				</section>
 
+
 				<section>
-					<h2>Trigger Warning</h2>
-					<ul>
-						<li>I was never out to hurt anyone</li>
-						<li>I am actually really excited by ActivityPub</li>
-						<li>I have been at least aware of it for years</li>
-					</ul>
+					<h2>searchcode.com</h2>
+					<p>IMAGE_HERE</p>
+					<aside class="notes">So I run searchcode.com, and its iteration over the last 10 years has been from PHP to Python almost to Java and finally to Go.
+
+The whole time that has happened one thing has been constant, which was the use of the index engine, which was provided using Sphinx Search and then a forked version called Manticore.
+
+This made me feel like a bit of a fraud, how can I claim to be a search guy without using my own index. So after the first covid lockdown in 2020, I was hiking with a mate I decided I would build my own index.
+
+Searchcode itself indexes about 75 billion lines of code across 40 million projects pulled from github, gitlab, bitbucket, codeberg, sr.ht and such. Thats about 120 million documents although it rises and falls.
+
+It handles about 22 RPS mostly through the api, with some portion of those being search queries and the remainder being code view queries, although it does burst much higher from time to time. It works out being about 2.6 million requests a day.</aside>
 				</section>
 
 				<section>
-					<h2>Fediverse?</h2>
-					<ul>
-						<li>You know twitter?</li>
-						<li>You know mastodon?</li>
-						<li>ActivityPub!</li>
-					</ul>
+					<h2>Search Lifecycle</h2>
+					<img src="./img/index.png" style="border: none;" />
+					<aside class="notes">
+So what is an index?
+In short, its something you feed in queries, and get back matching unique id's in some sort of order.
+There are a lot of bits that go into a search engine, crawlers, indexers, the index, query parsers, 
+data storage, etc... but its the index thats considered the "cool" thing to work on.</aside>
 				</section>
 
 				<section>
-					<h2><s>Mail</s>Mastinator</h2>
+					<h2>Why Go?</h2>
 					<ul>
-						<li>No sign up, no login, totally public</li>
-						<li>Accepts every possible address you can think of.</li>
-						<li>No accounts... it just accepts <s>email</s>messages</li>
-						<li>Insecure by default! Reasonable anonymity, but no privacy</li>
-						<li>Trillions and trillions and trillions of accounts</li>
+
 					</ul>
 				</section>
 
+
+
 				<section>
-									<h2>Deterministic Keys</h2>
-<pre><code style="font-size: 10px; line-height: 1em;">func GetKeys(username string, primes []int) (string, string) {
-	hsh := fnv.New64()
-	_, err := hsh.Write([]byte(username))
-	if err != nil {
-		return "", ""
-	}
+									<h2>Optimise</h2>
+<pre><code style="font-size: 10px; line-height: 1em;">┌──────────────────┐    ┌───────────────────────────────────────────────────────────────────┐
+│      bucket      │───▶│                                                                   │
+└──────────────────┘    │ 0011100000000000000000000000000011010010000000000000010000111111  │
+                        │ 0000100000000110001000000000000000000000001010001000001000000000  │
+                        │ 0010000000000000000000000000000001010001111111110000010100111111  │
+                        │ 0000100011010000000000000000000000000000001010001000000110000000  │
+                        │ 1100011000000001111111010100100010000000000000010000000000100100  │
+                        │ 0000000000000000000000000000000000000001111111110000000000000000  │
+                        │ 1000011000100001111111010100000010000000000000010000000000100100  │
+                        │ 0000000000000000000000000000000000000001111111110000000000000000  │
+                        │ 0000000000000010000000000011000000001000000000000000000000001000  │
+                        │ 1111111000000000000000000000001000010000010000000000000000011000  │
+                        │ 1111111111111111000000000011000000000000000000100010000000000000  │
+                        │ 1111111000000000000000000000001000010000010000010000000000001000  │
+                        │ 0000000000000000000000000000000000111110000000000000000000000000  │
+                        │ 0000000001100000110000001000000000000000000001000000101001000000  │
+                        │ 0000000000000000000100000000000000111110000000000000110000010000  │
+                        │ 0000000000100001110000001000000001000000000000000000101001111111  │
+                        │                                                                   │
+                        └───────────────────────────────────────────────────────────────────┘
+</code></pre>
+					<aside class="notes">The next step is to optimise this to not waste memory. In searchcode its done by packing 64 documents into a bloom filter block or bucket. 
 
-	pubKey, priKey, _ := GenerateKey(int(hsh.Sum64()), primes)
-	return pubKey, priKey
-}
+So if a bloom filter had 16 bits, we keep 16 uint64's in a slice.
+
+It would look like what you see. This ensures we are optimally using the space. Because we pack 64 documents into each bucket we end up using a single bit per location in the bloom filter.</aside>
+				</section>
+
+				<section>
+					<h2>Deterministic Keys</h2>
+<pre><code style="font-size: 10px; line-height: 1em;">
+┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+│     caisson      ├─┬▶│  shard 512       ├┬─▶│     bucket-1     │
+└──────────────────┘ │ └──────────────────┘│  └──────────────────┘
+                     │                     │                      
+                     │                     │  ┌──────────────────┐
+                     │                     ├─▶│     bucket-2     │
+                     │                     │  └──────────────────┘
+                     │                     │                      
+                     │                     │  ┌──────────────────┐
+                     │                     └─▶│     bucket-3     │
+                     │                        └──────────────────┘
+                     │                                            
+                     │                                            
+                     │ ┌──────────────────┐   ┌──────────────────┐
+                     └▶│  shard 2048      ├┬─▶│     bucket-1     │
+                       └──────────────────┘│  └──────────────────┘
+                                           │                      
+                                           │  ┌──────────────────┐
+                                           ├─▶│     bucket-2     │
+                                           │  └──────────────────┘
+                                           │                      
+                                           │  ┌──────────────────┐
+                                           └─▶│     bucket-3     │
+                                              └──────────────────┘
+</code></pre>
+					<aside class="notes">In searchcode its a little more in depth because it actually changes the size of the bloom filters based on the size of the document its indexing.
+
+What happens is when a document is indexed, it breaks it into unique trigrams, and then finds a bloom filter where it will be stored with a target bit density. If the document has a small amount of trigrams it ends up in a smaller bloom filter of say 256 bits, and if larger it goes into a larger one up to 4096.
+
+When the full 64 documents have been added to a bucket then in the case of a 256 bit bloom filter another 256 uint64's are appended on the end.
+
+Where shards represent a different bloom filter size, say 512 of 2048 bits, and buckets exist as a single uint64 slice in a shard. They are split out logiclly here to help understanding.
+					</aside>
+				</section>
 
 
-// GenerateKey Given a specific input returns a deterministic RSA key
-func GenerateKey(seed int, primes []int) (string, string, error) {
-	k, err := rsa.GenerateKey(NewDeterministicReader(seed, primes), 2048)
-	if err != nil {
-		return "", "", err
-	}
+				<section>
+					<h2>Deterministic Keys</h2>
+<pre><code style="font-size: 10px; line-height: 1em;">
+// Trigrams given input splits according to trigram rules
+// where we want to be as efficient as possible
+func (ci *CaissonIndex) Trigrams(text string) []string {
+    var runes = []rune(text)
 
-	pubkey, err := EncodeKey(&k.PublicKey)
-	if err != nil {
-		return "", "", err
-	}
+    if len(runes) <= 2 {
+        return []string{}
+    }
 
-	seckey, err := EncodeKey(k)
-	if err != nil {
-		return "", "", err
-	}
+    ngrams := make([]string, len(runes)-2)
 
-	return pubkey, seckey, nil
+    for i := 0; i < len(runes); i++ {
+        if i+3 < len(runes)+1 {
+            ngram := runes[i : i+3]
+            ngrams[i] = string(ngram)
+        }
+    }
+
+    return ngrams
 }
 </code></pre>
+					<aside class="notes">Interesting fact, in profiling the single biggest bottleneck in indexing is the trigram code. Which I include here. If someone wants to profile and improve performance on it I would really appreciate it. It dominiates the indexing approach because the bit setting is close to free from a CPU point of view.</aside>
 				</section>
-
-				<section>
-									<h2>Deterministic Keys</h2>
-<pre><code style="font-size: 10px; line-height: 1em;">type Reader struct {
-	rnd    *rand.Rand
-	primes []int
-}
-
-func NewDeterministicReader(seed int, primes []int) *Reader {
-	rnd := rand.New(rand.NewSource(int64(seed)))
-	return &Reader{rnd, primes}
-}
-
-func (r *Reader) Read(p []byte) (n int, err error) {
-	i := 0
-	b := p
-
-	if len(p) == 1 {
-		// fmt.Println("maybeReadRand")
-		return 1, nil
-	}
-
-	for i < len(b) {
-		if len(b) < 4 {
-			b[0] = 7
-			b = b[1:]
-		} else {
-			binary.LittleEndian.PutUint32(b, uint32(r.primes[r.rnd.Intn(len(r.primes))]))
-			b = b[4:]
-		}
-	}
-
-	return len(p), nil
-}
-</code></pre>
-				</section>
-
 
 
 				<section>
