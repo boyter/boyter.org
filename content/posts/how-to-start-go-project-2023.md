@@ -86,7 +86,7 @@ go: added github.com/boyter/scc/v3 v3.1.0
 
 Which as you an see has pulled down the correct version which is what I would expect.
 
-The following guide [Just tell me how to use Go Modules](https://engineering.kablamo.com.au/posts/2018/just-tell-me-how-to-use-go-modules/) and it's [Hacker News Conversation](https://news.ycombinator.com/item?id=18653225) covers this fairly well.
+The following guide [Just tell me how to use Go Modules](https://engineering.kablamo.com.au/posts/2018/just-tell-me-how-to-use-go-modules/) and its [Hacker News Conversation](https://news.ycombinator.com/item?id=18653225) covers this fairly well.
 
 ### Clean / Tidy
 

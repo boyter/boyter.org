@@ -163,3 +163,7 @@ span.date {
   display: inline-block;
   min-width: 90px;
 }
+
+html,pre,code {
+  text-size-adjust: 100%;
+}
