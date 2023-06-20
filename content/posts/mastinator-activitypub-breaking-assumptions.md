@@ -93,13 +93,13 @@ Applying this to follow requests, or indeed any other unsolicited request would 
 
 Also worth noting, that every added user increases server costs. Want to cost someone a lot of money? Get as many people as you can to follow them. Every follower increases their server load. On a shared instance they are going to slow down the server, and the admins are going to ask for money to maintain it. If they are on their own instance they are going to have to upgrade it to ensure timely communication.
 
-## My Takeawy
+## My Takeaway
 
 So as I mentioned I am not doing anything in bad faith here. I started by solving my own problem, realised I could solve other people's problems, then just followed this to a conclusion. If I had not done this someone else would have.
 
 The difference is that I was happy to do it publicly, took ownership, talked through it, and tried to improve things. Interestingly for some that just isn't good enough. Nothing short of full capitulation to how they want things to run is enough. This attitude in itself I think is going to hold back everything. Ever wondered why there is no search for the fediverse? Something like that would be extremely useful, especially when it comes to finding people to follow. However parts of the community HATE the idea with fire of a thousand suns and will do anything in their power to tear you down should you build it. I can't wait for some silicon valley company to come along and do so. Embrace, extend, extinguish could be the death knell of what has been created. 
 
-One thing I did observe is that the reach of the fediverse is larger than I thought. So much so I was interviewed over what happend by this following podcast https://tunes.artemai.art/channels/acrossthefediverse/ The audio is still being cut, but when there might hopefully appease someone? I have my doubts, these days it seems if disagree with someone you have to do so no matter what they say or do.
+One thing I did observe is that the reach of the fediverse is larger than I thought. So much so I was interviewed over what happened by this following podcast https://tunes.artemai.art/channels/acrossthefediverse/ The audio is still being cut, but when there might hopefully appease someone? I have my doubts, these days it seems if disagree with someone you have to do so no matter what they say or do.
 
 I think I totally get the uproar over quote re-tweets now. It seems there is a group of people out there who expect people to implement what they think is required for them without considering doing it themselves. Don't do it? You are spreading hate.
 
