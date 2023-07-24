@@ -1,0 +1,860 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Processing 40 TB of code from ~10 million projects with a dedicated server and Go for $100</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>Processing 40 TB of code from ~10 million projects with a dedicated server and Go for $100</h1>
+					<aside class="notes"></aside>
+				</section>
+
+				<section>
+					<h2>Intro?</h2>
+					<p>
+					<p>I blog <a href="https://boyter.org/">boyter.org</a> I free software <a href="https://github/boyter/">github/boyter/</a> I run <a href="https://searchcode.com/">searchcode.com</a> also on the twitter <a href="https://twitter.com/boyter">@boyter</a> activitypub <a href="https://honk.boyter.org/boyter">@boyter@honk.boyter.org</a></p>
+					<svg style="height:100px;" class="sc-fqkvVR crilYZ kablamo-svg-logo sc-eldPxv bzdxPy" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 427.99 516.63" fill="#F6F6F6"><title>kablamo-logo</title><path d="M308,374.7l-3.19-8.45h-1.35v9.62h.92v-8.31h0l3.17,8.34h.86l3.29-8.29h0v8.32h.91V366.3h-1.34ZM295,367l3.34,0v8.84h.92V367l3.35,0v-.78l-7.61-.06Zm-85.95-122,38.55-4.51L169.22,358.91l60.13-.17L237.83,339l30.39,0-1.64,19.74,46.61,0,2.39-154.92H230.15Zm53.53,36.52,1.08-3,1.34-3c1.45-3.95.71-1.86,2.46-6.27,3.16-8.13,2.4-5.81,6.05-16,1.06-2.79,2.78-7,4.63-12.31l-.53,4.88L276,255.41c-.88,5.81-1.34,10-1.59,12.31l-1.21,11.15a71.44,71.44,0,0,0-.71,8.82l-1.71,18.12H252.07Zm94.6-263-60.2,0L270.13,129,263.92,18.88l-63.41,0L143.79,150.51l-12-46L194.05,18.3l-54.64,0L90.46,94.87l19.73-76.62-51.72,0L15.09,196.9l51.72,0,18.87-82.24L100.12,197l44.28,0,8.26-26.11,99.9-10.58L233.66,197l40.31,0h0l52.1,0c37.4,0,67.83-24.6,71.41-57.56,2.28-20.89-6.32-30.55-30.48-34,25.94-2.13,42.85-17.93,45.56-42.85C415.73,33.45,396.91,18.43,357.18,18.41ZM223.57,66.94l-1,11.22c-.53,6.68-.71,11.48-.81,14.16l-.48,12.82c-.18,5.07-.32,8.81-.08,10.15l-.48,20.83H199.08l10.1-28,1-3.47,1.3-3.48c1.33-4.54.66-2.13,2.31-7.21,3-9.35,2.29-6.68,5.65-18.43,1-3.2,2.63-8,4.32-14.15ZM345,138.43c-1.31,12.06-11.82,20.09-25.55,20.08a33.46,33.46,0,0,1-4.65-.26l8.37-34A24.07,24.07,0,0,1,327,124C339.57,124,346,129.33,345,138.43Zm14.41-68c-1.13,10.45-10.65,17.41-23.8,17.4h-3.8l7.41-30.54A45.21,45.21,0,0,1,344.8,57C355.32,57,360.37,61.55,359.41,70.39ZM238.16,363.1c-14.88,0-28.79,5.67-40.43,15.53l3.79-13.21-36.59,0-57.42,86.82,20.72-86.85-44.6,0-67.3,130.4,40.57,0,24.67-54.35c8.49-20.52,8.39-20.13,11.88-28.73-1.57,5.27-2.38,8.4-3.73,13.68L88,433,74.42,495.78h30.75l34.59-58.05c4.48-7.43,9-15.84,13.71-25-1.39,3.72-2.36,6.65-3,8.41-4,11.34-3.64,10-5.42,15.25l-20.42,59.44,39.51,0,5.44-19c6.33,13.67,18.89,21.56,36.16,21.57,35.25,0,66.27-35.8,71.38-82.8C280.59,383.5,265.5,363.12,238.16,363.1Zm-.43,53.08c-2.94,27-14.31,49.15-25.21,49.14-6.83,0-9.5-6.86-7.93-21.35,2.81-25.85,14.91-48.76,25.29-48C236.89,396.4,239.22,402.47,237.73,416.18ZM88.63,203.87,51.15,358.25l78.76.06,8.87-37.16-33.69,0,37.12-117.26Z"></path></svg>
+					<p>
+					Largest dataset: ~6PB<br>
+Largest table: 2 trillion rows<br>
+Highest QPS: 70,000/s under a DDoS<br>
+					</p>
+					<aside class="notes">My name is Ben Boyter. You can find me online by the things you see up there. I am a tech principal at Kablamo specializing in data & applications. We are a digital product company and I have a passion for data platforms and search engines.
+
+So this talk is as the title suggests about my experience Processing 40 TB of code from ~10 million projects with a dedicated server and Go for $100.
+
+So im going to go through the reason for why I was doing this. The descriptions of what things I tried, the solution I settled on, and where I plan on taking this in the future. I will mix in some of the more interesting findings I got though as well so be on the lookout for those.
+
+Oh and in full disclosure the title is slightly clickbait. I didn't actually analyze 10 million projects. I was short by 15,000 and rounded up. Please forgive me.
+					</aside>
+				</section>
+
+
+				<section>
+					<h2>What?</h2>
+					<p>
+					What did I try?<br>
+					What did I learn?<br>
+					What did I work with.<br>
+					The future?<br>
+					</p>
+					<aside class="notes">So this talk is as the title suggests about my experience Processing 40 TB of code from ~10 million projects with a dedicated server and Go for $100.
+
+So im going to go through the reason for why I was doing this. The descriptions of what things I tried, the solution I settled on, and where I plan on taking this in the future. I will mix in some of the more interesting findings I got though as well so be on the lookout for those.
+
+Oh and in full disclosure the title is slightly clickbait. I didn't actually analyze 10 million projects. I was short by 15,000 and rounded up. Please forgive me.
+					</aside>
+				</section>
+
+				
+				<section>
+					<section>
+						<h2>Why?</h2>
+						<p>
+						Why would anyone in their right mind do this?
+						</p>
+						<img src="./img/why.gif" style="border: none;" />
+						<aside class="notes">I write a lot of code outside of work and there are two projects I maintain which are relevant to this talk. 
+						</aside>
+					</section>
+					<section>
+						<h2>scc</h2>
+						<pre><code style="font-size: 14px; line-height: 1em;">$ scc redis 
+───────────────────────────────────────────────────────────────────────────────
+Language                 Files     Lines   Blanks  Comments     Code Complexity
+───────────────────────────────────────────────────────────────────────────────
+C                          296    180267    20367     31679   128221      32548
+C Header                   215     32362     3624      6968    21770       1636
+TCL                        143     28959     3130      1784    24045       2340
+Shell                       44      1658      222       326     1110        187
+Autoconf                    22     10871     1038      1326     8507        953
+Lua                         20       525       68        70      387         65
+Markdown                    16      2595      683         0     1912          0
+Makefile                    11      1363      262       125      976         59
+Ruby                        10       795       78        78      639        116
+gitignore                   10       162       16         0      146          0
+YAML                         6       711       46         8      657          0
+HTML                         5      9658     2928        12     6718          0
+C++                          4       286       48        14      224         31
+License                      4       100       20         0       80          0
+Plain Text                   3       185       26         0      159          0
+CMake                        2       214       43         3      168          4
+CSS                          2       107       16         0       91          0
+Python                       2       219       12         6      201         34
+Systemd                      2        80        6         0       74          0
+BASH                         1       118       14         5       99         31
+Batch                        1        28        2         0       26          3
+C++ Header                   1         9        1         3        5          0
+Extensible Styleshe…         1        10        0         0       10          0
+Smarty Template              1        44        1         0       43          5
+m4                           1       562      116        53      393          0
+───────────────────────────────────────────────────────────────────────────────
+Total                      823    271888    32767     42460   196661      38012
+───────────────────────────────────────────────────────────────────────────────
+Estimated Cost to Develop (organic) $6,918,301
+Estimated Schedule Effort (organic) 28.682292 months
+Estimated People Required (organic) 21.428982
+───────────────────────────────────────────────────────────────────────────────
+Processed 9425137 bytes, 9.425 megabytes (SI)
+───────────────────────────────────────────────────────────────────────────────
+</code></pre>
+						<aside class="notes">The first is a tool called Sloc Cloc and Code (scc). Its a command line tool which given a code repository will count all of the lines of code, comments, blank lines in multiple programming languages.
+
+						It has one additional trick which is that it will estimate cyclomatic complexity by counting branch statements in the code. However this is a point of contention. Saying that a file, or project has a complexity of 200 is not very useful without some context. Is that high? Low? 
+
+	So I thought I would start collecting data from a few repositories in order to have an idea what this value actually means. I started getting the most popular repositories I could think of and was running scc over those, before realizing this was going to take a while and I was going to miss out on a lot of languages and repository sizes.
+
+	So I figured why not run it over every repository I could find?
+						</aside>
+					</section>
+
+					<section>
+						<img src="./img/searchcode.png" height="500px;" style="border: none;" />
+						<aside class="notes">This is where another project I maintain comes in. I run the site searchcode.com which as the name suggests searches code. It also at the time was aware of almost 10 million repositories across gitlab, bitbucket and github.
+
+	So the idea was to run scc over all 10 million repositories and do something with the results.
+						</aside>
+					</section>
+				</section>
+
+				<section>
+					<h2>Attempt 1</h2>
+					<img src="./img/nbn.jpg" style="border: none;" />
+					<aside class="notes">
+					I tried running it locally on my desktop. From memory I wrote a very simple shell script using repositories I was aware of.
+					
+					At the time I didn't have NBN, however they had installed the node, which reduced my speed from a respectable 20 mbps to 3 mbps.
+
+					This resulted in some complaints from the wife about Netflix and Youtube having issues. 
+
+					As many here know the first rule of marriage as a man is don't annoy your partner. So I started looking at other ways to do this.
+				</section>
+
+				<section>
+					<h2>Attempt 2</h2>
+					<img src="./img/attempt2.png" style="border: none;" /> <br>
+					
+					<img src="https://camo.githubusercontent.com/d6f56f2545f03c6d9c4fc822ea57df94436b389453d79e32d90ee9dc98df6cb4/68747470733a2f2f736c6f632e78797a2f6769746875622f626f797465722f7363632f" style="border: none;" />
+					<img src="https://camo.githubusercontent.com/6202501b41ad1c3e212e21d07114e6ab13e54e5ec19adc0707311454b2dd517c/68747470733a2f2f736c6f632e78797a2f6769746875622f626f797465722f7363632f3f63617465676f72793d636f6465" style="border: none;" />
+					<img src="https://camo.githubusercontent.com/d6e001cd08d58c4dbb5f66496ff564318abb28fbc5317c3fb1206a242d0628e1/68747470733a2f2f736c6f632e78797a2f6769746875622f626f797465722f7363632f3f63617465676f72793d626c616e6b73" style="border: none;" />
+					<img src="https://camo.githubusercontent.com/978695417d8d0e34bc48c644eb18ce0fe90daaf164a02ee28f8ebbd121f0f1ba/68747470733a2f2f736c6f632e78797a2f6769746875622f626f797465722f7363632f3f63617465676f72793d636f6d6d656e7473" style="border: none;" />
+					<img src="https://camo.githubusercontent.com/1a6c6060cac1fe672b424b6cf4e2bc549caf154e6ddbf595f3c597c9ee184497/68747470733a2f2f736c6f632e78797a2f6769746875622f626f797465722f7363632f3f63617465676f72793d636f636f6d6f" style="border: none;" />
+					
+					<aside class="notes">
+					So for Kablamo I work with AWS a lot. So naturally the first through was to use AWS Lambda. After all we know serverless has a lot going for it and should be cheap.
+
+I had previously set this up to produce those github badges you see allowing you to display things like the lines of code on your github project https://github.com/boyter/scc#badges-beta
+
+This worked as follows. I setup a aws lambda function behind a ALB. Calls to it spawn a few subprocesses. The first being a shallow git clone into the tmp location of lambda. https://github.com/boyter/scc-lambda then it runs scc over the checked out code, and uploads the results into s3.
+
+Perfect solution you might think. 
+
+Lambdas have a lot going for them. They are reasonably clean from a developer perspective because you don't have to manage any servers. They scale to thousands and thousands of concurrent requests and they generally don't cost very much.
+
+However there are of course some limitations , but I was prepared to live with. The first is that lambdas behind ALB's or APIGW like this have a hard 29 second timeout. This was not a problem in my case and I was prepared to live with it. 
+
+So I started by exporting all of the git urls, and wrote a simple python script to loop though every repository and ping my URL to generate the the data.
+
+After processing 1 million repositories I then checked my AWS costs and the cost was about $60.
+
+This meant to do all 10 million I was looking at a $700 AWS bill. Ouch. 
+
+I decided to rethink my solution. Keep in mind that was mostly storage and CPU, or what was needed to collect this information. Assuming I processed or exported the data it was going to increase the cost considerably. 
+				</section>
+				<section>
+					<h2>Attempt 3</h2>
+					<img src="./img/attempt3.png" style="border: none;" /> <br>
+					<aside class="notes">Since I was already in AWS the hip solution would be to dump the git repository locations as messages into SQS and pull from it using EC2 instances or fargate for processing. Then scale out the instances like crazy. I actually mentioned this to people at work and thats the solution they also proposed.
+
+Cool, scale out to collect the data. I can do that. 
+
+Collecting the data was one thing, but what about querying it?
+
+The next solution was to use AWS Athena after putting the data into S3. We can then query the data directly in S3 which is cool! Plus its serverless and in theory should be cheap.
+
+Thankfully at the time I was working on a customer project using Athena, and I was able to use that to estimate what it would have cost at the time. So I ran what I expected the data size to be and it was going to cost something like $2.50 USD. Per query! 
+
+Nobody gets their queries right at first and that's half the price of a coffee for a single For that dataset I quickly looked for an alternative.
+
+Also thinking about it, setting up the SQS queue, running instances... its going to be either click-ops development, or a pain to get everything setup properly...
+					</aside>
+				</section>
+
+				<section>
+					<h2>Third Attempt</h2>
+					<img src="./img/tacobell.png" height="500px;" style="border: none;" /> <br>
+					<aside class="notes">
+					To paraphrase the infamous mongodb is web-scale video, as architects and developers, there is a tendency for us to read sites like High Scalability and start thinking we are google architects with google scale problems.
+
+There is a great post out there on this subject with the title "Taco Bell programming" http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html Its core thesis is that you can solve most problems with the unix tool set, and a bit some judicious use of the pipe operator and redirects. The author gives a wonderful example about a 32 process crawler to download URL's.
+
+Now I don't subscribe entirely to that idea of doing everything in the shell, probably because I am not at all fluent at sed, but I do think that we need to stop thinking of millions to billions of rows, terabytes of data is a large scale problem. The original map-reduce paper by google came out in 2004 and hadoop came out in 2007. That's over 16 years ago. A lot of the showcases for what those projects could do can be easily done by a single machine these days.
+
+At the time I had some spare compute used by searchcode. It was fronted by a varnish cache accelerator, and if you have ever used varnish you know its very CPU efficient. As such the CPU on that box was doing the square root of zero most of the time, so I had a look at running the process on it.
+
+What I did was write a simple Go program that spawned 32 process  which literally called out using spawned processes to shallow git clone to a temp directory then run scc over it, and save the resulting json file to disk and s3.
+
+					</aside>
+				</section>
+
+				<section>
+					<h2>Lessons Learnt</h2>
+					<p>
+					</p>
+					<aside class="notes">
+					Lessons learnt from this
+	be care ful when creation millions of files in /tmp/ if you ever reboot... because you end up locking your linux box for a long time while it clears those files. Ask me how searchcode went down for several hours... I actually ended up having to boot into a recovery mode and then find the fastest way to clear all the files to bring it back online after waiting a few hours
+	Don't bother with the s3 saving at first, stuff the json into a tar file to some limit, either size or number of files, then compress and shove it into s3
+	Consider other compression software... gzip is ubiquitous but zstd  is probably the best other option offering better compression and faster performance, and for one off things like this really worth it
+	If you are going to process outside of s3, be careful storing it there, because the cost to fetch it is really non trivial
+	For tasks where you throw away the source data such as this, keep the results around locally! Even if you plan on storing them someone having a local copy can really help 
+					</aside>
+				</section>
+
+				<section>
+					<h2></h2>
+					<p>
+					</p>
+					<aside class="notes">The size of the data I needed to process raised another question. How does one process 10 million JSON files taking up just over 1 TB of disk space in an S3 bucket?
+
+Keeping in mind we already ruled out Athena. 
+
+The brains trust at work raised the idea to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it multiple times. Plus the structure of the data meant having a few tables which means foreign keys and indexes to ensure some level of performance. 
+
+This feels wasteful because we could just process the data as we read it from disk in a single pass, assuming we know what we want up front. 
+
+I was also worried about building a database this large. With just data it would be over 1 TB in size before adding indexes.  Now normally I would not worry about this, but I have run into issues with large databases of this size where I spend a fair amount of time turning them in order to get prompt responses.
+
+Probably not a problem if the HDD was a SSD, but for my box it was a mechanical drive.
+
+So I pulled the data out of S3 once and stored each file into a tar file that I could process over and over. This was something I regret having to do because if I have just kept a local version I could probably have processed faster and saved some cost.
+					</aside>
+				</section>
+
+
+				<section>
+					<h2>Raw Numbers</h2>
+					<p>
+	9,985,051 total repositories<br>
+	9,100,083 repositories with at least 1 identified file<br>
+	884,968 empty repositories (those with no files)<br>
+	3,529,516,251 files in all repositories<br>
+	40,736,530,379,778 bytes processed (40 TB)<br>
+	1,086,723,618,560 lines identified<br>
+	816,822,273,469 code lines identified<br>
+	124,382,152,510 blank lines identified<br>
+	145,519,192,581 comment lines identified<br>
+	71,884,867,919 complexity count according to scc rules<br>
+	2 new bugs raised in scc<br>
+					</p>
+					<aside class="notes">
+					It took about 5 weeks to download and run scc over the collection of repositories saving all of the data. This produced just over 1 TB of JSON files containing the results.
+
+ It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
+					</aside>
+				</section>
+
+				<section>
+					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" /> Most common filenames?</h2>
+					<p>
+					</p>
+					<table>
+					<tr><td>makefile</td><td>59,141,098</td></tr>
+					<tr><td>index</td><td>33,962,093</td></tr>
+					<tr><td>readme</td><td>22,964,539</td></tr>
+					<tr><td>jquery</td><td>20,015,171</td></tr>
+					<tr><td>main</td><td>12,308,009</td></tr>
+					<tr><td>package</td><td>10,975,828</td></tr>
+					<tr><td>license</td><td>10,441,647</td></tr>
+					<tr><td>_init_</td><td>10,193,245</td></tr>
+					</table>
+					<aside class="notes">
+					Probably the first thing I started looking at, and sorry for you one of the most boring.
+
+					Had you asked me before I started this I would have said, README, main, index, license. Thankfully the results reflect my thoughts pretty well. Although there are a lot of interesting ones in there. I have no idea why so many projects contain a file called 15 or s15 which I found in the full list.
+
+					It also looks like reports of jquery's death are greatly exaggerated.
+					</aside>
+				</section>
+
+				<section>
+					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />Missing a license</h2>
+					<img src="./img/hasLicense.png" style="border: none;" />
+					<aside class="notes">
+						This is an interesting one. This was only looking for files with the following names “license”, “licence”, “copying”, “copying3”, “unlicense”, “unlicence”, “license-mit”, “licence-mit” or “copyright”.
+
+						So based on that only about 1/3 of repositories have a licence.
+
+	This not exhaustive, because the files could have a license via some other means such as SPDX tags, or in the README file. However the results are still problematic.
+
+	I have heard some people say they say its now public domain, but this isnt an answer either. 
+	
+	Especially for anyone with Australian (im guessing most of you here) or German citizenship. If you hold either of those citizenships you legally cannot give up your human rights, with copyright being one of them. So you also cannot put anything into public domain. Germany implemented this right after WW2 so yes its done for a good reason.
+	
+	So if you want your work to be as open as possible you must be explicit with your license. At the very least please just ensure you include one and make everyones life easier.
+					</aside>
+				</section>
+
+
+				<section>
+					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />How many “pure” projects</h2>
+					<p>
+					<img src="./img/languagesPerProject.png" style="border: none;" />
+					</p>
+					<aside class="notes">
+					Assuming you define pure to mean a project that has 1 language in it. Of course that would not be very interesting by itself, so lets see what the spread is. As it turns out most projects have fewer than 25 languages in them with most in the less than 10 bracket.
+
+The peak in the below graph is for 4 languages.
+
+Of course pure projects might only have one programming language, but have lots of supporting other formats such as markdown, json, yml, css, .gitignore which are picked up by scc. It’s probably reasonable to assume that any project with less than 5 languages is “pure” (for some level of purity) and as it turns out is just over half the total data set. Of course your definition of purity might be different to mine so feel free to adjust to whatever number you like.
+
+What suprises me is an odd bump around 34-35 languages. I have no reasonable explanation as to why this might be the case and it probably warrents some investigation.
+					</aside>
+				</section>
+
+				<section>
+					<h2></h2>
+					<p>
+					</p>
+					<aside class="notes">
+					</aside>
+				</section>
+
+				<section>
+					<h2></h2>
+					<p>
+					</p>
+					<aside class="notes">
+					</aside>
+				</section>
+
+				<section>
+					<h2>The Future?</h2>
+					<p>
+					</p>
+					<aside class="notes">
+					</aside>
+				</section>
+
+
+
+
+
+
+				<section>
+					<img src="./img/searchcode.png" height="500px;" style="border: none;" />
+					<aside class="notes">So I run searchcode.com, and its iteration over the last 10 years has been from PHP to Python almost to Java and finally to Go.
+
+The whole time that has happened one thing has been constant, which was the use of the index engine, which was provided using Sphinx Search and then a forked version called Manticore.
+
+This made me feel like a bit of a fraud, how can I claim to be a search guy without using my own index. So after the first covid lockdown in 2020, I was hiking with a mate I decided I would build my own index.
+
+Searchcode itself indexes about 75 billion lines of code across 40 million projects pulled from github, gitlab, bitbucket, codeberg, sr.ht and such.
+
+It handles about 22 RPS with some portion of those being search queries and the remainder being code view queries. It works out being about 2.6 million requests a day.
+
+I work on it because its nice to have a place to work on interesting algorithms and problems at a reasonable scale to make it fun.
+
+Note. I do not have a PhD in applied search, nor do I work in the space professionally. This is about how I built a index in Go, not nessecarrily how you should.
+</aside>
+				</section>
+
+				<section>
+					<h2>PSA: Licensing</h2>
+					<p>If you are Australian (or German) you cannot put your code into public domain!</p>
+					<p>All code under AGPL-3.0 license</p>
+					<aside class="notes">So quick PSA. Personal bugbear of mine. You cannot give up your rights in Australia including copyright, so licence everything you do. For those curious Germany did this after WW2 so its probably a good idea.
+					I put this under AGPL-3.0 possibly because im a communist, or more likely because if you want to use this in your products I want you to pay me.</aside>
+				</section>
+
+
+				<section>
+					<section>
+						<h2>Searching code</h2>
+						<p>Trigrams</p>
+	<pre><code style="font-size: 18px; line-height: 1em;">searchcode ->	sea
+		ear
+		arc
+		rch
+		chc
+		hco
+		cod
+		ode
+	</code></pre>
+						<aside class="notes">So code search is in some ways easier than text, because you don't need to try to understand language in the way that you do when dealing with english, japanese or russian. Splitting on chinese or japanese words for example is painful.
+
+	You can solve this problem in code using whats known as trigrams, where you break the text apart into characters of 3 and index those. You can actually use any number you want for ngrams, but trigrams work best when indexing source code.
+
+	One catch with this is that you get false positives, some inputs generate the same ngrams despite being different. You also have terms with low cardinality such as repeated works in a line. So the letter p 100 times is no more useful than 3 of them.
+
+	Another issue is that you get more things to index bloating your posting list... We will get into what posting lists are shortly? Well lets have a look at how to build an index
+
+	But have a look here, were one term searchcode is turned into 8 things we need to index.
+						</aside>
+					</section>
+					<section>
+					<h2>line 98: caisson.go</h2>
+<pre><code style="font-size: 14px; line-height: 1em;">func Trigrams(text string) []string {
+	var runes = []rune(text)
+
+	if len(runes) <= 2 {
+		return []string{}
+	}
+
+	ngrams := make([]string, len(runes)-2)
+
+	for i := 0; i < len(runes); i++ {
+		if i+3 < len(runes)+1 {
+			ngram := runes[i : i+3]
+			ngrams[i] = string(ngram)
+		}
+	}
+
+	return ngrams
+}
+</code></pre>
+					<aside class="notes">
+					When you look at how this is called you will notice logic to split in spaces first and then index things larger than 3. This avoids indexing spaces which reduces the size of the bloom filter.
+					
+					Interesting fact, in profiling the single biggest bottleneck in indexing is the this trigram code. If someone wants to profile and improve performance on it I would really appreciate it. It dominiates the indexing profile by a huge amount.</aside>
+				</section>
+				</section>
+
+				
+
+
+				<section>
+					<h2>How to build an index</h2>
+					<p>Inverted index. Most common way to do it.</p>
+<pre><code style="font-size: 14px; line-height: 1em;">map[string][]struct{}
+map[string][]int64{} 
+</code></pre>
+					<ul>
+						<li>Posting lists</li>
+						<li>Need to implement skip lists or compression on the posting lists at scale</li>
+ 						<li>Supports a positional index</li>
+					</ul>
+
+					<aside class="notes">
+					So given our trigram terms we now need to index them. There are a few ways to do this. Lets walk through a few.
+
+					A posting list is the slice of struct or int64 containing the document's have that term.
+
+					So "set" is found inside documents 1,77 and 345
+
+					A positional index is one that stores where the term was found in the document. 
+
+					So "set" as position 5 and 56 inside document 77
+					
+					This is really useful for phrase searches and ranking.
+					In theory you can then use the index to reconstruct the document entirely. One catch with this is that your index becomes larger than the thing you are indexing.
+
+					Done simply these are a bit of code you can had over to your cousin or most junior developer.
+
+					Skip lists are something you end up needing to implement because when searching multiple terms you look for 
+					the intersection of multiple posting lists and it speeds things up and something you need to add to scale this approach.
+					
+					They are an interesting data structure worth looking up on wikipedia. When you start adding compression using ellias phano to reduce the size they quickly become complex, and it becomes easy to tank your performance.
+
+					
+					</aside>
+				</section>
+
+				<section>
+					<h2>Trie</h2>
+					<p>Typesense uses this, its also written in C++</p>
+<img src="./img/trie.png" height="100px" style="border: none;" />
+					<ul>
+						<li>Big problem is not friendly to GC due to the use of pointers (problem for Go)</li>
+						<li>Need to implement skip lists or compression on the posting lists at scale</li>
+ 						<li>Supports a positional index</li>
+					</ul>
+
+					<aside class="notes">
+					I tried this, and the GC non friendly problem caused it to have massive delays while walking the pointers. I think it was seconds in GC when I tried it which was unacceptable.
+
+					I could have possibly done off heap tricks but I wanted to stick to normal Go because I am a mortal programmer.
+					
+					So what about bitslice signatures?
+					</aside>
+				</section>
+
+				<section>
+					<h2>Bloom filter</h2>
+					<h2>line 159: caisson.go</h2>
+<img src="./img/bloom_example.png" style="border: none;" />
+					
+					<aside class="notes">
+					bitslice signatures are built on bloom filters. So whats a bloom filter?
+
+In short a probablistic data structure, that you can use to test the existance of something. You add items, and can check if it was added. They never return false negatives, but they do occassionaly lie and report something being added when it was not.
+
+So lets look at this example,
+
+We have a 8 bit bloom filter, and hash two terms, golang and searchcode. Golang hashes to bit position 0 and searchcode to bit position 6. To add an item we do the hash, and then set the bit position to 1.
+
+If I want to check if searchcode was added, I hash it again and probe the bit position. If set to 1 it means it was possibly added. If I want to check for the existance of awesome I could hash that and get the position 2 and if I probe that I can see it was never set so I know it was never added.
+
+The lie part comes from the hash function, where it might hash to position 0. So if I was checking for the existance of "java" and it hashes to bit position 0 I would assume it was added. This is a false positive.
+
+For hashing you can use any hash that returns an integer. FNV and FNVa work well for this being fast enough and providing enough distribution. Murmur3 is meant to be good. Note for multiple hashes you can salt the values to reuse hash functions.
+					</aside>
+				</section>
+
+				<section>
+						<h2>Frequency Concious Bloom Filter</h2>
+
+					<aside class="notes">So hashing... While you can has terms a single time in a bloom filter, it turns out that you can reduce the false positive rate by having multiple hashes. If you do this dependant on the term input you end up with a Frequency Conscious Bloom Filter.
+
+The reason is that rare terms need more hashes to avoid false positives.
+
+To get the frequency for searchcode I just calculated the hash counts for every bit of code I found find and removed all the common ones. I then use a weight to determine how many hashes each term needs.
+
+Its left as an exercise to yourselves to implement this, as I just hardcoded it to 3 hashes here.
+
+BTW this is one of the things you need to do at a large enough scale to get the performence you need and is something I put into searchcode.</aside>
+				</section>
+
+				<section>
+					<h2>Advantages</h2>
+					<ul>
+						<li>Compressed</li>
+						<li>Simple</li>
+					</ul>
+					<aside class="notes">Bloom filters have a lot going for them. They are compressed by nature, getting down to 9 bits per term added if you do them right. They are also really simple to implement. Note there are other filters like this, such as ribbon or xor, but as far as I know you cannot use them in the way I do here.</aside>
+				</section>
+
+				<section>
+					<section>
+						<h2>Bloom filter search</h2>
+	<img src="./img/bloomfilter.png" style="border: none;" />
+						<aside class="notes">
+						So how to search over out bloom filter index? This represents 4 documents in our index. All indexed using an 8 bit bloom filter. We took in documents, turned them into trigrams, got the hash positions and set the bit.
+						So now we search...
+						</aside>
+					</section>
+					<section>
+						<img src="./img/bloomfilter_1.png" style="border: none;" />
+						<aside class="notes">
+						Given our input of "golang" and "searchcode" we want to probe bit positions at 0 and 6. 
+						</aside>
+					</section>
+					<section>
+						<img src="./img/bloomfilter_2.png" style="border: none;" />
+					</section>
+					<section>
+						<img src="./img/bloomfilter_3.png" style="border: none;" />
+					</section>
+					<section>
+						<img src="./img/bloomfilter_4.png" style="border: none;" />
+					</section>
+					<section>
+						<img src="./img/bloomfilter_match.png" style="border: none;" />
+					</section>
+				</section>
+
+				<section>
+					<h2>Problems</h2>
+					<aside class="notes">
+					So a few problems with this approach.
+
+Problem is that each "bit" in this uses 1 byte under the hood, assuming we use a boolean to indicate the bit. A 8x overhead is unacceptable for most...
+
+Another problem is that is that its slow... This comes down to how fetching bits out of memory using the CPU works. The slow part is not the & logic you use, but memory walking.
+
+When you probe a single bit on any system you actually pull back 512 bits from RAM. A 512x overhead just to test a single bit! As a result on average you end up walking ALL the memory for your filter.
+
+If you have a index thats 100 GB in size, using a modern CPU its going to take ~2 seconds to walk all that memory, and thats irespective of how many cores you have. You become memory bound.
+
+This is one one of the reasons this as an approach fell out of favor in the 70's.
+					</aside>
+				</section>
+
+				<section>
+					<section>
+						<h2>Fixes</h2>
+						<img src="./img/rotated_bloomfilter.png" height="500px" style="border: none;" />
+						<aside class="notes">
+	However in the 80's a smart person called Roberts noticed you could rotate the filter.
+
+	So we do that by turning the rows into columns. So each row used to represent a document, but now each column does. Right to left.
+
+	With this done we only need to inspect the rows containing the bit positions of the query. So in this case 2 rows which is half the memory access.
+
+	We can then using out examples just row query bit positions 0 and 6 and then logically & them together. If they arent 0 then we have a positional match.
+
+	</aside>
+					</section>
+					<section>
+						<img src="./img/rotated_bloomfilter_1.png" style="border: none;" />
+					</section>
+					<section>
+						<img src="./img/rotated_bloomfilter_2.png" style="border: none;" />
+						<aside class="notes">
+	Logically we & together 1010 and 1000 and we get that document 4 on the left is portentially a match
+	This reduces the amount of RAM we need to access by factor of about 200 for larger bloom filters.</aside>
+					</section>
+				</section>
+
+				
+				
+				<section>
+						<h2>Add</h2>
+						<h2>line 187: caisson.go</h2>
+<pre><code style="font-size: 14px; line-height: 1em;">var bloomFilter []uint64
+
+func Add(item []bool) error {
+	if len(item) != BloomSize {
+		return errors.New(fmt.Sprintf("expected to match size %d", BloomSize))
+	}
+
+	if currentBlockDocumentCount == 0 || currentBlockDocumentCount == DocumentsPerBlock {
+		bloomFilter = append(bloomFilter, make([]uint64, BloomSize)...)
+		currentBlockDocumentCount = 0
+
+		if currentDocumentCount != 0 {
+			currentBlockStartDocumentCount += BloomSize
+		}
+	}
+
+	for i, bit := range item {
+		if bit {
+			bloomFilter[currentBlockStartDocumentCount+i] |= 1 << currentBlockDocumentCount
+		}
+	}
+
+	currentBlockDocumentCount++
+	currentDocumentCount++
+
+	return nil
+}
+</code></pre>
+					<aside class="notes">So given that lets build out bloom filter by adding documents.
+					
+					What this does is takes in boolean slice, checks if its the right size, then checks if we need to add a new 
+					block IE another batch of 64 documents, and then loops over the input setting the correct bits in the correct position.</aside>
+				</section>
+
+
+
+				<section>
+					<h2>Optimise</h2>
+					<h2>line 187: caisson.go</h2>
+<pre><code style="font-size: 14px; line-height: 1em;">1001010000001111000001111001101110100011111111111111111111111101
+0110111101101010111111111001001101110000000000010000100000000000
+0000000000001000000000000000000000000000000000000000000000000000
+0000000000001001000010110000001000100011111100000000000000000000
+1000011100000000000010000001001000100000000000000000000000000000
+0111011100000100000011110001000011000000000000000000000000000000
+0001000000001000000010000001000100000000000000000000000000000000
+0000001000001010101000010000001000001000000000000001000000000000
+0100000000001011000000000100001000111100000000000000000000000000
+0000001000011011001000001010100100100001111100000001010101011110
+0001011100000100000001000101101110000010000010001010101010100011
+0000101000000001000001000001000001011000000000000000000000000000
+1111111111111111111111011011111101101011111111111111111111111111
+0000000000001000001000010000000000110000001000000001100000001000
+0000000000001000001010010000000010100010000111111110101010100001
+0000000000001000000000010000011001100011111100000000000000000000
+</code></pre>
+					<aside class="notes">This is done so as to not waste memory. In the code its done by packing 64 documents into a bloom filter block or bucket. 
+
+So if a bloom filter had 16 bits, we keep 16 uint64's in a slice.
+
+It would look like what you see, and you can print it out if you modify the code.
+This ensures we are optimally using the space. Because we pack 64 documents into each bucket we end up using a single bit per location in the bloom filter. No 8x waste!
+
+It also becomes very fast to walk this because its a simple for loop. And we all know for loops go brrrr.
+</aside>
+				</section>
+
+				<section>
+					<h2>searchcode...</h2>
+<pre><code style="font-size: 14px; line-height: 1em;">
+┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
+│     caisson      ├─┬▶│  shard 512 bits  ├┬─▶│     bucket-1     │
+└──────────────────┘ │ └──────────────────┘│  └──────────────────┘
+                     │                     │                      
+                     │                     │  ┌──────────────────┐
+                     │                     ├─▶│     bucket-2     │
+                     │                     │  └──────────────────┘
+                     │                     │                      
+                     │                     │  ┌──────────────────┐
+                     │                     └─▶│     bucket-3     │
+                     │                        └──────────────────┘
+                     │                                            
+                     │                                            
+                     │ ┌──────────────────┐   ┌──────────────────┐
+                     └▶│  shard 1024 bits ├┬─▶│     bucket-1     │
+                       └──────────────────┘│  └──────────────────┘
+                                           │                      
+                                           │  ┌──────────────────┐
+                                           ├─▶│     bucket-2     │
+                                           │  └──────────────────┘
+                                           │                      
+                                           │  ┌──────────────────┐
+                                           └─▶│     bucket-3     │
+                                              └──────────────────┘
+</code></pre>
+					<aside class="notes">In searchcode its a little more in depth because it actually changes the size of the bloom filters based on the size of the document its indexing.
+
+What happens is when a document is indexed, it breaks it into unique trigrams, and then finds a bloom filter where it will be stored with a target bit density. If the document has a small amount of trigrams it ends up in a smaller bloom filter of say 256 bits, and if larger it goes into a larger one up to 4096.
+
+When the full 64 documents have been added to a bucket then in the case of a 256 bit bloom filter another 256 uint64's are appended on the end.
+
+Where shards represent a different bloom filter size, say 512 of 2048 bits, and buckets exist as a single uint64 slice in a shard. They are split out logiclly here to help understanding.
+					</aside>
+				</section>
+
+
+				<section>
+						<h2>Searching</h2>
+						<h2>line 20: caisson.go</h2>
+<pre><code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []uint32 {
+	var results []uint32
+	var res uint64
+
+	if len(queryBits) == 0 {
+		return results
+	}
+
+	for i := 0; i < len(bloomFilter); i += BloomSize {
+		res = bloomFilter[queryBits[0]+uint64(i)]
+
+		for j := 1; j < len(queryBits); j++ {
+			res = res & bloomFilter[queryBits[j]+uint64(i)]
+
+			if res == 0 {
+				break
+			}
+		}
+
+		if res != 0 {
+			for j := 0; j < DocumentsPerBlock; j++ {
+				if res&(1<<j) > 0 {
+					results = append(results, uint32(DocumentsPerBlock*(i/BloomSize)+j))
+				}
+			}
+		}
+
+	}
+
+	return results
+}
+</code></pre>
+					<aside class="notes">With the index done we can now search.
+					
+					The core search algorithm is as follows. 
+
+I find this algorithm beautifully simple. We take in query positions for the search, so in the case of searching for "searchcode" we turn that into trigrams
+then hash them using the same hash functions to get 6+ uint64's from 0 to whatever the filter is configured to be in a slice.
+
+					Then, walk over each logical block or bucket, which is as many uint64's as exist in the bloom filter, and then logically & that against the previous one. 
+					If its 0 bail out, otherwise if we have finished record the documentid based on what its position in the index is.
+
+
+Whats really cool about this is that we jump potentially all of the bytes in a block if we hit that res == 0 condition quickly, avoiding us walking any memory at all! This is the state we want
+to hit as often as possible.
+
+Results when returned gives ids, which we can then use the idToFile to find the true id for this document. 
+
+Once we have these id its a matter of reaching out to our primary data store, pulling back the documents and processing from there.
+</aside>
+				</section>
+
+
+				<section>
+						<h2>Size</h2>
+<pre><code style="font-size: 14px; line-height: 1em;">$ scc --no-cocomo caisson.go
+───────────────────────────────────────────────────────────────────────────────
+Language                 Files     Lines   Blanks  Comments     Code Complexity
+───────────────────────────────────────────────────────────────────────────────
+Go                           1       235       41        52      142         36
+───────────────────────────────────────────────────────────────────────────────
+Total                        1       235       41        52      142         36
+───────────────────────────────────────────────────────────────────────────────
+Processed 6746 bytes, 0.007 megabytes (SI)
+───────────────────────────────────────────────────────────────────────────────
+</code></pre>
+					<aside class="notes">As you can see its a short bit of code. Only about 150 lines. I really encourage you to have a look and play with it.</aside>
+				</section>
+
+
+				<section>
+					<h2>Demo</h2>
+					
+					<aside class="notes">This is meant to be interactive... I hope you have been following the code... 
+					
+					So lets try it on itself... 
+					
+					And assuming nobody has crashed searchcode since I started talking here it is. 
+
+So you can search for all sorts of things. Where searchcode is a bit different is that while it can do exact matches its more useful looking for related things. 
+
+A good example being how to use gson with mongodb in java. 
+
+Or looking for random things. For example I know Chewys gorgonia has something to do with newtape .</aside>
+				</section>
+
+		
+
+				<section>
+					<h2>Thank You!</h2>
+					<small>ChatGPT:
+The main problem with using a bitfunnel bit slice signature approach for code search is that it would be very inefficient. This is because bitfunnel bit slice signatures are designed for searching short, text-based documents. Code, on the other hand, is much longer and more complex than text-based documents. This means that bitfunnel bit slice signatures would be very large and inefficient for storing code.
+
+In addition, bitfunnel bit slice signatures are not very accurate. This is because they are probabilistic data structures. This means that there is a small chance that a bitfunnel bit slice signature will return a false positive. This is not a problem for text-based documents, but it can be a problem for code. This is because code is often very repetitive. This means that there is a high chance that a bitfunnel bit slice signature will return a false positive when searching for a particular trigram.
+
+For these reasons, I would not recommend using a bitfunnel bit slice signature approach for code search. Instead, I would recommend using an inverted index.
+
+</small>
+					<p>Presentation located at <a href="https://boyter.org/static/golang-syd-25th-may/">https://boyter.org/static/golang-syd-25th-may/</a> or just go to boyter.org and I will link it up tomorrow.</p>
+					<aside class="notes">
+					Of course... probably nobody using searchcode probably cares that its running on a unique bloom filter trigram backed index with 
+					ideas borrowed from bing. But I know... and now you do too. 
+					
+						Now this is meant to be interactive, so ill bring the code up and we can talk about whatever you like given time and get some questions out of the way.
+					</aside>
+				</section>
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
