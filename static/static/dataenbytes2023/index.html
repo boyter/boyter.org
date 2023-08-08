@@ -201,20 +201,39 @@ Also thinking about it, setting up the SQS queue, running instances... its going
 				</section>
 
 				<section>
-					<h2>Third Attempt</h2>
-					<img src="./img/tacobell.png" height="500px;" style="border: none;" /> <br>
-					<aside class="notes">
-					To paraphrase the infamous mongodb is web-scale video, as architects and developers, there is a tendency for us to read sites like High Scalability and start thinking we are google architects with google scale problems.
+					<section>
+						<h2>Attempt 4</h2>
+						<img src="./img/tacobell.png" height="500px;" style="border: none;" /> <br>
+						<aside class="notes">
+						To paraphrase the infamous mongodb is web-scale video, as architects and developers, there is a tendency for us to read sites like High Scalability and start thinking we are google architects with google scale problems.
 
-There is a great post out there on this subject with the title "Taco Bell programming" http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html Its core thesis is that you can solve most problems with the unix tool set, and a bit some judicious use of the pipe operator and redirects. The author gives a wonderful example about a 32 process crawler to download URL's.
+	There is a great post out there on this subject with the title "Taco Bell programming" http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html Its core thesis is that you can solve most problems with the unix tool set, and a bit some judicious use of the pipe operator and redirects. The author gives a wonderful example about a 32 process crawler to download URL's.
 
-Now I don't subscribe entirely to that idea of doing everything in the shell, probably because I am not at all fluent at sed, but I do think that we need to stop thinking of millions to billions of rows, terabytes of data is a large scale problem. The original map-reduce paper by google came out in 2004 and hadoop came out in 2007. That's over 16 years ago. A lot of the showcases for what those projects could do can be easily done by a single machine these days.
+	Now I don't subscribe entirely to that idea of doing everything in the shell, probably because I am not at all fluent at sed, but I do think that we need to stop thinking of millions to billions of rows, terabytes of data is a large scale problem. The original map-reduce paper by google came out in 2004 and hadoop came out in 2007. That's over 16 years ago. A lot of the showcases for what those projects could do can be easily done by a single machine these days.
 
-At the time I had some spare compute used by searchcode. It was fronted by a varnish cache accelerator, and if you have ever used varnish you know its very CPU efficient. As such the CPU on that box was doing the square root of zero most of the time, so I had a look at running the process on it.
+	At the time I had some spare compute used by searchcode. It was fronted by a varnish cache accelerator, and if you have ever used varnish you know its very CPU efficient. As such the CPU on that box was doing the square root of zero most of the time, so I had a look at running the process on it.
 
-What I did was write a simple Go program that spawned 32 process  which literally called out using spawned processes to shallow git clone to a temp directory then run scc over it, and save the resulting json file to disk and s3.
+	What I did was write a simple Go program that spawned 32 process  which literally called out using spawned processes to shallow git clone to a temp directory then run scc over it, and save the resulting json file to disk and s3.
 
-					</aside>
+						</aside>
+					</section>
+					<section>
+						<h2>Attempt 4</h2>
+						<img src="./img/hetzner.png" style="border: none;" /> <br>
+						<img src="./img/hetzner2.png" height="500px;" style="border: none;" />
+						<aside class="notes">
+						
+
+						</aside>
+					</section>
+					<section>
+						<h2>Attempt 4</h2>
+						<img src="./img/running.png" style="border: none;" /> <br>
+						<aside class="notes">
+						
+
+						</aside>
+					</section>
 				</section>
 
 				<section>
