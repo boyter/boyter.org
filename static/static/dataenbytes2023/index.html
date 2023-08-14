@@ -310,6 +310,21 @@ So I pulled the data out of S3 once and stored each file into a tar file that I 
 				</section>
 
 				<section>
+					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />The Java FactoryFactory</h2>
+					<table>
+					<tr><td>not factory</td><td>271,375,574</td><td>97.9%</td></tr>
+					<tr><td>factory</td><td>5,695,568</td><td>2.09%</td></tr>
+					<tr><td>factoryfactory</td><td>25,316</td><td>0.009%</td></tr>
+					<tr><td>factoryfactoryfactory</td><td>0 :(</td><td></td></tr>
+					</table>
+					<aside class="notes">
+Another one that came up in the internal company slack when looking through some old Java code. I thought why not add a check for any Java code that has Factory, FactoryFactory or FactoryFactoryFactory in the name. The idea being to see how many factories are out there.
+
+So slightly over 2% of all the Java code that I checked appeared to be a factory or factoryfactory. Thankfully there are no factoryfactoryfactories and perhaps that joke can finally die, although I am sure at least one non-ironic one exist somewhere in some Java 5 monolith that makes more money every day than I will see over my entire working life.
+					</aside>
+				</section>
+
+				<section>
 					<h2>Raw Numbers</h2>
 					<p>
 	9,985,051 total repositories<br>
@@ -348,8 +363,7 @@ It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 					</aside>
 				</section>
 
-				
-
+		
 				<section>
 					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />Missing a license</h2>
 					<img src="./img/hasLicense.png" style="border: none;" />
@@ -368,25 +382,9 @@ So if you want your work to be as open as possible you must be explicit with you
 					</aside>
 				</section>
 
-
 				
 
-				
-
-				<section>
-					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />The Java FactoryFactory</h2>
-					<table>
-					<tr><td>not factory</td><td>271,375,574</td><td>97.9%</td></tr>
-					<tr><td>factory</td><td>5,695,568</td><td>2.09%</td></tr>
-					<tr><td>factoryfactory</td><td>25,316</td><td>0.009%</td></tr>
-					<tr><td>factoryfactoryfactory</td><td>0 :(</td><td></td></tr>
-					</table>
-					<aside class="notes">
-					Another one that came up in the internal company slack when looking through some old Java code. I thought why not add a check for any Java code that has Factory, FactoryFactory or FactoryFactoryFactory in the name. The idea being to see how many factories are out there.
-
-					So slightly over 2% of all the Java code that I checked appeared to be a factory or factoryfactory. Thankfully there are no factoryfactoryfactories and perhaps that joke can finally die, although I am sure at least one non-ironic one exist somewhere in some Java 5 monolith that makes more money every day than I will see over my entire working life.
-					</aside>
-				</section>
+		
 
 				<section>
 					<h2>The Future?</h2>
