@@ -239,10 +239,14 @@ Also thinking about it, setting up the SQS queue, running instances... its going
 				<section>
 					<h2>Lessons Learnt</h2>
 					<p>
+					Don't store lots of files in tmp<br>
+					Don't use s3 at first...<br>
+					Consider compression, suzh as zstd.<br>
+					Keep results locally!<br>
 					</p>
 					<aside class="notes">
 					Lessons learnt from this
-	be care ful when creation millions of files in /tmp/ if you ever reboot... because you end up locking your linux box for a long time while it clears those files. Ask me how searchcode went down for several hours... I actually ended up having to boot into a recovery mode and then find the fastest way to clear all the files to bring it back online after waiting a few hours
+	be careful when creation millions of files in /tmp/ if you ever reboot... because you end up locking your linux box for a long time while it clears those files. Ask me how searchcode went down for several hours... I actually ended up having to boot into a recovery mode and then find the fastest way to clear all the files to bring it back online after waiting a few hours
 	Don't bother with the s3 saving at first, stuff the json into a tar file to some limit, either size or number of files, then compress and shove it into s3
 	Consider other compression software... gzip is ubiquitous but zstd  is probably the best other option offering better compression and faster performance, and for one off things like this really worth it
 	If you are going to process outside of s3, be careful storing it there, because the cost to fetch it is really non trivial
@@ -284,7 +288,6 @@ So I pulled the data out of S3 once and stored each file into a tar file that I 
 	124,382,152,510 blank lines identified<br>
 	145,519,192,581 comment lines identified<br>
 	71,884,867,919 complexity count according to scc rules<br>
-	2 new bugs raised in scc<br>
 					</p>
 					<aside class="notes">
 					It took about 5 weeks to download and run scc over the collection of repositories saving all of the data. This produced just over 1 TB of JSON files containing the results.
@@ -352,18 +355,30 @@ What suprises me is an odd bump around 34-35 languages. I have no reasonable exp
 				</section>
 
 				<section>
-					<h2></h2>
-					<p>
-					</p>
+					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />YAML or YML?</h2>
+					<table>
+					<tr><td>yaml</td><td>3,572,609</td></tr>
+					<tr><td>yml</td><td>14,076,349</td></tr>
+					</table>
 					<aside class="notes">
+					Sometime back on the company slack there was a “discussion” with many dying on one hill or the other over the use of .yaml or .yml
+
+The debate can finally(?) be ended. Although I suspect some will still prefer to die on their chosen hill.
 					</aside>
 				</section>
 
 				<section>
-					<h2></h2>
-					<p>
-					</p>
+					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />The Java FactoryFactory</h2>
+					<table>
+					<tr><td>not factory</td><td>271,375,574</td><td>97.9%</td></tr>
+					<tr><td>factory</td><td>5,695,568</td><td>2.09%</td></tr>
+					<tr><td>factoryfactory</td><td>25,316</td><td>0.009%</td></tr>
+					<tr><td>factoryfactoryfactory</td><td>0 :(</td><td></td></tr>
+					</table>
 					<aside class="notes">
+					Another one that came up in the internal company slack when looking through some old Java code. I thought why not add a check for any Java code that has Factory, FactoryFactory or FactoryFactoryFactory in the name. The idea being to see how many factories are out there.
+
+					So slightly over 2% of all the Java code that I checked appeared to be a factory or factoryfactory. Thankfully there are no factoryfactoryfactories and perhaps that joke can finally die, although I am sure at least one non-ironic one exist somewhere in some Java 5 monolith that makes more money every day than I will see over my entire working life.
 					</aside>
 				</section>
 
@@ -380,481 +395,7 @@ What suprises me is an odd bump around 34-35 languages. I have no reasonable exp
 
 
 
-				<section>
-					<img src="./img/searchcode.png" height="500px;" style="border: none;" />
-					<aside class="notes">So I run searchcode.com, and its iteration over the last 10 years has been from PHP to Python almost to Java and finally to Go.
-
-The whole time that has happened one thing has been constant, which was the use of the index engine, which was provided using Sphinx Search and then a forked version called Manticore.
-
-This made me feel like a bit of a fraud, how can I claim to be a search guy without using my own index. So after the first covid lockdown in 2020, I was hiking with a mate I decided I would build my own index.
-
-Searchcode itself indexes about 75 billion lines of code across 40 million projects pulled from github, gitlab, bitbucket, codeberg, sr.ht and such.
-
-It handles about 22 RPS with some portion of those being search queries and the remainder being code view queries. It works out being about 2.6 million requests a day.
-
-I work on it because its nice to have a place to work on interesting algorithms and problems at a reasonable scale to make it fun.
-
-Note. I do not have a PhD in applied search, nor do I work in the space professionally. This is about how I built a index in Go, not nessecarrily how you should.
-</aside>
-				</section>
-
-				<section>
-					<h2>PSA: Licensing</h2>
-					<p>If you are Australian (or German) you cannot put your code into public domain!</p>
-					<p>All code under AGPL-3.0 license</p>
-					<aside class="notes">So quick PSA. Personal bugbear of mine. You cannot give up your rights in Australia including copyright, so licence everything you do. For those curious Germany did this after WW2 so its probably a good idea.
-					I put this under AGPL-3.0 possibly because im a communist, or more likely because if you want to use this in your products I want you to pay me.</aside>
-				</section>
-
-
-				<section>
-					<section>
-						<h2>Searching code</h2>
-						<p>Trigrams</p>
-	<pre><code style="font-size: 18px; line-height: 1em;">searchcode ->	sea
-		ear
-		arc
-		rch
-		chc
-		hco
-		cod
-		ode
-	</code></pre>
-						<aside class="notes">So code search is in some ways easier than text, because you don't need to try to understand language in the way that you do when dealing with english, japanese or russian. Splitting on chinese or japanese words for example is painful.
-
-	You can solve this problem in code using whats known as trigrams, where you break the text apart into characters of 3 and index those. You can actually use any number you want for ngrams, but trigrams work best when indexing source code.
-
-	One catch with this is that you get false positives, some inputs generate the same ngrams despite being different. You also have terms with low cardinality such as repeated works in a line. So the letter p 100 times is no more useful than 3 of them.
-
-	Another issue is that you get more things to index bloating your posting list... We will get into what posting lists are shortly? Well lets have a look at how to build an index
-
-	But have a look here, were one term searchcode is turned into 8 things we need to index.
-						</aside>
-					</section>
-					<section>
-					<h2>line 98: caisson.go</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">func Trigrams(text string) []string {
-	var runes = []rune(text)
-
-	if len(runes) <= 2 {
-		return []string{}
-	}
-
-	ngrams := make([]string, len(runes)-2)
-
-	for i := 0; i < len(runes); i++ {
-		if i+3 < len(runes)+1 {
-			ngram := runes[i : i+3]
-			ngrams[i] = string(ngram)
-		}
-	}
-
-	return ngrams
-}
-</code></pre>
-					<aside class="notes">
-					When you look at how this is called you will notice logic to split in spaces first and then index things larger than 3. This avoids indexing spaces which reduces the size of the bloom filter.
-					
-					Interesting fact, in profiling the single biggest bottleneck in indexing is the this trigram code. If someone wants to profile and improve performance on it I would really appreciate it. It dominiates the indexing profile by a huge amount.</aside>
-				</section>
-				</section>
-
-				
-
-
-				<section>
-					<h2>How to build an index</h2>
-					<p>Inverted index. Most common way to do it.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">map[string][]struct{}
-map[string][]int64{} 
-</code></pre>
-					<ul>
-						<li>Posting lists</li>
-						<li>Need to implement skip lists or compression on the posting lists at scale</li>
- 						<li>Supports a positional index</li>
-					</ul>
-
-					<aside class="notes">
-					So given our trigram terms we now need to index them. There are a few ways to do this. Lets walk through a few.
-
-					A posting list is the slice of struct or int64 containing the document's have that term.
-
-					So "set" is found inside documents 1,77 and 345
-
-					A positional index is one that stores where the term was found in the document. 
-
-					So "set" as position 5 and 56 inside document 77
-					
-					This is really useful for phrase searches and ranking.
-					In theory you can then use the index to reconstruct the document entirely. One catch with this is that your index becomes larger than the thing you are indexing.
-
-					Done simply these are a bit of code you can had over to your cousin or most junior developer.
-
-					Skip lists are something you end up needing to implement because when searching multiple terms you look for 
-					the intersection of multiple posting lists and it speeds things up and something you need to add to scale this approach.
-					
-					They are an interesting data structure worth looking up on wikipedia. When you start adding compression using ellias phano to reduce the size they quickly become complex, and it becomes easy to tank your performance.
-
-					
-					</aside>
-				</section>
-
-				<section>
-					<h2>Trie</h2>
-					<p>Typesense uses this, its also written in C++</p>
-<img src="./img/trie.png" height="100px" style="border: none;" />
-					<ul>
-						<li>Big problem is not friendly to GC due to the use of pointers (problem for Go)</li>
-						<li>Need to implement skip lists or compression on the posting lists at scale</li>
- 						<li>Supports a positional index</li>
-					</ul>
-
-					<aside class="notes">
-					I tried this, and the GC non friendly problem caused it to have massive delays while walking the pointers. I think it was seconds in GC when I tried it which was unacceptable.
-
-					I could have possibly done off heap tricks but I wanted to stick to normal Go because I am a mortal programmer.
-					
-					So what about bitslice signatures?
-					</aside>
-				</section>
-
-				<section>
-					<h2>Bloom filter</h2>
-					<h2>line 159: caisson.go</h2>
-<img src="./img/bloom_example.png" style="border: none;" />
-					
-					<aside class="notes">
-					bitslice signatures are built on bloom filters. So whats a bloom filter?
-
-In short a probablistic data structure, that you can use to test the existance of something. You add items, and can check if it was added. They never return false negatives, but they do occassionaly lie and report something being added when it was not.
-
-So lets look at this example,
-
-We have a 8 bit bloom filter, and hash two terms, golang and searchcode. Golang hashes to bit position 0 and searchcode to bit position 6. To add an item we do the hash, and then set the bit position to 1.
-
-If I want to check if searchcode was added, I hash it again and probe the bit position. If set to 1 it means it was possibly added. If I want to check for the existance of awesome I could hash that and get the position 2 and if I probe that I can see it was never set so I know it was never added.
-
-The lie part comes from the hash function, where it might hash to position 0. So if I was checking for the existance of "java" and it hashes to bit position 0 I would assume it was added. This is a false positive.
-
-For hashing you can use any hash that returns an integer. FNV and FNVa work well for this being fast enough and providing enough distribution. Murmur3 is meant to be good. Note for multiple hashes you can salt the values to reuse hash functions.
-					</aside>
-				</section>
-
-				<section>
-						<h2>Frequency Concious Bloom Filter</h2>
-
-					<aside class="notes">So hashing... While you can has terms a single time in a bloom filter, it turns out that you can reduce the false positive rate by having multiple hashes. If you do this dependant on the term input you end up with a Frequency Conscious Bloom Filter.
-
-The reason is that rare terms need more hashes to avoid false positives.
-
-To get the frequency for searchcode I just calculated the hash counts for every bit of code I found find and removed all the common ones. I then use a weight to determine how many hashes each term needs.
-
-Its left as an exercise to yourselves to implement this, as I just hardcoded it to 3 hashes here.
-
-BTW this is one of the things you need to do at a large enough scale to get the performence you need and is something I put into searchcode.</aside>
-				</section>
-
-				<section>
-					<h2>Advantages</h2>
-					<ul>
-						<li>Compressed</li>
-						<li>Simple</li>
-					</ul>
-					<aside class="notes">Bloom filters have a lot going for them. They are compressed by nature, getting down to 9 bits per term added if you do them right. They are also really simple to implement. Note there are other filters like this, such as ribbon or xor, but as far as I know you cannot use them in the way I do here.</aside>
-				</section>
-
-				<section>
-					<section>
-						<h2>Bloom filter search</h2>
-	<img src="./img/bloomfilter.png" style="border: none;" />
-						<aside class="notes">
-						So how to search over out bloom filter index? This represents 4 documents in our index. All indexed using an 8 bit bloom filter. We took in documents, turned them into trigrams, got the hash positions and set the bit.
-						So now we search...
-						</aside>
-					</section>
-					<section>
-						<img src="./img/bloomfilter_1.png" style="border: none;" />
-						<aside class="notes">
-						Given our input of "golang" and "searchcode" we want to probe bit positions at 0 and 6. 
-						</aside>
-					</section>
-					<section>
-						<img src="./img/bloomfilter_2.png" style="border: none;" />
-					</section>
-					<section>
-						<img src="./img/bloomfilter_3.png" style="border: none;" />
-					</section>
-					<section>
-						<img src="./img/bloomfilter_4.png" style="border: none;" />
-					</section>
-					<section>
-						<img src="./img/bloomfilter_match.png" style="border: none;" />
-					</section>
-				</section>
-
-				<section>
-					<h2>Problems</h2>
-					<aside class="notes">
-					So a few problems with this approach.
-
-Problem is that each "bit" in this uses 1 byte under the hood, assuming we use a boolean to indicate the bit. A 8x overhead is unacceptable for most...
-
-Another problem is that is that its slow... This comes down to how fetching bits out of memory using the CPU works. The slow part is not the & logic you use, but memory walking.
-
-When you probe a single bit on any system you actually pull back 512 bits from RAM. A 512x overhead just to test a single bit! As a result on average you end up walking ALL the memory for your filter.
-
-If you have a index thats 100 GB in size, using a modern CPU its going to take ~2 seconds to walk all that memory, and thats irespective of how many cores you have. You become memory bound.
-
-This is one one of the reasons this as an approach fell out of favor in the 70's.
-					</aside>
-				</section>
-
-				<section>
-					<section>
-						<h2>Fixes</h2>
-						<img src="./img/rotated_bloomfilter.png" height="500px" style="border: none;" />
-						<aside class="notes">
-	However in the 80's a smart person called Roberts noticed you could rotate the filter.
-
-	So we do that by turning the rows into columns. So each row used to represent a document, but now each column does. Right to left.
-
-	With this done we only need to inspect the rows containing the bit positions of the query. So in this case 2 rows which is half the memory access.
-
-	We can then using out examples just row query bit positions 0 and 6 and then logically & them together. If they arent 0 then we have a positional match.
-
-	</aside>
-					</section>
-					<section>
-						<img src="./img/rotated_bloomfilter_1.png" style="border: none;" />
-					</section>
-					<section>
-						<img src="./img/rotated_bloomfilter_2.png" style="border: none;" />
-						<aside class="notes">
-	Logically we & together 1010 and 1000 and we get that document 4 on the left is portentially a match
-	This reduces the amount of RAM we need to access by factor of about 200 for larger bloom filters.</aside>
-					</section>
-				</section>
-
-				
-				
-				<section>
-						<h2>Add</h2>
-						<h2>line 187: caisson.go</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">var bloomFilter []uint64
-
-func Add(item []bool) error {
-	if len(item) != BloomSize {
-		return errors.New(fmt.Sprintf("expected to match size %d", BloomSize))
-	}
-
-	if currentBlockDocumentCount == 0 || currentBlockDocumentCount == DocumentsPerBlock {
-		bloomFilter = append(bloomFilter, make([]uint64, BloomSize)...)
-		currentBlockDocumentCount = 0
-
-		if currentDocumentCount != 0 {
-			currentBlockStartDocumentCount += BloomSize
-		}
-	}
-
-	for i, bit := range item {
-		if bit {
-			bloomFilter[currentBlockStartDocumentCount+i] |= 1 << currentBlockDocumentCount
-		}
-	}
-
-	currentBlockDocumentCount++
-	currentDocumentCount++
-
-	return nil
-}
-</code></pre>
-					<aside class="notes">So given that lets build out bloom filter by adding documents.
-					
-					What this does is takes in boolean slice, checks if its the right size, then checks if we need to add a new 
-					block IE another batch of 64 documents, and then loops over the input setting the correct bits in the correct position.</aside>
-				</section>
-
-
-
-				<section>
-					<h2>Optimise</h2>
-					<h2>line 187: caisson.go</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">1001010000001111000001111001101110100011111111111111111111111101
-0110111101101010111111111001001101110000000000010000100000000000
-0000000000001000000000000000000000000000000000000000000000000000
-0000000000001001000010110000001000100011111100000000000000000000
-1000011100000000000010000001001000100000000000000000000000000000
-0111011100000100000011110001000011000000000000000000000000000000
-0001000000001000000010000001000100000000000000000000000000000000
-0000001000001010101000010000001000001000000000000001000000000000
-0100000000001011000000000100001000111100000000000000000000000000
-0000001000011011001000001010100100100001111100000001010101011110
-0001011100000100000001000101101110000010000010001010101010100011
-0000101000000001000001000001000001011000000000000000000000000000
-1111111111111111111111011011111101101011111111111111111111111111
-0000000000001000001000010000000000110000001000000001100000001000
-0000000000001000001010010000000010100010000111111110101010100001
-0000000000001000000000010000011001100011111100000000000000000000
-</code></pre>
-					<aside class="notes">This is done so as to not waste memory. In the code its done by packing 64 documents into a bloom filter block or bucket. 
-
-So if a bloom filter had 16 bits, we keep 16 uint64's in a slice.
-
-It would look like what you see, and you can print it out if you modify the code.
-This ensures we are optimally using the space. Because we pack 64 documents into each bucket we end up using a single bit per location in the bloom filter. No 8x waste!
-
-It also becomes very fast to walk this because its a simple for loop. And we all know for loops go brrrr.
-</aside>
-				</section>
-
-				<section>
-					<h2>searchcode...</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">
-┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
-│     caisson      ├─┬▶│  shard 512 bits  ├┬─▶│     bucket-1     │
-└──────────────────┘ │ └──────────────────┘│  └──────────────────┘
-                     │                     │                      
-                     │                     │  ┌──────────────────┐
-                     │                     ├─▶│     bucket-2     │
-                     │                     │  └──────────────────┘
-                     │                     │                      
-                     │                     │  ┌──────────────────┐
-                     │                     └─▶│     bucket-3     │
-                     │                        └──────────────────┘
-                     │                                            
-                     │                                            
-                     │ ┌──────────────────┐   ┌──────────────────┐
-                     └▶│  shard 1024 bits ├┬─▶│     bucket-1     │
-                       └──────────────────┘│  └──────────────────┘
-                                           │                      
-                                           │  ┌──────────────────┐
-                                           ├─▶│     bucket-2     │
-                                           │  └──────────────────┘
-                                           │                      
-                                           │  ┌──────────────────┐
-                                           └─▶│     bucket-3     │
-                                              └──────────────────┘
-</code></pre>
-					<aside class="notes">In searchcode its a little more in depth because it actually changes the size of the bloom filters based on the size of the document its indexing.
-
-What happens is when a document is indexed, it breaks it into unique trigrams, and then finds a bloom filter where it will be stored with a target bit density. If the document has a small amount of trigrams it ends up in a smaller bloom filter of say 256 bits, and if larger it goes into a larger one up to 4096.
-
-When the full 64 documents have been added to a bucket then in the case of a 256 bit bloom filter another 256 uint64's are appended on the end.
-
-Where shards represent a different bloom filter size, say 512 of 2048 bits, and buckets exist as a single uint64 slice in a shard. They are split out logiclly here to help understanding.
-					</aside>
-				</section>
-
-
-				<section>
-						<h2>Searching</h2>
-						<h2>line 20: caisson.go</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []uint32 {
-	var results []uint32
-	var res uint64
-
-	if len(queryBits) == 0 {
-		return results
-	}
-
-	for i := 0; i < len(bloomFilter); i += BloomSize {
-		res = bloomFilter[queryBits[0]+uint64(i)]
-
-		for j := 1; j < len(queryBits); j++ {
-			res = res & bloomFilter[queryBits[j]+uint64(i)]
-
-			if res == 0 {
-				break
-			}
-		}
-
-		if res != 0 {
-			for j := 0; j < DocumentsPerBlock; j++ {
-				if res&(1<<j) > 0 {
-					results = append(results, uint32(DocumentsPerBlock*(i/BloomSize)+j))
-				}
-			}
-		}
-
-	}
-
-	return results
-}
-</code></pre>
-					<aside class="notes">With the index done we can now search.
-					
-					The core search algorithm is as follows. 
-
-I find this algorithm beautifully simple. We take in query positions for the search, so in the case of searching for "searchcode" we turn that into trigrams
-then hash them using the same hash functions to get 6+ uint64's from 0 to whatever the filter is configured to be in a slice.
-
-					Then, walk over each logical block or bucket, which is as many uint64's as exist in the bloom filter, and then logically & that against the previous one. 
-					If its 0 bail out, otherwise if we have finished record the documentid based on what its position in the index is.
-
-
-Whats really cool about this is that we jump potentially all of the bytes in a block if we hit that res == 0 condition quickly, avoiding us walking any memory at all! This is the state we want
-to hit as often as possible.
-
-Results when returned gives ids, which we can then use the idToFile to find the true id for this document. 
-
-Once we have these id its a matter of reaching out to our primary data store, pulling back the documents and processing from there.
-</aside>
-				</section>
-
-
-				<section>
-						<h2>Size</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">$ scc --no-cocomo caisson.go
-───────────────────────────────────────────────────────────────────────────────
-Language                 Files     Lines   Blanks  Comments     Code Complexity
-───────────────────────────────────────────────────────────────────────────────
-Go                           1       235       41        52      142         36
-───────────────────────────────────────────────────────────────────────────────
-Total                        1       235       41        52      142         36
-───────────────────────────────────────────────────────────────────────────────
-Processed 6746 bytes, 0.007 megabytes (SI)
-───────────────────────────────────────────────────────────────────────────────
-</code></pre>
-					<aside class="notes">As you can see its a short bit of code. Only about 150 lines. I really encourage you to have a look and play with it.</aside>
-				</section>
-
-
-				<section>
-					<h2>Demo</h2>
-					
-					<aside class="notes">This is meant to be interactive... I hope you have been following the code... 
-					
-					So lets try it on itself... 
-					
-					And assuming nobody has crashed searchcode since I started talking here it is. 
-
-So you can search for all sorts of things. Where searchcode is a bit different is that while it can do exact matches its more useful looking for related things. 
-
-A good example being how to use gson with mongodb in java. 
-
-Or looking for random things. For example I know Chewys gorgonia has something to do with newtape .</aside>
-				</section>
-
 		
-
-				<section>
-					<h2>Thank You!</h2>
-					<small>ChatGPT:
-The main problem with using a bitfunnel bit slice signature approach for code search is that it would be very inefficient. This is because bitfunnel bit slice signatures are designed for searching short, text-based documents. Code, on the other hand, is much longer and more complex than text-based documents. This means that bitfunnel bit slice signatures would be very large and inefficient for storing code.
-
-In addition, bitfunnel bit slice signatures are not very accurate. This is because they are probabilistic data structures. This means that there is a small chance that a bitfunnel bit slice signature will return a false positive. This is not a problem for text-based documents, but it can be a problem for code. This is because code is often very repetitive. This means that there is a high chance that a bitfunnel bit slice signature will return a false positive when searching for a particular trigram.
-
-For these reasons, I would not recommend using a bitfunnel bit slice signature approach for code search. Instead, I would recommend using an inverted index.
-
-</small>
-					<p>Presentation located at <a href="https://boyter.org/static/golang-syd-25th-may/">https://boyter.org/static/golang-syd-25th-may/</a> or just go to boyter.org and I will link it up tomorrow.</p>
-					<aside class="notes">
-					Of course... probably nobody using searchcode probably cares that its running on a unique bloom filter trigram backed index with 
-					ideas borrowed from bing. But I know... and now you do too. 
-					
-						Now this is meant to be interactive, so ill bring the code up and we can talk about whatever you like given time and get some questions out of the way.
-					</aside>
-				</section>
 
 			</div>
 		</div>
