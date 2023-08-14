@@ -1,9 +1,9 @@
 ---
-title: If you succeed; you will fail
+title: If you succeed, you will fail
 date: 2022-07-21
 ---
  
-> If you succeed; you will fail.
+> If you succeed, you will fail.
  
 Something said at a client engagement I was at some time ago. I figure enough time has passed that it is worth sharing this story.
  
@@ -41,7 +41,7 @@ Having already heard this, clearly it fell on deaf ears. After all, they already
  
 The release date was fixed, and going ahead no matter what. No amount of discussion or push back could change their mind. It was then someone (I don't even know if it was me) pointed out in a meeting that, if as many people as they want or expect use the system on the release, it's going to be a success in terms of users, and then an epic fail when the system falls over.
  
-> If you succeed; you will fail.
+> If you succeed, you will fail.
  
 We ended up trying to cover our company by sending out an email listing the problems, what the likely result was and asking for their acceptance of this outcome. Which I think we got.
  
