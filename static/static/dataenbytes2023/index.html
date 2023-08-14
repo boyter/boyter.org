@@ -151,6 +151,29 @@ Processed 9425137 bytes, 9.425 megabytes (SI)
 				</section>
 
 				<section>
+					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" /> Most common filenames?</h2>
+					<p>
+					</p>
+					<table>
+					<tr><td>makefile</td><td>59,141,098</td></tr>
+					<tr><td>index</td><td>33,962,093</td></tr>
+					<tr><td>readme</td><td>22,964,539</td></tr>
+					<tr><td>jquery</td><td>20,015,171</td></tr>
+					<tr><td>main</td><td>12,308,009</td></tr>
+					<tr><td>package</td><td>10,975,828</td></tr>
+					<tr><td>license</td><td>10,441,647</td></tr>
+					<tr><td>_init_</td><td>10,193,245</td></tr>
+					</table>
+					<aside class="notes">
+Probably the first thing I started looking at, and sorry for you one of the most boring.
+
+Had you asked me before I started this I would have said, README, main, index, license. Thankfully the results reflect my thoughts pretty well. Although there are a lot of interesting ones in there. I have no idea why so many projects contain a file called 15 or s15 which I found in the full list.
+
+It also looks like reports of jquery's death are greatly exaggerated.
+					</aside>
+				</section>
+
+				<section>
 					<h2>Attempt 2</h2>
 					<img src="./img/attempt2.png" style="border: none;" /> <br>
 					
@@ -181,6 +204,23 @@ This meant to do all 10 million I was looking at a $700 AWS bill. Ouch.
 
 I decided to rethink my solution. Keep in mind that was mostly storage and CPU, or what was needed to collect this information. Assuming I processed or exported the data it was going to increase the cost considerably. 
 				</section>
+
+				<section>
+					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />How many “pure” projects</h2>
+					<p>
+					<img src="./img/languagesPerProject.png" style="border: none;" />
+					</p>
+					<aside class="notes">
+Assuming you define pure to mean a project that has 1 language in it. Of course that would not be very interesting by itself, so lets see what the spread is. As it turns out most projects have fewer than 25 languages in them with most in the less than 10 bracket.
+
+The peak in the graph is for 4 languages.
+
+Of course pure projects might only have one programming language, but have lots of supporting other formats such as markdown, json, yml, css, .gitignore which are picked up by scc. It’s probably reasonable to assume that any project with less than 5 languages is “pure” (for some level of purity) and as it turns out is just over half the total data set. Of course your definition of purity might be different to mine so feel free to adjust to whatever number you like.
+
+What suprises me is an odd bump around 34-35 languages. I have no reasonable explanation as to why this might be the case and it probably warrents some investigation.
+					</aside>
+				</section>
+
 				<section>
 					<h2>Attempt 3</h2>
 					<img src="./img/attempt3.png" style="border: none;" /> <br>
@@ -197,6 +237,19 @@ Thankfully at the time I was working on a customer project using Athena, and I w
 Nobody gets their queries right at first and that's half the price of a coffee for a single For that dataset I quickly looked for an alternative.
 
 Also thinking about it, setting up the SQS queue, running instances... its going to be either click-ops development, or a pain to get everything setup properly...
+					</aside>
+				</section>
+
+				<section>
+					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />YAML or YML?</h2>
+					<table>
+					<tr><td>yaml</td><td>3,572,609</td></tr>
+					<tr><td>yml</td><td>14,076,349</td></tr>
+					</table>
+					<aside class="notes">
+Sometime back on the company slack there was a “discussion” with many dying on one hill or the other over the use of .yaml or .yml
+
+The debate can finally(?) be ended. Although I suspect some will still prefer to die on their chosen hill.
 					</aside>
 				</section>
 
@@ -237,25 +290,7 @@ Also thinking about it, setting up the SQS queue, running instances... its going
 				</section>
 
 				<section>
-					<h2>Lessons Learnt</h2>
-					<p>
-					Don't store lots of files in tmp<br>
-					Don't use s3 at first...<br>
-					Consider compression, suzh as zstd.<br>
-					Keep results locally!<br>
-					</p>
-					<aside class="notes">
-					Lessons learnt from this
-	be careful when creation millions of files in /tmp/ if you ever reboot... because you end up locking your linux box for a long time while it clears those files. Ask me how searchcode went down for several hours... I actually ended up having to boot into a recovery mode and then find the fastest way to clear all the files to bring it back online after waiting a few hours
-	Don't bother with the s3 saving at first, stuff the json into a tar file to some limit, either size or number of files, then compress and shove it into s3
-	Consider other compression software... gzip is ubiquitous but zstd  is probably the best other option offering better compression and faster performance, and for one off things like this really worth it
-	If you are going to process outside of s3, be careful storing it there, because the cost to fetch it is really non trivial
-	For tasks where you throw away the source data such as this, keep the results around locally! Even if you plan on storing them someone having a local copy can really help 
-					</aside>
-				</section>
-
-				<section>
-					<h2></h2>
+					<h2>Processing...</h2>
 					<p>
 					</p>
 					<aside class="notes">The size of the data I needed to process raised another question. How does one process 10 million JSON files taking up just over 1 TB of disk space in an S3 bucket?
@@ -274,7 +309,6 @@ So I pulled the data out of S3 once and stored each file into a tar file that I 
 					</aside>
 				</section>
 
-
 				<section>
 					<h2>Raw Numbers</h2>
 					<p>
@@ -290,82 +324,54 @@ So I pulled the data out of S3 once and stored each file into a tar file that I 
 	71,884,867,919 complexity count according to scc rules<br>
 					</p>
 					<aside class="notes">
-					It took about 5 weeks to download and run scc over the collection of repositories saving all of the data. This produced just over 1 TB of JSON files containing the results.
-
- It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
+It took about 5 weeks to download and run scc over the collection of repositories saving all of the data. 
+This produced just over 1 TB of JSON files containing the results.
+It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 					</aside>
 				</section>
 
 				<section>
-					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" /> Most common filenames?</h2>
+					<h2>Lessons Learnt</h2>
 					<p>
+					Don't store lots of files in tmp<br>
+					Don't use s3 at first...<br>
+					Consider compression, suzh as zstd.<br>
+					Keep results locally!<br>
 					</p>
-					<table>
-					<tr><td>makefile</td><td>59,141,098</td></tr>
-					<tr><td>index</td><td>33,962,093</td></tr>
-					<tr><td>readme</td><td>22,964,539</td></tr>
-					<tr><td>jquery</td><td>20,015,171</td></tr>
-					<tr><td>main</td><td>12,308,009</td></tr>
-					<tr><td>package</td><td>10,975,828</td></tr>
-					<tr><td>license</td><td>10,441,647</td></tr>
-					<tr><td>_init_</td><td>10,193,245</td></tr>
-					</table>
 					<aside class="notes">
-					Probably the first thing I started looking at, and sorry for you one of the most boring.
-
-					Had you asked me before I started this I would have said, README, main, index, license. Thankfully the results reflect my thoughts pretty well. Although there are a lot of interesting ones in there. I have no idea why so many projects contain a file called 15 or s15 which I found in the full list.
-
-					It also looks like reports of jquery's death are greatly exaggerated.
+					Lessons learnt from this
+	be careful when creation millions of files in /tmp/ if you ever reboot... because you end up locking your linux box for a long time while it clears those files. Ask me how searchcode went down for several hours... I actually ended up having to boot into a recovery mode and then find the fastest way to clear all the files to bring it back online after waiting a few hours
+	Don't bother with the s3 saving at first, stuff the json into a tar file to some limit, either size or number of files, then compress and shove it into s3
+	Consider other compression software... gzip is ubiquitous but zstd  is probably the best other option offering better compression and faster performance, and for one off things like this really worth it
+	If you are going to process outside of s3, be careful storing it there, because the cost to fetch it is really non trivial
+	For tasks where you throw away the source data such as this, keep the results around locally! Even if you plan on storing them someone having a local copy can really help 
 					</aside>
 				</section>
+
+				
 
 				<section>
 					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />Missing a license</h2>
 					<img src="./img/hasLicense.png" style="border: none;" />
 					<aside class="notes">
-						This is an interesting one. This was only looking for files with the following names “license”, “licence”, “copying”, “copying3”, “unlicense”, “unlicence”, “license-mit”, “licence-mit” or “copyright”.
+This is an interesting one. This was only looking for files with the following names “license”, “licence”, “copying”, “copying3”, “unlicense”, “unlicence”, “license-mit”, “licence-mit” or “copyright”.
 
-						So based on that only about 1/3 of repositories have a licence.
+So based on that only about 1/3 of repositories have a licence.
 
-	This not exhaustive, because the files could have a license via some other means such as SPDX tags, or in the README file. However the results are still problematic.
+This not exhaustive, because the files could have a license via some other means such as SPDX tags, or in the README file. However the results are still problematic.
 
-	I have heard some people say they say its now public domain, but this isnt an answer either. 
-	
-	Especially for anyone with Australian (im guessing most of you here) or German citizenship. If you hold either of those citizenships you legally cannot give up your human rights, with copyright being one of them. So you also cannot put anything into public domain. Germany implemented this right after WW2 so yes its done for a good reason.
-	
-	So if you want your work to be as open as possible you must be explicit with your license. At the very least please just ensure you include one and make everyones life easier.
+I have heard some people say they say its now public domain, but this isnt an answer either. 
+
+Especially for anyone with Australian (im guessing most of you here) or German citizenship. If you hold either of those citizenships you legally cannot give up your human rights, with copyright being one of them. So you also cannot put anything into public domain. Germany implemented this right after WW2 so yes its done for a good reason.
+
+So if you want your work to be as open as possible you must be explicit with your license. At the very least please just ensure you include one and make everyones life easier.
 					</aside>
 				</section>
 
 
-				<section>
-					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />How many “pure” projects</h2>
-					<p>
-					<img src="./img/languagesPerProject.png" style="border: none;" />
-					</p>
-					<aside class="notes">
-					Assuming you define pure to mean a project that has 1 language in it. Of course that would not be very interesting by itself, so lets see what the spread is. As it turns out most projects have fewer than 25 languages in them with most in the less than 10 bracket.
+				
 
-The peak in the below graph is for 4 languages.
-
-Of course pure projects might only have one programming language, but have lots of supporting other formats such as markdown, json, yml, css, .gitignore which are picked up by scc. It’s probably reasonable to assume that any project with less than 5 languages is “pure” (for some level of purity) and as it turns out is just over half the total data set. Of course your definition of purity might be different to mine so feel free to adjust to whatever number you like.
-
-What suprises me is an odd bump around 34-35 languages. I have no reasonable explanation as to why this might be the case and it probably warrents some investigation.
-					</aside>
-				</section>
-
-				<section>
-					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />YAML or YML?</h2>
-					<table>
-					<tr><td>yaml</td><td>3,572,609</td></tr>
-					<tr><td>yml</td><td>14,076,349</td></tr>
-					</table>
-					<aside class="notes">
-					Sometime back on the company slack there was a “discussion” with many dying on one hill or the other over the use of .yaml or .yml
-
-The debate can finally(?) be ended. Although I suspect some will still prefer to die on their chosen hill.
-					</aside>
-				</section>
+				
 
 				<section>
 					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />The Java FactoryFactory</h2>
@@ -385,16 +391,17 @@ The debate can finally(?) be ended. Although I suspect some will still prefer to
 				<section>
 					<h2>The Future?</h2>
 					<p>
+					Keeping the URL properly...<br>
+					Forget S3<br>
+					Trie to store filenames (avoid lossy)<br>
+					Latest version of scc<br>
+					Determine maintainability<br>
+					Tabs vs Spaces<br>
 					</p>
 					<aside class="notes">
+I am planning on doing this again at some point with the latest version of scc and an updated list of projects from searchcode.
 					</aside>
 				</section>
-
-
-
-
-
-
 		
 
 			</div>
