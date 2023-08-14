@@ -141,13 +141,13 @@ Processed 9425137 bytes, 9.425 megabytes (SI)
 					<h2>Attempt 1</h2>
 					<img src="./img/nbn.jpg" style="border: none;" />
 					<aside class="notes">
-					I tried running it locally on my desktop. From memory I wrote a very simple shell script using repositories I was aware of.
-					
-					At the time I didn't have NBN, however they had installed the node, which reduced my speed from a respectable 20 mbps to 3 mbps.
+I tried running it locally on my desktop. From memory I wrote a very simple shell script using the repositories I was aware of.
 
-					This resulted in some complaints from the wife about Netflix and Youtube having issues. 
+At the time I didn't have NBN, however they had installed the node, which reduced my speed from a respectable 20 mbps to 3 mbps.
 
-					As many here know the first rule of marriage as a man is don't annoy your partner. So I started looking at other ways to do this.
+This resulted in some complaints from the wife about Netflix and Youtube having issues. 
+
+The first rule of marriage as a man is don't annoy your partner. So I started looking at other ways to do this.
 				</section>
 
 				<section>
@@ -355,11 +355,17 @@ It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 					</p>
 					<aside class="notes">
 					Lessons learnt from this
-	be careful when creation millions of files in /tmp/ if you ever reboot... because you end up locking your linux box for a long time while it clears those files. Ask me how searchcode went down for several hours... I actually ended up having to boot into a recovery mode and then find the fastest way to clear all the files to bring it back online after waiting a few hours
-	Don't bother with the s3 saving at first, stuff the json into a tar file to some limit, either size or number of files, then compress and shove it into s3
-	Consider other compression software... gzip is ubiquitous but zstd  is probably the best other option offering better compression and faster performance, and for one off things like this really worth it
-	If you are going to process outside of s3, be careful storing it there, because the cost to fetch it is really non trivial
-	For tasks where you throw away the source data such as this, keep the results around locally! Even if you plan on storing them someone having a local copy can really help 
+be careful when creation millions of files in /tmp/ if you ever reboot... because you end up locking your linux box for a long time while it clears those files. 
+
+Ask me how searchcode went down for several hours... I actually ended up having to boot into a recovery mode and then find the fastest way to clear all the files to bring it back online after waiting a few hours for the reboot process to do this
+
+Don't bother with the s3 saving at first, stuff the json into a tar file to some limit, either size or number of files, then compress and shove it into s3
+
+Consider other compression software... gzip is ubiquitous but zstd  is probably the best other option offering better compression and faster performance, and for one off things like this really worth it
+
+If you are going to process outside of s3, be careful storing it there, because the cost to fetch it is really non trivial
+
+For tasks where you throw away the source data such as this, keep the results around locally! Even if you plan on storing them someone having a local copy can really help 
 					</aside>
 				</section>
 
@@ -374,17 +380,19 @@ So based on that only about 1/3 of repositories have a licence.
 
 This not exhaustive, because the files could have a license via some other means such as SPDX tags, or in the README file. However the results are still problematic.
 
-I have heard some people say they say its now public domain, but this isnt an answer either. 
+I have heard some people say they say without a licence is now public domain. I have two issues with this.
 
-Especially for anyone with Australian (im guessing most of you here) or German citizenship. If you hold either of those citizenships you legally cannot give up your human rights, with copyright being one of them. So you also cannot put anything into public domain. Germany implemented this right after WW2 so yes its done for a good reason.
+The first reason is that its incorrect. You still need to explicitly say its public domain.
 
-So if you want your work to be as open as possible you must be explicit with your license. At the very least please just ensure you include one and make everyones life easier.
+The second is that for anyone with Australian or German citizenship (im guessing most of you here), you legally cannot give up your human rights, with copyright being considered a human right. 
+
+So you also cannot put anything into public domain. Germany implemented this right after WW2 so yes its done for a good reason.
+
+So if you want your work to be as open as possible you must be explicit with your license. Consider MIT or Unlicence to have a similar affect. 
 					</aside>
 				</section>
 
-				
-
-		
+								
 
 				<section>
 					<h2>The Future?</h2>
@@ -392,6 +400,7 @@ So if you want your work to be as open as possible you must be explicit with you
 					Keeping the URL properly...<br>
 					Forget S3<br>
 					Trie to store filenames (avoid lossy)<br>
+					Use SQLite....<br>
 					Latest version of scc<br>
 					Determine maintainability<br>
 					Tabs vs Spaces<br>
