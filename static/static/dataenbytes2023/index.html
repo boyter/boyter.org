@@ -250,6 +250,8 @@ Also thinking about it, setting up the SQS queue, running instances... its going
 Sometime back on the company slack there was a “discussion” with many dying on one hill or the other over the use of .yaml or .yml
 
 The debate can finally(?) be ended. Although I suspect some will still prefer to die on their chosen hill.
+
+Perhaps its just an easy thing to bike shed about.
 					</aside>
 				</section>
 
@@ -287,15 +289,41 @@ The debate can finally(?) be ended. Although I suspect some will still prefer to
 
 						</aside>
 					</section>
+
+					<section>
+						<h2>Why Go?</h2>
+						<img src="./img/go.jpg" style="border: none;" /> <br>
+						<aside class="notes">
+I initally wrote the script in Python but having to install the pip dependencies on my clean 
+varnish box seemed like a bad idea and it keep breaking in odd ways which I didnt feel like debugging.
+
+I have a rule these days with Python. 
+If I have to import something not in the standard library, 
+I am going to run it more than 5 times
+or its a task that takes longer than an hour to run I rewrite it.
+
+
+Going back to taco bell programming, Go fits in with this rather well. 
+It produces a single binary to deploy and run.
+Its reasonably fast.
+Its use of channels reminds me of pipes in the unix sense.
+Its opinionated with generally one way to do anything well.
+
+						</aside>
+					</section>
 				</section>
 
 				<section>
-					<h2>Processing...</h2>
-					<p>
-					</p>
-					<aside class="notes">The size of the data I needed to process raised another question. How does one process 10 million JSON files taking up just over 1 TB of disk space in an S3 bucket?
+					<section>
+						<h2>Processing...</h2>
+						<p>
+						</p>
+						<aside class="notes">
+The size of the data I needed to process raised another question. How does one process 10 million JSON files taking up just over 1 TB of disk space in an S3 bucket?
 
 Keeping in mind we already ruled out Athena. 
+
+Firstly why it it in JSON? Tha
 
 The brains trust at work raised the idea to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it multiple times. Plus the structure of the data meant having a few tables which means foreign keys and indexes to ensure some level of performance. 
 
@@ -306,7 +334,36 @@ I was also worried about building a database this large. With just data it would
 Probably not a problem if the HDD was a SSD, but for my box it was a mechanical drive.
 
 So I pulled the data out of S3 once and stored each file into a tar file that I could process over and over. This was something I regret having to do because if I have just kept a local version I could probably have processed faster and saved some cost.
-					</aside>
+						</aside>
+					</section>
+					<section>
+						<h2>JSON?</h2>
+						<p>
+						</p>
+						<aside class="notes">
+So why is the data in JSON? 
+
+Honstly just because thats the format that comes out of scc as a default option.
+
+There would probably be some huge savings to be found moving to a binary format.
+						</aside>
+					</section>
+					<section>
+						<h2>Go again...</h2>
+						<p>
+						</p>
+						<aside class="notes">
+Since I was already working in Go I decided to just process the data in Go.
+
+Most as a learning exercise than anything else.
+
+I didn't multithread this for a few reasons. The first was that it was disk bound to the reading
+of content off the disk, and the second was I didn't feel like making it thread safe.
+
+It turned out to be a simple program. Create some maps and arrays, then loop every json file incrementing
+the counts as needed based on some logic for whatever we are caluclating.
+						</aside>
+					</section>
 				</section>
 
 				<section>
@@ -404,6 +461,8 @@ So if you want your work to be as open as possible you must be explicit with you
 					Latest version of scc<br>
 					Determine maintainability<br>
 					Tabs vs Spaces<br>
+					Don't store as JSON<br>
+					Try bigquery?<br>
 					</p>
 					<aside class="notes">
 I am planning on doing this again at some point with the latest version of scc and an updated list of projects from searchcode.
