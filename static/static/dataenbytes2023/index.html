@@ -330,6 +330,10 @@ ch := make(chan string)
 for i:=0;i<16;i++{
 	go parse(ch)
 }
+
+for _, l := range urllist {
+	ch <- l
+}
 						</code></pre>
 						<aside class="notes">
 Going back to taco bell programming, Go fits in with this rather well. 
@@ -337,6 +341,12 @@ It produces a single binary to deploy and run.
 Its reasonably fast.
 Its use of channels reminds me of pipes in the unix sense.
 Its opinionated with generally one way to do anything well.
+
+You an see an example of unix pipes at the top where we spawn 16 processes to parse from a list.
+The Go code below it is similar in that we spawn 16 goroutines which approximates the same thing.
+
+The advantage of the Go code of course is that its not limited to lines, I can change from the string
+to a real type to add addtional bits of information.
 						</aside>
 					</section>
 				</section>
@@ -348,9 +358,13 @@ Its opinionated with generally one way to do anything well.
 						<img src="./img/filesPerProject.png" style="border: none;" />
 						</p>
 						<aside class="notes">
-	How many files are in an average repository? Do most projects have a few files in them, or many? 
-	By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 12 
-	or however many files it has and plot it out.					</aside>
+How many files are in an average repository? Do most projects have a few files in them, or many? 
+By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 12 
+or however many files it has and plot it out.					
+
+This is limited to projects with less than 1000 files because the plot looks like empty with a thin smear on the 
+left side if you include all the outliers.
+</aside>
 					</section>
 					<section>
 						<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />Files in a repo 95%</h2>
@@ -373,38 +387,62 @@ Turns out the vast majority 95% of projects have less than 1,000 files in them. 
 						<p>
 						</p>
 						<aside class="notes">
-The size of the data I needed to process raised another question. How does one process 10 million JSON files taking up just over 1 TB of disk space in an S3 bucket?
+The size of the data I needed to process raised another question. 
+How does one process 10 million JSON files taking up just over 1 TB of disk space in an S3 bucket?
 
 Keeping in mind we already ruled out Athena. 
 
-Firstly why it it in JSON? Tha
+Firstly why it it in JSON? Thats just because thats the output from scc and I didn't feel like reprocessing it. Remember this is an iterative project.
 
-The brains trust at work raised the idea to dump the data into a large SQL database. However this means processing the data into the database, then running queries over it multiple times. Plus the structure of the data meant having a few tables which means foreign keys and indexes to ensure some level of performance. 
+The brains trust at work raised the idea to dump the data into a large SQL database. H
+owever this means processing the data into the database, then running queries over it multiple times.
+ Plus the structure of the data meant having a few tables which means foreign keys and indexes to ensure some level of performance. 
 
-This feels wasteful because we could just process the data as we read it from disk in a single pass, assuming we know what we want up front. 
+This feels wasteful because we could just process the data as we read it from disk in a single pass, assuming 
+we know what we want up front. 
 
-I was also worried about building a database this large. With just data it would be over 1 TB in size before adding indexes.  Now normally I would not worry about this, but I have run into issues with large databases of this size where I spend a fair amount of time turning them in order to get prompt responses.
+I was also worried about building a database this large. With just data it would be over 1 TB in size 
+before adding indexes. Now normally I would not worry about this, but I have run into issues with 
+large databases of this size where I spend a fair amount of time turning them in order to get prompt responses.
 
 Probably not a problem if the HDD was a SSD, but for my box it was a mechanical drive.
 
-So I pulled the data out of S3 once and stored each file into a tar file that I could process over and over. This was something I regret having to do because if I have just kept a local version I could probably have processed faster and saved some cost.
-						</aside>
-					</section>
-					<section>
-						<h2>JSON?</h2>
-						<p>
-						</p>
-						<aside class="notes">
-So why is the data in JSON? 
-
-Honstly just because thats the format that comes out of scc as a default option.
-
-There would probably be some huge savings to be found moving to a binary format.
+So I pulled the data out of S3 once and stored each file into a tar file that I could process over and over. 
+This was something I regret having to do because if I have just kept a local version I could probably have 
+processed faster and saved some cost.
 						</aside>
 					</section>
 					<section>
 						<h2>Go again...</h2>
 						<p>
+<pre><code style="font-size: 14px; line-height: 1em;">
+filesPerProject := map[int64]int64{}      // Number of files in each project in buckets IE projects with 10 files or projects with 2
+projectsPerLanguage := map[string]int64{} // Number of projects which use a language
+filesPerLanguage := map[string]int64{}    // Number of files per language
+hasLicenceCount := map[string]int64{}     // Count of if a project has a licence file or not
+
+fileNamesCount := map[string]int64{}                     // Count of filenames
+fileNamesNoExtensionCount := map[string]int64{}          // Count of filenames without extensions
+fileNamesNoExtensionLowercaseCount := map[string]int64{} // Count of filenames tolower and no extensions
+complexityPerLanguage := map[string]int64{}              // Sum of complexity per language
+
+commentsPerLanguage := map[string]int64{} // Sum of comments per language
+
+sourceCount := map[string]int64{} // Count of each source github/bitbucket/gitlab
+
+ymlOrYaml := map[string]int64{} // yaml or yml extension?
+
+mostComplex := Largest{}                               // Holds details of the most complex file
+mostComplexPerLanguage := map[string]Largest{}         // Most complex of each file type
+mostComplexWeighted := Largest{}                       // Holds details of the most complex file weighted by lines NB useless because it only picks up minified files
+mostComplexWeightedPerLanguage := map[string]Largest{} // Most complex of each file type weighted by lines
+largest := Largest{}                                   // Holds details of the largest file in bytes
+largestPerLanguage := map[string]Largest{}             // largest file per language
+longest := Largest{}                                   // Holds details of the longest file in lines
+longestPerLanguage := map[string]Largest{}             // longest file per language
+mostCommented := Largest{}                             // Holds details of the most commented file in lines
+mostCommentedPerLanguage := map[string]Largest{}       // most commented file per language
+</code></pre>
 						</p>
 						<aside class="notes">
 Since I was already working in Go I decided to just process the data in Go.
@@ -451,6 +489,7 @@ So slightly over 2% of all the Java code that I checked appeared to be a factory
 					</p>
 					<aside class="notes">
 It took about 5 weeks to download and run scc over the collection of repositories saving all of the data. 
+3,024,000 seconds, so we processed about 3 repositories per second in that time.
 This produced just over 1 TB of JSON files containing the results.
 It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 					</aside>
@@ -466,18 +505,22 @@ It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 					When CPU is high for a long time consider dedicated<br>
 					</p>
 					<aside class="notes">
-					Lessons learnt from this
+Lessons learnt from this
+
 be careful when creation millions of files in /tmp/ if you ever reboot... because you end up locking your linux box for a long time while it clears those files. 
 
 Ask me how searchcode went down for several hours... I actually ended up having to boot into a recovery mode and then find the fastest way to clear all the files to bring it back online after waiting a few hours for the reboot process to do this
 
 Don't bother with the s3 saving at first, stuff the json into a tar file to some limit, either size or number of files, then compress and shove it into s3
 
-Consider other compression software... gzip is ubiquitous but zstd  is probably the best other option offering better compression and faster performance, and for one off things like this really worth it
+Consider other compression software... gzip is ubiquitous but zstd is probably the best other option offering better compression and faster performance, and for one off things like this really worth it
 
 If you are going to process outside of s3, be careful storing it there, because the cost to fetch it is really non trivial
 
-For tasks where you throw away the source data such as this, keep the results around locally! Even if you plan on storing them someone having a local copy can really help 
+For tasks where you throw away the source data such as this, keep the results around locally! 
+Even if you plan on storing them someone having a local copy can really help
+
+You don't have to use the "pro" tools if you don't want, especailly if its for something that isnt designed to be repeatable.
 					</aside>
 				</section>
 
@@ -518,12 +561,26 @@ So if you want your work to be as open as possible you must be explicit with you
 					Tabs vs Spaces<br>
 					Don't store as JSON<br>
 					Try bigquery?<br>
+					Probably wouldn't use Go for processing...<br>
 					</p>
 					<aside class="notes">
 I am planning on doing this again at some point with the latest version of scc and an updated list of projects from searchcode.
 					</aside>
 				</section>
 		
+				<section>
+					<h2>Thank you!</h2>
+					<p>
+					https://boyter.org/posts/an-informal-survey-of-10-million-github-bitbucket-gitlab-projects/<br>
+					https://boyter.org/<br>
+					https://github.com/boyter/scc-data<br>
+					https://github.com/boyter/scc<br>
+					https://news.ycombinator.com/item?id=21121735<br>
+					https://boyter.org/static/dataenbytes2023/<br>
+					</p>
+					<aside class="notes">
+					</aside>
+				</section>
 
 			</div>
 		</div>
