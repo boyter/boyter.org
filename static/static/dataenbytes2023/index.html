@@ -58,7 +58,8 @@ Oh and in full disclosure the title is slightly clickbait. I didn't actually ana
 					What did I work with.<br>
 					The future?<br>
 					</p>
-					<aside class="notes">So this talk is as the title suggests about my experience Processing 40 TB of code from ~10 million projects with a dedicated server and Go for $100.
+					<aside class="notes">
+So this talk is as the title suggests about my experience Processing 40 TB of code from ~10 million projects with a dedicated server and Go for $100.
 
 So im going to go through the reason for why I was doing this. The descriptions of what things I tried, the solution I settled on, and where I plan on taking this in the future. I will mix in some of the more interesting findings I got though as well so be on the lookout for those.
 
@@ -74,7 +75,16 @@ Oh and in full disclosure the title is slightly clickbait. I didn't actually ana
 						Why would anyone in their right mind do this?
 						</p>
 						<img src="./img/why.gif" style="border: none;" />
-						<aside class="notes">I write a lot of code outside of work and there are two projects I maintain which are relevant to this talk. 
+						<aside class="notes">
+Why Go? Why dedicate server?
+As for why I made any decision... its mostly down to personal learning, and iterating. 
+I was never looking for an optimial way to do this, and what I got was organic. There are far more
+efficient ways to achive what I did given some thinking ahead, which as you will disover is
+not what I was doing.
+
+Thats not a why though...
+
+I write a lot of code outside of work and there are two projects I maintain which are relevant to this talk.
 						</aside>
 					</section>
 					<section>
@@ -118,21 +128,23 @@ Estimated People Required (organic) 21.428982
 Processed 9425137 bytes, 9.425 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 </code></pre>
-						<aside class="notes">The first is a tool called Sloc Cloc and Code (scc). Its a command line tool which given a code repository will count all of the lines of code, comments, blank lines in multiple programming languages.
+						<aside class="notes">
+The first is a tool called Sloc Cloc and Code (scc). Its a command line tool which given a code repository will count all of the lines of code, comments, blank lines in multiple programming languages.
 
-						It has one additional trick which is that it will estimate cyclomatic complexity by counting branch statements in the code. However this is a point of contention. Saying that a file, or project has a complexity of 200 is not very useful without some context. Is that high? Low? 
+It has one additional trick which is that it will estimate cyclomatic complexity by counting branch statements in the code. However this is a point of contention. Saying that a file, or project has a complexity of 200 is not very useful without some context. Is that high? Low? 
 
-	So I thought I would start collecting data from a few repositories in order to have an idea what this value actually means. I started getting the most popular repositories I could think of and was running scc over those, before realizing this was going to take a while and I was going to miss out on a lot of languages and repository sizes.
+So I thought I would start collecting data from a few repositories in order to have an idea what this value actually means. I started getting the most popular repositories I could think of and was running scc over those, before realizing this was going to take a while and I was going to miss out on a lot of languages and repository sizes.
 
-	So I figured why not run it over every repository I could find?
+So I figured why not run it over every repository I could find?
 						</aside>
 					</section>
 
 					<section>
 						<img src="./img/searchcode.png" height="500px;" style="border: none;" />
-						<aside class="notes">This is where another project I maintain comes in. I run the site searchcode.com which as the name suggests searches code. It also at the time was aware of almost 10 million repositories across gitlab, bitbucket and github.
+						<aside class="notes">
+This is where another project I maintain comes in. I run the site searchcode.com which as the name suggests searches code. It also at the time was aware of almost 10 million repositories across gitlab, bitbucket and github.
 
-	So the idea was to run scc over all 10 million repositories and do something with the results.
+So the idea was to run scc over all 10 million repositories and do something with the results.
 						</aside>
 					</section>
 				</section>
@@ -167,7 +179,10 @@ The first rule of marriage as a man is don't annoy your partner. So I started lo
 					<aside class="notes">
 Probably the first thing I started looking at, and sorry for you one of the most boring.
 
-Had you asked me before I started this I would have said, README, main, index, license. Thankfully the results reflect my thoughts pretty well. Although there are a lot of interesting ones in there. I have no idea why so many projects contain a file called 15 or s15 which I found in the full list.
+Had you asked me before I started this I would have said, README, main, index, license. Thankfully the results reflect my thoughts pretty well. 
+Although there are a lot of interesting ones in there. I have no idea why so many projects contain a file called 15 or s15 which I found in the full list.
+
+JavaScript projects including Font Awesome, which stores the bathtub icon as s15 for some reason. 15 seems to be related to javascript as well.
 
 It also looks like reports of jquery's death are greatly exaggerated.
 					</aside>
@@ -184,17 +199,17 @@ It also looks like reports of jquery's death are greatly exaggerated.
 					<img src="https://camo.githubusercontent.com/1a6c6060cac1fe672b424b6cf4e2bc549caf154e6ddbf595f3c597c9ee184497/68747470733a2f2f736c6f632e78797a2f6769746875622f626f797465722f7363632f3f63617465676f72793d636f636f6d6f" style="border: none;" />
 					
 					<aside class="notes">
-					So for Kablamo I work with AWS a lot. So naturally the first through was to use AWS Lambda. After all we know serverless has a lot going for it and should be cheap.
+So for Kablamo I work with AWS a lot. So naturally the first through was to use AWS Lambda. After all we know serverless has a lot going for it and should be cheap.
 
 I had previously set this up to produce those github badges you see allowing you to display things like the lines of code on your github project https://github.com/boyter/scc#badges-beta
 
 This worked as follows. I setup a aws lambda function behind a ALB. Calls to it spawn a few subprocesses. The first being a shallow git clone into the tmp location of lambda. https://github.com/boyter/scc-lambda then it runs scc over the checked out code, and uploads the results into s3.
 
-Perfect solution you might think. 
+Perfect solution you might think.
 
 Lambdas have a lot going for them. They are reasonably clean from a developer perspective because you don't have to manage any servers. They scale to thousands and thousands of concurrent requests and they generally don't cost very much.
 
-However there are of course some limitations , but I was prepared to live with. The first is that lambdas behind ALB's or APIGW like this have a hard 29 second timeout. This was not a problem in my case and I was prepared to live with it. 
+However there are of course some limitations, but I was prepared to live with. The first is that lambdas behind ALB's or APIGW like this have a hard 29 second timeout. This was not a problem in my case and I was prepared to live with it. 
 
 So I started by exporting all of the git urls, and wrote a simple python script to loop though every repository and ping my URL to generate the the data.
 
@@ -300,15 +315,54 @@ varnish box seemed like a bad idea and it keep breaking in odd ways which I didn
 I have a rule these days with Python. 
 If I have to import something not in the standard library, 
 I am going to run it more than 5 times
-or its a task that takes longer than an hour to run I rewrite it.
+or its a task that takes longer than an a few hours to run I rewrite it unless it worked correctly the first time.
+						</aside>
+					</section>
+					<section>
+						<h2>Channels and Pipes </h2>
+						<pre><code style="font-size: 14px; line-height: 1em;">
+cat urllist.txt | xargs -P16 python parse.py
+						</code></pre>
 
+						<pre><code style="font-size: 14px; line-height: 1em;">
+ch := make(chan string)
 
+for i:=0;i<16;i++{
+	go parse(ch)
+}
+						</code></pre>
+						<aside class="notes">
 Going back to taco bell programming, Go fits in with this rather well. 
 It produces a single binary to deploy and run.
 Its reasonably fast.
 Its use of channels reminds me of pipes in the unix sense.
 Its opinionated with generally one way to do anything well.
+						</aside>
+					</section>
+				</section>
 
+				<section>
+					<section>
+						<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />Files in a repo?</h2>
+						<p>
+						<img src="./img/filesPerProject.png" style="border: none;" />
+						</p>
+						<aside class="notes">
+	How many files are in an average repository? Do most projects have a few files in them, or many? 
+	By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 12 
+	or however many files it has and plot it out.					</aside>
+					</section>
+					<section>
+						<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />Files in a repo 95%</h2>
+						<p>
+						<img src="./img/filesPerProjectPercentile95.png" style="border: none;" />
+						</p>
+						<aside class="notes">
+As it turns out most repositories have less than 200 files in them.
+
+However what about plotting this by percentile, or more specifically by 95th percentile so its actually worth looking at? 
+Turns out the vast majority 95% of projects have less than 1,000 files in them. While 90% of them have less than 
+300 files and 85% have less than 200.
 						</aside>
 					</section>
 				</section>
@@ -409,6 +463,7 @@ It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 					Don't use s3 at first...<br>
 					Consider compression, suzh as zstd.<br>
 					Keep results locally!<br>
+					When CPU is high for a long time consider dedicated<br>
 					</p>
 					<aside class="notes">
 					Lessons learnt from this
