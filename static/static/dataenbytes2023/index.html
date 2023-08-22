@@ -76,7 +76,13 @@ Oh and in full disclosure the title is slightly clickbait. I didn't actually ana
 						</p>
 						<img src="./img/why.gif" style="border: none;" />
 						<aside class="notes">
-Why Go? Why dedicate server?
+I get asked this a lot by my managers....
+I don't have a good reason for why I do anything outside of work to be honest. I just do things... 
+sometimes I get something useful out of.
+
+But for this talk I do have some answers.
+
+Why Go? Why dedicated server?
 As for why I made any decision... its mostly down to personal learning, and iterating. 
 I was never looking for an optimial way to do this, and what I got was organic. There are far more
 efficient ways to achive what I did given some thinking ahead, which as you will disover is
@@ -346,7 +352,7 @@ You an see an example of unix pipes at the top where we spawn 16 processes to pa
 The Go code below it is similar in that we spawn 16 goroutines which approximates the same thing.
 
 The advantage of the Go code of course is that its not limited to lines, I can change from the string
-to a real type to add addtional bits of information.
+to a real type to add addtional bits of information if needed.
 						</aside>
 					</section>
 				</section>
@@ -447,13 +453,17 @@ mostCommentedPerLanguage := map[string]Largest{}       // most commented file pe
 						<aside class="notes">
 Since I was already working in Go I decided to just process the data in Go.
 
-Most as a learning exercise than anything else.
+Most as a learning exercise than anything else. 
 
 I didn't multithread this for a few reasons. The first was that it was disk bound to the reading
 of content off the disk, and the second was I didn't feel like making it thread safe.
 
 It turned out to be a simple program. Create some maps and arrays, then loop every json file incrementing
 the counts as needed based on some logic for whatever we are caluclating.
+
+Now this is not ideal from an analytics perspective, it had a few advantages. The first was that I didn't need to parse the data into 
+some format I could then query over. Which was fine so long as I knew what answeres I wanted up front. The other was that it allowed me to do things
+that perhaps would not be easy or possible inside your usual formats.
 						</aside>
 					</section>
 				</section>
@@ -496,33 +506,44 @@ It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 				</section>
 
 				<section>
-					<h2>Lessons Learnt</h2>
-					<p>
-					Don't store lots of files in tmp<br>
-					Don't use s3 at first...<br>
-					Consider compression, suzh as zstd.<br>
-					Keep results locally!<br>
-					When CPU is high for a long time consider dedicated<br>
-					</p>
-					<aside class="notes">
-Lessons learnt from this
+					<section>
+						<h2>Lessons Learnt</h2>
+						<p>
+						Don't store lots of files in tmp<br>
+						Don't use s3 at first...<br>
+						Consider compression, suzh as zstd.<br>
+						Keep results locally!<br>
+						When CPU is high for a long time consider dedicated<br>
+						Dedicated server go brrr<br>
+						</p>
+						<aside class="notes">
+	Lessons learnt from this
 
-be careful when creation millions of files in /tmp/ if you ever reboot... because you end up locking your linux box for a long time while it clears those files. 
+	be careful when creation millions of files in /tmp/ if you ever reboot... because you end up locking your linux box for a long time while it clears those files. 
 
-Ask me how searchcode went down for several hours... I actually ended up having to boot into a recovery mode and then find the fastest way to clear all the files to bring it back online after waiting a few hours for the reboot process to do this
+	Ask me how searchcode went down for several hours... I actually ended up having to boot into a recovery mode and then find the fastest way to clear all the files to bring it back online after waiting a few hours for the reboot process to do this
 
-Don't bother with the s3 saving at first, stuff the json into a tar file to some limit, either size or number of files, then compress and shove it into s3
+	Don't bother with the s3 saving at first, stuff the json into a tar file to some limit, either size or number of files, then compress and shove it into s3
 
-Consider other compression software... gzip is ubiquitous but zstd is probably the best other option offering better compression and faster performance, and for one off things like this really worth it
+	Consider other compression software... gzip is ubiquitous but zstd is probably the best other option offering better compression and faster performance, and for one off things like this really worth it
 
-If you are going to process outside of s3, be careful storing it there, because the cost to fetch it is really non trivial
+	If you are going to process outside of s3, be careful storing it there, because the cost to fetch it is really non trivial
 
-For tasks where you throw away the source data such as this, keep the results around locally! 
-Even if you plan on storing them someone having a local copy can really help
+	For tasks where you throw away the source data such as this, keep the results around locally! 
+	Even if you plan on storing them someone having a local copy can really help
 
-You don't have to use the "pro" tools if you don't want, especailly if its for something that isnt designed to be repeatable.
-					</aside>
+	You don't have to use the "pro" tools if you don't want, especailly if its for something that isnt designed to be repeatable.
+						</aside>
+					</section>
+
+					<section>
+						<h2>Dedicated server go brrr</h2>
+						<img src="./img/brrr.png" style="border: none;" />
+						<aside class="notes">
+						</aside>
+					</section>
 				</section>
+
 
 		
 				<section>
@@ -555,29 +576,33 @@ So if you want your work to be as open as possible you must be explicit with you
 					Keeping the URL properly...<br>
 					Forget S3<br>
 					Trie to store filenames (avoid lossy)<br>
-					Use SQLite....<br>
+					Use SQLite?<br>
 					Latest version of scc<br>
 					Determine maintainability<br>
 					Tabs vs Spaces<br>
 					Don't store as JSON<br>
 					Try bigquery?<br>
-					Probably wouldn't use Go for processing...<br>
+					Another language? Rust? Zig?<br>
 					</p>
 					<aside class="notes">
 I am planning on doing this again at some point with the latest version of scc and an updated list of projects from searchcode.
+
+I think the first thing to do is forget s3 and look at packing data into tar files with gz up to some limit.
+Id like to try sqlite as the store as well, since that would make for a great blog post title.
+Id love an algorithm to determine maintainability. Reading a lot of academic papers on this but yet to find something useful.
+Bigquery is one of those things that should eat something like this...
 					</aside>
 				</section>
 		
 				<section>
 					<h2>Thank you!</h2>
 					<p>
-					https://boyter.org/posts/an-informal-survey-of-10-million-github-bitbucket-gitlab-projects/<br>
-					https://boyter.org/<br>
-					https://github.com/boyter/scc-data<br>
-					https://github.com/boyter/scc<br>
-					https://news.ycombinator.com/item?id=21121735<br>
-					https://boyter.org/static/dataenbytes2023/<br>
-					</p>
+					<a href="https://boyter.org/posts/an-informal-survey-of-10-million-github-bitbucket-gitlab-projects/">https://boyter.org/posts/an-informal-survey-of-10-million-github-bitbucket-gitlab-projects/</a>
+					<a href="https://boyter.org/">https://boyter.org/</a>
+					<a href="https://github.com/boyter/scc-data">https://github.com/boyter/scc-data</a>
+					<a href="https://github.com/boyter/scc">https://github.com/boyter/scc</a>
+					<a href="https://news.ycombinator.com/item?id=21121735">https://news.ycombinator.com/item?id=21121735</a>
+					<a href="https://boyter.org/static/dataenbytes2023/">https://boyter.org/static/dataenbytes2023/</a>
 					<aside class="notes">
 					</aside>
 				</section>
