@@ -39,13 +39,24 @@
 Largest table: 2 trillion rows<br>
 Highest QPS: 70,000/s under a DDoS<br>
 					</p>
-					<aside class="notes">My name is Ben Boyter. You can find me online by the things you see up there. I am a tech principal at Kablamo specializing in data & applications. We are a digital product company and I have a passion for data platforms and search engines.
+					<aside class="notes">
+My name is Ben Boyter. You can find me online by the things you see up there. I am a tech principal at Kablamo specializing in 
+data & applications. We are a digital product company and I have a passion for data platforms and search engines.
 
-So this talk is as the title suggests about my experience Processing 40 TB of code from ~10 million projects with a dedicated server and Go for $100.
+So this talk is as the title suggests about my experience Processing 40 TB of code from ~10 million projects with a dedicated 
+server and Go for $100.
 
-So im going to go through the reason for why I was doing this. The descriptions of what things I tried, the solution I settled on, and where I plan on taking this in the future. I will mix in some of the more interesting findings I got though as well so be on the lookout for those.
+So im going to go through the reason for why I was doing this. The descriptions of what things I tried, the solution I settled on,
+and where I plan on taking this in the future. I will mix in some of the more interesting findings I got though as well so be 
+on the lookout for those.
 
-Oh and in full disclosure the title is slightly clickbait. I didn't actually analyze 10 million projects. I was short by 15,000 and rounded up. Please forgive me.
+I thought id throw in some stats oif the largest data sets I have worked on there.
+6PB of data
+a table with 2 trillion rows (it grew by about 200 million every day)
+And the highest QPS I have dealt with which was ovber 70,000 rps while under a DDoS attack.
+
+Oh and in full disclosure the title is slightly clickbait. I didn't actually analyze 10 million projects. I was short by
+15,000 and rounded up. Please forgive me.
 					</aside>
 				</section>
 
@@ -55,15 +66,12 @@ Oh and in full disclosure the title is slightly clickbait. I didn't actually ana
 					<p>
 					What did I try?<br>
 					What did I learn?<br>
-					What did I work with.<br>
+					What worked?<br>
 					The future?<br>
 					</p>
 					<aside class="notes">
-So this talk is as the title suggests about my experience Processing 40 TB of code from ~10 million projects with a dedicated server and Go for $100.
-
-So im going to go through the reason for why I was doing this. The descriptions of what things I tried, the solution I settled on, and where I plan on taking this in the future. I will mix in some of the more interesting findings I got though as well so be on the lookout for those.
-
-Oh and in full disclosure the title is slightly clickbait. I didn't actually analyze 10 million projects. I was short by 15,000 and rounded up. Please forgive me.
+So I am trying a newish format for this talk, which is a common one where I outline what im going to go through. So here it is.
+What did I try, how did I faile, what did I learn, what worked eventually, and future thoughts.
 					</aside>
 				</section>
 
@@ -78,19 +86,21 @@ Oh and in full disclosure the title is slightly clickbait. I didn't actually ana
 						<aside class="notes">
 I get asked this a lot by my managers....
 I don't have a good reason for why I do anything outside of work to be honest. I just do things... 
-sometimes I get something useful out of.
+sometimes I get something useful out of and write about it, or record it. I almost always have fun doing it
+so perhaps thats the reason.
 
 But for this talk I do have some answers.
 
 Why Go? Why dedicated server?
+
 As for why I made any decision... its mostly down to personal learning, and iterating. 
 I was never looking for an optimial way to do this, and what I got was organic. There are far more
-efficient ways to achive what I did given some thinking ahead, which as you will disover is
-not what I was doing.
+efficient ways to achive what I did given some thinking ahead, so please refrain from yelling at me with them.
+I am aware, I just didn't care too much at the time.
 
 Thats not a why though...
 
-I write a lot of code outside of work and there are two projects I maintain which are relevant to this talk.
+The why is that I write a lot of code outside of work and there are two projects I maintain which are relevant to this talk.
 						</aside>
 					</section>
 					<section>
@@ -135,11 +145,16 @@ Processed 9425137 bytes, 9.425 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 </code></pre>
 						<aside class="notes">
-The first is a tool called Sloc Cloc and Code (scc). Its a command line tool which given a code repository will count all of the lines of code, comments, blank lines in multiple programming languages.
+The first is a tool called Sloc Cloc and Code (scc). Its a command line tool which given a code repository will 
+count all of the lines of code, comments, blank lines in multiple programming languages.
 
-It has one additional trick which is that it will estimate cyclomatic complexity by counting branch statements in the code. However this is a point of contention. Saying that a file, or project has a complexity of 200 is not very useful without some context. Is that high? Low? 
+It has one additional trick which is that it will estimate cyclomatic complexity by counting branch statements in the code. 
+However this is a point of contention. Saying that a file, or project has a complexity of 200 is not very useful without some 
+context. Is that high? Low? 
 
-So I thought I would start collecting data from a few repositories in order to have an idea what this value actually means. I started getting the most popular repositories I could think of and was running scc over those, before realizing this was going to take a while and I was going to miss out on a lot of languages and repository sizes.
+So I thought I would start collecting data from a few repositories in order to have an idea what this value actually 
+means. I started getting the most popular repositories I could think of and was running scc over those, before realizing 
+this was going to take a while and I was going to miss out on a lot of languages and repository sizes.
 
 So I figured why not run it over every repository I could find?
 						</aside>
@@ -148,9 +163,10 @@ So I figured why not run it over every repository I could find?
 					<section>
 						<img src="./img/searchcode.png" height="500px;" style="border: none;" />
 						<aside class="notes">
-This is where another project I maintain comes in. I run the site searchcode.com which as the name suggests searches code. It also at the time was aware of almost 10 million repositories across gitlab, bitbucket and github.
+This is where another project I maintain comes in. I run the site searchcode.com which as the name suggests searches code. 
+It also at the time was aware of almost 10 million repositories across gitlab, bitbucket and github.
 
-So the idea was to run scc over all 10 million repositories and do something with the results.
+So the idea was to export all 10 million repositories and then run scc over those and do something with the results.
 						</aside>
 					</section>
 				</section>
@@ -159,13 +175,19 @@ So the idea was to run scc over all 10 million repositories and do something wit
 					<h2>Attempt 1</h2>
 					<img src="./img/nbn.jpg" style="border: none;" />
 					<aside class="notes">
-I tried running it locally on my desktop. From memory I wrote a very simple shell script using the repositories I was aware of.
+So for the first attempt.
 
-At the time I didn't have NBN, however they had installed the node, which reduced my speed from a respectable 20 mbps to 3 mbps.
+I tried running it locally on my desktop. A very old desktop... but good enough for something like this. 
 
-This resulted in some complaints from the wife about Netflix and Youtube having issues. 
+From memory I wrote a very simple shell script to process each repository and save the results to disk.
 
-The first rule of marriage as a man is don't annoy your partner. So I started looking at other ways to do this.
+At the time I didn't have NBN, however they had installed the node, which reduced my ADSL2+ speed from a respectable 21 mbps to 3 mbps.
+
+So when I was running my process it used all of the bandwidth I had available.
+This resulted in some complaints from the children and then wife about Netflix and Youtube having issues playing. 
+
+The first rule of marriage is don't annoy your partner. So I started looking at other ways to do this that did not invovle tying up
+my own internet connection for weeks.
 				</section>
 
 				<section>
@@ -183,6 +205,8 @@ The first rule of marriage as a man is don't annoy your partner. So I started lo
 					<tr><td>_init_</td><td>10,193,245</td></tr>
 					</table>
 					<aside class="notes">
+Ah so the first interesting finding.
+
 Probably the first thing I started looking at, and sorry for you one of the most boring.
 
 Had you asked me before I started this I would have said, README, main, index, license. Thankfully the results reflect my thoughts pretty well. 
@@ -190,7 +214,7 @@ Although there are a lot of interesting ones in there. I have no idea why so man
 
 JavaScript projects including Font Awesome, which stores the bathtub icon as s15 for some reason. 15 seems to be related to javascript as well.
 
-It also looks like reports of jquery's death are greatly exaggerated.
+It also looks based on the values that reports of jquery's death are greatly exaggerated.
 					</aside>
 				</section>
 
@@ -205,25 +229,31 @@ It also looks like reports of jquery's death are greatly exaggerated.
 					<img src="https://camo.githubusercontent.com/1a6c6060cac1fe672b424b6cf4e2bc549caf154e6ddbf595f3c597c9ee184497/68747470733a2f2f736c6f632e78797a2f6769746875622f626f797465722f7363632f3f63617465676f72793d636f636f6d6f" style="border: none;" />
 					
 					<aside class="notes">
-So for Kablamo I work with AWS a lot. So naturally the first through was to use AWS Lambda. After all we know serverless has a lot going for it and should be cheap.
+So for Kablamo I work with AWS a lot. So naturally the first thought was to use AWS Lambda. 
 
-I had previously set this up to produce those github badges you see allowing you to display things like the lines of code on your github project https://github.com/boyter/scc#badges-beta
+After all we know serverless has a lot going for it and should be cheap.
+
+I had previously set this up to produce those github badges you see allowing you to display things 
+like the lines of code on your github project and you can see an example at the bottom here.
 
 This worked as follows. I setup a aws lambda function behind a ALB. Calls to it spawn a few subprocesses. The first being a shallow git clone into the tmp location of lambda. https://github.com/boyter/scc-lambda then it runs scc over the checked out code, and uploads the results into s3.
 
 Perfect solution you might think.
 
-Lambdas have a lot going for them. They are reasonably clean from a developer perspective because you don't have to manage any servers. They scale to thousands and thousands of concurrent requests and they generally don't cost very much.
+Lambdas have a lot going for them. They are reasonably clean from a developer perspective because you don't have to manage any servers. 
+They scale to thousands and thousands of concurrent requests and they generally don't cost very much.
 
-However there are of course some limitations, but I was prepared to live with. The first is that lambdas behind ALB's or APIGW like this have a hard 29 second timeout. This was not a problem in my case and I was prepared to live with it. 
+However there are of course some limitations, but I was prepared to live with. The first is that http lambdas like this have a hard 29 second timeout. Which chould be a problem for larger repositories.
 
-So I started by exporting all of the git urls, and wrote a simple python script to loop though every repository and ping my URL to generate the the data.
+So I started by exporting all of the git urls, and wrote a simple python script to loop though every repository 
+and ping my URL to generate the the data.
 
-After processing 1 million repositories I then checked my AWS costs and the cost was about $60.
+After processing 1 million repositories I checked my AWS costs and noticed they were about $60.
 
-This meant to do all 10 million I was looking at a $700 AWS bill. Ouch. 
+This meant to do all 10 million repositories I was looking at a $700 AWS bill. Ouch. 
 
-I decided to rethink my solution. Keep in mind that was mostly storage and CPU, or what was needed to collect this information. Assuming I processed or exported the data it was going to increase the cost considerably. 
+As such I decided to rethink my solution. Keep in mind that was mostly storage and CPU, or what was needed to collect 
+this information. Assuming I processed or exported the data it was going to increase the cost considerably. 
 				</section>
 
 				<section>
@@ -232,32 +262,49 @@ I decided to rethink my solution. Keep in mind that was mostly storage and CPU, 
 					<img src="./img/languagesPerProject.png" style="border: none;" />
 					</p>
 					<aside class="notes">
-Assuming you define pure to mean a project that has 1 language in it. Of course that would not be very interesting by itself, so lets see what the spread is. As it turns out most projects have fewer than 25 languages in them with most in the less than 10 bracket.
+Another finding here.
+
+So I defined a pure project to mean a project that has 1 language in it. 
+Of course that would not be very interesting by itself, so lets see what the spread is. 
+As it turns out most projects have fewer than 25 languages in them with most in the less than 10 bracket.
 
 The peak in the graph is for 4 languages.
 
-Of course pure projects might only have one programming language, but have lots of supporting other formats such as markdown, json, yml, css, .gitignore which are picked up by scc. It’s probably reasonable to assume that any project with less than 5 languages is “pure” (for some level of purity) and as it turns out is just over half the total data set. Of course your definition of purity might be different to mine so feel free to adjust to whatever number you like.
+Of course pure projects might only have one programming language, but have lots of supporting other formats such as 
+markdown, json, yml, css, .gitignore which are picked up by scc. It's probably reasonable to assume that any project with 
+less than 5 languages is “pure”  and as it turns out is just over half the total data set. Of course your definition of purity might be different to mine so feel free to adjust to whatever number you like.
 
-What suprises me is an odd bump around 34-35 languages. I have no reasonable explanation as to why this might be the case and it probably warrents some investigation.
+What suprises me is an odd bump around 34-35 languages. 
+I have no reasonable explanation as to why this might be the case and it probably warrents some investigation.
 					</aside>
 				</section>
 
 				<section>
 					<h2>Attempt 3</h2>
 					<img src="./img/attempt3.png" style="border: none;" /> <br>
-					<aside class="notes">Since I was already in AWS the hip solution would be to dump the git repository locations as messages into SQS and pull from it using EC2 instances or fargate for processing. Then scale out the instances like crazy. I actually mentioned this to people at work and thats the solution they also proposed.
+					<aside class="notes">		
+So attempt 3.
 
-Cool, scale out to collect the data. I can do that. 
+Since I was already in AWS the hip solution would be to dump the git repository locations as messages 
+into SQS and pull from it using EC2 instances or fargate for processing. Then scale out like crazy. 
+I actually mentioned this to people at work and thats the solution they also proposed.
+
+Cool, scale out to collect the data. I can do that.
 
 Collecting the data was one thing, but what about querying it?
 
-The next solution was to use AWS Athena after putting the data into S3. We can then query the data directly in S3 which is cool! Plus its serverless and in theory should be cheap.
+The idea was to use AWS Athena after putting the data into S3. We can then query the data directly in S3 which is cool! 
+Plus its serverless and in theory should be cheap.
 
-Thankfully at the time I was working on a customer project using Athena, and I was able to use that to estimate what it would have cost at the time. So I ran what I expected the data size to be and it was going to cost something like $2.50 USD. Per query! 
+Thankfully at the time I was working on a customer project using Athena, and I was able to use that to estimate what 
+it would have cost at the time. So I ran what I expected the data size to be and it was going to cost 
+something like $2.50 USD. Per query! 
 
-Nobody gets their queries right at first and that's half the price of a coffee for a single For that dataset I quickly looked for an alternative.
+Nobody gets their queries right at first and that's half the price of a coffee for a single For that dataset I quickly 
+looked for an alternative.
 
-Also thinking about it, setting up the SQS queue, running instances... its going to be either click-ops development, or a pain to get everything setup properly...
+Also thinking about it, setting up the SQS queue, running instances... its going to be either click-ops 
+development, or a pain to get everything setup properly with devops stacks and I was feeling lazy...
 					</aside>
 				</section>
 
@@ -268,9 +315,13 @@ Also thinking about it, setting up the SQS queue, running instances... its going
 					<tr><td>yml</td><td>14,076,349</td></tr>
 					</table>
 					<aside class="notes">
-Sometime back on the company slack there was a “discussion” with many dying on one hill or the other over the use of .yaml or .yml
+So on the subject of devops and yaml....
 
-The debate can finally(?) be ended. Although I suspect some will still prefer to die on their chosen hill.
+Sometime back on the company slack there was a “discussion” with many dying on one hill or the other over the use 
+of .yaml or .yml for stack definitions.
+
+As such I thought I would calculate which one is more comment so. The debate can finally be ended. Although I suspect some 
+will still prefer to die on their chosen hill.
 
 Perhaps its just an easy thing to bike shed about.
 					</aside>
@@ -281,16 +332,15 @@ Perhaps its just an easy thing to bike shed about.
 						<h2>Attempt 4</h2>
 						<img src="./img/tacobell.png" height="500px;" style="border: none;" /> <br>
 						<aside class="notes">
-						To paraphrase the infamous mongodb is web-scale video, as architects and developers, there is a tendency for us to read sites like High Scalability and start thinking we are google architects with google scale problems.
+To paraphrase the infamous mongodb is web-scale video, as architects and developers, there is a tendency for us to read sites like High Scalability and start thinking we are google architects with google scale problems.
 
-	There is a great post out there on this subject with the title "Taco Bell programming" http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html Its core thesis is that you can solve most problems with the unix tool set, and a bit some judicious use of the pipe operator and redirects. The author gives a wonderful example about a 32 process crawler to download URL's.
+There is a great post out there on this subject with the title "Taco Bell programming" Its core thesis is that you can solve most problems with the unix tool set, and a bit some judicious use of the pipe operator and redirects. The author gives a wonderful example about a 32 process crawler to download URL's.
 
-	Now I don't subscribe entirely to that idea of doing everything in the shell, probably because I am not at all fluent at sed, but I do think that we need to stop thinking of millions to billions of rows, terabytes of data is a large scale problem. The original map-reduce paper by google came out in 2004 and hadoop came out in 2007. That's over 16 years ago. A lot of the showcases for what those projects could do can be easily done by a single machine these days.
+Now I don't subscribe entirely to that idea of doing everything in the shell, probably because I am not at all fluent at sed, but I do think that we need to stop thinking of millions to billions of rows, terabytes of data is a large scale problem. The original map-reduce paper by google came out in 2004 and hadoop came out in 2007. That's over 16 years ago. A lot of the showcases for what those projects could do can be easily done by a single machine these days.
 
-	At the time I had some spare compute used by searchcode. It was fronted by a varnish cache accelerator, and if you have ever used varnish you know its very CPU efficient. As such the CPU on that box was doing the square root of zero most of the time, so I had a look at running the process on it.
+At the time I had some spare compute used by searchcode. It was fronted by a varnish cache accelerator, and if you have ever used varnish you know its very CPU efficient. As such the CPU on that box was doing the square root of zero most of the time, so I had a look at running the process on it.
 
-	What I did was write a simple Go program that spawned 32 process  which literally called out using spawned processes to shallow git clone to a temp directory then run scc over it, and save the resulting json file to disk and s3.
-
+What I did was write a simple Go program that spawned 32 process  which literally called out using spawned processes to shallow git clone to a temp directory then run scc over it, and save the resulting json file to disk and s3.
 						</aside>
 					</section>
 					<section>
@@ -578,11 +628,12 @@ So if you want your work to be as open as possible you must be explicit with you
 					Trie to store filenames (avoid lossy)<br>
 					Use SQLite?<br>
 					Latest version of scc<br>
-					Determine maintainability<br>
+					Determine maintainability**<br>
 					Tabs vs Spaces<br>
 					Don't store as JSON<br>
 					Try bigquery?<br>
 					Another language? Rust? Zig?<br>
+					Explorer!<br>
 					</p>
 					<aside class="notes">
 I am planning on doing this again at some point with the latest version of scc and an updated list of projects from searchcode.
@@ -591,19 +642,27 @@ I think the first thing to do is forget s3 and look at packing data into tar fil
 Id like to try sqlite as the store as well, since that would make for a great blog post title.
 Id love an algorithm to determine maintainability. Reading a lot of academic papers on this but yet to find something useful.
 Bigquery is one of those things that should eat something like this...
+
+Id like to actually process the results too and provide a webpage you could use to compare your project to millions of others.
+Maybe as a way to see what projects are like yours!
 					</aside>
 				</section>
 		
 				<section>
 					<h2>Thank you!</h2>
 					<p>
-					<a href="https://boyter.org/posts/an-informal-survey-of-10-million-github-bitbucket-gitlab-projects/">https://boyter.org/posts/an-informal-survey-of-10-million-github-bitbucket-gitlab-projects/</a>
-					<a href="https://boyter.org/">https://boyter.org/</a>
-					<a href="https://github.com/boyter/scc-data">https://github.com/boyter/scc-data</a>
-					<a href="https://github.com/boyter/scc">https://github.com/boyter/scc</a>
-					<a href="https://news.ycombinator.com/item?id=21121735">https://news.ycombinator.com/item?id=21121735</a>
-					<a href="https://boyter.org/static/dataenbytes2023/">https://boyter.org/static/dataenbytes2023/</a>
+					<a href="https://boyter.org/posts/an-informal-survey-of-10-million-github-bitbucket-gitlab-projects/">https://boyter.org/posts/an-informal-survey-of-10-million-github-bitbucket-gitlab-projects/</a><br>
+					<a href="https://boyter.org/">https://boyter.org/</a><br>
+					<a href="https://github.com/boyter/scc-data">https://github.com/boyter/scc-data</a><br>
+					<a href="https://github.com/boyter/scc">https://github.com/boyter/scc</a><br>
+					<a href="https://news.ycombinator.com/item?id=21121735">https://news.ycombinator.com/item?id=21121735</a><br>
+					<a href="https://boyter.org/static/dataenbytes2023/">https://boyter.org/static/dataenbytes2023/</a><br>
 					<aside class="notes">
+So thank you very much. I know this is a multitrack conference and if I were you I would have been in that LLM talk in 
+one of the other rooms, but I really appreicate you having come and listened to my rambling.
+
+If you have any questions please as me here, or if shy over email or twitter or whatever you prefer. 
+I promise to respond and not ghost you.
 					</aside>
 				</section>
 
