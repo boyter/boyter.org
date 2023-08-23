@@ -340,24 +340,35 @@ Now I don't subscribe entirely to that idea of doing everything in the shell, pr
 
 At the time I had some spare compute used by searchcode. It was fronted by a varnish cache accelerator, and if you have ever used varnish you know its very CPU efficient. As such the CPU on that box was doing the square root of zero most of the time, so I had a look at running the process on it.
 
-What I did was write a simple Go program that spawned 32 process  which literally called out using spawned processes to shallow git clone to a temp directory then run scc over it, and save the resulting json file to disk and s3.
+What I did was write a simple Go program that spawned 32 process which literally called out using spawned processes to shallow git clone to a temp directory then run scc over it, and save the resulting json file to disk and s3.
 						</aside>
 					</section>
 					<section>
 						<h2>Attempt 4</h2>
-						<img src="./img/hetzner.png" style="border: none;" /> <br>
+						<img src="./img/hetznertoday.png" style="border: none;" /> <br>
 						<img src="./img/hetzner2.png" height="500px;" style="border: none;" />
 						<aside class="notes">
-						
+So I used a spare box I had lying around. But what about you? 
 
+So Hetzner is my personal pick for dedicated servers at the moment. Great support, inexpensive prices. 
+
+They have a special at the moment where the even a new server can be ordered without setup fees, making it even with the current unfavorable exchange rates
+a under the magical $100.
+
+Below that you can see a server auction house they offer where you can find even better deals. I have found things at 27 euros a month on there giving you
+several months of a fairly powerful machine to attempt this.
 						</aside>
 					</section>
 					<section>
 						<h2>Attempt 4</h2>
 						<img src="./img/running.png" style="border: none;" /> <br>
 						<aside class="notes">
-						
+So here is a htop capture of the box I was running the process on. You can see a few git clones running, the process itself withe the imaginative
+name process, and the varnish process that the box was meant to be doing.
 
+While the CPU's arent very busy because its mostly network bound in this case you can see the load average is rather high to capture that. Its at almost 22 in this screenshot and sat there for the duration of the clone process.
+
+scc itself does not appear because its almost instant from a cpu point of view and was hard to capture in the screenshot.
 						</aside>
 					</section>
 
@@ -564,7 +575,7 @@ It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 						Consider compression, suzh as zstd.<br>
 						Keep results locally!<br>
 						When CPU is high for a long time consider dedicated<br>
-						Dedicated server go brrr<br>
+						Use --depth=1 for shallow git clones<br>
 						</p>
 						<aside class="notes">
 	Lessons learnt from this
@@ -600,7 +611,9 @@ It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 					<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />Missing a license</h2>
 					<img src="./img/hasLicense.png" style="border: none;" />
 					<aside class="notes">
-This is an interesting one. This was only looking for files with the following names “license”, “licence”, “copying”, “copying3”, “unlicense”, “unlicence”, “license-mit”, “licence-mit” or “copyright”.
+For any talk I attend I like to have a single thing I take away from it that is valuable. I hope for a lot of you this one is it.
+
+Looking for licence files. This is flawed because it was only looking for files with the following names “license”, “licence”, “copying”, “copying3”, “unlicense”, “unlicence”, “license-mit”, “licence-mit” or “copyright”.
 
 So based on that only about 1/3 of repositories have a licence.
 
@@ -612,9 +625,11 @@ The first reason is that its incorrect. You still need to explicitly say its pub
 
 The second is that for anyone with Australian or German citizenship (im guessing most of you here), you legally cannot give up your human rights, with copyright being considered a human right. 
 
-So you also cannot put anything into public domain. Germany implemented this right after WW2 so yes its done for a good reason.
+So you also cannot put anything into public domain. 
 
-So if you want your work to be as open as possible you must be explicit with your license. Consider MIT or Unlicence to have a similar affect. 
+For those wondering WHY we have this, well Germany implemented this right after WW2 so its there for a good reason.
+
+So if you want your work to be as open as possible you must be explicit with your license. Consider MIT or Unlicence to have a similar affect for source code. 
 					</aside>
 				</section>
 
@@ -636,10 +651,10 @@ So if you want your work to be as open as possible you must be explicit with you
 					Explorer!<br>
 					</p>
 					<aside class="notes">
-I am planning on doing this again at some point with the latest version of scc and an updated list of projects from searchcode.
+I plan on doing this again at some point with the latest version of scc and an updated list of projects from searchcode.
 
 I think the first thing to do is forget s3 and look at packing data into tar files with gz up to some limit.
-Id like to try sqlite as the store as well, since that would make for a great blog post title.
+Id like to try sqlite as the store as well, since that would make for a great blog post title... no other reason.
 Id love an algorithm to determine maintainability. Reading a lot of academic papers on this but yet to find something useful.
 Bigquery is one of those things that should eat something like this...
 
@@ -659,10 +674,10 @@ Maybe as a way to see what projects are like yours!
 					<a href="https://boyter.org/static/dataenbytes2023/">https://boyter.org/static/dataenbytes2023/</a><br>
 					<aside class="notes">
 So thank you very much. I know this is a multitrack conference and if I were you I would have been in that LLM talk in 
-one of the other rooms, but I really appreicate you having come and listened to my rambling.
+one of the other rooms, but I really appreicate you having come and listened to this.
 
-If you have any questions please as me here, or if shy over email or twitter or whatever you prefer. 
-I promise to respond and not ghost you.
+If you have any questions please ask me here either soon or in the hallways. If shy over email or twitter or whatever you prefer. 
+I promise to not ghost you.
 					</aside>
 				</section>
 
