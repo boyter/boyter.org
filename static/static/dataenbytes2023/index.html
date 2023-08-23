@@ -420,25 +420,15 @@ to a real type to add addtional bits of information if needed.
 
 				<section>
 					<section>
-						<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />Files in a repo?</h2>
-						<p>
-						<img src="./img/filesPerProject.png" style="border: none;" />
-						</p>
-						<aside class="notes">
-How many files are in an average repository? Do most projects have a few files in them, or many? 
-By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 12 
-or however many files it has and plot it out.					
-
-This is limited to projects with less than 1000 files because the plot looks like empty with a thin smear on the 
-left side if you include all the outliers.
-</aside>
-					</section>
-					<section>
 						<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />Files in a repo 95%</h2>
 						<p>
 						<img src="./img/filesPerProjectPercentile95.png" style="border: none;" />
 						</p>
 						<aside class="notes">
+How many files are in an average repository? Do most projects have a few files in them, or many? 
+By looping over the repositories and counting the number of files we can then drop them in buckets of 1, 2, 10, 12 
+or however many files it has and plot it out.					
+					
 As it turns out most repositories have less than 200 files in them.
 
 However what about plotting this by percentile, or more specifically by 95th percentile so its actually worth looking at? 
@@ -567,6 +557,68 @@ It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 				</section>
 
 				<section>
+						<h2><img src="./img/pin.png" style="border: none; background:none; height:0.6em;" />Potty Mouth</h2>
+						<table>
+<thead>
+<tr>
+<th>language</th>
+<th>curse count</th>
+<th>%</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C Header</td>
+<td>7,660</td>
+<td>0.001%</td>
+</tr>
+<tr>
+<td>Java</td>
+<td>7,023</td>
+<td>0.002%</td>
+</tr>
+<tr>
+<td>C</td>
+<td>6,897</td>
+<td>0.001%</td>
+</tr>
+<tr>
+<td>PHP</td>
+<td>5,713</td>
+<td>0.002%</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>4,306</td>
+<td>0.001%</td>
+</tr>
+<tr>
+<td>Ruby</td>
+<td>3,121</td>
+<td>0.002%</td>
+</tr>
+<tr>
+<td>C++</td>
+<td>1,543</td>
+<td>0.001%</td>
+</tr>
+<tr>
+<td>Dart</td>
+<td>1,533</td>
+<td>0.191%</td>
+</tr>
+</tbody>
+</table>
+						<aside class="notes">
+Working this out is not an exact science. It falls into the NLP class of problems really. Picking up cursing/swearing or offensive terms using filenames from a defined list is never going to be effective. If you do a simple string contains test you pick up all sorts or normal files such as assemble.sh and such. So to produce the following I pulled a list of curse words, then checked if any files in each project start with one of those values followed by a period. 
+
+While not accurate at all as mentioned it is incredibly fun to see what this produces. So lets start with a list of which languages have the most curse words. However we should probably weight this against how much code exists as well. So here are the top ones.
+
+Interesting! My first thought was “those naughty C developers!” but as it turns out while they have a high count they write so much code it probably isn't that big a deal. However pretty clearly Dart developers have an axe to grind! If you know someone coding in Dart you may want to go offer them a hug.
+						</aside>
+					</section>
+
+				<section>
 					<section>
 						<h2>Lessons Learnt</h2>
 						<p>
@@ -601,6 +653,13 @@ It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 						<h2>Dedicated server go brrr</h2>
 						<img src="./img/brrr.png" style="border: none;" />
 						<aside class="notes">
+I think for me this is one of the biggest takeaways.
+
+I had more of a look on hetzner and you can get some seriously powerful machines for not much. 80 core ARM machines with 256 gb of ram for under 300 euros.
+32 core epyc AMD mnachines with 1024 GB of ram for 500 euros a month.
+
+The amounnt of power you have on tap is insane. The cloud is a wonderful tool for scale and repeatability, but at least consider the other older options.
+And I havent even looked at buying your own physical machine here.
 						</aside>
 					</section>
 				</section>
