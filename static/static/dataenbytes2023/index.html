@@ -26,7 +26,11 @@
 			<div class="slides">
 				<section>
 					<h1>Processing 40 TB of code from ~10 million projects with a dedicated server and Go for $100</h1>
-					<aside class="notes"></aside>
+					<aside class="notes">
+Wow so many people... if I were you id be at the LLM talk on the other track...
+
+If you are fence sitting, I will put this all online so feel free to leave if you want.
+					</aside>
 				</section>
 
 				<section>
@@ -71,7 +75,9 @@ Oh and in full disclosure the title is slightly clickbait. I didn't actually ana
 					</p>
 					<aside class="notes">
 So I am trying a newish format for this talk, which is a common one where I outline what im going to go through. So here it is.
-What did I try, how did I faile, what did I learn, what worked eventually, and future thoughts.
+What did I try, how did I failed, what did I learn, what worked eventually, and future thoughts.
+Im also going to mix in any findings I did have.
+Note I don't have explanations for some of the findings... where I do ill let you know.
 					</aside>
 				</section>
 
@@ -379,6 +385,8 @@ scc itself does not appear because its almost instant from a cpu point of view a
 I initally wrote the script in Python but having to install the pip dependencies on my clean 
 varnish box seemed like a bad idea and it keep breaking in odd ways which I didnt feel like debugging.
 
+I am a big python fan, but only for anything throwaway.
+
 I have a rule these days with Python. 
 If I have to import something not in the standard library, 
 I am going to run it more than 5 times
@@ -442,6 +450,9 @@ Turns out the vast majority 95% of projects have less than 1,000 files in them. 
 					<section>
 						<h2>Processing...</h2>
 						<p>
+						Database?<br>
+						Spinning rust...<br>
+						<img src="./img/spinningrust.png" style="border: none;" /> <br>
 						</p>
 						<aside class="notes">
 The size of the data I needed to process raised another question. 
@@ -451,8 +462,8 @@ Keeping in mind we already ruled out Athena.
 
 Firstly why it it in JSON? Thats just because thats the output from scc and I didn't feel like reprocessing it. Remember this is an iterative project.
 
-The brains trust at work raised the idea to dump the data into a large SQL database. H
-owever this means processing the data into the database, then running queries over it multiple times.
+The brains trust at work raised the idea to dump the data into a large SQL database. 
+However this means processing the data into the database, then running queries over it multiple times.
  Plus the structure of the data meant having a few tables which means foreign keys and indexes to ensure some level of performance. 
 
 This feels wasteful because we could just process the data as we read it from disk in a single pass, assuming 
@@ -593,16 +604,6 @@ It took just over 49 hours to crunch the 1 TB of JSON and produce the results.
 <td>0.001%</td>
 </tr>
 <tr>
-<td>Ruby</td>
-<td>3,121</td>
-<td>0.002%</td>
-</tr>
-<tr>
-<td>C++</td>
-<td>1,543</td>
-<td>0.001%</td>
-</tr>
-<tr>
 <td>Dart</td>
 <td>1,533</td>
 <td>0.191%</td>
@@ -614,7 +615,11 @@ Working this out is not an exact science. It falls into the NLP class of problem
 
 While not accurate at all as mentioned it is incredibly fun to see what this produces. So lets start with a list of which languages have the most curse words. However we should probably weight this against how much code exists as well. So here are the top ones.
 
-Interesting! My first thought was “those naughty C developers!” but as it turns out while they have a high count they write so much code it probably isn't that big a deal. However pretty clearly Dart developers have an axe to grind! If you know someone coding in Dart you may want to go offer them a hug.
+Interesting! My first thought was “those naughty C developers!” but as it turns out while they have a high count they write so much code it probably isn't that big a deal. However pretty clearly Dart developers have an axe to grind! 
+
+Anyone here a dart developer? Do you want a hug?
+
+If you know someone coding in Dart you may want to go offer them a hug.
 						</aside>
 					</section>
 
@@ -737,6 +742,8 @@ one of the other rooms, but I really appreicate you having come and listened to 
 
 If you have any questions please ask me here either soon or in the hallways. If shy over email or twitter or whatever you prefer. 
 I promise to not ghost you.
+
+Oh I also have swag which I don't want to carry around so feel free to come get some of it!
 					</aside>
 				</section>
 
