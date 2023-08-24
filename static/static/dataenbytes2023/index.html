@@ -392,6 +392,9 @@ I have a rule these days with Python.
 If I have to import something not in the standard library, 
 I am going to run it more than 5 times
 or its a task that takes longer than an a few hours to run I rewrite it unless it worked correctly the first time.
+
+In this case I rewrote with Go just calling out to git and scc via subprocesses. It was actually very close 
+to a straight Python conversion and really worth it for Go's concurrency.
 						</aside>
 					</section>
 					<section>
@@ -670,7 +673,8 @@ If you know someone coding in Dart you may want to go offer them a hug.
 	Oh and for lots of git clones use depth=1 because it saves a lot of bandwidth.
 
 	Lastly Go works pretty well as glue code where you would normally reach for python, without having to worry about deployments
-	or in most cases performance very much.
+	or in most cases performance very much. Its probably not the best option for data crunching, but again a simple binary deploy is
+	fairly appealing.
 						</aside>
 					</section>
 
@@ -684,9 +688,9 @@ I had a look at hetzner again last night and you can get some seriously powerful
 80 core ARM machines with 256 gb of ram for under 300 euros.
 32 core EPYC AMD mnachines with 1024 GB of ram for 500 euros a month.
 
-The amount of power you have on tap is insane. 
+The amount of power you have on tap is insane. Thats not even looking at real server grade hardware either.
 The cloud is a wonderful tool for scale, repeatability, managed services, but I think keeping at least the idea of a dedicated server 
- in mind is a good idea.
+ in mind is a good idea, when you need lots of power at 100% load for a long period of time.
 						</aside>
 					</section>
 				</section>
