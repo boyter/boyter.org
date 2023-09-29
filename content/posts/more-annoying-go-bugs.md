@@ -7,14 +7,13 @@ Thought I would write done some of the more annoying/interesting software bugs I
 
 Both were dealing with an archive system where large amounts of video/audio/images are uploaded into, then searchable. It allows the editing of metadata for each type of content, as well sending to external systems.
 
-
 ### Problem #1
 
-When a record is being edited a flag "This is being edited" is added to the record and removed on save. However randomly the flag would not be removed, and sometimes additional flags would appear. This was implemented as a "cheap" version of optimisting locking that worked within the application requirements.
+When a record is being edited a flag "This is being edited" is added to the record and removed on save. However randomly the flag would not be removed, and sometimes additional flags would appear. This was implemented as a "cheap" version of optimistic locking that worked within the application requirements.
 
 ### Diagnosis
 
-I spent a lot of time looking through this. Then penny dropped when given some additonal information "Oh we wanted to put a timestamp in the edit message".
+I spent a lot of time looking through this. Then penny dropped when given some additional information "Oh we wanted to put a timestamp in the edit message".
 
 Tracking back to how this message is created, and we find this code.
 
@@ -32,7 +31,7 @@ Further investigation showed that the removal, worked by doing a string comparis
 
 The catch was that multiple containers were running copies of the application behind a load balancer. Without sticky sessions set sometimes you landed on another container running the application. So you might read from one application but save on another. It's likely they had a different time in the message, since its unlikely they started at 100% the same time.
 
-As a result randomly you could clear flags, but not always, and sometimes when the appliation was deployed again or a container died you would get more than one. Every problem explained due to the use of a global variable.
+As a result randomly you could clear flags, but not always, and sometimes when the application was deployed again or a container died you would get more than one. Every problem explained due to the use of a global variable.
 
 ### Resolution
 
@@ -57,14 +56,4 @@ The process then continued, and when determining where it should put the file us
 
 ### Resolution
 
-Change back to explicit `select` targetting just the fields we want to ensure futher database changes would not be an issue, and to deal with the scan exception. Additional logging added around this exception as well.
-
-
-
-
-
-
-
-
-
-
+Change back to explicit `select` targeting just the fields we want to ensure further database changes would not be an issue, and to deal with the scan exception. Additional logging added around this exception as well.
