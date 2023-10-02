@@ -28,7 +28,7 @@ I initially wanted everything to be deterministic with the AI, and generally it 
 
 The big thing for my was discovering in lua first class functions, so you can throw around different ones at runtime which makes assigning different draw/update functions really easy. As such it was about a 2 min job to start a title screen with instructions. It also allowed my to create screen transitions which was something I had massive issues with previously.
 
-So can confirm basic sounds effects add a LOT to the experience. A lot more than I was expecting.
+So I can confirm basic sounds effects add a LOT to the experience. A lot more than I was expecting.
 
 I took a crash course in learning the the basics of music theory to get any sort of music in... but then stuck to one track played on the intro. This is easily my biggest pain point, as I have never been musical, and know nothing about it. Something to improve on.
 
@@ -40,10 +40,12 @@ Seems some people played it too, at least according to the itch.io reports. Not 
 
 I am however very impressed with pico-8 and how easy it is to work with. I can see why people use it now, allowing you to nail down the core mechanic for distilled fun, and then build out on that. The fact I was able to go from
 
-> September 18th 20203 - I think im actually going to commit to finishing something in pico-8. I find I work best with constraints and not a blank canvas. Because it is so constrained you have to cut down to the barest thing possible.
+> September 18th 2023 - I think im actually going to commit to finishing something in pico-8. I find I work best with constraints and not a blank canvas. Because it is so constrained you have to cut down to the barest thing possible.
 
-to 
+to
 
 > September 26th 2023 - Published.
 
-Is nothing short of amazing to me. Now to tackle something a little more complex, and grind out game development for a bit. Maybe one day I can make something people really want to play.
+About a week. Nothing short of amazing to me. Now to tackle something a little more complex, and grind out game development for a bit. Maybe one day I can make something people really want to play.
+
+EDIT: Someone posted this post to Hacker News https://news.ycombinator.com/item?id=37703651
