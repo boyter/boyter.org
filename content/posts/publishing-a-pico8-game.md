@@ -26,7 +26,7 @@ The premise is fairly simple. Pick your spell and cast it, with the enemy doing 
 
 I initially wanted everything to be deterministic with the AI, and generally it is, however I quickly realized what I guess many game developers have that this isn't ideal. As such some of the AI is random in order to produce more fun moments.
 
-The big thing for my was discovering in lua first class functions, so you can throw around different ones at runtime which makes assigning different draw/update functions really easy. As such it was about a 2 min job to start a title screen with instructions. It also allowed my to create screen transitions which was something I had massive issues with previously.
+The big thing for me was discovering in lua first class functions, so you can throw around different ones at runtime which makes assigning different draw/update functions really easy. As such it was about a 2 min job to start a title screen with instructions. It also allowed my to create screen transitions which was something I had massive issues with previously.
 
 So I can confirm basic sounds effects add a LOT to the experience. A lot more than I was expecting.
 
