@@ -25,7 +25,7 @@
 		<div class="reveal">
 			<div class="slides">
 				<section>
-					<h1>Building a code search index in Go</h1>
+					<h1>The Power of Bloom Filters: Building a Cutting Edge Go Search Engine to Explore the World's Source Code</h1>
 					<a href="https://github.com/boyter/indexer">https://github.com/boyter/indexer</a>
 					<p>Go get a copy of the above!</p>
 					<aside class="notes">So as part of the interactive theme, id suggest everyone go and get a copy of the above. Or just go hammer searchcode.com with stuff.</aside>
@@ -37,44 +37,69 @@
 					"Officially" technical lead/principle at Kablamo but a "code monkey" at heart.</p>
 					<p>I blog <a href="https://boyter.org/">boyter.org</a> I free software <a href="https://github/boyter/">github/boyter/</a> I run <a href="https://searchcode.com/">searchcode.com</a> also on the twitter <a href="https://twitter.com/boyter">@boyter</a> activitypub <a href="https://honk.boyter.org/boyter">@boyter@honk.boyter.org</a></p>
 					<aside class="notes">Not going to bore you too much with who I am because you don't care.
-					
-					Aside, I was going to do a talk about how you can destroy the fediverse with a few lines of code... then thought better of it. If you want that  in the future go hassle Chewy or Katie.
 					</aside>
 				</section>
 
 
 				<section>
+					<h2>PHP -> Python -> Java -> Go</h2>
+					<img src="./img/sphinx_logo.png" style="border: none;" />
+					<img src="./img/manticore_logo.svg" style="border: none;" />
 					<img src="./img/searchcode.png" height="500px;" style="border: none;" />
-					<aside class="notes">So I run searchcode.com, and its iteration over the last 10 years has been from PHP to Python almost to Java and finally to Go.
+					<aside class="notes">
+So I run searchcode.com which as the un-imaginative name would suggest searches over source code. 
+I have been doing this for the last 10 years modifying and rewriting it from PHP to Python to 
+Java and finally to Go.
 
-The whole time that has happened one thing has been constant, which was the use of the index engine, which was provided using Sphinx Search and then a forked version called Manticore.
+Searchcode itself indexes about 75 billion lines of code across 40 million projects pulled from 
+github, gitlab, bitbucket, codeberg, sr.ht and such.
 
-This made me feel like a bit of a fraud, how can I claim to be a search guy without using my own index. So after the first covid lockdown in 2020, I was hiking with a mate I decided I would build my own index.
+Its sort of a serious side project, where I get to have a wonderful time working on algorithms and such.
+Which is nice compared to the usual code golf I get to deal with. Im sure if I fiddle with this a bit more
+I can reduce to code count by a third!
 
-Searchcode itself indexes about 75 billion lines of code across 40 million projects pulled from github, gitlab, bitbucket, codeberg, sr.ht and such.
+The whole time that has happened one thing has been constant, which was the use of the 
+index engine, which was provided using Sphinx Search and then a forked version called Manticore.
 
-It handles about 22 RPS with some portion of those being search queries and the remainder being code view queries. It works out being about 2.6 million requests a day.
-
-I work on it because its nice to have a place to work on interesting algorithms and problems at a reasonable scale to make it fun.
-
-Note. I do not have a PhD in applied search, nor do I work in the space professionally. This is about how I built a index in Go, not nessecarrily how you should.
-</aside>
+This made me feel like a bit of a fraud, how can I claim to be a search guy without 
+using my own index. So after the early in 2020, I decided I would build my own index.
+					</aside>
 				</section>
 
 				<section>
-					<h2>PSA: Licensing</h2>
-					<p>If you are Australian (or German) you cannot put your code into public domain!</p>
-					<p>All code under AGPL-3.0 license</p>
-					<aside class="notes">So quick PSA. Personal bugbear of mine. You cannot give up your rights in Australia including copyright, so licence everything you do. For those curious Germany did this after WW2 so its probably a good idea.
-					I put this under AGPL-3.0 possibly because im a communist, or more likely because if you want to use this in your products I want you to pay me.</aside>
+					<h2>Considerations</h2>
+					<ul>
+						<li>Free service
+							<ul>
+								<li>Put everything in RAM</li>
+								<li>Downtime not a huge issue</li>
+								<li>Single server</li>
+							</ul>
+						</li>
+						<li>Boolean queries</li>
+ 						<li>Single developer</li>
+						<li>This is how I built an index... not nessecarrily how you should!</li>
+					</ul>
+					<aside class="notes">
+					Design Considerations
+	Now we need to consider the goals of searchcode.com
+		its free... this influences the design, because I don't need to worry about pesky cusotmers, if the service goes down
+			put it all in ram! cos ram is cheap right?
+			downtime is not a problem
+			single server!
+			Turns out most people just type terms and expect results, VERY few people actually do boolean queries
+		Needs to be understandable by me... this is where Go is really useful.
+			I like the language but I die a little for all the error handling conditions I deal with
+			Then I realise I finished whatever I was doing really quickly and get over it
+			I don't think I would have gotten as far as I did without using Go
+					</aside>
 				</section>
-
 
 				<section>
 					<section>
-						<h2>Searching code</h2>
+						<h2>Searching code: Tokenisation</h2>
 						<p>Trigrams</p>
-	<pre><code style="font-size: 18px; line-height: 1em;">searchcode ->	sea
+<pre><code style="font-size: 18px; line-height: 1em;">searchcode ->	sea
 		ear
 		arc
 		rch
@@ -82,20 +107,43 @@ Note. I do not have a PhD in applied search, nor do I work in the space professi
 		hco
 		cod
 		ode
-	</code></pre>
-						<aside class="notes">So code search is in some ways easier than text, because you don't need to try to understand language in the way that you do when dealing with english, japanese or russian. Splitting on chinese or japanese words for example is painful.
+</code></pre>
+						<aside class="notes">
+So code search is in some ways easier than text, because you don't need to try to understand language in the way that you do when dealing with english, japanese or russian. Splitting on chinese or japanese words for example is painful.
 
-	You can solve this problem in code using whats known as trigrams, where you break the text apart into characters of 3 and index those. You can actually use any number you want for ngrams, but trigrams work best when indexing source code.
+You can solve this problem in code using whats known as trigrams, where you break the text apart into characters of 3 and index those. You can actually use any number you want for ngrams, but trigrams work best when indexing source code.
 
-	One catch with this is that you get false positives, some inputs generate the same ngrams despite being different. You also have terms with low cardinality such as repeated works in a line. So the letter p 100 times is no more useful than 3 of them.
+One catch with this is that you get false positives, some inputs generate the same ngrams despite being different. You also have terms with low cardinality such as repeated works in a line. So the letter p 100 times is no more useful than 3 of them.
 
-	Another issue is that you get more things to index bloating your posting list... We will get into what posting lists are shortly? Well lets have a look at how to build an index
+Another issue is that you get more things to index bloating your posting list... We will get into what posting lists are shortly? Well lets have a look at how to build an index
 
-	But have a look here, were one term searchcode is turned into 8 things we need to index.
+But have a look here, were one term searchcode is turned into 8 things we need to index.
 						</aside>
 					</section>
 					<section>
-					<h2>line 98: caisson.go</h2>
+						<h2>Problem</h2>
+						<p>Creates long posting lists</p>
+<pre><code style="font-size: 18px; line-height: 1em;">searchcode ->	sea
+		ear
+		arc
+		rch
+		chc
+		hco
+		cod
+		ode
+
+vs
+
+searchcode -> searchcode
+</code></pre>
+						<aside class="notes">
+If we tokenise by trigrams we get a great dela more tokens we need to index. In our example from before
+searchcode turns into 8 things we need to add to our index, vs a single thing we would need if we treated
+it as plain space delimited text.
+						</aside>
+					</section>
+					<section>
+						<h2>Trigram Generation<h2>
 <pre><code style="font-size: 14px; line-height: 1em;">func Trigrams(text string) []string {
 	var runes = []rune(text)
 
@@ -116,53 +164,120 @@ Note. I do not have a PhD in applied search, nor do I work in the space professi
 }
 </code></pre>
 					<aside class="notes">
-					When you look at how this is called you will notice logic to split in spaces first and then index things larger than 3. This avoids indexing spaces which reduces the size of the bloom filter.
-					
-					Interesting fact, in profiling the single biggest bottleneck in indexing is the this trigram code. If someone wants to profile and improve performance on it I would really appreciate it. It dominiates the indexing profile by a huge amount.</aside>
+When you look at how this is called you will notice logic to split in spaces first and 
+then index things larger than 3. This avoids indexing spaces which reduces the 
+size of the bloom filter.
+
+Interesting fact, this is by far the single biggest bottleneck in searchcode when indexing.
+If someone wants to profile and improve performance on it I would really appreciate it. 
+It dominiates the indexing profile by a huge amount.</aside>
 					</section>
+					<section>
+					<img src="./img/nerdsniped.png" style="border: none;" />
+					<aside class="notes">
+Consider yourself nerd sniped
+					</aside>
+				</section>
+
 				</section>
 
 				
 
+				<section>
+					<section>
+						<h2>What is an index?</h2>
+						<p>Structured list. Keys point at data so searches are faster.</p>
+						<p>Which documents contain the term?</p>
+						<p>So how are we going to build one? Textbook 101 style?</p>
+					</section>
+					<section>
+						<h2>Textbook 101 index</h2>
+
+<pre><code style="font-size: 14px; line-height: 1em;">package main
+
+type pos struct { 
+	id int    // unique document id
+	loc []int // store document positions in posting list
+}
+
+func main() {
+	index := map[string][]int{}    // non-positional index
+	index["searchcode"] = append(index["searchcode"], 175)
+	index["gopher"] = append(index["gopher"], 1337)
+
+	//////////////
+
+	posIndex := map[string][]pos{} // positional index
+	posIndex["searchcode"] = append(posIndex["searchcode"], pos{175, []int{1,6,8,9}})
+	posIndex["gopher"] = append(posIndex["gopher"], pos{1337, []int{1,2,3,99}})
+}</code></pre>
+						<ul>
+							<li>Posting lists</li>
+							<li>Need to implement skip lists or compression on the posting lists at scale</li>
+							<li>Supports a positional index</li>
+						</ul>
+
+						<aside class="notes">
+So given our trigram terms we now need to index them. There are a few ways to do this. Lets walk through a few.
+
+A posting list is the slice of struct or int64 containing the document's that contain that term.
+
+So "set" is found inside documents 1,77 and 345
+
+A positional index is one that stores where the term was found in the document. 
+
+So "set" as position 5 and 56 inside document 77
+
+This is really useful for phrase searches and ranking.
+In theory you can then use the index to reconstruct the document entirely. One catch with this is that your index becomes larger than the thing you are indexing.
+
+Done simply these are a bit of code you can had over to your cousin or most junior developer.
+
+Skip lists are something you end up needing to implement because when searching multiple terms you look for 
+the intersection of multiple posting lists and it speeds things up and something you need to add to scale this approach.
+
+They are an interesting data structure worth looking up on wikipedia. When you start adding compression using ellias phano to reduce the size they quickly become complex, and it becomes easy to tank your performance.
+						</aside>
+					</section>
+					<section>
+						<h2>Problems</h2>
+						<img src="./img/assvogel.gif" style="border: none;" />
+						<ul>
+							<li>Posting lists</li>
+							<li>Need to implement skip lists or compression on the posting lists at scale</li>
+							<li>Supports a positional index</li>
+						</ul>
+
+						<aside class="notes">
+						</aside>
+					</section>
+					<section>
+						<h2>For those wondering...</h2>
+						<img src="./img/vulture.jpg" style="border: none;" />
+						<aside class="notes">
+						Assvogel is an obsolete Afrikaans word for a South African vulture 
+						</aside>
+					</section>
+				</section>
 
 				<section>
-					<h2>How to build an index</h2>
-					<p>Inverted index. Most common way to do it.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">map[string][]struct{}
-map[string][]int64{} 
-</code></pre>
+					<h2>Trie</h2>
+					<p>Typesense uses this, its also written in C++</p>
+<img src="./img/trie.png" height="100px" style="border: none;" />
 					<ul>
-						<li>Posting lists</li>
+						<li>Big problem is not friendly to GC due to the use of pointers (problem for Go)</li>
 						<li>Need to implement skip lists or compression on the posting lists at scale</li>
  						<li>Supports a positional index</li>
 					</ul>
 
 					<aside class="notes">
-					So given our trigram terms we now need to index them. There are a few ways to do this. Lets walk through a few.
+					I tried this, and the GC non friendly problem caused it to have massive delays while walking the pointers. I think it was seconds in GC when I tried it which was unacceptable.
 
-					A posting list is the slice of struct or int64 containing the document's have that term.
-
-					So "set" is found inside documents 1,77 and 345
-
-					A positional index is one that stores where the term was found in the document. 
-
-					So "set" as position 5 and 56 inside document 77
+					I could have possibly done off heap tricks but I wanted to stick to normal Go because I am a mortal programmer.
 					
-					This is really useful for phrase searches and ranking.
-					In theory you can then use the index to reconstruct the document entirely. One catch with this is that your index becomes larger than the thing you are indexing.
-
-					Done simply these are a bit of code you can had over to your cousin or most junior developer.
-
-					Skip lists are something you end up needing to implement because when searching multiple terms you look for 
-					the intersection of multiple posting lists and it speeds things up and something you need to add to scale this approach.
-					
-					They are an interesting data structure worth looking up on wikipedia. When you start adding compression using ellias phano to reduce the size they quickly become complex, and it becomes easy to tank your performance.
-
-					
+					So what about bitslice signatures?
 					</aside>
 				</section>
-
-				
 
 				<section>
 					<h2>Bloom filter</h2>
@@ -256,6 +371,20 @@ This is one one of the reasons this as an approach fell out of favor in the 70's
 				</section>
 
 				<section>
+					<section>
+							<h2>Fixes</h2>
+							<img src="./img/rotate.gif" style="border: none;" />
+							<aside class="notes">
+		However in the 80's a smart person called Roberts noticed you could rotate the filter.
+
+		So we do that by turning the rows into columns. So each row used to represent a document, but now each column does. Right to left.
+
+		With this done we only need to inspect the rows containing the bit positions of the query. So in this case 2 rows which is half the memory access.
+
+		We can then using out examples just row query bit positions 0 and 6 and then logically & them together. If they arent 0 then we have a positional match.
+
+		</aside>
+					</section>
 					<section>
 						<h2>Fixes</h2>
 						<img src="./img/rotated_bloomfilter.png" height="500px" style="border: none;" />
