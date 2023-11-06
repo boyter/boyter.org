@@ -355,12 +355,39 @@ BTW this is one of the things you need to do at a large enough scale to get the 
 
 				<section>
 					<h2>Problems</h2>
+<pre><code style="font-size: 14px; line-height: 1em;">package main
+			
+import (
+	"fmt"
+	"runtime"
+)
+
+func main() {
+	memUsage := func() string {
+		var m runtime.MemStats
+		runtime.ReadMemStats(&m)
+		return fmt.Sprintf("%v MB", m.Alloc/1024/1024)
+	}
+
+	fmt.Println(memUsage())
+	bigBloom := make([]bool, 100_000_000)
+	fmt.Println(memUsage())
+	_ = len(bigBloom)
+}
+
+$ go run main.go
+0 MB
+95 MB</code></pre>
 					<aside class="notes">
-					So a few problems with this approach.
+So a few problems with this approach.
 
-Problem is that each "bit" in this uses 1 byte under the hood, assuming we use a boolean to indicate the bit. A 8x overhead is unacceptable for most...
+How much memory do 10 million bools take up? Almost 100MB which is 8x what you expect.
 
-Another problem is that is that its slow... This comes down to how fetching bits out of memory using the CPU works. The slow part is not the & logic you use, but memory walking.
+Problem is that each "bit" in this uses 1 byte under the hood since they are all addressable.
+As you can see. Note this isnt a problem with Go it occurs in most languages.
+
+Another problem is that is that its slow... This comes down to how fetching bits out of 
+memory using the CPU works. The slow part is not the & logic you use, but memory walking.
 
 When you probe a single bit on any system you actually pull back 512 bits from RAM. A 512x overhead just to test a single bit! As a result on average you end up walking ALL the memory for your filter.
 
@@ -375,13 +402,13 @@ This is one one of the reasons this as an approach fell out of favor in the 70's
 							<h2>Fixes</h2>
 							<img src="./img/rotate.gif" style="border: none;" />
 							<aside class="notes">
-		However in the 80's a smart person called Roberts noticed you could rotate the filter.
+However in the 80's a smart person called Roberts noticed you could rotate the filter, assuming each filter had the same number of bits.
 
-		So we do that by turning the rows into columns. So each row used to represent a document, but now each column does. Right to left.
+So we do that by turning the rows into columns. So each row used to represent a document, but now each column does. Right to left.
 
-		With this done we only need to inspect the rows containing the bit positions of the query. So in this case 2 rows which is half the memory access.
+With this done we only need to inspect the rows containing the bit positions of the query. So in this case 2 rows which is half the memory access.
 
-		We can then using out examples just row query bit positions 0 and 6 and then logically & them together. If they arent 0 then we have a positional match.
+We can then using out examples just row query bit positions 0 and 6 and then logically & them together. If they arent 0 then we have a positional match.
 
 		</aside>
 					</section>
@@ -389,14 +416,6 @@ This is one one of the reasons this as an approach fell out of favor in the 70's
 						<h2>Fixes</h2>
 						<img src="./img/rotated_bloomfilter.png" height="500px" style="border: none;" />
 						<aside class="notes">
-	However in the 80's a smart person called Roberts noticed you could rotate the filter.
-
-	So we do that by turning the rows into columns. So each row used to represent a document, but now each column does. Right to left.
-
-	With this done we only need to inspect the rows containing the bit positions of the query. So in this case 2 rows which is half the memory access.
-
-	We can then using out examples just row query bit positions 0 and 6 and then logically & them together. If they arent 0 then we have a positional match.
-
 	</aside>
 					</section>
 					<section>
@@ -413,15 +432,10 @@ This is one one of the reasons this as an approach fell out of favor in the 70's
 				
 				
 				<section>
-						<h2>Add</h2>
-						<h2>line 187: caisson.go</h2>
+						<h2>Pack the bits with bit set</h2>
 <pre><code style="font-size: 14px; line-height: 1em;">var bloomFilter []uint64
 
 func Add(item []bool) error {
-	if len(item) != BloomSize {
-		return errors.New(fmt.Sprintf("expected to match size %d", BloomSize))
-	}
-
 	if currentBlockDocumentCount == 0 || currentBlockDocumentCount == DocumentsPerBlock {
 		bloomFilter = append(bloomFilter, make([]uint64, BloomSize)...)
 		currentBlockDocumentCount = 0
@@ -445,8 +459,8 @@ func Add(item []bool) error {
 </code></pre>
 					<aside class="notes">So given that lets build out bloom filter by adding documents.
 					
-					What this does is takes in boolean slice, checks if its the right size, then checks if we need to add a new 
-					block IE another batch of 64 documents, and then loops over the input setting the correct bits in the correct position.</aside>
+What this does is takes in boolean slice, then checks if we need to add a new 
+block IE another batch of 64 documents, and then loops over the input setting the correct bits in the correct position.</aside>
 				</section>
 
 
@@ -471,7 +485,9 @@ func Add(item []bool) error {
 0000000000001000001010010000000010100010000111111110101010100001
 0000000000001000000000010000011001100011111100000000000000000000
 </code></pre>
-					<aside class="notes">This is done so as to not waste memory. In the code its done by packing 64 documents into a bloom filter block or bucket. 
+					<aside class="notes">
+					
+This is done so as to not waste memory. In the code its done by packing 64 documents into a bloom filter block or bucket. 
 
 So if a bloom filter had 16 bits, we keep 16 uint64's in a slice.
 
@@ -556,15 +572,16 @@ Where shards represent a different bloom filter size, say 512 of 2048 bits, and 
 	return results
 }
 </code></pre>
-					<aside class="notes">With the index done we can now search.
+					<aside class="notes">
+With the index done we can now search.
 					
-					The core search algorithm is as follows. 
+The core search algorithm is as follows. 
 
 I find this algorithm beautifully simple. We take in query positions for the search, so in the case of searching for "searchcode" we turn that into trigrams
 then hash them using the same hash functions to get 6+ uint64's from 0 to whatever the filter is configured to be in a slice.
 
-					Then, walk over each logical block or bucket, which is as many uint64's as exist in the bloom filter, and then logically & that against the previous one. 
-					If its 0 bail out, otherwise if we have finished record the documentid based on what its position in the index is.
+Then, walk over each logical block or bucket, which is as many uint64's as exist in the bloom filter, and then logically & that against the previous one. 
+If its 0 bail out, otherwise if we have finished record the documentid based on what its position in the index is.
 
 
 Whats really cool about this is that we jump potentially all of the bytes in a block if we hit that res == 0 condition quickly, avoiding us walking any memory at all! This is the state we want
