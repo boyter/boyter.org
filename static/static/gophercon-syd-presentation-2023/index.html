@@ -4,7 +4,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>Golang-Syd 25th May 2023</title>
+		<title>GopherConSyd 2023</title>
 
 		<link rel="stylesheet" href="css/reveal.css">
 		<link rel="stylesheet" href="css/theme/black.css">
@@ -25,7 +25,7 @@
 		<div class="reveal">
 			<div class="slides">
 				<section>
-					<h1>The Power of Bloom Filters: Building a Cutting Edge Go Search Engine to Explore the World's Source Code</h1>
+					<h1>Bloom Filters: Building a Cutting Edge Go Search Engine to Explore the World's Source Code</h1>
 					<!--<a href="https://github.com/boyter/indexer">https://github.com/boyter/indexer</a>
 					<p>Go get a copy of the above!</p>-->
 					<aside class="notes">So as part of the interactive theme, id suggest everyone go and get a copy of the above. Or just go hammer searchcode.com with stuff.</aside>
@@ -531,15 +531,13 @@ We can then using out examples just row query bit positions 0 and 6 and then log
 				<section>
 						<h2>Pack the bits with bit set</h2>
 <pre><code style="font-size: 14px; line-height: 1em;">var bloomFilter []uint64
+var BloomSize = 2048
 
 func Add(item []bool) error {
 	if currentBlockDocumentCount == 0 || currentBlockDocumentCount == DocumentsPerBlock {
 		bloomFilter = append(bloomFilter, make([]uint64, BloomSize)...)
 		currentBlockDocumentCount = 0
-
-		if currentDocumentCount != 0 {
-			currentBlockStartDocumentCount += BloomSize
-		}
+		currentBlockStartDocumentCount += BloomSize
 	}
 
 	for i, bit := range item {
@@ -635,17 +633,13 @@ Where shards represent a different bloom filter size, say 512 of 2048 bits, and 
 
 
 				<section>
+					<section>
 						<h2>Searching</h2>
-						<h2>line 20: caisson.go</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []uint32 {
-	var results []uint32
+<pre><code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []int {
+	var results []int
 	var res uint64
 
-	if len(queryBits) == 0 {
-		return results
-	}
-
-	for i := 0; i < len(bloomFilter); i += BloomSize {
+	for i := 0; i < len(bloomFilter); i += 2048 {
 		res = bloomFilter[queryBits[0]+uint64(i)]
 
 		for j := 1; j < len(queryBits); j++ {
@@ -657,9 +651,9 @@ Where shards represent a different bloom filter size, say 512 of 2048 bits, and 
 		}
 
 		if res != 0 {
-			for j := 0; j < DocumentsPerBlock; j++ {
-				if res&(1<<j) > 0 {
-					results = append(results, uint32(DocumentsPerBlock*(i/BloomSize)+j))
+			for j := 0; j < 64; j++ {
+				if res&(1<&lt;j) > 0 {
+					results = append(results, 64*(i/BloomSize)+j)
 				}
 			}
 		}
@@ -669,28 +663,32 @@ Where shards represent a different bloom filter size, say 512 of 2048 bits, and 
 	return results
 }
 </code></pre>
-					<aside class="notes">
-With the index done we can now search.
-					
-The core search algorithm is as follows. 
+						<aside class="notes">
+	With the index done we can now search.
+						
+	The core search algorithm is as follows. 
 
-I find this algorithm beautifully simple. We take in query positions for the search, so in the case of searching for "searchcode" we turn that into trigrams
-then hash them using the same hash functions to get 6+ uint64's from 0 to whatever the filter is configured to be in a slice.
+	I find this algorithm beautifully simple. We take in query positions for the search, so in the case of searching for "searchcode" we turn that into trigrams
+	then hash them using the same hash functions to get 6+ uint64's from 0 to whatever the filter is configured to be in a slice.
 
-Then, walk over each logical block or bucket, which is as many uint64's as exist in the bloom filter, and then logically & that against the previous one. 
-If its 0 bail out, otherwise if we have finished record the documentid based on what its position in the index is.
+	Then, walk over each logical block or bucket, which is as many uint64's as exist in the bloom filter, and then logically & that against the previous one. 
+	If its 0 bail out, otherwise if we have finished record the documentid based on what its position in the index is.
 
 
-Whats really cool about this is that we jump potentially all of the bytes in a block if we hit that res == 0 condition quickly, avoiding us walking any memory at all! This is the state we want
-to hit as often as possible.
+	Whats really cool about this is that we jump potentially all of the bytes in a block if we hit that res == 0 condition quickly, avoiding us walking any memory at all! This is the state we want
+	to hit as often as possible.
 
-Results when returned gives ids, which we can then use the idToFile to find the true id for this document. 
+	Results when returned gives ids, which we can then use the idToFile to find the true id for this document. 
 
-Once we have these id its a matter of reaching out to our primary data store, pulling back the documents and processing from there.
-</aside>
+	Once we have these id its a matter of reaching out to our primary data store, pulling back the documents and processing from there.
+	</aside>
+					</section>
+					<section>
+						<h2>Searching</h2>
+						TODO animation of search across memory here
+					</section>
 				</section>
-
-
+					
 				<section>
 						<h2>Size</h2>
 <pre><code style="font-size: 14px; line-height: 1em;">$ scc --no-cocomo caisson.go
@@ -721,7 +719,6 @@ In addition, bitfunnel bit slice signatures are not very accurate. This is becau
 For these reasons, I would not recommend using a bitfunnel bit slice signature approach for code search. Instead, I would recommend using an inverted index.
 
 </small>
-					<p>Presentation located at <a href="https://boyter.org/static/golang-syd-25th-may/">https://boyter.org/static/golang-syd-25th-may/</a> or just go to boyter.org and I will link it up tomorrow.</p>
 					<aside class="notes">
 					Of course... probably nobody using searchcode probably cares that its running on a unique bloom filter trigram backed index with 
 					ideas borrowed from bing. But I know... and now you do too. 
