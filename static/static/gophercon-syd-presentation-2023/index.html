@@ -210,7 +210,7 @@ Consider yourself nerd sniped
 					<section>
 						<h2>What is an index?</h2>
 						<p>Structured list. Keys point at data so searches are faster.</p>
-						<p>Which documents contain the term? So string to list of integers.</p>
+						<p>Given a term, return id's which contain it.</p>
 					</section>
 					<section>
 						<h2>Textbook 101 index</h2>
@@ -846,6 +846,13 @@ Once we have these id its a matter of reaching out to our primary data store, pu
 	return 2
 }
 </code></pre>
+						<aside class="notes">
+Amazing I know. I found this out by testing different hash counts from 1 to 10 against the frequency ones
+against a dozen different sized bloom filters looking for the lowest false positive rate.
+
+In almost every case 2 worked out to give the best possible signal to noise ratio. I suspect this is due to
+trigrams being fairly common across all code with none being particiually unique unlike natural language.
+						</aside>
 					</section>
 
 					<section>
@@ -863,6 +870,16 @@ func doSearch() { // only 5 instances of this function can run
 }
 </code></pre>
 						<aside class="notes">
+This one seems counter intuitive. 
+
+But the thing is when it comes to processes that are really pushing system limits, doing things in serial
+to an extent can be faster. 
+
+For search, imagine each query takes one second. Process in parallel and if 10 requests come in, they all
+get a result 10 seconds later. Do it in serial and one user gets it in 1 second, the second in 2 etc.. to 10.
+
+This is where I really like Go functionality. I remember writing a counting semaphore in C# once and it was
+a horrible bug ridden thing. To have something so simple in Go using using channels is amazing language design.
 						</aside>
 					</section>
 
@@ -898,10 +915,15 @@ Processed 6746 bytes, 0.007 megabytes (SI)
 					<p>Probably nobody cases how searchcode works, but I care, and I know. Now you do too.</p>
 					<img src="./img/gopher.png" height="500px" style="border: none;" />
 					<aside class="notes">
-					Of course... probably nobody using searchcode probably cares that its running on a unique bloom filter trigram backed index with 
-					ideas borrowed from bing. But I know... and now you do too. 
-					
-						Now this is meant to be interactive, so ill bring the code up and we can talk about whatever you like given time and get some questions out of the way.
+Of course... probably nobody using searchcode probably cares that its running on a unique bloom filter trigram
+ backed index with 
+ideas borrowed from bing. Even if I am fairly sure this is the only instance of any search engine doing so.
+
+But I know... and now you do too.
+
+Now if you want one of these great looking stickers designed in house at Kablamo, 
+come talk to myself or anyone else at the Kablamo desk and get one. Feel free to tell me 
+all the mistakes I made too.
 					</aside>
 				</section>
 
