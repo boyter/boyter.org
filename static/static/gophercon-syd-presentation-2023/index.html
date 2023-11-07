@@ -43,8 +43,7 @@
 
 				<section>
 					<h2>PHP -> Python -> Java -> Go</h2>
-					<img src="./img/sphinx_logo.png" style="border: none;" />
-					<img src="./img/manticore_logo.svg" style="border: none;" />
+					<img src="./img/sphinx_manticore.png" style="border: none;" />
 					<img src="./img/searchcode.gif" height="500px;" style="border: none;" />
 					<aside class="notes">
 So I run searchcode.com which as the un-imaginative name would suggest searches over source code. 
@@ -211,8 +210,7 @@ Consider yourself nerd sniped
 					<section>
 						<h2>What is an index?</h2>
 						<p>Structured list. Keys point at data so searches are faster.</p>
-						<p>Which documents contain the term?</p>
-						<p>So how are we going to build one? Textbook 101 style?</p>
+						<p>Which documents contain the term? So string to list of integers.</p>
 					</section>
 					<section>
 						<h2>Textbook 101 index</h2>
@@ -270,7 +268,6 @@ They are an interesting data structure worth looking up on wikipedia. When you s
 						<ul>
 							<li>Trigrams create LONG posting lists</li>
 							<li>Need to implement skip lists or compression on the posting lists at scale</li>
-							<li>Supports a positional index</li>
 						</ul>
 
 						<aside class="notes">
@@ -279,7 +276,7 @@ They are an interesting data structure worth looking up on wikipedia. When you s
 					<section>
 						<h2>Problem 2</h2>
 						<h3>Compression</h3>
-						<p>Elias Fano</p>
+						<pre><code style="font-size: 14px; line-height: 1em;">index := map[string][]int{} // this should be compressible right?</code></pre>
 						<img src="./img/elias_fano.png" style="border: none;" />
 						<aside class="notes">
 Elias Fano compression is a technique used to compress a sorted list of integers, primarily in the context 
@@ -289,7 +286,7 @@ of sorted lists, where the integers are typically increasing.
 					</section>
 					<section>
 						<h2>Complexity</h2>
-						<pre><code style="font-size: 16px; line-height: 1em;">index := map[string][]int{}    // non-positional index
+						<pre><code style="font-size: 16px; line-height: 1em;">index := map[string][]int{} // non-positional index
 </code></pre>
 <p>vs</p>
 						<img src="./img/complex.png" style="border: none;" />
@@ -308,7 +305,7 @@ Trust me you don't want me writing algorithms like this.
 					</section>
 				</section>
 
-				<section>
+				<!--<section>
 					<h2>Trie</h2>
 					<p>Typesense uses this, its also written in C++</p>
 <img src="./img/trie.png" height="100px" style="border: none;" />
@@ -326,7 +323,7 @@ I could have possibly done off heap tricks but I wanted to stick to normal Go be
 
 So what about bitslice signatures?
 					</aside>
-				</section>
+				</section>-->
 
 				<section>
 					<section>
@@ -354,14 +351,96 @@ the existance of "java" and it hashes to bit position 0 I would assume it was ad
 For hashing you can use any hash that returns an integer. FNV and FNVa work well for this being fast enough and providing enough distribution. Murmur3 is meant to be good. Note for multiple hashes you can salt the values to reuse hash functions.
 						</aside>
 					</section>
+
 					<section>
-						<h2>Bloom filter: false positive</h2>
-					
-						<p>TODO: Display how you create bloom filter search here</p>
+						<h2>Bloom filter: Empty</h2>
+	<img src="./img/BloomFilter1.png" style="border: none;" />
+						<aside class="notes">
+						</aside>
+					</section>
+					<section>
+						<h2>Bloom filter: Add</h2>
+	<img src="./img/BloomFilter2.png" style="border: none;" />
+						<aside class="notes">
+						</aside>
+					</section>
+					<section>
+						<h2>Bloom filter: Add second</h2>
+	<img src="./img/BloomFilter3.png" style="border: none;" />
+						<aside class="notes">
+						</aside>
+					</section>
+					<section>
+						<h2>Bloom filter: Add overlapping bit</h2>
+	<img src="./img/BloomFilter4.png" style="border: none;" />
+						<aside class="notes">
+						</aside>
+					</section>
+					<section>
+						<h2>Bloom filter: Hit</h2>
+	<img src="./img/BloomFilter5.png" style="border: none;" />
+						<aside class="notes">
+						</aside>
+					</section>
+					<section>
+						<h2>Bloom filter: Miss</h2>
+	<img src="./img/BloomFilter7.png" style="border: none;" />
+						<aside class="notes">
+						</aside>
+					</section>
+					<section>
+						<h2>Bloom filter: False Positive</h2>
+	<img src="./img/BloomFilter6.png" style="border: none;" />
+						<aside class="notes">
+						</aside>
+					</section>
+
+					<section>
+						<h2>Go Bloom Filter</h2>
+
+<pre><code style="font-size: 14px; line-height: 1em;">package main
+
+import (
+	"fmt"
+	"hash/fnv"
+)
+
+func main() {
+	bloom := make([]bool, 16) // 16 bit bloom filter
+	hash := func(term string) uint64 { // hash function for bloom filter
+		hsh := fnv.New64()
+		_, _ = hsh.Write([]byte(term))
+		return hsh.Sum64() % uint64(len(bloom))
+	}
+
+	bloom[hash("gopher")] = true // add to the filter
+	bloom[hash("sydney")] = true
+
+	for _, i := range bloom { // print out the filter
+		if i == true {
+			fmt.Print("1")
+		} else {
+			fmt.Print("0")
+		}
+	}
+
+	if bloom[hash("sydney")] == true { fmt.Print("\nprobably added") }
+	if bloom[hash("house")] == false { fmt.Print("\nwas not added") }
+	if bloom[hash("boyter")] == true { fmt.Print("\nfalse positive! was never added!") }
+}
+</code></pre>
+
+<pre><code style="font-size: 14px; line-height: 1em;">$ go run main.go 
+0010000001000000
+probably added
+was not added
+false positive! was never added!
+</code></pre>
 
 						<aside class="notes">
 						</aside>
 					</section>
+
 					<section>
 						<h2>Bloom filter: search</h2>
 					
@@ -427,9 +506,11 @@ $ go run main.go
 0 MB
 95 MB</code></pre>
 						<aside class="notes">
-So a few problems with this approach.
+So there a few problems with this approach.
 
-How much memory do 100 million bools take up? Almost 100MB which if you calculate is about 8x what you expect.
+Firstly.
+
+How much memory do 100 million bools take up? Almost 100 MB which if you calculate is about 8x what you expect.
 
 Problem is that each "bit" in this uses 1 byte under the hood since they are all addressable.
 Note this isnt a problem with Go it occurs in most languages.
@@ -440,33 +521,36 @@ Note this isnt a problem with Go it occurs in most languages.
 						<img src="./img/ram.jpg" style="border: none;" />
 						<aside class="notes">
 Another problem is that is that its slow... This comes down to how fetching bits out of 
-memory using the CPU works. The slow part is not the & logic you use, but memory walking.
+memory using the CPU works.
 
-When you probe a single bit on any system you actually pull back 512 bits from RAM. This is because usually a 
-full cache line is read, which is 512 bits or 64 bytes. A 512x overhead just to test a single bit! 
+When you probe a single bit on most modern sysems you actually pull back 512 bits from RAM. This is because usually a 
+full cache line is read, which is 512 bits or 64 bytes. So a 512x overhead just to test a single bit! 
 
-As a result on average you end up walking ALL the memory for your filter.
+As a result on average you end up walking ALL the memory for your filter, depending on which bits your proble.
 
-If you have a index thats 100 GB in size, using a modern CPU its going to take ~2 seconds to walk all that memory, and thats irespective of how many cores you have. You become memory bound.
-
-This is one one of the reasons this as an approach fell out of favor in the 70's.
-
-This is because memory is accessed and transferred in chunks, not at the level of individual bits.
-CPU's are very smart, and tend to assume if you accessed 1 bit somewhere you are likely to need the next one
-
+This is one one of the reasons this as an approach fell out of favor in the 70's, because in practice
+you do end up walking all the addressable memory.
 						</aside>
 					</section>
 					<section>
 						<h2>Problem 2</h2>
 						TODO PICTURE OF RAM HERE
 						<aside class="notes">
-So for bloom filters this is a huge problem, because if you have a proper hash function you get a distribution that means you end up walking all the memory... which sounds fine
+So for bloom filters this is a huge problem, because if you have a proper hash function you get a 
+distribution that means you end up walking all the memory... which sounds fine.
+
 Till you realise modern CPU's arent as fast as you would think for memory,
-Theoretical bandwidth for CPU's is something like 100 GB's
+
+Theoretical bandwidth for CPU's is something like 100 GB/s
+
 In theory theory and practice are the same, in practice they are not, you don't see
+
 So if you had an index taking 100 GB in memory your theoretical request per second is 1
-In reality is much lower because of overheads, where you are more likley to get less than 50 GB's
-So if you have say 2000 bits in your bloom filter, and you check say 6 bits which would be 3 of our trigrams you are actually likely to pull all of the 2000 bits across the cpu						</aside>
+
+In reality is much lower because of overheads, where you are more likely to get less than 50 GB/s
+
+So if you have say 2048 bits in your bloom filter, and you probe 6 bits or so 3 trigrams you are likely to 
+pull all of the 2048 bits across the CPU						</aside>
 					</section>
 				</section>
 
@@ -478,7 +562,8 @@ So if you have say 2000 bits in your bloom filter, and you check say 6 bits whic
 							<h2>Fixes</h2>
 							<img src="./img/rotate.gif" style="border: none;" />
 							<aside class="notes">
-However in the 80's a smart person called Roberts noticed you could rotate the filter, assuming each filter had the same number of bits.
+However in the 80's a smart person called Roberts noticed you could rotate the filter, 
+assuming each filter has the same exact size, IE the same number of bits.
 
 So we do that by turning the rows into columns. So each row used to represent a document, but now each column does. Right to left.
 
