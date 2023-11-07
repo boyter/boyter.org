@@ -79,7 +79,7 @@ using my own index. So after the early in 2020, I decided I would build my own i
 						</li>
 						<li>Boolean queries</li>
  						<li>Single developer</li>
-						<li>This is how I built an index... not nessecarrily how you should!</li>
+						<li>This is how I built an index... not necessarily how you should build one!</li>
 					</ul>
 					<aside class="notes">
 					Design Considerations
@@ -444,16 +444,19 @@ false positive! was never added!
 					<section>
 						<h2>Bloom filter: search</h2>
 					
-						<p>Multiple bloom filters, in this case 4</p>
+						<p>Multiple bloom filters, in this case 4. Searching bit positions 1 and 7.</p>
+						<pre><code style="font-size: 14px; line-height: 1em;">for each bloomfilter
+	for each bit
+		check if bit location in filter is set
+	if all matching bits are set
+		record possible match</code></pre>
+
 						<img src="./img/bloom_naieve_search.gif" style="border: none;" />
 
 						<aside class="notes">
 	So how to search over out bloom filter index? This represents 4 documents in our index. All indexed using an 8 bit bloom filter. We took in documents, turned them into trigrams, got the hash positions and set the bit.
 	So now we search...
 						</aside>
-					</section>
-					<section>
-						<img src="./img/bloomfilter_match.png" style="border: none;" />
 					</section>
 				</section>
 
@@ -476,8 +479,15 @@ BTW this is one of the things you need to do at a large enough scale to get the 
 					<section>
 						<h2>Advantages</h2>
 						<ul>
-							<li>Compressed only uses several bits per term</li>
-							<li>Very simple!!!!</li>
+							<li>Compressed. Only using several bits per term</li>
+							<li>Very simple!!!!
+							<ul>
+							<li>Adding</li>
+							<li>Editing</li>
+							<li>Searching</li>
+							<li>Extensible</li>
+							</ul>
+							</li>
 						</ul>
 						<aside class="notes">
 Bloom filters have a lot going for them. They are compressed by nature, getting down to 9 bits per term 
@@ -516,7 +526,7 @@ So there a few problems with this approach.
 
 Firstly.
 
-How much memory do 100 million bools take up? Almost 100 MB which if you calculate is about 8x what you expect.
+How much memory does 100 million bools take up? Almost 100 MB which if you calculate is about 8x what you expect.
 
 Problem is that each "bit" in this uses 1 byte under the hood since they are all addressable.
 Note this isnt a problem with Go it occurs in most languages.
@@ -541,7 +551,7 @@ you do end up walking all the addressable memory.
 					</section>
 					<section>
 						<h2>Problem 2</h2>
-						TODO PICTURE OF RAM HERE
+						TODO picture illustrating the issue here
 						<aside class="notes">
 So for bloom filters this is a huge problem, because if you have a proper hash function you get a 
 distribution that means you end up walking all the memory... which sounds fine.
@@ -566,7 +576,22 @@ pull all of the 2048 bits across the CPU						</aside>
 
 				<section>
 					<section>
+						<h2>Bitfunnel</h2>
+						<p>Good enough for Dan Luu? Good enough for you.</p>
+						<img src="./img/bitfunnel.png" style="border: none;" />
+						<aside class="notes">
+Bing paper - BitFunnel: Revisiting Signatures for Search
+Dan Luu is a co-author. Anything he writes I pay attention to.
+Good enough for Dan Luu, Good enough for you.
+
+Supposedly at this point it powers every query thats comes into Bing.
+
+It did win best paper at SIGIR, which is probably the most prestigious IR conferences.
+						</aside>
+					</section>
+					<section>
 							<h2>Fixes</h2>
+							<p>Rotate the filter. Documents now on columns not rows.</p>
 							<img src="./img/rotate.gif" style="border: none;" />
 							<aside class="notes">
 However in the 80's a smart person called Roberts noticed you could rotate the filter, 
@@ -574,7 +599,8 @@ assuming each filter has the same exact size, IE the same number of bits.
 
 So we do that by turning the rows into columns. So each row used to represent a document, but now each column does. Right to left.
 
-With this done we only need to inspect the rows containing the bit positions of the query. So in this case 2 rows which is half the memory access.
+With this done we only need to inspect the rows containing the bit positions of the query. 
+So in this case 2 rows which is half the memory access.
 
 We can then using out examples just row query bit positions 0 and 6 and then logically & them together. If they arent 0 then we have a positional match.
 
@@ -593,22 +619,28 @@ We can then using out examples just row query bit positions 0 and 6 and then log
 						<img src="./img/rotated_bloomfilter_2.png" style="border: none;" />
 						<aside class="notes">
 	Logically we & together 1010 and 1000 and we get that document 4 on the left is portentially a match
-	This reduces the amount of RAM we need to access by factor of about 200 for larger bloom filters.</aside>
+	</aside>
 					</section>
-				</section>
 
-				
-				
-				<section>
+					<section>
+						<h2>Results?</h2>
+						<p>This reduces the amount of RAM we need to access by factor of about 200 for larger bloom filters.</p>
+						<aside class="notes"></aside>
+					</section>
+
+					<section>
 						<h2>Pack the bits with bit set</h2>
+						<p>Use int64's to hold the filters in columns, and flip bits starting right to left.</p>
 <pre><code style="font-size: 14px; line-height: 1em;">var bloomFilter []uint64
-var BloomSize = 2048
+var bloomSize = 16
+var currentBlockDocumentCount = 0
+var currentBlockStartDocumentCount = 0
 
 func Add(item []bool) error {
-	if currentBlockDocumentCount == 0 || currentBlockDocumentCount == DocumentsPerBlock {
-		bloomFilter = append(bloomFilter, make([]uint64, BloomSize)...)
+	if currentBlockDocumentCount == 0 || currentBlockDocumentCount == 64 {
+		bloomFilter = append(bloomFilter, make([]uint64, bloomSize)...)
 		currentBlockDocumentCount = 0
-		currentBlockStartDocumentCount += BloomSize
+		currentBlockStartDocumentCount += bloomSize
 	}
 
 	for i, bit := range item {
@@ -627,85 +659,105 @@ func Add(item []bool) error {
 					
 What this does is takes in boolean slice, then checks if we need to add a new 
 block IE another batch of 64 documents, and then loops over the input setting the correct bits in the correct position.</aside>
-				</section>
+					</section>
 
 
 
-				<section>
-					<h2>Optimise</h2>
-					<h2>line 187: caisson.go</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">1001010000001111000001111001101110100011111111111111111111111101
-0110111101101010111111111001001101110000000000010000100000000000
-0000000000001000000000000000000000000000000000000000000000000000
-0000000000001001000010110000001000100011111100000000000000000000
-1000011100000000000010000001001000100000000000000000000000000000
-0111011100000100000011110001000011000000000000000000000000000000
-0001000000001000000010000001000100000000000000000000000000000000
-0000001000001010101000010000001000001000000000000001000000000000
-0100000000001011000000000100001000111100000000000000000000000000
-0000001000011011001000001010100100100001111100000001010101011110
-0001011100000100000001000101101110000010000010001010101010100011
-0000101000000001000001000001000001011000000000000000000000000000
-1111111111111111111111011011111101101011111111111111111111111111
-0000000000001000001000010000000000110000001000000001100000001000
-0000000000001000001010010000000010100010000111111110101010100001
-0000000000001000000000010000011001100011111100000000000000000000
+
+					<section>
+						<h2>Result</h2>
+						<p>16 bit bloom filter, with 32 documents added. Less wasted space.</p>
+<pre><code style="font-size: 14px; line-height: 1em;">0000000000000000000000000000000010100011111111111111111111111101
+0000000000000000000000000000000001110000000000010000100000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000100011111100000000000000000000
+0000000000000000000000000000000000100000000000000000000000000000
+0000000000000000000000000000000011000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000001000000000000001000000000000
+0000000000000000000000000000000000111100000000000000000000000000
+0000000000000000000000000000000000100001111100000001010101011110
+0000000000000000000000000000000010000010000010001010101010100011
+0000000000000000000000000000000001011000000000000000000000000000
+0000000000000000000000000000000001101011111111111111111111111111
+0000000000000000000000000000000000110000001000000001100000001000
+0000000000000000000000000000000010100010000111111110101010100001
+0000000000000000000000000000000001100011111100000000000000000000
 </code></pre>
-					<aside class="notes">
-					
-This is done so as to not waste memory. In the code its done by packing 64 documents into a bloom filter block or bucket. 
+						<aside class="notes">
+						
+	This is done so as to not waste memory. In the code its done by packing 64 documents into a bloom filter block or bucket. 
 
-So if a bloom filter had 16 bits, we keep 16 uint64's in a slice.
+	So if a bloom filter had 16 bits, we keep 16 int64's in a slice.
 
-It would look like what you see, and you can print it out if you modify the code.
-This ensures we are optimally using the space. Because we pack 64 documents into each bucket we end up using a single bit per location in the bloom filter. No 8x waste!
+	It would look like what you see, and you can print it out if you modify the code.
+	This ensures we are optimally using the space. Because we pack 64 documents into each 
+	bucket we end up using a single bit per location in the bloom filter. No 8x waste!
 
-It also becomes very fast to walk this because its a simple for loop. And we all know for loops go brrrr.
-</aside>
-				</section>
-
-				<section>
-					<h2>searchcode...</h2>
+	It also becomes very fast to walk this because its a simple for loop. And we all know for loops go brrrr.
+	</aside>
+					</section>
+			
+					<section>
+						<h2>Sharding</h2>
+						<p>Result? Very little wasted space. Squeeze every bit.</p>
 <pre><code style="font-size: 14px; line-height: 1em;">
 ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
-│     caisson      ├─┬▶│  shard 512 bits  ├┬─▶│     bucket-1     │
+│     caisson      ├─┬▶│  shard 512 bits  ├┬─▶│ bucket-1 64 docs │
 └──────────────────┘ │ └──────────────────┘│  └──────────────────┘
                      │                     │                      
                      │                     │  ┌──────────────────┐
-                     │                     ├─▶│     bucket-2     │
+                     │                     ├─▶│ bucket-2 64 docs │
                      │                     │  └──────────────────┘
                      │                     │                      
                      │                     │  ┌──────────────────┐
-                     │                     └─▶│     bucket-3     │
+                     │                     └─▶│ bucket-3 64 docs │
                      │                        └──────────────────┘
                      │                                            
                      │                                            
                      │ ┌──────────────────┐   ┌──────────────────┐
-                     └▶│  shard 1024 bits ├┬─▶│     bucket-1     │
+                     └▶│  shard 1024 bits ├┬─▶│ bucket-1 64 docs │
                        └──────────────────┘│  └──────────────────┘
                                            │                      
                                            │  ┌──────────────────┐
-                                           ├─▶│     bucket-2     │
-                                           │  └──────────────────┘
-                                           │                      
-                                           │  ┌──────────────────┐
-                                           └─▶│     bucket-3     │
+                                           └─▶│ bucket-2 64 docs │
                                               └──────────────────┘
 </code></pre>
-					<aside class="notes">In searchcode its a little more in depth because it actually changes the size of the bloom filters based on the size of the document its indexing.
+						<aside class="notes">
+	In searchcode its a little more in depth because it actually changes the size of the bloom filters 
+	based on the size of the document its indexing. Note I re
 
-What happens is when a document is indexed, it breaks it into unique trigrams, and then finds a bloom filter where it will be stored with a target bit density. If the document has a small amount of trigrams it ends up in a smaller bloom filter of say 256 bits, and if larger it goes into a larger one up to 4096.
+	What happens is when a document is indexed, it breaks it into unique trigrams, and then finds a 
+	bloom filter where it will be stored with a target bit density. If the document has a small amount 
+	of trigrams it ends up in a smaller bloom filter of say 256 bits, and if larger it goes into a 
+	larger one. This is done to avoid over filling the filters, which drives up the false positive rate,
+	or under filling them and wasting memory.
 
-When the full 64 documents have been added to a bucket then in the case of a 256 bit bloom filter another 256 uint64's are appended on the end.
+	When the full 64 documents have been added to a bucket then in the case of a 512 bit bloom filter another 512 
+	int64's are appended on the end, and then those are filled right to left.
 
-Where shards represent a different bloom filter size, say 512 of 2048 bits, and buckets exist as a single uint64 slice in a shard. They are split out logiclly here to help understanding.
-					</aside>
+	Where shards represent a different bloom filter size, say 512 of 2048 bits, and buckets exist as a 
+	single uint64 slice in a shard. They are split out logically here to help understanding.
+						</aside>
+					</section>
+					<section>
+						<h2>Copy the shards after indexing</h2>
+						<p>Result? Less fragmented memory, faster search.</p>
+<pre><code style="font-size: 14px; line-height: 1em;">
+bloomFilter = append(ci.bloomFilter, make([]int64, 512)...)
+
+// attempt to save memory shrink lists... https://go.dev/blog/slices-intro#TOC_6
+out := make([]int64, len(bloomFilter))
+copy(out, bloomFilter)
+bloomFilter = out
+</code></pre>
+					</section>
 				</section>
-
 
 				<section>
 					<section>
-						<h2>Searching</h2>
+						<h2>Searching: Done per shard</h2>
+						<p>I find this algorithm beautiful</p>
 <pre><code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []int {
 	var results []int
 	var res uint64
@@ -735,23 +787,23 @@ Where shards represent a different bloom filter size, say 512 of 2048 bits, and 
 }
 </code></pre>
 						<aside class="notes">
-	With the index done we can now search.
-						
-	The core search algorithm is as follows. 
+With the index done we can now search.
+					
+The core search algorithm is as follows. 
 
-	I find this algorithm beautifully simple. We take in query positions for the search, so in the case of searching for "searchcode" we turn that into trigrams
-	then hash them using the same hash functions to get 6+ uint64's from 0 to whatever the filter is configured to be in a slice.
+I find this algorithm beautifully simple. We take in query positions for the search, so in the case of searching for "searchcode" we turn that into trigrams
+then hash them using the same hash functions to get 6+ uint64's from 0 to whatever the filter is configured to be in a slice.
 
-	Then, walk over each logical block or bucket, which is as many uint64's as exist in the bloom filter, and then logically & that against the previous one. 
-	If its 0 bail out, otherwise if we have finished record the documentid based on what its position in the index is.
+Then, walk over each logical block or bucket, which is as many uint64's as exist in the bloom filter, and then logically & that against the previous one. 
+If its 0 bail out, otherwise if we have finished record the documentid based on what its position in the index is.
 
 
-	Whats really cool about this is that we jump potentially all of the bytes in a block if we hit that res == 0 condition quickly, avoiding us walking any memory at all! This is the state we want
-	to hit as often as possible.
+Whats really cool about this is that we jump potentially all of the bytes in a block if we hit that res == 0 condition quickly, avoiding us walking any memory at all! This is the state we want
+to hit as often as possible.
 
-	Results when returned gives ids, which we can then use the idToFile to find the true id for this document. 
+Results when returned gives ids, which we can then use the idToFile to find the true id for this document. 
 
-	Once we have these id its a matter of reaching out to our primary data store, pulling back the documents and processing from there.
+Once we have these id its a matter of reaching out to our primary data store, pulling back the documents and processing from there.
 	</aside>
 					</section>
 					<section>
