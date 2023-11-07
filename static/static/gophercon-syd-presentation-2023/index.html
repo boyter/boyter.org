@@ -481,12 +481,12 @@ BTW this is one of the things you need to do at a large enough scale to get the 
 						<ul>
 							<li>Compressed. Only using several bits per term</li>
 							<li>Very simple!!!!
-							<ul>
-							<li>Adding</li>
-							<li>Editing</li>
-							<li>Searching</li>
-							<li>Extensible</li>
-							</ul>
+								<ul>
+								<li>Adding</li>
+								<li>Editing</li>
+								<li>Searching</li>
+								<li>Extensible</li>
+								</ul>
 							</li>
 						</ul>
 						<aside class="notes">
@@ -813,6 +813,7 @@ Once we have these id its a matter of reaching out to our primary data store, pu
 						<p>Rare terms need more hashes to reduce false positive rate</p>
 
 <pre><code style="font-size: 14px; line-height: 1em;">func (ci *CaissonIndex) DetermineHashCount(ngram string) int {
+	// version 0.1
 	// if nothing that indicates its a very rare term so it needs the most hashes
 	// so set that up as the default
 	hashCount := 5
@@ -845,6 +846,24 @@ Once we have these id its a matter of reaching out to our primary data store, pu
 	return 2
 }
 </code></pre>
+					</section>
+
+					<section>
+						<h2>Restrict Parallelism</h2>
+						<p>Parallelism works... if you have CPU to spare</p>
+<pre><code style="font-size: 14px; line-height: 1em;">var sem = make(chan bool, 5) // counting semaphore
+
+func doSearch() { // only 5 instances of this function can run
+	sem <- true
+		defer func() {
+		<- sem
+	}()
+
+	// Do CPU/Memory intensive stuff here
+}
+</code></pre>
+						<aside class="notes">
+						</aside>
 					</section>
 
 					<section>
