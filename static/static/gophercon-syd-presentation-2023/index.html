@@ -406,8 +406,8 @@ import (
 )
 
 func main() {
-	bloom := make([]bool, 16) // 16 bit bloom filter
-	hash := func(term string) uint64 { // hash function for bloom filter
+	bloom := make([]bool, 16)          // 16 bit bloom filter
+	hash := func(term string) uint64 { // single hash function for bloom filter
 		hsh := fnv.New64()
 		_, _ = hsh.Write([]byte(term))
 		return hsh.Sum64() % uint64(len(bloom))
@@ -444,6 +444,7 @@ false positive! was never added!
 					<section>
 						<h2>Bloom filter: search</h2>
 					
+						<p>Multiple bloom filters, in this case 4</p>
 						<img src="./img/bloom_naieve_search.gif" style="border: none;" />
 
 						<aside class="notes">
@@ -457,7 +458,7 @@ false positive! was never added!
 				</section>
 
 
-				<section>
+				<!--<section>
 						<h2>Frequency Concious Bloom Filter</h2>
 
 					<aside class="notes">So hashing... While you can has terms a single time in a bloom filter, it turns out that you can reduce the false positive rate by having multiple hashes. If you do this dependant on the term input you end up with a Frequency Conscious Bloom Filter.
@@ -469,19 +470,24 @@ To get the frequency for searchcode I just calculated the hash counts for every 
 Its left as an exercise to yourselves to implement this, as I just hardcoded it to 3 hashes here.
 
 BTW this is one of the things you need to do at a large enough scale to get the performence you need and is something I put into searchcode.</aside>
-				</section>
+				</section>-->
 
 				<section>
 					<section>
 						<h2>Advantages</h2>
 						<ul>
-							<li>Compressed</li>
+							<li>Compressed only uses several bits per term</li>
 							<li>Very simple!!!!</li>
 						</ul>
-						<aside class="notes">Bloom filters have a lot going for them. They are compressed by nature, getting down to 9 bits per term added if you do them right. They are also really simple to implement. Note there are other filters like this, such as ribbon or xor, but as far as I know you cannot use them in the way I do here.</aside>
+						<aside class="notes">
+Bloom filters have a lot going for them. They are compressed by nature, getting down to 9 bits per term 
+added if you do them right. They are also really simple to implement. 
+Note there are other filters like this, such as ribbon or xor, but as far as I know you cannot 
+use them in the way I do here.</aside>
 					</section>
 					<section>
-						<h2>Problem</h2>
+						<h2>Problems</h2>
+						<p>No free lunch...</p>
 <pre><code style="font-size: 14px; line-height: 1em;">package main
 			
 import (
@@ -518,6 +524,7 @@ Note this isnt a problem with Go it occurs in most languages.
 					</section>
 					<section>
 						<h2>Problem 2</h2>
+						<p>Generic DDR5 RAM stick</p>
 						<img src="./img/ram.jpg" style="border: none;" />
 						<aside class="notes">
 Another problem is that is that its slow... This comes down to how fetching bits out of 
