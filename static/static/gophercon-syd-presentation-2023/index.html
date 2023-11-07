@@ -700,6 +700,7 @@ block IE another batch of 64 documents, and then loops over the input setting th
 			
 					<section>
 						<h2>Sharding</h2>
+						<p>Shard based on the length of the document we want to index.</p>
 						<p>Result? Very little wasted space. Squeeze every bit.</p>
 <pre><code style="font-size: 14px; line-height: 1em;">
 ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
@@ -743,21 +744,17 @@ block IE another batch of 64 documents, and then loops over the input setting th
 					<section>
 						<h2>Copy the shards after indexing</h2>
 						<p>Result? Less fragmented memory, faster search.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">
-bloomFilter = append(ci.bloomFilter, make([]int64, 512)...)
+<pre><code style="font-size: 14px; line-height: 1em;">bloomFilter = append(ci.bloomFilter, make([]int64, 512)...)
 
-// attempt to save memory shrink lists... https://go.dev/blog/slices-intro#TOC_6
+// attempt to save/organise memory shrink lists... https://go.dev/blog/slices-intro#TOC_6
 out := make([]int64, len(bloomFilter))
 copy(out, bloomFilter)
 bloomFilter = out
 </code></pre>
 					</section>
-				</section>
-
-				<section>
 					<section>
 						<h2>Searching: Done per shard</h2>
-						<p>I find this algorithm beautiful</p>
+						<p>I find this algorithm beautiful.</p>
 <pre><code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []int {
 	var results []int
 	var res uint64
@@ -809,6 +806,51 @@ Once we have these id its a matter of reaching out to our primary data store, pu
 					<section>
 						<h2>Searching</h2>
 						TODO animation of search across memory here
+					</section>
+
+					<section>
+						<h2>Frequency Concious Bloom Filter</h2>
+						<p>Rare terms need more hashes to reduce false positive rate</p>
+
+<pre><code style="font-size: 14px; line-height: 1em;">func (ci *CaissonIndex) DetermineHashCount(ngram string) int {
+	// if nothing that indicates its a very rare term so it needs the most hashes
+	// so set that up as the default
+	hashCount := 5
+
+	v, ok := ci.termTreatments[ngram]
+	if ok {
+		weight := float64(v) / float64(ci.highestTermCount) * 100
+
+		if weight >= 5 {
+			hashCount = 1
+		} else if weight >= 2.5 {
+			hashCount = 2
+		} else if weight >= 5 {
+			hashCount = 3
+		} else if weight >= 10 {
+			hashCount = 4
+		}
+	}
+
+	return hashCount
+}
+</code></pre>
+					</section>
+
+					<section>
+						<h2>Result?</h2>
+						<p>Wasted time...</p>
+						<p>New algorithm is mind blowing.</p>
+<pre><code style="font-size: 14px; line-height: 1em;">func (ci *CaissonIndex) DetermineHashCount(ngram string) int {
+	return 2
+}
+</code></pre>
+					</section>
+
+					<section>
+						<h2>Grand Total Result?</h2>
+						<p>Rolling average index search time: ~50ms</p>
+						<img src="./img/searchtime.png" style="border: none;" />
 					</section>
 				</section>
 					
