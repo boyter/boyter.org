@@ -234,9 +234,8 @@ func main() {
 	posIndex["gopher"] = append(posIndex["gopher"], pos{1337, []int{1,2,3,99}})
 }</code></pre>
 						<ul>
-							<li>Posting lists</li>
 							<li>Need to implement skip lists or compression on the posting lists at scale</li>
-							<li>Supports a positional index</li>
+							<li>Supports positional index</li>
 						</ul>
 
 						<aside class="notes">
@@ -264,7 +263,7 @@ They are an interesting data structure worth looking up on wikipedia. When you s
 					<section>
 						<h2>Problem</h2>
 						<p>Intersect two lists</p>
-						<img src="./img/assvogel.gif" style="border: none;" />
+						<img src="./img/assvogel.gif" height="500px;" style="border: none;" />
 						<ul>
 							<li>Trigrams create LONG posting lists</li>
 							<li>Need to implement skip lists or compression on the posting lists at scale</li>
@@ -290,6 +289,16 @@ of sorted lists, where the integers are typically increasing.
 </code></pre>
 <p>vs</p>
 						<img src="./img/complex.png" style="border: none;" />
+						<aside class="notes">
+This is clearly a lot more complex than what we started with. Certainly more than I am willing to deal with.
+
+Trust me you don't want me writing algorithms like this.
+						</aside>
+					</section>
+					<section>
+						<h2>My attempt</h2>
+						<p>Two turkeys taped together... cannot fly.</p>
+						<img src="./img/turkeys.jpg"  height="500px;" style="border: none;" />
 						<aside class="notes">
 This is clearly a lot more complex than what we started with. Certainly more than I am willing to deal with.
 
@@ -327,9 +336,13 @@ So what about bitslice signatures?
 
 				<section>
 					<section>
-						<h2>Bloom filter 101</h2>
-	<img src="./img/bloom_example.png" style="border: none;" />
-						
+						<h2>How about bloom filters?</h2>
+						<p>Whats a bloom filter?</p>
+					</section>
+					<section>
+						<h2>Bloom filter: Empty</h2>
+						<p>16 boolean's in an array</p>
+	<img src="./img/BloomFilter1.png" style="border: none;" />
 						<aside class="notes">
 Bitslice signatures are built on bloom filters. So whats a bloom filter?
 
@@ -349,47 +362,47 @@ The lie part comes from the hash function, where it might hash to position 0. So
 the existance of "java" and it hashes to bit position 0 I would assume it was added. This is a false positive.
 
 For hashing you can use any hash that returns an integer. FNV and FNVa work well for this being fast enough and providing enough distribution. Murmur3 is meant to be good. Note for multiple hashes you can salt the values to reuse hash functions.
-						</aside>
-					</section>
 
-					<section>
-						<h2>Bloom filter: Empty</h2>
-	<img src="./img/BloomFilter1.png" style="border: none;" />
-						<aside class="notes">
 						</aside>
 					</section>
 					<section>
 						<h2>Bloom filter: Add</h2>
+						<p>Hash the term 3 times and set the bits</p>
 	<img src="./img/BloomFilter2.png" style="border: none;" />
 						<aside class="notes">
 						</aside>
 					</section>
 					<section>
 						<h2>Bloom filter: Add second</h2>
+						<p>3 more bits set</p>
 	<img src="./img/BloomFilter3.png" style="border: none;" />
 						<aside class="notes">
 						</aside>
 					</section>
 					<section>
-						<h2>Bloom filter: Add overlapping bit</h2>
+						<h2>Bloom filter: Add overlapping bits</h2>
+						<p>"big" and "dog" share 2 bits</p>
 	<img src="./img/BloomFilter4.png" style="border: none;" />
 						<aside class="notes">
 						</aside>
 					</section>
 					<section>
 						<h2>Bloom filter: Hit</h2>
+						<p>hash "big" and check bits</p>
 	<img src="./img/BloomFilter5.png" style="border: none;" />
 						<aside class="notes">
 						</aside>
 					</section>
 					<section>
 						<h2>Bloom filter: Miss</h2>
+						<p>one bit position is 0 so miss</p>
 	<img src="./img/BloomFilter7.png" style="border: none;" />
 						<aside class="notes">
 						</aside>
 					</section>
 					<section>
 						<h2>Bloom filter: False Positive</h2>
+						<p>big and yellow supplied bits</p>
 	<img src="./img/BloomFilter6.png" style="border: none;" />
 						<aside class="notes">
 						</aside>
@@ -444,14 +457,14 @@ false positive! was never added!
 					<section>
 						<h2>Bloom filter: search</h2>
 					
-						<p>Multiple bloom filters, in this case 4. Searching bit positions 1 and 7.</p>
+						<p>Check bit positions 1 and 7. Document 4 matches.</p>
 						<pre><code style="font-size: 14px; line-height: 1em;">for each bloomfilter
 	for each bit
 		check if bit location in filter is set
 	if all matching bits are set
 		record possible match</code></pre>
 
-						<img src="./img/bloom_naieve_search.gif" style="border: none;" />
+						<img src="./img/bloom_naieve_search.gif" height="500px" style="border: none;" />
 
 						<aside class="notes">
 	So how to search over out bloom filter index? This represents 4 documents in our index. All indexed using an 8 bit bloom filter. We took in documents, turned them into trigrams, got the hash positions and set the bit.
@@ -535,7 +548,7 @@ Note this isnt a problem with Go it occurs in most languages.
 					<section>
 						<h2>Problem 2</h2>
 						<p>Generic DDR5 RAM stick</p>
-						<img src="./img/ram.jpg" style="border: none;" />
+						<img src="./img/ram.jpg" height="500px" style="border: none;" />
 						<aside class="notes">
 Another problem is that is that its slow... This comes down to how fetching bits out of 
 memory using the CPU works.
@@ -551,7 +564,47 @@ you do end up walking all the addressable memory.
 					</section>
 					<section>
 						<h2>Problem 2</h2>
-						TODO picture illustrating the issue here
+						<img src="./img/2048_bloom.png" height="500px" style="border: none;" />
+						<aside class="notes">
+So for bloom filters this is a huge problem, because if you have a proper hash function you get a 
+distribution that means you end up walking all the memory... which sounds fine.
+
+Till you realise modern CPU's arent as fast as you would think for memory,
+
+Theoretical bandwidth for CPU's is something like 100 GB/s
+
+In theory theory and practice are the same, in practice they are not, you don't see
+
+So if you had an index taking 100 GB in memory your theoretical request per second is 1
+
+In reality is much lower because of overheads, where you are more likely to get less than 50 GB/s
+
+So if you have say 2048 bits in your bloom filter, and you probe 6 bits or so 3 trigrams you are likely to 
+pull all of the 2048 bits across the CPU						</aside>
+					</section>
+					<section>
+						<h2>Problem 2</h2>
+						<img src="./img/2048_bloom_2.png" height="500px" style="border: none;" />
+						<aside class="notes">
+So for bloom filters this is a huge problem, because if you have a proper hash function you get a 
+distribution that means you end up walking all the memory... which sounds fine.
+
+Till you realise modern CPU's arent as fast as you would think for memory,
+
+Theoretical bandwidth for CPU's is something like 100 GB/s
+
+In theory theory and practice are the same, in practice they are not, you don't see
+
+So if you had an index taking 100 GB in memory your theoretical request per second is 1
+
+In reality is much lower because of overheads, where you are more likely to get less than 50 GB/s
+
+So if you have say 2048 bits in your bloom filter, and you probe 6 bits or so 3 trigrams you are likely to 
+pull all of the 2048 bits across the CPU						</aside>
+					</section>
+					<section>
+						<h2>Problem 3</h2>
+						<img src="./img/2048_bloom_3.png" height="500px" style="border: none;" />
 						<aside class="notes">
 So for bloom filters this is a huge problem, because if you have a proper hash function you get a 
 distribution that means you end up walking all the memory... which sounds fine.
@@ -592,7 +645,7 @@ It did win best paper at SIGIR, which is probably the most prestigious IR confer
 					<section>
 							<h2>Fixes</h2>
 							<p>Rotate the filter. Documents now on columns not rows.</p>
-							<img src="./img/rotate.gif" style="border: none;" />
+							<img src="./img/rotate.gif" height="500px" style="border: none;" />
 							<aside class="notes">
 However in the 80's a smart person called Roberts noticed you could rotate the filter, 
 assuming each filter has the same exact size, IE the same number of bits.
@@ -607,19 +660,21 @@ We can then using out examples just row query bit positions 0 and 6 and then log
 		</aside>
 					</section>
 					<section>
-						<h2>Fixes</h2>
-						<img src="./img/rotated_bloomfilter.png" height="500px" style="border: none;" />
+						<img src="./img/rotate1.png" height="500px" style="border: none;" />
 						<aside class="notes">
 	</aside>
 					</section>
 					<section>
-						<img src="./img/rotated_bloomfilter_1.png" style="border: none;" />
+						<img src="./img/rotate2.png" height="500px" style="border: none;" />
 					</section>
 					<section>
-						<img src="./img/rotated_bloomfilter_2.png" style="border: none;" />
-						<aside class="notes">
-	Logically we & together 1010 and 1000 and we get that document 4 on the left is portentially a match
-	</aside>
+						<img src="./img/rotate3.png" height="500px" style="border: none;" />
+					</section>
+					<section>
+						<img src="./img/rotate4.png" height="500px" style="border: none;" />
+					</section>
+					<section>
+						<img src="./img/rotate5.png" height="500px" style="border: none;" />
 					</section>
 
 					<section>
@@ -754,7 +809,7 @@ bloomFilter = out
 					</section>
 					<section>
 						<h2>Searching: Done per shard</h2>
-						<p>I find this algorithm beautiful.</p>
+						<p>I find this algorithm beautifully simple.</p>
 <pre><code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []int {
 	var results []int
 	var res uint64
@@ -805,7 +860,8 @@ Once we have these id its a matter of reaching out to our primary data store, pu
 					</section>
 					<section>
 						<h2>Searching</h2>
-						TODO animation of search across memory here
+						<p>Perform & between each row, and if we see 0 skip to next bucket</p>
+						<img src="./img/bloomsearch.gif" height="500px" style="border: none;" /><br>
 					</section>
 
 					<section>
@@ -884,8 +940,9 @@ a horrible bug ridden thing. To have something so simple in Go using using chann
 					</section>
 
 					<section>
-						<h2>Grand Total Result?</h2>
+						<h2>Grand Total Result</h2>
 						<p>Rolling average index search time: ~50ms</p>
+						<p>140,000,000 to 180,000,000 files</p>
 						<img src="./img/searchtime.png" style="border: none;" />
 					</section>
 				</section>
@@ -913,7 +970,10 @@ Processed 6746 bytes, 0.007 megabytes (SI)
 				<section>
 					<h2>Thank You!</h2>
 					<p>Probably nobody cases how searchcode works, but I care, and I know. Now you do too.</p>
-					<img src="./img/gopher.png" height="500px" style="border: none;" />
+					<img src="./img/gopher.png" height="500px" style="border: none;" /><br>
+					<a href="https://searchcode.com/">https://searchcode.com/</a><br>
+					<a href="https://boyter.org/posts/how-i-built-my-own-index-for-searchcode/">https://boyter.org/posts/how-i-built-my-own-index-for-searchcode/</a><br>
+					<a href="https://boyter.org/">https://boyter.org/</a>
 					<aside class="notes">
 Of course... probably nobody using searchcode probably cares that its running on a unique bloom filter trigram
  backed index with 
