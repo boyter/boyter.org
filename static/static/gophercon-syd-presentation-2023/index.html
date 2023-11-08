@@ -75,6 +75,7 @@ using my own index. So after the early in 2020, I decided I would build my own i
 								<li>Put everything in RAM</li>
 								<li>Downtime not a huge issue</li>
 								<li>Single server</li>
+								<li>Single binary, no daemons!</li>
 							</ul>
 						</li>
 						<li>Boolean queries</li>
@@ -660,26 +661,32 @@ We can then using out examples just row query bit positions 0 and 6 and then log
 		</aside>
 					</section>
 					<section>
+						<p>Rotated filter (documents are columnns now)</p>
 						<img src="./img/rotate1.png" height="500px" style="border: none;" />
 						<aside class="notes">
-	</aside>
+						</aside>
 					</section>
 					<section>
-						<img src="./img/rotate2.png" height="500px" style="border: none;" />
-					</section>
-					<section>
+						<p>Fetch row 1 and 7 same as previous example</p>
 						<img src="./img/rotate3.png" height="500px" style="border: none;" />
+						<aside class="notes">
+						</aside>
 					</section>
 					<section>
+						<p>Logically & all rows</p>
 						<img src="./img/rotate4.png" height="500px" style="border: none;" />
+						<aside class="notes">
+						</aside>
 					</section>
 					<section>
+						<p>Pos 1 is true, so document 4 matches</p>
 						<img src="./img/rotate5.png" height="500px" style="border: none;" />
+						<aside class="notes">
+						</aside>
 					</section>
-
 					<section>
 						<h2>Results?</h2>
-						<p>This reduces the amount of RAM we need to access by factor of about 200 for larger bloom filters.</p>
+						<p>This reduces the amount of RAM we need to access by factor of more than 200 for larger bloom filters.</p>
 						<aside class="notes"></aside>
 					</section>
 
@@ -722,6 +729,8 @@ block IE another batch of 64 documents, and then loops over the input setting th
 					<section>
 						<h2>Result</h2>
 						<p>16 bit bloom filter, with 32 documents added. Less wasted space.</p>
+<pre><code style="font-size: 14px; line-height: 1em;">bloomFilter := make([]int64, 16) 
+</code></pre>
 <pre><code style="font-size: 14px; line-height: 1em;">0000000000000000000000000000000010100011111111111111111111111101
 0000000000000000000000000000000001110000000000010000100000000000
 0000000000000000000000000000000000000000000000000000000000000000
@@ -756,7 +765,9 @@ block IE another batch of 64 documents, and then loops over the input setting th
 					<section>
 						<h2>Sharding</h2>
 						<p>Shard based on the length of the document we want to index.</p>
-						<p>Result? Very little wasted space. Squeeze every bit.</p>
+<pre><code style="font-size: 14px; line-height: 1em;">0000000100000000 // underfilled bloom filter
+1011111111111110 // overfilled bloom filter</code></pre>
+						<p>Result? Less wasted space. Squeeze every bit.</p>
 <pre><code style="font-size: 14px; line-height: 1em;">
 ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
 │     caisson      ├─┬▶│  shard 512 bits  ├┬─▶│ bucket-1 64 docs │
@@ -808,63 +819,6 @@ bloomFilter = out
 </code></pre>
 					</section>
 					<section>
-						<h2>Searching: Done per shard</h2>
-						<p>I find this algorithm beautifully simple.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []int {
-	var results []int
-	var res uint64
-
-	for i := 0; i < len(bloomFilter); i += 2048 {
-		res = bloomFilter[queryBits[0]+uint64(i)]
-
-		for j := 1; j < len(queryBits); j++ {
-			res = res & bloomFilter[queryBits[j]+uint64(i)]
-
-			if res == 0 {
-				break
-			}
-		}
-
-		if res != 0 {
-			for j := 0; j < 64; j++ {
-				if res&(1<&lt;j) > 0 {
-					results = append(results, 64*(i/BloomSize)+j)
-				}
-			}
-		}
-
-	}
-
-	return results
-}
-</code></pre>
-						<aside class="notes">
-With the index done we can now search.
-					
-The core search algorithm is as follows. 
-
-I find this algorithm beautifully simple. We take in query positions for the search, so in the case of searching for "searchcode" we turn that into trigrams
-then hash them using the same hash functions to get 6+ uint64's from 0 to whatever the filter is configured to be in a slice.
-
-Then, walk over each logical block or bucket, which is as many uint64's as exist in the bloom filter, and then logically & that against the previous one. 
-If its 0 bail out, otherwise if we have finished record the documentid based on what its position in the index is.
-
-
-Whats really cool about this is that we jump potentially all of the bytes in a block if we hit that res == 0 condition quickly, avoiding us walking any memory at all! This is the state we want
-to hit as often as possible.
-
-Results when returned gives ids, which we can then use the idToFile to find the true id for this document. 
-
-Once we have these id its a matter of reaching out to our primary data store, pulling back the documents and processing from there.
-	</aside>
-					</section>
-					<section>
-						<h2>Searching</h2>
-						<p>Perform & between each row, and if we see 0 skip to next bucket</p>
-						<img src="./img/bloomsearch.gif" height="500px" style="border: none;" /><br>
-					</section>
-
-					<section>
 						<h2>Frequency Concious Bloom Filter</h2>
 						<p>Rare terms need more hashes to reduce false positive rate</p>
 
@@ -898,7 +852,7 @@ Once we have these id its a matter of reaching out to our primary data store, pu
 						<h2>Result?</h2>
 						<p>Wasted time...</p>
 						<p>New algorithm is mind blowing.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">func (ci *CaissonIndex) DetermineHashCount(ngram string) int {
+<pre><code style="font-size: 14px; line-height: 1em;">func DetermineHashCount(ngram string) int {
 	return 2
 }
 </code></pre>
@@ -938,34 +892,79 @@ This is where I really like Go functionality. I remember writing a counting sema
 a horrible bug ridden thing. To have something so simple in Go using using channels is amazing language design.
 						</aside>
 					</section>
+					<section>
+						<h2>Searching: Done per shard</h2>
+						<p>I find this algorithm beautifully simple.</p>
+<pre><code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []int {
+	var results []int
+	var res uint64
+
+	for i := 0; i < len(bloomFilter); i += 2048 {
+		res = bloomFilter[queryBits[0]+uint64(i)]
+
+		for j := 1; j < len(queryBits); j++ {
+			res = res & bloomFilter[queryBits[j]+uint64(i)]
+
+			if res == 0 {
+				break
+			}
+		}
+
+		if res != 0 {
+			for j := 0; j < 64; j++ {
+				if res&(1<&lt;j) > 0 {
+					results = append(results, 64*(i/2048)+j)
+				}
+			}
+		}
+
+	}
+
+	return results
+}
+</code></pre>
+						<aside class="notes">
+With the index done we can now search.
+					
+The core search algorithm is as follows. 
+
+I find this algorithm beautifully simple. We take in query positions for the search, so in the case of searching for "searchcode" we turn that into trigrams
+then hash them using the same hash functions to get 6+ uint64's from 0 to whatever the filter is configured to be in a slice.
+
+Then, walk over each logical block or bucket, which is as many uint64's as exist in the bloom filter, and then logically & that against the previous one. 
+If its 0 bail out, otherwise if we have finished record the documentid based on what its position in the index is.
+
+
+Whats really cool about this is that we jump potentially all of the bytes in a block if we hit that res == 0 condition quickly, avoiding us walking any memory at all! This is the state we want
+to hit as often as possible.
+
+Results when returned gives ids, which we can then use the idToFile to find the true id for this document. 
+
+Once we have these id its a matter of reaching out to our primary data store, pulling back the documents and processing from there.
+	</aside>
+					</section>
+					<section>
+						<h2>Searching: Visually</h2>
+						<p>Perform & between each row, and if we see 0 skip to next bucket</p>
+						<img src="./img/bloomsearch.gif" height="500px" style="border: none;" /><br>
+					</section>
+
+					
 
 					<section>
 						<h2>Grand Total Result</h2>
 						<p>Rolling average index search time: ~50ms</p>
 						<p>140,000,000 to 180,000,000 files</p>
+						<p>~100GB RAM</p>
 						<img src="./img/searchtime.png" style="border: none;" />
 					</section>
 				</section>
 					
 				<section>
-						<h2>Size</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">$ scc --no-cocomo caisson.go
-───────────────────────────────────────────────────────────────────────────────
-Language                 Files     Lines   Blanks  Comments     Code Complexity
-───────────────────────────────────────────────────────────────────────────────
-Go                           1       235       41        52      142         36
-───────────────────────────────────────────────────────────────────────────────
-Total                        1       235       41        52      142         36
-───────────────────────────────────────────────────────────────────────────────
-Processed 6746 bytes, 0.007 megabytes (SI)
-───────────────────────────────────────────────────────────────────────────────
-</code></pre>
+					<h2>Conclusions</h2>
+					<p>Go works well for this. I doubt I could have done it in another language</p>
 					<aside class="notes">As you can see its a short bit of code. Only about 150 lines. I really encourage you to have a look and play with it.</aside>
 				</section>
-
-
-
-		
 
 				<section>
 					<h2>Thank You!</h2>
