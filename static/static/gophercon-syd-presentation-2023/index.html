@@ -108,6 +108,7 @@ liked      -> like
 likely     -> like
 	</code></pre>
 	<p>Does not work for code!</p>
+	<pre><code style="font-size: 18px; line-height: 1em;">for(i=0;i++;i&lt;100)</pre></code>
 							<aside class="notes">
 	So code search is in some ways easier than text, because you don't need to try to understand language in the way that you do when dealing with english, japanese or russian. Splitting on chinese or japanese words for example is painful.
 
@@ -145,8 +146,9 @@ But have a look here, were one term searchcode is turned into 8 things we need t
 						</aside>
 					</section>
 					<section>
-						<h2>Problem</h2>
+						<h2>Problems</h2>
 						<p>Creates long posting lists</p>
+						<p>Introduces false positives</p>
 <pre><code style="font-size: 18px; line-height: 1em;">searchcode ->	sea
 		ear
 		arc
@@ -218,26 +220,20 @@ Consider yourself nerd sniped
 
 <pre><code style="font-size: 14px; line-height: 1em;">package main
 
-type pos struct { 
-	id int    // unique document id
-	loc []int // store document positions in posting list
-}
-
 func main() {
-	index := map[string][]int{}    // non-positional index
-	index["searchcode"] = append(index["searchcode"], 175)
+	// non-positional index
+	index := map[string][]int{} 
 	index["gopher"] = append(index["gopher"], 1337)
 
-	//////////////
-
-	posIndex := map[string][]pos{} // positional index
-	posIndex["searchcode"] = append(posIndex["searchcode"], pos{175, []int{1,6,8,9}})
-	posIndex["gopher"] = append(posIndex["gopher"], pos{1337, []int{1,2,3,99}})
-}</code></pre>
-						<ul>
-							<li>Need to implement skip lists or compression on the posting lists at scale</li>
-							<li>Supports positional index</li>
-						</ul>
+	// positional index
+	type pos struct {
+		id  int   // unique document id
+		loc []int // store document positions in posting list
+	}
+	posIndex := map[string][]pos{} 
+	posIndex["gopher"] = append(posIndex["gopher"], pos{1337, []int{1, 2, 3, 99}})
+}
+</code></pre>
 
 						<aside class="notes">
 So given our trigram terms we now need to index them. There are a few ways to do this. Lets walk through a few.
@@ -262,15 +258,21 @@ They are an interesting data structure worth looking up on wikipedia. When you s
 						</aside>
 					</section>
 					<section>
-						<h2>Problem</h2>
-						<p>Intersect two lists</p>
+						<h2>Problem: Intersect two lists</h2>
 						<img src="./img/assvogel.gif" height="500px;" style="border: none;" />
 						<ul>
 							<li>Trigrams create LONG posting lists</li>
-							<li>Need to implement skip lists or compression on the posting lists at scale</li>
+							<li>Need to implement skip lists AND compression at scale</li>
 						</ul>
 
 						<aside class="notes">
+						</aside>
+					</section>
+					<section>
+						<h2>For those wondering...</h2>
+						<img src="./img/vulture.jpg" style="border: none;" />
+						<aside class="notes">
+						Assvogel is an obsolete Afrikaans word for a South African vulture 
 						</aside>
 					</section>
 					<section>
@@ -298,7 +300,7 @@ Trust me you don't want me writing algorithms like this.
 					</section>
 					<section>
 						<h2>My attempt</h2>
-						<p>Two turkeys taped together... cannot fly.</p>
+						<p>Two turkeys duct taped together does not make an eagle.</p>
 						<img src="./img/turkeys.jpg"  height="500px;" style="border: none;" />
 						<aside class="notes">
 This is clearly a lot more complex than what we started with. Certainly more than I am willing to deal with.
@@ -306,13 +308,7 @@ This is clearly a lot more complex than what we started with. Certainly more tha
 Trust me you don't want me writing algorithms like this.
 						</aside>
 					</section>
-					<section>
-						<h2>For those wondering...</h2>
-						<img src="./img/vulture.jpg" style="border: none;" />
-						<aside class="notes">
-						Assvogel is an obsolete Afrikaans word for a South African vulture 
-						</aside>
-					</section>
+					
 				</section>
 
 				<!--<section>
@@ -406,6 +402,8 @@ For hashing you can use any hash that returns an integer. FNV and FNVa work well
 						<p>big and yellow supplied bits</p>
 	<img src="./img/BloomFilter6.png" style="border: none;" />
 						<aside class="notes">
+While bloom filters do introduce false positives, you have to deal with them anyway since we are using trigrams.
+So this is not a deal breaker. Also ranking the documents can help with this.
 						</aside>
 					</section>
 
@@ -548,7 +546,7 @@ Note this isnt a problem with Go it occurs in most languages.
 					</section>
 					<section>
 						<h2>Problem 2</h2>
-						<p>Generic DDR5 RAM stick</p>
+						<p>Generic RAM stick</p>
 						<img src="./img/ram.jpg" height="500px" style="border: none;" />
 						<aside class="notes">
 Another problem is that is that its slow... This comes down to how fetching bits out of 
@@ -686,7 +684,7 @@ We can then using out examples just row query bit positions 0 and 6 and then log
 					</section>
 					<section>
 						<h2>Results?</h2>
-						<p>This reduces the amount of RAM we need to access by factor of more than 200 for larger bloom filters.</p>
+						<p>This reduces the amount of RAM we need to access by a huge factor for larger bloom filters.</p>
 						<aside class="notes"></aside>
 					</section>
 
@@ -832,13 +830,13 @@ bloomFilter = out
 	if ok {
 		weight := float64(v) / float64(ci.highestTermCount) * 100
 
-		if weight >= 5 {
+		if weight >= 10 {
 			hashCount = 1
-		} else if weight >= 2.5 {
-			hashCount = 2
 		} else if weight >= 5 {
+			hashCount = 2.5
+		} else if weight >= 2 {
 			hashCount = 3
-		} else if weight >= 10 {
+		} else if weight >= 1.5 {
 			hashCount = 4
 		}
 	}
@@ -850,7 +848,7 @@ bloomFilter = out
 
 					<section>
 						<h2>Result?</h2>
-						<p>Wasted time...</p>
+						<p>Wasted time... For trigrams anyway</p>
 						<p>New algorithm is mind blowing.</p>
 <pre><code style="font-size: 14px; line-height: 1em;">func DetermineHashCount(ngram string) int {
 	return 2
@@ -905,7 +903,7 @@ a horrible bug ridden thing. To have something so simple in Go using using chann
 		for j := 1; j < len(queryBits); j++ {
 			res = res & bloomFilter[queryBits[j]+uint64(i)]
 
-			if res == 0 {
+			if res == 0 { // important! skip shard if nothing!
 				break
 			}
 		}
@@ -957,12 +955,28 @@ Once we have these id its a matter of reaching out to our primary data store, pu
 						<p>140,000,000 to 180,000,000 files</p>
 						<p>~100GB RAM</p>
 						<img src="./img/searchtime.png" style="border: none;" />
+
+
+<pre><code style="font-size: 14px; line-height: 1em;">{
+    "level": "info",
+    "totalCount": 266,
+    "falseCount": 144,
+    "positiveCount": 122,
+    "timeMillis": 24,
+    "reductionPercent": 0.4586466165413534,
+    "query": "while (*d++ = *s++); source:github repo:linux",
+    "time": "2023-11-08T06:30:19+01:00",
+    "message": "search"
+}</code></pre>
+
 					</section>
 				</section>
 					
 				<section>
 					<h2>Conclusions</h2>
-					<p>Go works well for this. I doubt I could have done it in another language</p>
+					<p>Go. I doubt I could have done it in another language. I still don't like nil checks.</p>
+					<p>Bloomfilters + Trigrams works well. As far as I know this is globally unique. Nobody else I know uses this approach.</p>
+					<p>Dealing with false positives from the filters isnt a deal breaker due to trigrams.</p>
 					<aside class="notes">As you can see its a short bit of code. Only about 150 lines. I really encourage you to have a look and play with it.</aside>
 				</section>
 
@@ -975,8 +989,7 @@ Once we have these id its a matter of reaching out to our primary data store, pu
 					<a href="https://boyter.org/">https://boyter.org/</a>
 					<aside class="notes">
 Of course... probably nobody using searchcode probably cares that its running on a unique bloom filter trigram
- backed index with 
-ideas borrowed from bing. Even if I am fairly sure this is the only instance of any search engine doing so.
+backed index with ideas borrowed from bing. Even if I am fairly sure this is the only instance of any search engine doing so.
 
 But I know... and now you do too.
 
