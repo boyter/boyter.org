@@ -42,7 +42,7 @@ Don't worry if you are still sleepy im sure this talk will put you back to sleep
 						<p>I blog <a href="https://boyter.org/">boyter.org</a> I free software <a href="https://github/boyter/">github/boyter/</a> I run <a href="https://searchcode.com/">searchcode.com</a> also on the twitter.com <a href="https://twitter.com/boyter">@boyter</a> activitypub <a href="https://honk.boyter.org/boyter">@boyter@honk.boyter.org</a></p>
 						<aside class="notes">
 So who am I? 
-I am not going to bore you too much with who I am because you don't care. 
+I am not going to bore you too much with who I am because you probably don't care. 
 Im not famous, but you can find me at these places.
 						</aside>
 					</section>
@@ -52,12 +52,11 @@ Im not famous, but you can find me at these places.
 						<img src="./img/halflisten.jpg" height="500px;" style="border: none;" />
 						<aside class="notes">
 Don't worry too much about missing anything.
-Everything you are about to see is now available boyter.org
+For those who prefer to hang out on slack everything you are about to see is now available boyter.org
 You can even skip ahead on the slides and head off for a coffee if you like. I won't judge you.
 						</aside>
 					</section>
 				</section>
-
 
 				<section>
 					<section>
@@ -69,20 +68,22 @@ So I run searchcode which as the un-imaginative name would suggest searches over
 I have been doing this for the last 10 years modifying and rewriting it from PHP to Python to 
 Java and finally to Go.
 
-Its a serious side project, where I get to have a wonderful time playing with algorithms, 
-and data structures, and it gets enough traffic to make it this interesting, 
+Its a serious side project, where I get to have a wonderful time with it playing with algorithms, 
+and data structures. It gets enough traffic to make it this interesting, 
 with several million requests hitting it a day so I can try these things at some level of scale.
+
+Its a great testing ground where I can fail without too many problems. Yes I do fail a lot with it.
 
 It indexes about 75 billion lines of code across 40 million projects.
 
 But most of the time I have worked on it there was one constant, which was the index, provided using Sphinx
-early on and later a forked version called Manticore.
+early on and later a forked version of Sphinx called Manticore.
 
 But I had been feeling a bit like a fraud, how can I claim to be a search guy without 
 using my own index. So early in 2020, I decided I would build my own.
 
 Incidently there has been a lot of talks about the importance of tests
-searchcode has very few tests.
+searchcode is very light on tests.
 It does however get enough traffic that I can say "Thank you internet for testing it for me!".
 						</aside>
 					</section>
@@ -756,6 +757,8 @@ This ensures we are optimally using the space. Because we pack 64 documents into
 int we end up using a single bit per location in the bloom filter. No 8x overhead!
 
 It also becomes very fast to iterate this in code because its a simple for loop over a slice. 
+
+It also means when we do our & operation we are now searching 64 documents for every operation, which is a huge speed up.
 	</aside>
 					</section>
 			
@@ -1035,7 +1038,7 @@ backed index with ideas borrowed from bing.
 
 But I know... and now you do too.
 
-Thank you very much.
+Thank you very much. Ill be at the Kablamo booth with the lovely stickers if you want to chat.
 					</aside>
 				</section>
 
