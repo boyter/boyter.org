@@ -32,20 +32,28 @@
 				</section>
 
 				<section>
-					<h2>Who are you?</h2>
-					<p>
-					"Officially" technical lead/principle at Kablamo but a "code monkey" at heart.</p>
-					<p>I blog <a href="https://boyter.org/">boyter.org</a> I free software <a href="https://github/boyter/">github/boyter/</a> I run <a href="https://searchcode.com/">searchcode.com</a> also on the twitter <a href="https://twitter.com/boyter">@boyter</a> activitypub <a href="https://honk.boyter.org/boyter">@boyter@honk.boyter.org</a></p>
-					<aside class="notes">Not going to bore you too much with who I am because you don't care.
-					</aside>
+					<section>
+						<h2>Who are you?</h2>
+						<p>
+						"Officially" technical lead/principle at Kablamo but a "code monkey" at heart.</p>
+						<p>I blog <a href="https://boyter.org/">boyter.org</a> I free software <a href="https://github/boyter/">github/boyter/</a> I run <a href="https://searchcode.com/">searchcode.com</a> also on the twitter <a href="https://twitter.com/boyter">@boyter</a> activitypub <a href="https://honk.boyter.org/boyter">@boyter@honk.boyter.org</a></p>
+						<aside class="notes">Not going to bore you too much with who I am because you don't care.
+						</aside>
+					</section>
+					<section>
+						<h2>https://boyter.org/</h2>
+						<p>Everything is here, now, so feel free to go back to sleep</p>
+						<img src="./img/halflisten.jpg" height="500px;" style="border: none;" />
+					</section>
 				</section>
 
 
 				<section>
-					<h2>PHP -> Python -> Java -> Go</h2>
-					<img src="./img/sphinx_manticore.png" style="border: none;" />
-					<img src="./img/searchcode.gif" height="500px;" style="border: none;" />
-					<aside class="notes">
+					<section>
+						<h2>PHP -> Python -> Java -> Go</h2>
+						<img src="./img/sphinx_manticore.png" style="border: none;" />
+						<img src="./img/searchcode.gif" height="500px;" style="border: none;" />
+						<aside class="notes">
 So I run searchcode.com which as the un-imaginative name would suggest searches over source code. 
 I have been doing this for the last 10 years modifying and rewriting it from PHP to Python to 
 Java and finally to Go.
@@ -54,16 +62,34 @@ Searchcode itself indexes about 75 billion lines of code across 40 million proje
 github, gitlab, bitbucket, codeberg, sr.ht and such.
 
 Its sort of a serious side project, where I get to have a wonderful time working on neat algorithms.
-It gets enough traffic to make it interesting.
+It gets enough traffic to make it interesting. The thing I love is that every part of it from,
+
+index, early termination, syntax highlighting, matching, snippet extraction, 
+rate limiting, bot detection, ranking, distributed algorithsm, caching... 
+every part is one of those problems you lightly scratch and discover
+people getting PhD's in. So there is a lot of width and depth to learn about.
 
 Which is nice compared to the usual code golf I get to deal with. Im sure if I fiddle with this a bit more
 I can reduce to code count by a third!
 
 The whole time that has happened one thing has been constant, which was the use of the 
-index engine, which was provided using Sphinx Search and then a forked version called Manticore.
+index engine, which was provided using Sphinx Search and then a forked version called Manticore. Both
+are great products, and if their capabilities fit into what you need are amazing. I was abusing them
+in ways that were causing issue.s
 
-This made me feel like a bit of a fraud, how can I claim to be a search guy without 
-using my own index. So after the early in 2020, I decided I would build my own index.
+I had been feeling a bit like a fraud, how can I claim to be a search guy without 
+using my own index. So after the early in 2020, I decided I would build my own.
+						</aside>
+					</section>
+					<section>
+						<p>early termination, syntax highlighting, matching, snippet extraction, 
+rate limiting, <strong>index</strong>, bot detection, ranking, distributed algorithms, caching, tokenization,
+string searching, regular expressions, data structures, cache lines etc...</p>
+					</section>
+					<aside class="notes">
+As mentioned here are some of the things that go into a search engine.
+
+I could probably talk all day about it but am limited to just the index today. 
 					</aside>
 				</section>
 
@@ -75,15 +101,15 @@ using my own index. So after the early in 2020, I decided I would build my own i
 								<li>Put everything in RAM</li>
 								<li>Downtime not a huge issue</li>
 								<li>Single server</li>
-								<li>Single binary, no daemons!</li>
 							</ul>
 						</li>
+						<li>Single binary, no daemons!</li>
 						<li>Boolean queries</li>
- 						<li>Single developer</li>
+ 						<li>Single developer, spare time</li>
 						<li>This is how I built an index... not necessarily how you should build one!</li>
 					</ul>
 					<aside class="notes">
-					Design Considerations
+Design Considerations
 Now we need to consider the goals of searchcode.com
 its free... this influences the design, because I don't need to worry about pesky cusotmers, 
 if the service goes down
@@ -93,8 +119,11 @@ single server!
 Turns out most people just type terms and expect results, VERY few people actually do boolean queries
 Needs to be understandable by me... this is where Go is really useful.
 I like the language but I die a little for all the error handling conditions I deal with
-Then I realise I finished whatever I was doing really quickly and get over it
-I don't think I would have gotten as far as I did without using Go
+Then I realise I finished whatever I was doing really quickly and get over it.
+I don't think I would have gotten as far as I did without using Go.
+
+Lastly, this is how I built an index. I have no formal training in it, but as nobody on the internet 
+knows you a dog, you don't need permission for a lot of things just action.
 					</aside>
 				</section>
 
@@ -102,70 +131,52 @@ I don't think I would have gotten as far as I did without using Go
 					<section>
 							<h2>Searching: Tokenisation</h2>
 							<p>Mapping / Stemming</p>
-	<pre><code style="font-size: 18px; line-height: 1em;">searchcode -> searchcode
-likes      -> like
-liked      -> like
-likely     -> like
+	<pre><code style="font-size: 18px; line-height: 1em;">
+"searchcode"         -> [searchcode]
+"sydney gophercon"   -> [sydney, gophercon]
+"likes liked likely" -> [like]
 	</code></pre>
 	<p>Does not work for code!</p>
 	<pre><code style="font-size: 18px; line-height: 1em;">for(i=0;i++;i&lt;100)</pre></code>
 							<aside class="notes">
-	So code search is in some ways easier than text, because you don't need to try to understand language in the way that you do when dealing with english, japanese or russian. Splitting on chinese or japanese words for example is painful.
-
-	You can solve this problem in code using whats known as trigrams, where you break the text apart into characters of 3 and index those. You can actually use any number you want for ngrams, but trigrams work best when indexing source code.
-
-	One catch with this is that you get false positives, some inputs generate the same ngrams despite being different. You also have terms with low cardinality such as repeated works in a line. So the letter p 100 times is no more useful than 3 of them.
-
-	Another issue is that you get more things to index bloating your posting list... We will get into what posting lists are shortly? Well lets have a look at how to build an index
-
-	But have a look here, were one term searchcode is turned into 8 things we need to index.
+So code search is in some ways easier than text, because you don't need to try to understand language 
+in the way that you do when dealing with english, japanese or russian. Splitting on chinese or japanese 
+words for example is painful.
 							</aside>
 					</section>
 					<section>
 						<h2>Searching code: Tokenisation</h2>
 						<p>Trigrams</p>
-<pre><code style="font-size: 18px; line-height: 1em;">searchcode ->	sea
-		ear
-		arc
-		rch
-		chc
-		hco
-		cod
-		ode
+<pre><code style="font-size: 18px; line-height: 1em;">"searchcode"   -> [sea, ear, arc, rch, chc, hco, cod, ode]
+"pppppppppppp" -> [ppp]
 </code></pre>
 						<aside class="notes">
-So code search is in some ways easier than text, because you don't need to try to understand language in the way that you do when dealing with english, japanese or russian. Splitting on chinese or japanese words for example is painful.
+You can solve this problem in code using whats known as trigrams, where you break the text apart into c
+haracters of 3 and index those. You can actually use any number you want for ngrams, 
+but trigrams work well when indexing source code.
 
-You can solve this problem in code using whats known as trigrams, where you break the text apart into characters of 3 and index those. You can actually use any number you want for ngrams, but trigrams work best when indexing source code.
+One catch with this is that you get false positives, some inputs generate the same 
+ngrams despite being different. You also have terms with low cardinality such 
+as repeated works in a line. So the letter p repeated 100 times is no more useful than 3 of them. 
+They map to the same thing
 
-One catch with this is that you get false positives, some inputs generate the same ngrams despite being different. You also have terms with low cardinality such as repeated works in a line. So the letter p 100 times is no more useful than 3 of them.
-
-Another issue is that you get more things to index bloating your posting list... We will get into what posting lists are shortly? Well lets have a look at how to build an index
-
-But have a look here, were one term searchcode is turned into 8 things we need to index.
+But have a look here, were one term searchcode is turned into 8 terms we need to index.
 						</aside>
 					</section>
 					<section>
 						<h2>Problems</h2>
 						<p>Creates long posting lists</p>
 						<p>Introduces false positives</p>
-<pre><code style="font-size: 18px; line-height: 1em;">searchcode ->	sea
-		ear
-		arc
-		rch
-		chc
-		hco
-		cod
-		ode
+<pre><code style="font-size: 18px; line-height: 1em;">"searchcode" -> [searchcode]</code></pre>
+						<p>vs</p>
 
-vs
 
-searchcode -> searchcode
+<pre><code style="font-size: 18px; line-height: 1em;">"searchcode" -> [sea, ear, arc, rch, chc, hco, cod, ode]
 </code></pre>
 						<aside class="notes">
-If we tokenise by trigrams we get a great dela more tokens we need to index. In our example from before
-searchcode turns into 8 things we need to add to our index, vs a single thing we would need if we treated
-it as plain space delimited text.
+If we tokenise by trigrams we get a great deal more tokens we need to index. In our example 
+searchcode turns into 8 terms we need to add to our index, vs a single thing we would need if we treated
+it as plain space delimited text. This is an important consideration, because it enlarges the index a great deal.
 						</aside>
 					</section>
 					<section>
@@ -190,18 +201,17 @@ it as plain space delimited text.
 }
 </code></pre>
 					<aside class="notes">
-When you look at how this is called you will notice logic to split in spaces first and 
-then index things larger than 3. This avoids indexing spaces which reduces the 
-size of the bloom filter.
+So here is some code to create trigrams given some input text.
 
 Interesting fact, this is by far the single biggest bottleneck in searchcode when indexing.
+I have tweaked this a great deal.
 If someone wants to profile and improve performance on it I would really appreciate it. 
 It dominiates the indexing profile by a huge amount.</aside>
 					</section>
 					<section>
 					<img src="./img/nerdsniped.png" style="border: none;" />
 					<aside class="notes">
-Consider yourself nerd sniped
+Consider yourself nerd sniped.
 					</aside>
 				</section>
 
@@ -214,9 +224,15 @@ Consider yourself nerd sniped
 						<h2>What is an index?</h2>
 						<p>Structured list. Keys point at data so searches are faster.</p>
 						<p>Given a term, return id's which contain it.</p>
+						<aside class="notes">
+So what is an index. The definition can be fuzzy, but in my case I treat it as a 
+function that I pass in a term or terms to search for and it returns a list of integers
+which refer to documents that likely contain the terms, possibly ordered by relevance.
+						</aside>
 					</section>
 					<section>
 						<h2>Textbook 101 index</h2>
+						<p>Average CS textbook example</p>
 
 <pre><code style="font-size: 14px; line-height: 1em;">package main
 
@@ -238,23 +254,19 @@ func main() {
 						<aside class="notes">
 So given our trigram terms we now need to index them. There are a few ways to do this. Lets walk through a few.
 
-A posting list is the slice of struct or int64 containing the document's that contain that term.
+A posting list is the slice of struct or int's containing the document's that contain that term.
 
-So "set" is found inside documents 1,77 and 345
+So "gopher" is found inside documents 1337 here.
 
 A positional index is one that stores where the term was found in the document. 
 
-So "set" as position 5 and 56 inside document 77
+So "gopher" as position 1, 2, 3 and 99.
 
-This is really useful for phrase searches and ranking.
-In theory you can then use the index to reconstruct the document entirely. One catch with this is that your index becomes larger than the thing you are indexing.
+Positional index are really useful for phrase searches and ranking.
+In theory you can then use them to reconstruct the document entirely. 
+One catch with this is that your index tends to becomes as large or larger than the thing you are indexing.
 
-Done simply these are a bit of code you can had over to your cousin or most junior developer.
-
-Skip lists are something you end up needing to implement because when searching multiple terms you look for 
-the intersection of multiple posting lists and it speeds things up and something you need to add to scale this approach.
-
-They are an interesting data structure worth looking up on wikipedia. When you start adding compression using ellias phano to reduce the size they quickly become complex, and it becomes easy to tank your performance.
+Done simply as presented here these are a bit of code you can had over to your cousin or most junior developer.
 						</aside>
 					</section>
 					<section>
@@ -266,24 +278,38 @@ They are an interesting data structure worth looking up on wikipedia. When you s
 						</ul>
 
 						<aside class="notes">
+The big problem with any approach that uses posting lists is that they get long.
+
+Consider the search for "the assvogel". The is a very common word, and appears in nearly every document.
+Assvogel is very rare and only appears in a few.
+
+To get the intersection of them you have to walk the "the" posting list for a long time to find a match.
+This gets worse when you add more common terms.
+
+Skip lists are something you end up needing to implement because when searching multiple terms you look for 
+the intersection of multiple posting lists and it speeds things up and something you need to add to scale this approach.
+
+They are an interesting data structure worth looking up on wikipedia. When you start adding compression using ellias phano to reduce the size they quickly become complex, and it becomes easy to tank your performance.
+
 						</aside>
 					</section>
 					<section>
 						<h2>For those wondering...</h2>
 						<img src="./img/vulture.jpg" style="border: none;" />
 						<aside class="notes">
-						Assvogel is an obsolete Afrikaans word for a South African vulture 
+Assvogel is an obsolete Afrikaans word for a South African vulture. Today you learnt.
 						</aside>
 					</section>
 					<section>
 						<h2>Problem 2</h2>
 						<h3>Compression</h3>
 						<pre><code style="font-size: 14px; line-height: 1em;">index := map[string][]int{} // this should be compressible right?</code></pre>
+						<p>Shannon Elias Fano</p>
 						<img src="./img/elias_fano.png" style="border: none;" />
 						<aside class="notes">
-Elias Fano compression is a technique used to compress a sorted list of integers, primarily in the context 
-of information retrieval and data compression. It was designed to take advantage of the properties 
-of sorted lists, where the integers are typically increasing.
+Elias Fano compression is a technique used to compress a sorted list of integers.
+
+Great thing to implement, not so much to explain. Lets just assume its magic.
 						</aside>
 					</section>
 					<section>
@@ -293,7 +319,9 @@ of sorted lists, where the integers are typically increasing.
 <p>vs</p>
 						<img src="./img/complex.png" style="border: none;" />
 						<aside class="notes">
-This is clearly a lot more complex than what we started with. Certainly more than I am willing to deal with.
+This is clearly a lot more complex than what we started with. 
+
+Certainly more than I was willing to deal with over time.
 
 Trust me you don't want me writing algorithms like this.
 						</aside>
@@ -303,9 +331,10 @@ Trust me you don't want me writing algorithms like this.
 						<p>Two turkeys duct taped together does not make an eagle.</p>
 						<img src="./img/turkeys.jpg"  height="500px;" style="border: none;" />
 						<aside class="notes">
-This is clearly a lot more complex than what we started with. Certainly more than I am willing to deal with.
+So I did attempt to create the CompressedSkipList.
 
-Trust me you don't want me writing algorithms like this.
+I implemented both the skip list and elias fano compression, and got two turkeys duct taped together.
+Not the eagle I wanted. So I rethought my approach.
 						</aside>
 					</section>
 					
@@ -334,32 +363,24 @@ So what about bitslice signatures?
 				<section>
 					<section>
 						<h2>How about bloom filters?</h2>
-						<p>Whats a bloom filter?</p>
+						<p>A.K.A Bitsliced signatures</p>
+						<aside class="notes">
+There is a technique to search using bloom filters. However it helps if you know what one is.
+						</aside>
 					</section>
 					<section>
 						<h2>Bloom filter: Empty</h2>
 						<p>16 boolean's in an array</p>
 	<img src="./img/BloomFilter1.png" style="border: none;" />
 						<aside class="notes">
-Bitslice signatures are built on bloom filters. So whats a bloom filter?
-
 In short a probablistic data structure, that you can use to test the existance of something. 
-You add items, and can check if it was added. They never return false negatives, but they do occassionaly lie and report something being added when it was not.
+You add items, and can check if it was added. 
+
+They never return false negatives, but they do occassionaly lie and report something being added when it was not.
 
 So lets look at this example,
 
-We have a 8 bit bloom filter, and hash two terms, golang and searchcode. Golang hashes to bit position 0 and 
-searchcode to bit position 6. To add an item we do the hash, and then set the bit position to 1.
-
-If I want to check if searchcode was added, I hash it again and probe the bit position. 
-If set to 1 it means it was possibly added. If I want to check for the existance of awesome I could 
-hash that and get the position 2 and if I probe that I can see it was never set so I know it was never added.
-
-The lie part comes from the hash function, where it might hash to position 0. So if I was checking for 
-the existance of "java" and it hashes to bit position 0 I would assume it was added. This is a false positive.
-
-For hashing you can use any hash that returns an integer. FNV and FNVa work well for this being fast enough and providing enough distribution. Murmur3 is meant to be good. Note for multiple hashes you can salt the values to reuse hash functions.
-
+We have a 16 bit bloom filter. Its just a slice of booleans set by default to false, indicated by 0 here.
 						</aside>
 					</section>
 					<section>
@@ -367,6 +388,8 @@ For hashing you can use any hash that returns an integer. FNV and FNVa work well
 						<p>Hash the term 3 times and set the bits</p>
 	<img src="./img/BloomFilter2.png" style="border: none;" />
 						<aside class="notes">
+To add something to the filter we get a term, hash it using a integer returning hash like fnv, and use the resulting
+outputs to map to bit positions inside our filter. We then set those positions to true.
 						</aside>
 					</section>
 					<section>
@@ -374,6 +397,7 @@ For hashing you can use any hash that returns an integer. FNV and FNVa work well
 						<p>3 more bits set</p>
 	<img src="./img/BloomFilter3.png" style="border: none;" />
 						<aside class="notes">
+Add another term. Same process, hash 3 times and set the bits.
 						</aside>
 					</section>
 					<section>
@@ -381,6 +405,8 @@ For hashing you can use any hash that returns an integer. FNV and FNVa work well
 						<p>"big" and "dog" share 2 bits</p>
 	<img src="./img/BloomFilter4.png" style="border: none;" />
 						<aside class="notes">
+Another term added, where 2 of the bits overlap. This is an expected property of the filter
+and one of the ways they are space efficient.
 						</aside>
 					</section>
 					<section>
@@ -388,6 +414,9 @@ For hashing you can use any hash that returns an integer. FNV and FNVa work well
 						<p>hash "big" and check bits</p>
 	<img src="./img/BloomFilter5.png" style="border: none;" />
 						<aside class="notes">
+To check if the filter has something we do the same process. Hash the term as we did on insert,
+then check the bit positions. They are all true so this indicates big was probably added to the filter.
+Why probably? We will get to that in a moment.
 						</aside>
 					</section>
 					<section>
@@ -395,6 +424,8 @@ For hashing you can use any hash that returns an integer. FNV and FNVa work well
 						<p>one bit position is 0 so miss</p>
 	<img src="./img/BloomFilter7.png" style="border: none;" />
 						<aside class="notes">
+Another check, but notice that the middle bit is false. This means we know that sydney was never added
+to this filter.
 						</aside>
 					</section>
 					<section>
@@ -402,8 +433,13 @@ For hashing you can use any hash that returns an integer. FNV and FNVa work well
 						<p>big and yellow supplied bits</p>
 	<img src="./img/BloomFilter6.png" style="border: none;" />
 						<aside class="notes">
+Here we see an example of a false positive match. We hash and check the positions and they are all true.
+But we never added this term, the bits were supplied by other terms.
+
 While bloom filters do introduce false positives, you have to deal with them anyway since we are using trigrams.
-So this is not a deal breaker. Also ranking the documents can help with this.
+So this is not a deal breaker.
+
+A lot of tweaking of bloom filters is to control the false positive rate, where higher or lower values can be useful.
 						</aside>
 					</section>
 
@@ -450,6 +486,8 @@ false positive! was never added!
 </code></pre>
 
 						<aside class="notes">
+So here is a bloom filter implemented in go. The filter itself is 4 lines of code. A slice of booleans,
+a function to hash and thats all you need. The output shows that terms were added, and a false positive.
 						</aside>
 					</section>
 
@@ -463,11 +501,20 @@ false positive! was never added!
 	if all matching bits are set
 		record possible match</code></pre>
 
-						<img src="./img/bloom_naieve_search.gif" height="500px" style="border: none;" />
+						<img src="./img/bloom_naieve_search.gif" height="400px" style="border: none;" />
 
 						<aside class="notes">
-	So how to search over out bloom filter index? This represents 4 documents in our index. All indexed using an 8 bit bloom filter. We took in documents, turned them into trigrams, got the hash positions and set the bit.
-	So now we search...
+So how to search over out bloom filter index? 
+
+You just add more bloom filters.
+
+This represents 4 documents in our index with their own filter. 
+All indexed using an 8 bit bloom filter. 
+
+So to search we hash out search terms, which come to position 1 and 7. 
+We loop over each filter, checking the bit positions at 1 and 7.
+If any are false we know it cannot be a match.
+If all are true we have a possible match. In this case document 4.
 						</aside>
 					</section>
 				</section>
@@ -491,7 +538,7 @@ BTW this is one of the things you need to do at a large enough scale to get the 
 					<section>
 						<h2>Advantages</h2>
 						<ul>
-							<li>Compressed. Only using several bits per term</li>
+							<li>Compressed. Only using several bits per term!</li>
 							<li>Very simple!!!!
 								<ul>
 								<li>Adding</li>
@@ -503,9 +550,13 @@ BTW this is one of the things you need to do at a large enough scale to get the 
 						</ul>
 						<aside class="notes">
 Bloom filters have a lot going for them. They are compressed by nature, getting down to 9 bits per term 
-added if you do them right. They are also really simple to implement. 
-Note there are other filters like this, such as ribbon or xor, but as far as I know you cannot 
-use them in the way I do here.</aside>
+added if you do them right. 
+They are also really simple to implement. 
+Adding is simple, just add a new filter.
+Editing is simple, just set some booleans or replace the filter.
+Searching is a really simple for loop.
+You can extend them using counting bloom filters or probably even positions.
+						</aside>
 					</section>
 					<section>
 						<h2>Problems</h2>
@@ -529,19 +580,22 @@ func main() {
 	fmt.Println(memUsage())
 	_ = len(bigBloom)
 }
+</code></pre>
 
-$ go run main.go
+<pre><code style="font-size: 14px; line-height: 1em;">$ go run main.go
 0 MB
 95 MB</code></pre>
 						<aside class="notes">
-So there a few problems with this approach.
+There are of course problems.
 
 Firstly.
 
 How much memory does 100 million bools take up? Almost 100 MB which if you calculate is about 8x what you expect.
 
+This program shows the issue nicely.
+
 Problem is that each "bit" in this uses 1 byte under the hood since they are all addressable.
-Note this isnt a problem with Go it occurs in most languages.
+Not a problem with Go it occurs in any other major language.
 						</aside>
 					</section>
 					<section>
@@ -552,74 +606,39 @@ Note this isnt a problem with Go it occurs in most languages.
 Another problem is that is that its slow... This comes down to how fetching bits out of 
 memory using the CPU works.
 
-When you probe a single bit on most modern sysems you actually pull back 512 bits from RAM. This is because usually a 
-full cache line is read, which is 512 bits or 64 bytes. So a 512x overhead just to test a single bit! 
+When you probe a single bit on most modern sysems you actually pull back 512 bits from RAM. This is because a 
+full cache line is read, which is 512 bits or 64 bytes. So its a 512x overhead just to test a single bit! 
 
-As a result on average you end up walking ALL the memory for your filter, depending on which bits your proble.
+As a result on average you end up walking ALL the memory for your filter, depending on which bits your probe.
 
 This is one one of the reasons this as an approach fell out of favor in the 70's, because in practice
 you do end up walking all the addressable memory.
 						</aside>
 					</section>
 					<section>
-						<h2>Problem 2</h2>
-						<img src="./img/2048_bloom.png" height="500px" style="border: none;" />
-						<aside class="notes">
-So for bloom filters this is a huge problem, because if you have a proper hash function you get a 
-distribution that means you end up walking all the memory... which sounds fine.
-
-Till you realise modern CPU's arent as fast as you would think for memory,
-
-Theoretical bandwidth for CPU's is something like 100 GB/s
-
-In theory theory and practice are the same, in practice they are not, you don't see
-
-So if you had an index taking 100 GB in memory your theoretical request per second is 1
-
-In reality is much lower because of overheads, where you are more likely to get less than 50 GB/s
-
-So if you have say 2048 bits in your bloom filter, and you probe 6 bits or so 3 trigrams you are likely to 
-pull all of the 2048 bits across the CPU						</aside>
-					</section>
-					<section>
-						<h2>Problem 2</h2>
+						<h2>Illustration</h2>
 						<img src="./img/2048_bloom_2.png" height="500px" style="border: none;" />
 						<aside class="notes">
-So for bloom filters this is a huge problem, because if you have a proper hash function you get a 
-distribution that means you end up walking all the memory... which sounds fine.
+Here is a representation of the issue. We have a 2048 bit bloom filter, where each square is a bit.
+We have hashed our terms to 6 bit positions.
 
-Till you realise modern CPU's arent as fast as you would think for memory,
-
-Theoretical bandwidth for CPU's is something like 100 GB/s
-
-In theory theory and practice are the same, in practice they are not, you don't see
-
-So if you had an index taking 100 GB in memory your theoretical request per second is 1
-
-In reality is much lower because of overheads, where you are more likely to get less than 50 GB/s
-
-So if you have say 2048 bits in your bloom filter, and you probe 6 bits or so 3 trigrams you are likely to 
-pull all of the 2048 bits across the CPU						</aside>
+We used a good hash function so we get a decent distribution within those locations and now want to probe those
+bits.
+						</aside>
 					</section>
 					<section>
-						<h2>Problem 3</h2>
+						<h2>Can we do better?</h2>
 						<img src="./img/2048_bloom_3.png" height="500px" style="border: none;" />
 						<aside class="notes">
-So for bloom filters this is a huge problem, because if you have a proper hash function you get a 
-distribution that means you end up walking all the memory... which sounds fine.
+Because the bits are all within 512 bits of each other, we are likely to pull the entire filter across 
+the CPU.
 
-Till you realise modern CPU's arent as fast as you would think for memory,
+This is a big problem because accessing memory while fast isnt as fast as you expect. Modern CPU's can theoriticly 
+push 100 GB across the CPU per second. In reality you are more likely to get 50 GB. So if your index is 100 GB in size
+you are limited to 1 search every two seconds. 
 
-Theoretical bandwidth for CPU's is something like 100 GB/s
-
-In theory theory and practice are the same, in practice they are not, you don't see
-
-So if you had an index taking 100 GB in memory your theoretical request per second is 1
-
-In reality is much lower because of overheads, where you are more likely to get less than 50 GB/s
-
-So if you have say 2048 bits in your bloom filter, and you probe 6 bits or so 3 trigrams you are likely to 
-pull all of the 2048 bits across the CPU						</aside>
+Can we do better?
+						</aside>
 					</section>
 				</section>
 
@@ -632,13 +651,14 @@ pull all of the 2048 bits across the CPU						</aside>
 						<p>Good enough for Dan Luu? Good enough for you.</p>
 						<img src="./img/bitfunnel.png" style="border: none;" />
 						<aside class="notes">
-Bing paper - BitFunnel: Revisiting Signatures for Search
-Dan Luu is a co-author. Anything he writes I pay attention to.
-Good enough for Dan Luu, Good enough for you.
-
-Supposedly at this point it powers every query thats comes into Bing.
+In 2017 as SIGIR this paper about bitfunnel was released, detailing how bing uses
+bit signatures or bloom filters to query within the index. I believe at the time
+it was just searching the fresh index, but powers everything now.
 
 It did win best paper at SIGIR, which is probably the most prestigious IR conferences.
+
+Dan Luu is a co-author. Anything he writes I pay attention to.
+Hence my saying,  "Good enough for Dan Luu, Good enough for you."
 						</aside>
 					</section>
 					<section>
@@ -646,46 +666,54 @@ It did win best paper at SIGIR, which is probably the most prestigious IR confer
 							<p>Rotate the filter. Documents now on columns not rows.</p>
 							<img src="./img/rotate.gif" height="500px" style="border: none;" />
 							<aside class="notes">
-However in the 80's a smart person called Roberts noticed you could rotate the filter, 
+So lets start.
+
+In the 80's a smart person called Roberts noticed you could rotate the filter, 
 assuming each filter has the same exact size, IE the same number of bits.
 
 So we do that by turning the rows into columns. So each row used to represent a document, but now each column does. Right to left.
 
 With this done we only need to inspect the rows containing the bit positions of the query. 
-So in this case 2 rows which is half the memory access.
-
-We can then using out examples just row query bit positions 0 and 6 and then logically & them together. If they arent 0 then we have a positional match.
-
 		</aside>
 					</section>
-					<section>
+					<!--<section>
 						<p>Rotated filter (documents are columnns now)</p>
 						<img src="./img/rotate1.png" height="500px" style="border: none;" />
 						<aside class="notes">
 						</aside>
-					</section>
+					</section>-->
 					<section>
 						<p>Fetch row 1 and 7 same as previous example</p>
 						<img src="./img/rotate3.png" height="500px" style="border: none;" />
 						<aside class="notes">
+So in this case 2 rows which is half the memory access.
+
+We can then using out examples just row query bit positions 0 and 6 and then logically & them together. If they arent 0 then we have a positional match.
+
 						</aside>
 					</section>
 					<section>
 						<p>Logically & all rows</p>
 						<img src="./img/rotate4.png" height="500px" style="border: none;" />
 						<aside class="notes">
+The nice thing about this is that a & in the CPU is as close as we get to free operation from a performance point of view.
+In fact the computation for this is so low it beomes all about the memory lookups.
 						</aside>
 					</section>
 					<section>
 						<p>Pos 1 is true, so document 4 matches</p>
 						<img src="./img/rotate5.png" height="500px" style="border: none;" />
 						<aside class="notes">
+So after the logical & we see a single bit is left on in the first position with corresponds to document 4.
+This is because we filled right to left, based on our rotation.
 						</aside>
 					</section>
 					<section>
 						<h2>Results?</h2>
 						<p>This reduces the amount of RAM we need to access by a huge factor for larger bloom filters.</p>
-						<aside class="notes"></aside>
+						<aside class="notes">
+A huge factor. Something like 200x. We still need to be careful because of cache lines, but there are further tricks.
+						</aside>
 					</section>
 
 					<section>
@@ -715,10 +743,13 @@ func Add(item []bool) error {
 	return nil
 }
 </code></pre>
-					<aside class="notes">So given that lets build out bloom filter by adding documents.
-					
-What this does is takes in boolean slice, then checks if we need to add a new 
-block IE another batch of 64 documents, and then loops over the input setting the correct bits in the correct position.</aside>
+					<aside class="notes">
+So lets write code to pack our filters. This code packs in one bloom filter at a time into int64's
+right to left, and once hitting document 65 adds more empty ints so we can continue adding documents.
+
+As a result to add documents we need only turn them into trigrams, hash those into a normal bloom filter,
+and pass them into this. Very simple from a code perspective.
+					</aside>
 					</section>
 
 
@@ -747,16 +778,18 @@ block IE another batch of 64 documents, and then loops over the input setting th
 0000000000000000000000000000000001100011111100000000000000000000
 </code></pre>
 						<aside class="notes">
-						
-	This is done so as to not waste memory. In the code its done by packing 64 documents into a bloom filter block or bucket. 
+This is what it looks like in memory. We have a 16 bit bloom filter, with 16 int64's one after the other.
+We have added 32 documents to it, so only the right most 32 bits have anything set. 
+If we added another 32 documents the whole thing would look like the right side.
 
-	So if a bloom filter had 16 bits, we keep 16 int64's in a slice.
+Logically I call these a block or bucket.
 
-	It would look like what you see, and you can print it out if you modify the code.
-	This ensures we are optimally using the space. Because we pack 64 documents into each 
-	bucket we end up using a single bit per location in the bloom filter. No 8x waste!
+This ensures we are optimally using the space. Because we pack 64 documents into each 
+bucket we end up using a single bit per location in the bloom filter. No 8x waste!
 
-	It also becomes very fast to walk this because its a simple for loop. And we all know for loops go brrrr.
+It also becomes very fast to iterate this in code because its a simple for loop over a slice. 
+
+We all know for loops go brrrr.
 	</aside>
 					</section>
 			
@@ -789,6 +822,10 @@ block IE another batch of 64 documents, and then loops over the input setting th
                                               └──────────────────┘
 </code></pre>
 						<aside class="notes">
+However the fix is still a little wasteful because smaller documents don't need large filters.
+
+So we shard on the document length, where larger documents get larger bloom filters.
+
 	In searchcode its a little more in depth because it actually changes the size of the bloom filters 
 	based on the size of the document its indexing. Note I re
 
