@@ -30,8 +30,8 @@
 Good morning Sydney!
 Lovely to see everyone back for day two.
 Hope you are all caffinated and comfortable.
-As you can sort of see im talking about bloom filers and search.
-Don't worry if you are still sleepy im sure this talk will put you back to sleep soon.
+As you can mostly see im talking about bloom filers and search. Sorry about the clickbait title, but you gotta stand out in the 
+paper selection process somehow.
 					</aside>
 				</section>
 
@@ -133,20 +133,20 @@ While all of them are facinating in some way I am limiting myself to just the in
 						</li>
 						<li>Boolean queries</li>
  						<li>Single developer, time constrained</li>
-						<li>This is how I built an index... not necessarily how you should build one!</li>
 					</ul>
 					<aside class="notes">
 So we are building our own index.
 
 Now we need to consider the goals of searchcode.
-Firstly its free... this influences the design, because I don't need to worry about pesky customers.
-As such downtime is not a problem, if it goes for a while I don't really care.
+Firstly its free service... this influences the design, because I don't need to worry about pesky customers.
+As such downtime is not a problem, if it goes for a while no big issue.
 I want it to run on a single server, again downtime isnt important and it makes maintenance easier.
 When it comes to search.
 Turns out most people just type terms and expect results, VERY few people actually do boolean queries.
 The code needs to be understandable by me... this is where Go is really useful.
+Also I rewrote the site in Go and wanted to ship a single binary that does everything.
 
-Lastly, this is for you, this is how I built an index, not necessarily how you should build one.
+Lastly, and this is for you, this is how I built an index, not necessarily how you should build one.
 					</aside>
 				</section>
 
@@ -1004,15 +1004,16 @@ next before jumping to the next block, or skipping ahead where it finds nothing.
 					
 
 					<section>
-						<h2>Total Result</h2>
+						<h2>Final Result</h2>
 						<p>Rolling average index search time: ~50ms</p>
 						<p>140,000,000 to 180,000,000 files - roughly 75 billion lines</p>
-						<p>16 core AMD 5950x with 128 GB RAM; Index in ~100GB RAM</p>
+						<p>Index rougly ~100GB RAM</p>
 						<img src="./img/searchtime.png" style="border: none;" />
 
 						<aside class="notes">
 So whats the final result?
-So right now the average search for the index is about 50 milliseconds.
+So right now the average search time for the index is about 50 milliseconds. 
+This is from the seconds I was getting previously, and a massive improvement improving the service.
 This is generally over 140 to 180 million files, this changes depending on whats being indexed, due to 
 duplicate code detections and minfied file checks.
 The index aims to be 100 GB in size.
