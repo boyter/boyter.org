@@ -233,15 +233,14 @@ If someone wants to profile and improve performance on it I would really appreci
 It dominiates the indexing profile by a huge amount.</aside>
 					</section>
 					<section>
-					<img src="./img/nerdsniped.png" style="border: none;" />
-					<aside class="notes">
-Consider yourself nerd sniped.
-					</aside>
-				</section>
+						<img src="./img/nerdsniped.png" style="border: none;" />
+						<aside class="notes">
+	Consider yourself nerd sniped.
+						</aside>
+					</section>
 
 				</section>
-
-				
+			
 
 				<section>
 					<section>
@@ -545,12 +544,12 @@ If all are true we have a possible match. In this case document 4.
 							</li>
 						</ul>
 						<aside class="notes">
-Bloom filters have a lot going for them. They are compressed by nature, getting down to 9 bits per term.
-They are also really simple to implement. 
+Bloom filters searches have a lot going for them. They are compressed by nature, using a few bits per term added.
+They are also really simple to implement as you just saw, its only 5 lines of code.
 Adding is simple, just add a new filter.
-Editing is simple, just set some bits or replace the filter.
+Editing is simple, just fiddle some values or replace the filter.
 Searching is a really simple for loop.
-You can extend them using counting bloom filters for other purposes.
+You can extend them to counting bloom filters, or put structs for positions.
 						</aside>
 					</section>
 					<section>
@@ -628,8 +627,10 @@ bits.
 Because the bits are all within 512 bits of each other, we are likely to pull the entire filter across 
 the CPU.
 
-This is a big problem because accessing memory while fast isnt as fast as you expect. Modern CPU's can theoretically 
-push more than 100 GB across the CPU per second. 
+This is a big problem because accessing memory often isnt as fast as you expect. Modern CPU's can theoretically 
+push more than 100 GB across the CPU per second.
+
+In theory theory and practice are the same. In practice they arent.
 
 In reality you are more likely to get 50 GB. So if your index is 100 GB in size
 you are limited to 1 search every two seconds. 
