@@ -29,6 +29,7 @@
 					<aside class="notes">
 Good morning Sydney!
 Lovely to see everyone back for day two.
+Hope you are all caffinated and comfortable.
 As you can sort of see im talking about bloom filers and search.
 Don't worry if you are still sleepy im sure this talk will put you back to sleep soon.
 					</aside>
@@ -61,7 +62,6 @@ You can even skip ahead on the slides and head off for a coffee if you like. I w
 				<section>
 					<section>
 						<h2>PHP -> Python -> Java -> Go</h2>
-						<img src="./img/sphinx_manticore.png" style="border: none;" />
 						<img src="./img/searchcode.gif" height="500px;" style="border: none;" />
 						<aside class="notes">
 So I run searchcode.com which as the imaginative name would suggest searches over source code. 
@@ -76,10 +76,22 @@ Its a great testing ground where I can fail without too many problems. Yes I do 
 
 It indexes about 75 billion lines of code across 40 million projects.
 
+Incidently there has been a lot of talks about the importance of tests
+searchcode is very light on tests.
+It does however get enough traffic that I can say "Thank you internet for testing it for me!".
+						</aside>
+					</section>
+					<section>
+						<h2>The index</h2>
+						<img src="./img/sphinx_manticore.png" style="border: none;" />
+						<aside class="notes">
 But most of the time I have worked on it there was one constant, which was the index, provided using Sphinx
 early on and later a forked version of Sphinx called Manticore.
 
-But I had been feeling a bit like a fraud, how can I claim to be a search guy without 
+Both are fantastic pieces of sofware, but I was abusing them in ways beyond the creates intents and it 
+was causing uptime issues.
+
+Also I had been feeling a bit like a fraud, how can I claim to be a search guy without 
 using my own index. So early in 2020, I decided I would build my own.
 
 Of course the first step was to tell everyone this, so I informed the work slack channel, some friends
@@ -87,9 +99,6 @@ and the wife who is of course contractually obligated to listen to everything I 
 
 She responded with "thats nice".
 
-Incidently there has been a lot of talks about the importance of tests
-searchcode is very light on tests.
-It does however get enough traffic that I can say "Thank you internet for testing it for me!".
 						</aside>
 					</section>
 					<section>
@@ -1029,6 +1038,8 @@ The other is that Bloomfilters + Trigrams work really well. I actually asked cha
 I shouldn't use them. 
 Its also as far as I know unique approach with nobody having tried it before. Although nobody
 in the search space really talk about what they are doing.
+
+I have also uploaded a minimal version of everything for you to download and play around with.
 					</aside>
 				</section>
 
