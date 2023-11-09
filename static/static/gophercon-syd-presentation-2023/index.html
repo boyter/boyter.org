@@ -62,6 +62,7 @@ You can even skip ahead on the slides and head off for a coffee if you like. I w
 				<section>
 					<section>
 						<h2>PHP -> Python -> Java -> Go</h2>
+						<p><a href="https://searchcode.com/">searchcode.com</a></p>
 						<img src="./img/searchcode.gif" height="500px;" style="border: none;" />
 						<aside class="notes">
 So I run searchcode.com which as the imaginative name would suggest searches over source code. 
@@ -76,7 +77,7 @@ Its a great testing ground where I can fail without too many problems. Yes I do 
 
 It indexes about 75 billion lines of code across 40 million projects.
 
-Incidently there has been a lot of talks about the importance of tests
+Incidently there has been a lot of talks about the importance of tests here so far.
 searchcode is very light on tests.
 It does however get enough traffic that I can say "Thank you internet for testing it for me!".
 						</aside>
@@ -94,17 +95,18 @@ was causing uptime issues.
 Also I had been feeling a bit like a fraud, how can I claim to be a search guy without 
 using my own index. So early in 2020, I decided I would build my own.
 
-Of course the first step was to tell everyone this, so I informed the work slack channel, some friends
+Of course the first step was to doing anything is to boast about it to everyone, 
+so I informed the work slack channel, some friends
 and the wife who is of course contractually obligated to listen to everything I say.
 
 She responded with "thats nice".
-
 						</aside>
 					</section>
 					<section>
 						<p>early termination, syntax highlighting, matching, snippet extraction, 
 rate limiting, <strong>index</strong>, bot detection, ranking, distributed algorithms, caching, tokenization,
-string searching, regular expressions, data structures, line detection, CPU cache lines, duplicate detection etc...</p>
+string searching, regular expressions, data structures, line detection, CPU cache lines, duplicate detection, 
+literal extraction etc...</p>
 <aside class="notes">
 Here are some of the things that go into any search engine.
 
@@ -1031,8 +1033,8 @@ they don't deal with trigrams, have some additional tricks they implemented, and
 So conclusions.
 I doubt I could have done this in another language. 
 I like Go. I don't love it, it doesnt push the happy parts of my brain the way Python for example does.
-But it just get out of the way, and while I want to hurt myself every time I write another err nil check...
-I realise I solved the problem... fairly quickly... the solution was solid and just move on.
+But it just gets out of the way, and while I want to hurt myself every time I write another err nil check...
+I realise I solved the problem... fairly quickly... the solution was solid and understandable and I just move on.
 
 The other is that Bloomfilters + Trigrams work really well. I actually asked chatgpt about this and it suggested
 I shouldn't use them. 
