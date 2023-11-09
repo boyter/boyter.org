@@ -26,9 +26,7 @@
 			<div class="slides">
 				<section>
 					<h1>Bloom Filters: Building a Cutting Edge Go Search Engine to Explore the World's Source Code</h1>
-					<!--<a href="https://github.com/boyter/indexer">https://github.com/boyter/indexer</a>
-					<p>Go get a copy of the above!</p>-->
-					<aside class="notes">So as part of the interactive theme, id suggest everyone go and get a copy of the above. Or just go hammer searchcode.com with stuff.</aside>
+					<aside class="notes"></aside>
 				</section>
 
 				<section>
@@ -36,8 +34,9 @@
 						<h2>Who are you?</h2>
 						<p>
 						"Officially" technical lead/principle at Kablamo but a "code monkey" at heart.</p>
-						<p>I blog <a href="https://boyter.org/">boyter.org</a> I free software <a href="https://github/boyter/">github/boyter/</a> I run <a href="https://searchcode.com/">searchcode.com</a> also on the twitter <a href="https://twitter.com/boyter">@boyter</a> activitypub <a href="https://honk.boyter.org/boyter">@boyter@honk.boyter.org</a></p>
-						<aside class="notes">Not going to bore you too much with who I am because you don't care.
+						<p>I blog <a href="https://boyter.org/">boyter.org</a> I free software <a href="https://github/boyter/">github/boyter/</a> I run <a href="https://searchcode.com/">searchcode.com</a> also on the twitter.com <a href="https://twitter.com/boyter">@boyter</a> activitypub <a href="https://honk.boyter.org/boyter">@boyter@honk.boyter.org</a></p>
+						<aside class="notes">
+Not going to bore you too much with who I am because you don't care.
 						</aside>
 					</section>
 					<section>
@@ -64,21 +63,20 @@ github, gitlab, bitbucket, codeberg, sr.ht and such.
 Its sort of a serious side project, where I get to have a wonderful time working on neat algorithms.
 It gets enough traffic to make it interesting. The thing I love is that every part of it from,
 
-index, early termination, syntax highlighting, matching, snippet extraction, 
-rate limiting, bot detection, ranking, distributed algorithsm, caching... 
-every part is one of those problems you lightly scratch and discover
-people getting PhD's in. So there is a lot of width and depth to learn about.
-
 Which is nice compared to the usual code golf I get to deal with. Im sure if I fiddle with this a bit more
 I can reduce to code count by a third!
 
 The whole time that has happened one thing has been constant, which was the use of the 
 index engine, which was provided using Sphinx Search and then a forked version called Manticore. Both
 are great products, and if their capabilities fit into what you need are amazing. I was abusing them
-in ways that were causing issue.s
+in ways that were causing issue.
 
 I had been feeling a bit like a fraud, how can I claim to be a search guy without 
 using my own index. So after the early in 2020, I decided I would build my own.
+
+
+So there has been a lot of talks about tests so far at gopercon. So you won't be happy to know searchcode
+has relatively few tests. Thank you internet for testing it for me!
 						</aside>
 					</section>
 					<section>
@@ -87,7 +85,12 @@ rate limiting, <strong>index</strong>, bot detection, ranking, distributed algor
 string searching, regular expressions, data structures, cache lines etc...</p>
 					</section>
 					<aside class="notes">
-As mentioned here are some of the things that go into a search engine.
+index, early termination, syntax highlighting, matching, snippet extraction, 
+rate limiting, bot detection, ranking, distributed algorithsm, caching... 
+
+
+Every part is one of those problems you lightly scratch and discover
+people getting PhD's in. So there is a lot of width and depth to learn about.
 
 I could probably talk all day about it but am limited to just the index today. 
 					</aside>
@@ -918,7 +921,7 @@ func doSearch() { // only 5 instances of this function can run
 This one seems counter intuitive. 
 
 But the thing is when it comes to processes that are really pushing system limits, doing things in serial
-to an extent can be faster. 
+to an extent can be faster for users. 
 
 For search, imagine each query takes one second. Process in parallel and if 10 requests come in, they all
 get a result 10 seconds later. Do it in serial and one user gets it in 1 second, the second in 2 etc.. to 10.
@@ -989,8 +992,9 @@ Once we have these id its a matter of reaching out to our primary data store, pu
 					<section>
 						<h2>Grand Total Result</h2>
 						<p>Rolling average index search time: ~50ms</p>
-						<p>140,000,000 to 180,000,000 files</p>
-						<p>~100GB RAM</p>
+						<p>140,000,000 to 180,000,000 files - roughly 75 billion lines</p>
+						<p>Index in ~100GB RAM</p>
+						<p>16 core AMD 5950x with 128 GB RAM</p>
 						<img src="./img/searchtime.png" style="border: none;" />
 
 
@@ -1014,12 +1018,15 @@ Once we have these id its a matter of reaching out to our primary data store, pu
 					<p>Go. I doubt I could have done it in another language. I still don't like nil checks.</p>
 					<p>Bloomfilters + Trigrams works well. As far as I know this is globally unique. Nobody else I know uses this approach.</p>
 					<p>Dealing with false positives from the filters isnt a deal breaker due to trigrams.</p>
-					<aside class="notes">As you can see its a short bit of code. Only about 150 lines. I really encourage you to have a look and play with it.</aside>
+					<p></p>
+					<aside class="notes">
+As you can see its a short bit of code. Only about 150 lines. 
+I really encourage you to have a look and play with it.</aside>
 				</section>
 
 				<section>
 					<h2>Thank You!</h2>
-					<p>Probably nobody cases how searchcode works, but I care, and I know. Now you do too.</p>
+					<p>Users probably don't cares how searchcode works, but I know. Now you do too.</p>
 					<img src="./img/gopher.png" height="500px" style="border: none;" /><br>
 					<a href="https://searchcode.com/">https://searchcode.com/</a><br>
 					<a href="https://boyter.org/posts/how-i-built-my-own-index-for-searchcode/">https://boyter.org/posts/how-i-built-my-own-index-for-searchcode/</a><br>
@@ -1030,9 +1037,7 @@ backed index with ideas borrowed from bing. Even if I am fairly sure this is the
 
 But I know... and now you do too.
 
-Now if you want one of these great looking stickers designed in house at Kablamo, 
-come talk to myself or anyone else at the Kablamo desk and get one. Feel free to tell me 
-all the mistakes I made too.
+Thank you.
 					</aside>
 				</section>
 
