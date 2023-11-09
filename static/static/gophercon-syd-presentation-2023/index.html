@@ -84,13 +84,15 @@ It does however get enough traffic that I can say "Thank you internet for testin
 					</section>
 					<section>
 						<h2>The index</h2>
+						<p>My personal shame</p>
 						<img src="./img/sphinx_manticore.png" style="border: none;" />
 						<aside class="notes">
 But most of the time I have worked on it there was one constant, which was the index, provided using Sphinx
 early on and later a forked version of Sphinx called Manticore.
 
-Both are fantastic pieces of sofware, but I was abusing them in ways beyond the creates intents and it 
-was causing uptime issues.
+Both are fantastic pieces of sofware, but I was abusing them in ways beyond the creators intents and it 
+was causing uptime issues. Searches were taking 10's of seconds, it was consuming all the CPU 
+and memory on the box and it was no longer a good solution. 
 
 Also I had been feeling a bit like a fraud, how can I claim to be a search guy without 
 using my own index. So early in 2020, I decided I would build my own.
@@ -106,7 +108,7 @@ She responded with "thats nice".
 						<p>early termination, syntax highlighting, matching, snippet extraction, 
 rate limiting, <strong>index</strong>, bot detection, ranking, distributed algorithms, caching, tokenization,
 string searching, regular expressions, data structures, line detection, CPU cache lines, duplicate detection, 
-literal extraction etc...</p>
+literal extraction, unicode, case insensitive matching etc...</p>
 <aside class="notes">
 Here are some of the things that go into any search engine.
 
@@ -164,12 +166,14 @@ So one thing I need to cover is tokenisation. This is where you convert text int
 Generally tokenisation is splitting on space characters you find in text.
 But can get more complex.
 Space splitting doesnt work on east asian languages for example.
-This does not work for code either and if I want to search for i++ in the middle of code I should be allowed dammit.
+This does not work for code either and if you want to search for i++ in the middle of code thats valid
+and should work.
 							</aside>
 					</section>
 					<section>
 						<h2>Searching code: Tokenisation</h2>
 						<p>Trigrams</p>
+						<small>This works for east asian languages too</small>
 <pre><code style="font-size: 18px; line-height: 1em;">"searchcode"   -> [sea, ear, arc, rch, chc, hco, cod, ode]
 "pppppppppppp" -> [ppp]
 </code></pre>
@@ -252,7 +256,7 @@ which refer to documents that likely contain those terms, possibly ordered by re
 					</section>
 					<section>
 						<h2>Textbook 101 index</h2>
-						<p>Average CS textbook example</p>
+						<p>2 examples, positional and non-positional</p>
 
 <pre><code style="font-size: 14px; line-height: 1em;">package main
 
@@ -308,7 +312,7 @@ This takes a long time for the longer lists.
 
 This gets worse when you add more common terms to the query, or you add more documents.
 
-To solve this you end up using a data structure called skip list to speed this process up.
+To solve this you end up using a data structure called "skip list" to speed this process up.
 						</aside>
 					</section>
 					<section>
