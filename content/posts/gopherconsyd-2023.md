@@ -1,6 +1,6 @@
 ---
 title: GopherConSyd 2023 - All slides, notes and links
-date: 2123-11-09
+date: 2023-11-09
 ---
 
 Welcome. If you are reading this you either follow me on RSS, watch my blog or were directed here at the start of my GopherConSyd 2023 talk about "Bloom Filters: Building a Cutting Edge Go Search Engine to Explore the World's Source Code". Whatever the case may be, welcome!
