@@ -13,4 +13,8 @@ In no particular order a list of Go libraries/packages I really like and some re
 - [gjson](https://github.com/tidwall/gjson) A simple way to get values out of JSON without needing to unmarshall into a struct. Really useful for tests, as well as annoying API's that have mixed data types.
 - [mux](https://github.com/gorilla/mux) The inbuilt Go router isn't horrible, but is painful to use. This one supports path variables, and you can specify which http methods it uses.
 
+The below are things I am exploring, but not sold on yet.
+
+- [mockio](https://github.com/ovechkin-dm/mockio) I am fond of saying that there is nothing like Java's Mockito in Go... however this claims to be something like it. I am still testing it, but it looks promising.
+
 I fully expect this to be a living document with other useful packages I like added over time.
