@@ -12,6 +12,7 @@ In no particular order a list of Go libraries/packages I really like and some re
 - [templ](https://github.com/a-h/templ) HTML template language for Go. There is nothing you can do in this that you cannot in Go templates, but you get compile time checks of the code rather than actually having to run it. It also means you don't need to worry about embedding template (although this is fairly easy these days anyway). Works really well with HTMX.
 - [gjson](https://github.com/tidwall/gjson) A simple way to get values out of JSON without needing to unmarshall into a struct. Really useful for tests, as well as annoying API's that have mixed data types.
 - [mux](https://github.com/gorilla/mux) The inbuilt Go router isn't horrible, but is painful to use. This one supports path variables, and you can specify which http methods it uses.
+- [sqlc](https://github.com/sqlc-dev/sqlc) Generate type safe Go code to access your database. Of all the DB layer abstractions I have used this is best. Its similar to something I wrote in PHP over a decade ago, although much better.
 
 The below are things I am exploring, but not sold on yet.
 
