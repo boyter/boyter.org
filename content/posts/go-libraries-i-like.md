@@ -17,5 +17,6 @@ In no particular order a list of Go libraries/packages I really like and some re
 The below are things I am exploring, but not sold on yet.
 
 - [mockio](https://github.com/ovechkin-dm/mockio) I am fond of saying that there is nothing like Java's Mockito in Go... however this claims to be something like it. I am still testing it, but it looks promising.
+- [cleanenv](github.com/ilyakaznacheev/cleanenv) Simple way to deal with env variables.
 
 I fully expect this to be a living document with other useful packages I like added over time.
