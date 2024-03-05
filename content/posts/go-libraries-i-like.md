@@ -13,6 +13,7 @@ In no particular order a list of Go libraries/packages I really like and some re
 - [gjson](https://github.com/tidwall/gjson) A simple way to get values out of JSON without needing to unmarshall into a struct. Really useful for tests, as well as annoying API's that have mixed data types.
 - [mux](https://github.com/gorilla/mux) The inbuilt Go router isn't horrible, but is painful to use. This one supports path variables, and you can specify which http methods it uses.
 - [sqlc](https://github.com/sqlc-dev/sqlc) Generate type safe Go code to access your database. Of all the DB layer abstractions I have used this is best. Its similar to something I wrote in PHP over a decade ago, although much better.
+- [xurls](https://github.com/mvdan/xurls) The number of times I have gone looking for a URL regex only to find it misses some edge case... This solves a lot of that pain, especially when it comes to extracting them out of text.
 
 The below are things I am exploring, but not sold on yet.
 
