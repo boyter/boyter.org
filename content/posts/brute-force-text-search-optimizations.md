@@ -130,4 +130,4 @@ Benchmark_bruteSearchOptimize-8       18040      62702 ns/op
 PASS
 ```
 
-I am not going to lie this is a far more impressive result than I expected. It appears no only does this technique save on memory it also is considerably faster to search across. While there is a one off cost on the initial construction in memory, for documents that aren't as long as Pride and Prejudice it's a small cost.
+I am not going to lie this is a far more impressive result than I expected. It appears not only does this technique save on memory it is also considerably faster to search across. While there is a one off cost on the initial construction in memory, for documents that aren't as long as Pride and Prejudice it's a small one, and possibly worth it.
