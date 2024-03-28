@@ -1,6 +1,6 @@
 ---
 title: Running a Mac Mini M2 as a home server
-date: 2024-03-20
+date: 2054-03-20
 ---
 
 I have always dabbled in running a home server. I ran a AMD Phenom system at home for a long time, but eventually I gave it up due to the power usage and the noise. The fans are one problem you can solve but it had spinning HDD's and a low wife appreciation factor.
