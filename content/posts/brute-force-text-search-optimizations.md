@@ -48,7 +48,7 @@ A somewhat slow (depending on your input size) function to achieve this follows.
 func bruteSearchOptimize(input string) string {
     tokens := strings.Fields(input)
     var sb strings.Builder
-    skipTokens := map[string]interface{}{}
+    skipTokens := map[string]struct{}{}
     for i := 0; i < len(tokens); i++ {
         tok := tokens[i]
         foundLonger := false
@@ -58,7 +58,7 @@ func bruteSearchOptimize(input string) string {
         if ok {
             continue
         }
-        skipTokens[tok] = true
+        skipTokens[tok] = struct{}{}
 
         for j := i; j < len(tokens); j++ {
             tok2 := tokens[j]
