@@ -61,7 +61,7 @@ You can even skip ahead on the slides and head off for a coffee if you like. I w
 
 				<section>
 					<section>
-						<h2>Lets talk search engines</h2>
+						<h2>My hobby; search engines</h2>
 						<p><a href="https://searchcode.com/">searchcode.com</a></p>
 						<img src="./img/searchcode.gif" height="500px;" style="border: none;" />
 						<aside class="notes">
@@ -93,30 +93,8 @@ Do it at compile time.
 					</section>
 
 					<section>
-						<h2>The index</h2>
-						<p>My personal shame</p>
-						<img src="./img/sphinx_manticore.png" style="border: none;" />
-						<aside class="notes">
-But most of the time I have worked on it there was one constant, which was the index, provided using Sphinx
-early on and later a forked version of Sphinx called Manticore.
-
-Both are fantastic pieces of sofware, but I was abusing them in ways beyond the creators intents and it 
-was causing uptime issues. Searches were taking 10's of seconds, it was consuming all the CPU 
-and memory on the box and it was no longer a good solution. 
-
-Also I had been feeling a bit like a fraud, how can I claim to be a search guy without 
-using my own index. So early in 2020, I decided I would build my own.
-
-Of course the first step was to doing anything is to boast about it to everyone, 
-so I informed the work slack channel, some friends
-and the wife who is of course contractually obligated to listen to everything I say.
-
-She responded with "thats nice".
-						</aside>
-					</section>
-					<section>
 						<p>early termination, syntax highlighting, matching, snippet extraction, 
-rate limiting, <strong>index</strong>, bot detection, ranking, distributed algorithms, caching, tokenization,
+rate limiting, index, bot detection, ranking, distributed algorithms, caching, tokenization,
 string searching, regular expressions, data structures, line detection, CPU cache lines, duplicate detection, 
 literal extraction, unicode, case insensitive matching etc...</p>
 <aside class="notes">
@@ -124,133 +102,12 @@ Here are some of the things that go into any search engine.
 
 Every part you see is one of those problems you lightly scratch and discover
 people getting PhD's in. So it constantly keeps me interested and learning.
-
-While all of them are facinating in some way I am limiting myself to just the index today.
 					</aside>
 					</section>
 				</section>
 
-				<section>
-					<h2>Considerations</h2>
-					<ul>
-						<li>Free service
-							<ul>
-								<li>Put everything in RAM</li>
-								<li>Downtime not a huge issue</li>
-								<li>Single server</li>
-								<li>Single binary, no daemons!</li>
-							</ul>
-						</li>
-						<li>Boolean queries</li>
- 						<li>Single developer, time constrained</li>
-					</ul>
-					<aside class="notes">
-So we are building our own index.
-
-Now we need to consider the goals of searchcode.
-Firstly its free service... this influences the design, because I don't need to worry about pesky customers.
-As such downtime is not a problem, if it goes for a while no big issue.
-I want it to run on a single server, again downtime isnt important and it makes maintenance easier.
-When it comes to search.
-Turns out most people just type terms and expect results, VERY few people actually do boolean queries.
-The code needs to be understandable by me... this is where Go is really useful.
-Also I rewrote the site in Go and wanted to ship a single binary that does everything.
-
-Lastly, and this is for you, this is how I built an index, not necessarily how you should build one.
-					</aside>
-				</section>
-
-				<section>
-					<section>
-							<h2>Searching: Tokenisation</h2>
-							<p>Mapping / Stemming</p>
-	<pre><code style="font-size: 18px; line-height: 1em;">
-"searchcode"         -> [searchcode]
-"sydney gophercon"   -> [sydney, gophercon]
-"likes liked likely" -> [like]
-	</code></pre>
-	<p>Does not work for code!</p>
-	<pre><code style="font-size: 18px; line-height: 1em;">for(i=0;i++;i&lt;100)</pre></code>
-							<aside class="notes">
-So one thing I need to cover is tokenisation. This is where you convert text into something you can index.
-Generally tokenisation is splitting on space characters you find in text.
-But can get more complex.
-Space splitting doesnt work on east asian languages for example.
-This does not work for code either and if you want to search for i++ in the middle of code thats valid
-and should work.
-							</aside>
-					</section>
-					<section>
-						<h2>Searching code: Tokenisation</h2>
-						<p>Trigrams</p>
-						<small>This works for east asian languages too</small>
-<pre><code style="font-size: 18px; line-height: 1em;">"searchcode"   -> [sea, ear, arc, rch, chc, hco, cod, ode]
-"pppppppppppp" -> [ppp]
-</code></pre>
-						<aside class="notes">
-You can solve this problem by splitting on trigrams, this is where you break the text apart into characters of 3 
-and index those. 
-
-One catch with this is that you get false positives, some inputs generate the same 
-trigrams despite being different. You also have terms with low cardinality such 
-as repeated characters in a line. So the letter p repeated 100 times is no more useful than 3 of them. 
-They produce the same trigram.
-						</aside>
-					</section>
-					<section>
-						<h2>Problems</h2>
-						<p>Creates long posting lists</p>
-						<p>Introduces false positives</p>
-<pre><code style="font-size: 18px; line-height: 1em;">"searchcode" -> [searchcode]</code></pre>
-						<p>vs</p>
-
-
-<pre><code style="font-size: 18px; line-height: 1em;">"searchcode" -> [sea, ear, arc, rch, chc, hco, cod, ode]
-</code></pre>
-						<aside class="notes">
-Trigrams have their own problems.
-If we tokenise by trigrams we get a great deal more tokens we need to index. In our example 
-searchcode turns into 8 terms we need to add to our index, vs a single thing we would need if we treated
-it as plain space delimited text. This is an important consideration, because it enlarges the index a great deal.
-						</aside>
-					</section>
-					<section>
-						<h2>Trigram Generation<h2>
-<pre><code style="font-size: 14px; line-height: 1em;">func Trigrams(text string) []string {
-	var runes = []rune(text)
-
-	if len(runes) <= 2 {
-		return []string{}
-	}
-
-	ngrams := make([]string, len(runes)-2)
-
-	for i := 0; i < len(runes); i++ {
-		if i+3 < len(runes)+1 {
-			ngram := runes[i : i+3]
-			ngrams[i] = string(ngram)
-		}
-	}
-
-	return ngrams
-}
-</code></pre>
-					<aside class="notes">
-So here is some code to create trigrams given some input text.
-
-Interesting fact, this is by far the single biggest bottleneck in searchcode when indexing.
-If someone wants to profile and improve performance on it I would really appreciate it. 
-It dominiates the indexing profile by a huge amount.</aside>
-					</section>
-					<section>
-						<img src="./img/nerdsniped.png" style="border: none;" />
-						<aside class="notes">
-	Consider yourself nerd sniped.
-						</aside>
-					</section>
-
-				</section>
-			
+		
+	
 
 				<section>
 					<section>
@@ -793,155 +650,9 @@ It also means when we do our & operation we are now searching 64 documents for e
 	</aside>
 					</section>
 			
-					<section>
-						<h2>Sharding</h2>
-						<p>Shard based on the length of the document we want to index.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">0000000100000000 // underfilled bloom filter
-1011111111111110 // overfilled bloom filter</code></pre>
-						<p>Result? Less wasted space. Squeeze every bit.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">
-┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
-│      index       ├─┬▶│  shard 512 bits  ├┬─▶│  block-1 64 docs │
-└──────────────────┘ │ └──────────────────┘│  └──────────────────┘
-                     │                     │                      
-                     │                     │  ┌──────────────────┐
-                     │                     ├─▶│  block-2 64 docs │
-                     │                     │  └──────────────────┘
-                     │                     │                      
-                     │                     │  ┌──────────────────┐
-                     │                     └─▶│  block-3 64 docs │
-                     │                        └──────────────────┘
-                     │                                            
-                     │                                            
-                     │ ┌──────────────────┐   ┌──────────────────┐
-                     └▶│  shard 1024 bits ├┬─▶│  block-1 64 docs │
-                       └──────────────────┘│  └──────────────────┘
-                                           │                      
-                                           │  ┌──────────────────┐
-                                           └─▶│  block-2 64 docs │
-                                              └──────────────────┘
-</code></pre>
-						<aside class="notes">
-However the fix is still a little wasteful because smaller documents don't need large bloom filters.
+					
+					
 
-So we shard on the document length, where larger documents are added to larger bloom filters.
-
-What happens is when a document is indexed, it broken into unique trigrams, and allocated 
-bloom filter thats size is appropiate to keep a certain bit density. 
-
-This is done to avoid over filling the filters, which drives up the false positive rate,
-or under filling them and wasting memory.
-
-This sort of represents how things look in memory.
-
-Shards have a different bloom filter size, say 512 or 1048 bits, and all blocks exist as a 
-single int slice in a shard. Each block contains 64 documents, but all exist in a single slice.
-						</aside>
-					</section>
-					<section>
-						<h2>Copy the shards after indexing</h2>
-						<p>Result? Less fragmented memory, faster search.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">// attempt to save/organise memory shrink lists... https://go.dev/blog/slices-intro#TOC_6
-out := make([]int64, len(bloomFilter))
-copy(out, bloomFilter)
-bloomFilter = out
-</code></pre>
-						<aside class="notes">
-So when you are working with really large slices, and you constantly append to them, like searchcode does you can 
-get a great deal of value copying it over itself with a new slice you allocate up front.
-
-The result is less memory fragmentration, which in our case means a faster search.
-						</aside>
-					</section>
-					<section>
-						<h2>Frequency Concious Bloom Filter</h2>
-						<p>Rare terms need more hashes to reduce false positive rate</p>
-
-<pre><code style="font-size: 14px; line-height: 1em;">func (ci *CaissonIndex) DetermineHashCount(ngram string) int {
-	// version 0.1
-	// if nothing that indicates its a very rare term so it needs the most hashes
-	// so set that up as the default
-	hashCount := 5
-
-	v, ok := ci.termTreatments[ngram]
-	if ok {
-		weight := float64(v) / float64(ci.highestTermCount) * 100
-
-		if weight >= 10 {
-			hashCount = 1
-		} else if weight >= 5 {
-			hashCount = 2.5
-		} else if weight >= 2 {
-			hashCount = 3
-		} else if weight >= 1.5 {
-			hashCount = 4
-		}
-	}
-
-	return hashCount
-}
-</code></pre>
-						<aside class="notes">
-In bitfunnel one of the thing they implemented was Frequency Concious Bloom Filters.
-The reason for this is terms like "the" appear in almost every document. So you can get away with
-false positive matches on it, because its likey it was in the document anyway. 
-However "assvogel" appears in almost none so you want more hashes to drive
-its false positive rate down.
-
-Dont overthink it, just remember rarer terms need more hashes.
-
-This is an early prototype function I had for it... I itereated on this more than I care to admit.
-						</aside>
-					</section>
-
-					<section>
-						<h2>Result?</h2>
-						<p>Wasted time... For trigrams anyway</p>
-						<p>New algorithm is mind blowing.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">func DetermineHashCount(ngram string) int {
-	return 2
-}
-</code></pre>
-						<aside class="notes">
-The result was a lot of wasted time actually.
-
-I found this out by testing different fixed hash counts from 1 to 10 against the frequency concious ones
-against a dozen different sized bloom filters looking for the lowest false positive rate over after indexing
-several million lines of code.
-
-In almost every case 2 hashes worked out to give the best possible signal to noise ratio. I suspect this is due to
-trigrams being fairly common across all code with none being particiually unique unlike natural language.
-						</aside>
-					</section>
-
-					<section>
-						<h2>Restrict Parallelism</h2>
-						<p>Parallelism works... if you have CPU to spare</p>
-<pre><code style="font-size: 14px; line-height: 1em;">var sem = make(chan bool, 5) // counting semaphore
-
-func doSearch() { // only 5 instances of this function can run
-	sem <- true
-		defer func() {
-		<- sem
-	}()
-
-	// Do CPU/Memory intensive stuff here
-}
-</code></pre>
-						<aside class="notes">
-This one seems counter intuitive. 
-
-But the thing is when it comes to processes that are really pushing system limits, doing things in serial
-to an extent can be faster for users. 
-
-Imagine each query takes one second. Process in parallel and if 10 requests come in, they all
-get a result 10 seconds later. Do it in serial and one user gets it in 1 second, the second in 2 etc.. to 10.
-
-This is where I really like Go functionality. I remember writing a counting semaphore in C# once and it was
-a horrible bug ridden thing. To have something so simple in Go using using channels just speaks to  
-amazing language design.
-						</aside>
-					</section>
 					<section>
 						<h2>Searching</h2>
 						<p>The core loop.</p>
@@ -995,11 +706,7 @@ Results when returned gives ids, which we can then use to get the document itsel
 The best part is that this is a simple for loop over a slice of ints, and as we all know for loops go brrrr
 	</aside>
 					</section>
-					<section>
-						<img src="./img/brr.png" height="500px" style="border: none;" /><br>
-						<aside class="notes">
-						</aside>
-					</section>
+					
 					<section>
 						<h2>Searching: Visually</h2>
 						<p>Perform & between each row, and if we see 0 skip to next block</p>
@@ -1012,32 +719,6 @@ next before jumping to the next block, or skipping ahead where it finds nothing.
 					</section>
 
 					
-
-					<section>
-						<h2>Final Result</h2>
-						<p>Rolling average index search time: ~50ms</p>
-						<p>140,000,000 to 180,000,000 files - roughly 75 billion lines</p>
-						<p>Index rougly ~100GB RAM</p>
-						<img src="./img/searchtime.png" style="border: none;" />
-
-						<aside class="notes">
-So whats the final result?
-So right now the average search time for the index is about 50 milliseconds. 
-This is from the seconds I was getting previously, and a massive improvement improving the service.
-This is generally over 140 to 180 million files, this changes depending on whats being indexed, due to 
-duplicate code detections and minfied file checks.
-The index aims to be 100 GB in size.
-
-You can actually see how long any search took by looking at the source where it will print out 
-the time taken to do everything to render the page.
-
-This is not as fast as the times reported by bitfunnel, but they are using highly optimised C++,
-they don't deal with trigrams, have some additional tricks they implemented, and most importantly
- actually know what they are doing
-
-						</aside>
-
-					</section>
 				</section>
 					
 				<section>
