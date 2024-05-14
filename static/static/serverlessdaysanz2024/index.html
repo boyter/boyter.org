@@ -62,7 +62,19 @@ You can even skip ahead on the slides and head off for a coffee if you like. I w
 				<section>
 					<section>
 						<h2>My hobby; search engines</h2>
-						<p><a href="https://searchcode.com/">searchcode.com</a></p>
+							<p>early termination, syntax highlighting, matching, snippet extraction, 
+	rate limiting, index, bot detection, ranking, distributed algorithms, caching, tokenization,
+	string searching, regular expressions, data structures, line detection, CPU cache lines, duplicate detection, 
+	literal extraction, unicode, case insensitive matching etc...</p>
+	<aside class="notes">
+	Here are some of the things that go into any search engine.
+
+	Every part you see is one of those problems you lightly scratch and discover
+	people getting PhD's in. So it constantly keeps me interested and learning.
+						</aside>
+					</section>
+					<section>
+						<h2>searchcode.com</h2>
 						<img src="./img/searchcode.gif" height="500px;" style="border: none;" />
 						<aside class="notes">
 So at the time I was building a new index for searchcode from scratch. 
@@ -71,17 +83,29 @@ asked why I didn't use AWS as generally for work everything lands there.
 I mentioned something to the effect that you needed a lot of persistent storage, 
 or RAM to keep the index around which is prohibitively expensive. 
 
-He mentioned perhaps using Lambda? And I responded its lack of persistance is a problem… 
+He mentioned perhaps using Lambda? And I responded its lack of persistance is a problem.
+						</aside>
+					</section>
 
-At that point I trailed off. Something occurred to me.
-
+					<section>
+						<h2>Lambda/Serverless Weaknesses</h2>
+						<ul>
+							<li>Persistance</li>
+							<li>Performance</li>
+						</ul>
+						<aside class="notes">
 Lamba's or any other serverless function on cloud work well for certain problems. 
 So long as you can rebuild state inside the lambda, because there is no guarantee it 
-will still be running next time the lambda executes. The lack of persistance is an issue because modern search engines need to have some level of it. You either store the index in RAM, as most modern search engines do, or on disk.
+will still be running next time the lambda executes. The lack of persistance is an issue 
+because modern search engines need to have some level of it. 
+You either store the index in RAM, as most modern search engines do, or on disk.
+
+At that point I trailed off. Something occurred to me.
 
 Without persistance it makes lambda a non starter. But, there is a saying in computing.
 						</aside>
 					</section>
+
 					<section>
 						<blockquote>Never do at runtime what you can do at compile time.</blockquote>
 						<aside class="notes">
@@ -91,25 +115,42 @@ In other words, generate code which contains the index and compile that into the
 Do it at compile time.
 						</aside>
 					</section>
-
-					<section>
-						<p>early termination, syntax highlighting, matching, snippet extraction, 
-rate limiting, index, bot detection, ranking, distributed algorithms, caching, tokenization,
-string searching, regular expressions, data structures, line detection, CPU cache lines, duplicate detection, 
-literal extraction, unicode, case insensitive matching etc...</p>
-<aside class="notes">
-Here are some of the things that go into any search engine.
-
-Every part you see is one of those problems you lightly scratch and discover
-people getting PhD's in. So it constantly keeps me interested and learning.
-					</aside>
-					</section>
 				</section>
 
-		
-	
+
 
 				<section>
+					<section>
+						<h2>Proving the theory</h2>
+						<pre><code style="font-size: 14px; line-height: 1em;">package main
+
+func main() {
+	index := []string{
+		"Memcached vs Redis - More Different Than You Would Expect",
+		"You Don't Need a Library for File Walking in Go",
+		// ... 99,997 more ...
+		"Lessons Learnt Building for the Atlassian Marketplace",
+	}
+
+	for _, x := range index {
+		strings.Contains(x, "searchterm")
+	}
+}
+</code></pre>
+						
+						<aside class="notes">
+So the first thing I considered was putting content directly into lambda’s, and then brute force 
+searching across that content. Considering our guess of storing ~100,000 items in a lambda, a modern 
+CPU brute force string searching in memory should return in a few hundred milliseconds. Modern CPU’s are very fast.
+
+So I tried it. I created a Go file with 100,000 strings in a slice, and then wrote a simple loop 
+to run over that performing a search.
+
+Alas I underestimated how weak the CPU allotted to a lambda is, and searches took several seconds. 
+Even increasing the RAM to improve the CPU allotment didn't really help. My fallback plan was to
+ embed an index into the lambda, allowing for a quick scan over that index before looking at the content directly.
+						</aside>
+					</section>
 					<section>
 						<h2>What is an index?</h2>
 						<p>Structured list. Keys point at data so searches are faster.</p>
@@ -122,28 +163,18 @@ which refer to documents that likely contain those terms, possibly ordered by re
 					</section>
 					<section>
 						<h2>Textbook 101 index</h2>
-						<p>2 examples, positional and non-positional</p>
 
 <pre><code style="font-size: 14px; line-height: 1em;">package main
 
 func main() {
-	// non-positional index
 	index := map[string][]int{} 
-	index["gopher"] = append(index["gopher"], 1337)
-
-	// positional index
-	type pos struct {
-		id  int   // unique document id
-		loc []int // store document positions in posting list
-	}
-	posIndex := map[string][]pos{} 
-	posIndex["gopher"] = append(posIndex["gopher"], pos{1337, []int{1, 2, 3, 99}})
+	index["serverless"] = append(index["serverless"], 1337)
 }
 </code></pre>
 
 						<aside class="notes">
 So here is the textbook 101 example.
-Given a term in this case "gopher" lets index it. 
+Given a term in this case "serverless" lets index it. 
 
 The first index here is a non positional index. Its just a map of string to slice of integers.
 Strings are the terms and integers the document ids.
@@ -160,56 +191,9 @@ Positional indexes are really useful for phrase searches and ranking.
 One catch with this is that your index tends to becomes as large or larger than the thing you are indexing.
 						</aside>
 					</section>
-					<section>
-						<h2>Problem: Intersect two lists</h2>
-						<p>Trigrams create LONG posting lists, need to skip list</p>
-						<img src="./img/assvogel.gif" height="500px;" style="border: none;" />
-						
-						<aside class="notes">
-The problems start when the lists become large.
-
-Consider the search for "the assvogel". "The" is a very common word, and appears in nearly every document.
-"Assvogel" is very rare and only appears in a few.
-
-To get documents that match we need to find the intersection of the posting lists.
-
-To get the intersection of them you have to walk each posting list looking for matching id's.
-This takes a long time for the longer lists.
-
-This gets worse when you add more common terms to the query, or you add more documents.
-
-To solve this you end up using a data structure called "skip list" to speed this process up.
-						</aside>
-					</section>
-					<section>
-						<h2>For those wondering...</h2>
-						<img src="./img/vulture.jpg" style="border: none;" />
-						<aside class="notes">
-For those wondering.
-Assvogel is an obsolete Afrikaans word for a South African vulture.
-						</aside>
-					</section>
-					<section>
-						<h2>Problem 2</h2>
-						<h3>Compression</h3>
-						<pre><code style="font-size: 14px; line-height: 1em;">index := map[string][]int{} // this should be compressible right?</code></pre>
-						<p>Shannon Elias Fano</p>
-						<img src="./img/elias_fano.png" style="border: none;" />
-						<aside class="notes">
-The second problem is memory usage. It looks like the posting lists could be compressed.
-
-Compressing them is a good idea because they take a lot of space, and we want the index in RAM.
-
-Shannon Elias Fano compression is a technique used to compress a sorted list of integers.
-
-Don't worry you arent expected to understand how it works.
-						</aside>
-					</section>
+					
 					<section>
 						<h2>Complexity</h2>
-						<pre><code style="font-size: 16px; line-height: 1em;">index := map[string][]int{} // non-positional index
-</code></pre>
-<p>vs</p>
 						<img src="./img/complex.png" style="border: none;" />
 						<aside class="notes">
 This introduces complexity.
@@ -227,9 +211,7 @@ This is what my attempted looked like.
 So I did attempt to create a CompressedSkipList.
 
 I implemented both the skip list and elias fano compression, and got two turkeys taped together.
-Not the eagle I wanted. Thats on me, no Go.
-
-So I rethought my approach. How about bitsliced signatures?
+Not the eagle I wanted.
 						</aside>
 					</section>
 					
