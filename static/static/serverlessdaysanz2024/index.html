@@ -152,6 +152,16 @@ Even increasing the RAM to improve the CPU allotment didn't really help. My fall
 						</aside>
 					</section>
 					<section>
+						<h2>This does not work...</h2>
+						<img src="./img/lambdacpu.png" style="border: none;" />
+						<aside class="notes">
+Alas I underestimated how weak the CPU allotted to a lambda is, and searches took several seconds. 
+Even increasing the RAM to improve the CPU allotment didn’t really help. 
+My fallback plan was to embed an index into the lambda, allowing for a quick scan over that index 
+before looking at the content directly.
+						</aside>
+					</section>
+					<section>
 						<h2>What is an index?</h2>
 						<p>Structured list. Keys point at data so searches are faster.</p>
 						<p>Given a term, return id's which contain it.</p>
@@ -303,7 +313,7 @@ You will find that a lot of tweaking of bloom filters is to control the false po
 						</aside>
 					</section>
 
-					<section>
+					<!-- <section>
 						<h2>Go Bloom Filter</h2>
 
 <pre><code style="font-size: 14px; line-height: 1em;">package main
@@ -349,7 +359,7 @@ false positive! was never added!
 So here is a bloom filter implemented in go. The filter itself is 4 lines of code. A slice of booleans,
 a function to hash and thats all you need. The output shows that terms were added, and a false positive.
 						</aside>
-					</section>
+					</section> -->
 
 					<section>
 						<h2>Bloom filter: search</h2>
@@ -383,14 +393,7 @@ If all are true we have a possible match. In this case document 4.
 						<h2>Advantages</h2>
 						<ul>
 							<li>Compressed. Only using several bits per term!</li>
-							<li>Very simple!!!!
-								<ul>
-								<li>Adding</li>
-								<li>Editing</li>
-								<li>Searching</li>
-								<li>Extensible</li>
-								</ul>
-							</li>
+							<li>Just arrays of integers, easy to embed</li>
 						</ul>
 						<aside class="notes">
 Bloom filters searches have a lot going for them. They are compressed by nature, using a few bits per term added.
@@ -399,46 +402,21 @@ Adding is simple, just add a new filter.
 Editing is simple, just fiddle some values or replace the filter.
 Searching is a really simple for loop.
 You can extend them to counting bloom filters, or put structs for positions.
+
+This technique lends itself pretty well to what I am attempting to do, because ultimately it’s just an 
+array of 64 bit integers you scan across, making it trivial to write this out into a file which you then compile. Its also already compressed ensuring we can stay under our 50 MB limit while storing a lot of content. Lastly the actual code to do the search is a simple loop with some bitwise checks. Far easier to deal with than a skiplist, which would need to be written into code.
 						</aside>
 					</section>
 					<section>
 						<h2>Problems</h2>
 						<p>No free lunch...</p>
-<pre><code style="font-size: 14px; line-height: 1em;">package main
-			
-import (
-	"fmt"
-	"runtime"
-)
-
-func main() {
-	memUsage := func() string {
-		var m runtime.MemStats
-		runtime.ReadMemStats(&m)
-		return fmt.Sprintf("%v MB", m.Alloc/1024/1024)
-	}
-
-	fmt.Println(memUsage())
-	bigBloom := make([]bool, 100_000_000) // represents lots of bloom filters in memory
-	fmt.Println(memUsage())
-	_ = len(bigBloom)
-}
-</code></pre>
-
-<pre><code style="font-size: 14px; line-height: 1em;">$ go run main.go
-0 MB
-95 MB</code></pre>
+						<p>8x overhead per bit because of how languages work...</p>
 						<aside class="notes">
 There are of course problems.
 
 Firstly.
 
 How much memory does 100 million bools take up? Almost 100 MB which if you calculate is about 8x what you expect.
-
-This program shows the issue nicely.
-
-Problem is that each "bit" in this uses 1 byte under the hood.
-Not a problem with Go it occurs in any other major language.
 						</aside>
 					</section>
 					<section>
@@ -558,47 +536,6 @@ The result of this is it reduces memory access by a huge amount. Something like 
 					</section>
 
 					<section>
-						<h2>Pack the bits with bit set</h2>
-						<p>Use int64's to hold the filters in columns, and flip bits starting right to left.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">var bloomFilter []uint64
-var bloomSize = 16
-var currentBlockDocumentCount = 0
-var currentBlockStartDocumentCount = 0
-
-func Add(item []bool) error {
-	if currentBlockDocumentCount == 0 || currentBlockDocumentCount == 64 {
-		bloomFilter = append(bloomFilter, make([]uint64, bloomSize)...)
-		currentBlockDocumentCount = 0
-		currentBlockStartDocumentCount += bloomSize
-	}
-
-	for i, bit := range item {
-		if bit {
-			bloomFilter[currentBlockStartDocumentCount+i] |= 1 << currentBlockDocumentCount
-		}
-	}
-
-	currentBlockDocumentCount++
-	currentDocumentCount++
-
-	return nil
-}
-</code></pre>
-					<aside class="notes">
-The next step is to continue to save space.
-
-So lets write code to pack our filters. This code packs one bloom filter at a time into an int64 slice
-right to left, and once hitting document 65 adds more ints to the slice so we can continue adding documents.
-
-As a result to add documents we need only turn them into trigrams, hash those into a normal bloom filter,
-and pass them into this. Very simple from a code perspective.
-					</aside>
-					</section>
-
-
-
-
-					<section>
 						<h2>Result</h2>
 						<p>16 bit bloom filter, with 32 documents added. Less wasted space.</p>
 <pre><code style="font-size: 14px; line-height: 1em;">0000000000000000000000000000000010100011111111111111111111111101
@@ -631,9 +568,25 @@ It also becomes very fast to iterate this in code because its a simple for loop 
 It also means when we do our & operation we are now searching 64 documents for every operation, which is a huge speed up.
 	</aside>
 					</section>
-			
-					
-					
+
+					<section>
+						<h2>Code Example</h2>
+						<p>Example filter.</p>
+<pre><code style="font-size: 14px; line-height: 1em;">
+var bloomFilter = []uint64{1942, 1696, 1762, 496, 1776, 1954, 1970, 1536, 494, 134, 128, 1680, 0, 1536, 
+2016, 1952, 2047, 296, 1600, 1536, 0, 64, 1664, 1985, 2046, 2032, 1760, 1536, 416, 1536, 360, 1568, 256, 
+1920, 384, 0, 0, 1780, 1920, 1536, 256, 2032, 0, 1792, 1536, 1540, 1988, 0, 146, 1664, 2047, 288, 256, 1888, 
+256, 2011, 128, 1778, 1904, 354, 0, 200, 1952, 496, 1920, 403, 1687, 384, 128, 1600, 1664, 0, 1600, 1990, 1760, 
+1536, 256, 0, 0, 1664, 418, 1860, 1952, 256, 128, 162, 1736, 266, 64, 1922, 64, 1800, 0, 2003, 1920, 2016, 384, 
+// a lot more follow...
+1644, 1864, 1920, 64}
+
+</code></pre>
+						<aside class="notes">
+This is what the filter looks like in code, where it literally is just a huge array of integers. I used 2048
+integers per 64 documents, in my case to make things simple.
+	</aside>
+					</section>
 
 					<section>
 						<h2>Searching</h2>
@@ -671,21 +624,11 @@ The core search loop.
 
 I find this algorithm beautifully simple.
 				
-We take in query positions for the search, so in the case of searching for "searchcode" we turn that into trigrams
-then hash them using the same 2 functions to get 16 ints's from 0 to 2048 in this case.
+The result of the above returns a list of interesting document id’s which can then be brute force checked
+for the terms we believe are in there. We only believe because of the false positive property that bloom filters have. 
+Bloom filters by default produce false positive results, but the above is fast enough to run in a 
+few milliseconds cutting down on the total number of documents we need to inspect to a manageable level.
 
-Then, walk over each logical block of 2048 integers, and then logically & each row we are looking at. 
-If we see all zeros we bail out, and skip to the next block of 2048. 
-
-If we don't have all zeros we extract the bits set and use that to determine the document id.
-
-Whats really cool about this is that we jump potentially an entire blocks of 2048 ints if we hit that res == 0 condition quickly, 
-avoiding us looking at most of the memory! 
-This is the state we want to hit as often as possible, and when we do we skip up to 16,384 bytes at a time.
-
-Results when returned gives ids, which we can then use to get the document itself for further processing.
-
-The best part is that this is a simple for loop over a slice of ints, and as we all know for loops go brrrr
 	</aside>
 					</section>
 					
@@ -700,9 +643,33 @@ next before jumping to the next block, or skipping ahead where it finds nothing.
 						</aside>
 					</section>
 
-					
+					<section>
+						<h2>Time to search</h2>
+<pre><code style="font-size: 14px; line-height: 1em;">
+2021-09-13T14:33:34.114+10:00	Duration: 142.89 ms Billed Duration: 143 ms
+2021-09-13T14:34:26.427+10:00	Duration: 6.44 ms Billed Duration: 7 ms 
+2021-09-13T14:35:15.851+10:00	Duration: 3.40 ms Billed Duration: 4 ms 
+2021-09-13T14:35:28.738+10:00	Duration: 1.10 ms Billed Duration: 2 ms 
+2021-09-13T14:35:44.979+10:00	Duration: 6.11 ms Billed Duration: 7 ms 
+2021-09-13T14:36:15.089+10:00	Duration: 70.31 ms Billed Duration: 71 ms 
+</code></pre>
+
+<aside class="notes">
+Checking cloudwatch with the above implemented shows the following runtime’s for a variety of searches being 
+run, on a lambda allocated with 1024 MB of RAM.
+
+Keep in mind that the above times include ranking and snippet extraction as well and the result is ready to show to the user. 
+Its not just the time for the core search.						
+						
+						</aside>
+					</section>
 				</section>
 					
+
+
+
+
+
 				<section>
 					<h2>Conclusions</h2>
 					<p>Go. I doubt I could have done it in another language.</p>
