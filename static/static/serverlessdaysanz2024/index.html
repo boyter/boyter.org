@@ -47,7 +47,7 @@ Im not famous, but you can find me at these places.
 					</section>
 					<section>
 						<h2>https://boyter.org/</h2>
-						<p>Everything is <a href="https://boyter.org/">here</a>, so feel free to go back to sleep</p>
+						<p>Everything is <a href="https://boyter.org/">here</a>, so feel free to go to sleep</p>
 						<img src="./img/halflisten.jpg" height="500px;" style="border: none;" />
 						<aside class="notes">
 For those who prefer to hang out on slack everything you are about to see is now available boyter.org
@@ -219,6 +219,8 @@ Its just a map or dictionary that points terms to document id's.
 The problem is that to do this properly you need to compress the lists to safe space, and
 have a data structure called a skip list so you can jump through the lists quickly.
 This is clearly a lot more complex than what we started with. 
+
+Because we are stuffing the index into a lambda we really want that compression.
 						</aside>
 					</section>
 					<section>
@@ -357,8 +359,9 @@ If all are true we have a possible match. In this case document 4.
 						</ul>
 						<aside class="notes">
 Bloom filters searches have a lot going for them. They are compressed by nature, using a few bits per term added.
+
+We really want that compression too because it means we can cram more into our lambdas.
 Adding is simple, just add a new filter.
-Editing is simple, just fiddle some values or replace the filter.
 Searching is a really simple for loop.
 						</aside>
 					</section>
@@ -678,7 +681,7 @@ it. Dear, dear Lizzy. A house in town! Every thing that is charming! Three daugh
 
 					<section>
 						<h2>Searching</h2>
-						<p>Bloom Filter Index -> Brute Force Search -> Rank -> Snippet Extraction</p>
+						<p>Bloom Filter Index -> Brute Force Search -> Rank -> Sort -> Snippet Extraction</p>
 					</section>
 					<section>
 						<h2>Time to search</h2>
