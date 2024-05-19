@@ -604,7 +604,8 @@ Inside a lambda this runs in a few milliseconds.
 					<section>
 						<h2>Crawling</h2>
 						<p>Lists exist, just download 3 or 4 and merge.</p>
-						<p>(dolist (y list of URLs) GET y)</p>
+						<pre><code style="font-size: 14px; line-height: 1em;">for y in listOfUrls:
+	get y</code></pre>
 						
 						<aside class="notes">
 Need to source the websites... thankfully lists of this exist, so I just downloaded them and filtered to anything
@@ -652,7 +653,7 @@ on disk storage. It does mean I have to recrawl if I change the index, but you n
 						</aside>
 					</section>
 					<section>
-						<h2>Ranking</h2>
+						<h2>Query Ranking</h2>
 <pre><code style="font-size: 14px; line-height: 1em;">// defaults for BM25 which provide a good level of damping
 k1 := 1.2
 b := 0.75
@@ -688,6 +689,7 @@ it. Dear, dear Lizzy. A house in town! Every thing that is charming! Three daugh
 					</section>
 					<section>
 						<h2>Time to search</h2>
+						<p>Problem solved.</p>
 <pre><code style="font-size: 14px; line-height: 1em;">2021-09-13T14:33:34.114+10:00	Duration: 142.89 ms Billed Duration: 143 ms
 2021-09-13T14:34:26.427+10:00	Duration: 6.44 ms Billed Duration: 7 ms 
 2021-09-13T14:35:15.851+10:00	Duration: 3.40 ms Billed Duration: 4 ms 
@@ -725,6 +727,7 @@ for other purposes, and it decouples the index from the web server which feels n
 					</section>
 					<section>
 						<h2>Building Index</h2>
+						<p>Iterate the crawled documents</p>
 						<pre><code style="font-size: 14px; line-height: 1em;">
 sb.WriteString(fmt.Sprintf(`var averageDocumentLength float64 = %d`, averageDocumentLength))
 
@@ -812,23 +815,30 @@ aws lambda update-function-configuration --function-name aws-lambda-search-contr
 	So conclusions.
 	I doubt I could have done this in another language. 
 	Remember we compile the index as code, so we want a fast compiler.
+
+	Bloom filters are great.
+
+	AWS is ripe for abuse.
+
+	I did try ARM64 lambdas, but the binaries were larger, so I needed more lambdas, so little to gain.
 						</aside>
 					</section>
 					<section>
 						<h2>Conclusions</h2>
 						<p>A minimal version of the bloom filter index is available for you to play with <a href="https://github.com/boyter/indexer">https://github.com/boyter/indexer</a></p>
-						<p>Probably don't do this</p>
-
 						<ul>
 							<li>Lambda layers... pointless for this, CPU weak</li>
-							<li>Its... probably not a good idea</li>
-							<li>Massive interest by bots</li>
+							<li>Its... probably not a good idea at this scale</li>
+							<li>Probably a really good idea for static websites?</li>
 						</ul>
 						<aside class="notes">
-	So a few conclusions.
-	I doubt I could have done this in another language. 
+	So I have a version of the bloom filter index for you to play with if interested.
 
-	I have also uploaded a minimal version of everything for you to download and play around with.
+	People often ask me if lambda layers would help, but I found the CPU to be too weak for it to have any effect.
+
+	Its probably not a good idea to do things like this at scale, as the cost can be quite high if it gets popular.
+
+	It might be a really good idea for static websites, especially with lambda urls?
 						</aside>
 					</section>
 				</section>
@@ -836,7 +846,7 @@ aws lambda update-function-configuration --function-name aws-lambda-search-contr
 				<section>
 					<img src="./img/vendor_lockin_compressed.png" height="500px" style="border: none;" /><br>
 					<aside class="notes">
-So thank you for today. I leave you with this comic, which was partly inspired by this experiment.
+So thank you for today. I leave you with this comic, partly inspired by this experiment.
 
 Vendor lock in? They wish. All these vendors are locked in here with ME!
 					</aside>
