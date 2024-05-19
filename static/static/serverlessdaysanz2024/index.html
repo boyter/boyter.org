@@ -116,17 +116,22 @@ Do it at compile time.
 
 					<section>
 						<h2>The idea!</h2>
+						<p>Compile the index INTO the lambda and deploy that</p>
 							<ul>
-								<li>75 GB of space to store all your lambda's FREE STORAGE!</li>
-								<li>AWS Lambda 1,000,000 free requests per month FREE COMPUTE!</li>
-								<li>AWS Lambda 400,000 seconds of compute time per month FREE COMPUTE!</li>
+								<li>50 MB zipped binary</li>
+								<li>75 GB of space to store all your lambda's</li>
+								<li>AWS Lambda 1,000,000 free requests per month</li>
+								<li>AWS Lambda 400,000 seconds of compute time per month</li>
 							</ul>
 						<aside class="notes">
+Some see constraints. I see free compute.
+
 The plan, is then to shard the index using individual lambda's. 
 Each one holds a portion of the index compiled into the binary that we deploy. 
 Well we are limited to 50 MB per lambda after it is zipped and deployed into AWS, 
 so there is an upper limit on the size of the binary we can produce.
 
+This means the entire thing is 100% serverless, and 100% while its just sitting there.
 
 The best part about this is that it solves one of the big problems with building a search engine. 
 That problem is that you need to pay for a heap of machines to sit there doing nothing up till someone 
@@ -162,10 +167,7 @@ func main() {
 						<aside class="notes">
 Brute force is a viable stragey, assuming you have a lot of force.
 
-So the first thing I considered was putting content directly into lambda's, and then brute force 
-searching across that content. 
-
-Tools such as grep can walk gigabytes of content in seconds so this isnt a bad idea.
+Tools such as grep can walk gigabytes of content in seconds so this isnt a bad idea in theory.
 
 Taking a guessof storing ~100,000 items in a lambda, a modern 
 CPU brute force string searching in memory should return in a few hundred milliseconds.
@@ -176,12 +178,13 @@ to run over that performing a search.
 					</section>
 					<section>
 						<h2>This does not work...</h2>
+						<p>Several seconds per search...</p>
 						<img src="./img/lambdacpu.png" style="border: none;" />
 						<aside class="notes">
 Alas I underestimated how weak the CPU allotted to a lambda is, and searches took several seconds. 
 Even increasing the RAM to improve the CPU allotment didn't really help. 
-My fallback plan was to embed an index into the lambda, allowing for a quick scan over that index 
-before looking at the content directly.
+
+My fallback plan was to embed an index into the lambda, allowing for a quick scan of the documents.
 						</aside>
 					</section>
 					<section>
@@ -189,9 +192,9 @@ before looking at the content directly.
 						<p>Structured list. Keys point at data so searches are faster.</p>
 						<p>Given a term, return id's which contain it.</p>
 						<aside class="notes">
-So what is an index. The definition can be a little fuzzy, but I am defining it for me as a 
+The definition of an index can be a little fuzzy, but I am defining it for me as a 
 function that I pass in a term or terms and it returns a list of integers
-which refer to documents that likely contain those terms, possibly ordered by relevance.
+which refer to documents that likely contain those terms.
 						</aside>
 					</section>
 					<section>
@@ -199,16 +202,18 @@ which refer to documents that likely contain those terms, possibly ordered by re
 
 <pre><code style="font-size: 14px; line-height: 1em;">
 index = map[string][]int{
-	"serverless": []int{1,3,1337,31337},
+	"serverless": []int{3,1337},
 	"days": []int{1,2,3,4,5,6,1337},
-	"lambda": []int{456,45454},
+	"brimful": []int{7,45},
+	"asha": []int{45},
 }
 </code></pre>
 
 						<aside class="notes">
 So here is the textbook 101 example.
 
-Its just a map or dictionary that points terms to document id's.
+Its just a map or dictionary that points terms to document id's. 
+This is not compressed. Walking the lists for common terms can take a long time.
 						</aside>
 					</section>
 					
@@ -216,11 +221,11 @@ Its just a map or dictionary that points terms to document id's.
 						<h2>Complexity</h2>
 						<img src="./img/complex.png" style="border: none;" />
 						<aside class="notes">
-The problem is that to do this properly you need to compress the lists to safe space, and
+So we compress the lists to save space using elis fano compression, and
 have a data structure called a skip list so you can jump through the lists quickly.
-This is clearly a lot more complex than what we started with. 
 
-Because we are stuffing the index into a lambda we really want that compression.
+Because we are stuffing the index into a lambda we really want that compression, and we know
+lambdas are CPU weak so we want that performance.
 						</aside>
 					</section>
 					<section>
@@ -228,10 +233,9 @@ Because we are stuffing the index into a lambda we really want that compression.
 						<p>Two turkeys taped together does not make an eagle.</p>
 						<img src="./img/turkeys.jpg"  height="500px;" style="border: none;" />
 						<aside class="notes">
-So I did attempt to create a CompressedSkipList.
+So I did attempt to create a Compressed SkipList.
 
-I implemented both the skip list and with elias fano compression, and got two turkeys taped together.
-Not the eagle I wanted.
+And got two turkeys taped together. Not the eagle I wanted.
 						</aside>
 					</section>
 					
@@ -242,6 +246,8 @@ Not the eagle I wanted.
 						<h2>How about bloom filters?</h2>
 						<p>A.K.A Bitsliced signatures</p>
 						<aside class="notes">
+Now I had the same problem with searchcode.com and had solved it using bloom filters.
+
 There is a technique to search using bloom filters. However it helps if you know what one is.
 						</aside>
 					</section>
@@ -325,7 +331,7 @@ You will find that a lot of tweaking of bloom filters is to control the false po
 
 					<section>
 						<h2>Bloom filter: search</h2>
-					
+						<p>8 bit bloom filter</p>
 						<p>Check bit positions 1 and 7. Document 4 matches.</p>
 						<pre><code style="font-size: 14px; line-height: 1em;">for each bloomfilter
 	for each bit
@@ -355,35 +361,24 @@ If all are true we have a possible match. In this case document 4.
 						<h2>Advantages</h2>
 						<ul>
 							<li>Compressed. Only using several bits per term!</li>
-							<li>Just arrays of integers, easy to embed in code</li>
+							<li>Just arrays of bools, easy to embed in code</li>
 						</ul>
 						<aside class="notes">
 Bloom filters searches have a lot going for them. They are compressed by nature, using a few bits per term added.
 
-We really want that compression too because it means we can cram more into our lambdas.
 Adding is simple, just add a new filter.
 Searching is a really simple for loop.
 						</aside>
 					</section>
 					<section>
-						<h2>Problems</h2>
-						<p>No free lunch...</p>
+						<h2>Problem</h2>
 						<p>8x overhead per bit because of how languages work...</p>
-						<aside class="notes">
-There are of course problems.
-
-Firstly.
-
-How much memory does 100 million bools take up? 
-Almost 100 MB which if you calculate is about 8x what you expect.
-						</aside>
-					</section>
-					<section>
-						<h2>Problem 2</h2>
-						<p>Generic RAM stick</p>
 						<img src="./img/ram.jpg" height="500px" style="border: none;" />
 						<aside class="notes">
-Another problem is that is that this search is slow... This comes down to how fetching bits out of 
+Firtly in memory there is an 8x overhead when using booleans, because each bool is actually a byte in memory.
+This excessabates the second problem.
+
+This search is slow... This comes down to how fetching bits out of 
 memory works.
 
 When you probe a single bit on most modern sysems you actually pull back 512 bits from RAM. This is because a 
@@ -445,10 +440,10 @@ Hence my personal saying "Good enough for Dan Luu, Good enough for you."
 						</aside>
 					</section>
 					<section>
-							<h2>Fixes</h2>
-							<p>Rotate the filter. Documents now on columns not rows.</p>
-							<img src="./img/rotate.gif" height="500px" style="border: none;" />
-							<aside class="notes">
+						<h2>Fixes</h2>
+						<p>Rotate the filter. Documents now on columns not rows.</p>
+						<img src="./img/rotate.gif" height="500px" style="border: none;" />
+						<aside class="notes">
 In the 80's a smart person called Roberts noticed you could rotate the filter, 
 assuming each filter has the same exact size.
 
@@ -496,7 +491,9 @@ The result of this is it reduces memory access by a huge amount. Something like 
 
 					<section>
 						<h2>Example</h2>
-						<p>16 bit bloom filter, with 32 documents added. Less wasted space.</p>
+						<p>64 bit ints to store the filter</p>
+						<p>16 bit bloom filter, with 32 documents added.</p>
+						<p>Filled right to left</p>
 <pre><code style="font-size: 14px; line-height: 1em;">0000000000000000000000000000000010100011111111111111111111111101
 0000000000000000000000000000000001110000000000010000100000000000
 0000000000000000000000000000000000000000000000000000000000000000
@@ -529,6 +526,7 @@ It also means when we do our & operation we are now searching 64 documents for e
 					<section>
 						<h2>Embed Code Example</h2>
 						<p>Example filter.</p>
+						<p>50000 * 2048 = 102,400,000 ints</p>
 <pre><code style="font-size: 14px; line-height: 1em;">
 var bloomFilter = []uint64{1942, 1696, 1762, 496, 1776, 1954, 1970, 1536, 494, 134, 128, 1680, 0, 1536, 
 2016, 1952, 2047, 296, 1600, 1536, 0, 64, 1664, 1985, 2046, 2032, 1760, 1536, 416, 1536, 360, 1568, 256, 
@@ -596,6 +594,8 @@ few milliseconds cutting down on the total number of documents we need to inspec
 Visually the search looks a bit like this. Where it pulls back rows, 
 logically anding them and moving to the 
 next before jumping to the next block, or skipping ahead where it finds nothing.
+
+Inside a lambda this runs in a few milliseconds.
 						</aside>
 					</section>
 				</section>
@@ -603,29 +603,27 @@ next before jumping to the next block, or skipping ahead where it finds nothing.
 				<section>
 					<section>
 						<h2>Crawling</h2>
-						<p>https://hackertarget.com/top-million-site-list-download/</p>
+						<p>Lists exist, just download 3 or 4 and merge.</p>
+						<p>(dolist (y list of URLs) GET y)</p>
 						
 						<aside class="notes">
-Need to source the websites... thankfully lists of this exist, so I just downloaded it and filtered to anything
+Need to source the websites... thankfully lists of this exist, so I just downloaded them and filtered to anything
 ending with .au
 
 I tried some crawlers, but just went back to a custom one locked per domain writing out the contents to a custom format.
+Dont overthink your crawlers beyond faking the user agent to googlebot.
 
-Of course everyone knows that PageRank by Google is what propelled Google to the top of the search heap… 
-Actually I don't know how true that is and I suspect that speed and not being a portal helped, but regardless, 
-pagerank requires processing your documents multiple times to produce the rank score for the domain or page. 
-It takes a long time to do this, and while the whole thing beautiful mathematically, its not very practical
-especially for a single person working on this in their spare time.
+One advantage about using domain lists is they come with a rank value. Which we can use to get our own pagerank
+without spending time implementing pagerank outselves.
 
-Can we find an easier way to do this? Some shortcut? Well yes. Turns out that all of the document sources where 
-I got the domains, list those domains in order of popularity. So I used this value to influence the score giving a 
-“cheap” version of pagerank. Adding the domain popularity into the index when building it provides some pre-ranking of documents.
+I used this value to influence the score giving a 
+“cheap” version of pagerank, a pre-rank score.
 						</aside>
 					</section>
 					<section>
 						<h2>Output</h2>
 <pre><code style="font-size: 14px; line-height: 1em;">
-{
+[{
     "url": "https://engineering.kablamo.com.au/",
     "title": [
         "Kablamo Engineering Blog"
@@ -645,8 +643,13 @@ I got the domains, list those domains in order of popularity. So I used this val
         "28.7.2021 - By Ben Boyter"
     ],
     "rank": 0.65
-}
+}]
 </code></pre>
+						<aside class="notes">
+Here is an example of a crawled document. Note I threw away all of the HTHL, which gives something like a 50x saving
+on disk storage. It does mean I have to recrawl if I change the index, but you need to crawl freqently anyway so.
+
+						</aside>
 					</section>
 					<section>
 						<h2>Ranking</h2>
