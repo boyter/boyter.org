@@ -502,19 +502,46 @@ The result of this is it reduces memory access by a huge amount. Something like 
 					</section>
 
 					<section>
+						<h2>64 document 16 bit bloom filter</h2>
+						<pre><code style="font-size: 14px; line-height: 1em;">0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000
+</code></pre>
+						<aside class="notes">
+So here is our new bloom filter. 
+
+Its 16 bits long with space for 64 documents. 64 columns, one for each document with 16 possible bits we can set.
+
+We do this by using int64's for the filter.
+						</aside>
+					</section>
+
+					<section>
 						<h2>Example</h2>
-						<p>64 bit ints to store the filter</p>
 						<p>16 bit bloom filter, with 32 documents added.</p>
 						<p>Filled right to left</p>
 <pre><code style="font-size: 14px; line-height: 1em;">0000000000000000000000000000000010100011111111111111111111111101
-0000000000000000000000000000000001110000000000010000100000000000
-0000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000100011111100000000000000000000
-0000000000000000000000000000000000100000000000000000000000000000
-0000000000000000000000000000000011000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000001000000000000001000000000000
-0000000000000000000000000000000000111100000000000000000000000000
+0000000000000000000000000000000001110000000000010000100100000000
+0000000000000000000000000000000000000000000000000001000100010000
+0000000000000000000000000000000000100011111100001010000000000000
+0000000000000000000000000000000000100000000000111000000000011000
+0000000000000000000000000000000011000000000100000100000100010000
+0000000000000000000000000000000000000000011000100000000100000010
+0000000000000000000000000000000000001000000000000001000000010010
+0000000000000000000000000000000000111100000000000000000100010100
 0000000000000000000000000000000000100001111100000001010101011110
 0000000000000000000000000000000010000010000010001010101010100011
 0000000000000000000000000000000001011000000000000000000000000000
@@ -524,20 +551,19 @@ The result of this is it reduces memory access by a huge amount. Something like 
 0000000000000000000000000000000001100011111100000000000000000000
 </code></pre>
 						<aside class="notes">
-This is what it looks like in memory after adding 32 documents. We have a 16 bit bloom filter, 
-with 16 int64's one after the other.
+This is what it looks like in memory after adding 32 documents.
 We have added 32 documents to it, so only the right most 32 bits have anything set. 
 
 This ensures we are optimally using the space. Because we pack 64 documents into each 
 int we end up using a single bit per location in the bloom filter. No 8x overhead!
 
-It also means when we do our & operation we are now searching 64 documents for every operation, which is a huge speed up.
+It also means when we do our search AND operation we are now searching 64 documents for every operation, which is a huge speed up.
 	</aside>
 					</section>
 
 					<section>
 						<h2>Embed Code Example</h2>
-						<p>Example filter.</p>
+						<p>Filter set to 2048 bits</p>
 						<p>50,000 * 2,048 = 102,400,000 ints</p>
 <pre><code style="font-size: 14px; line-height: 1em;">
 var bloomFilter = []uint64{1942, 1696, 1762, 496, 1776, 1954, 1970, 1536, 494, 134, 128, 1680, 0, 1536, 
@@ -552,7 +578,7 @@ var bloomFilter = []uint64{1942, 1696, 1762, 496, 1776, 1954, 1970, 1536, 494, 1
 						<aside class="notes">
 This is what the filter looks like in code, where it literally is just a huge array of integers.
 
-For 50,000 documents its about 100 million integers.
+For 50,000 documents its about 100 million integers. All which get compiled into the binary.
 	</aside>
 					</section>
 
@@ -592,7 +618,7 @@ The core search loop.
 
 I find this algorithm beautifully simple.
 				
-The result of the above returns a list of interesting document id's which can then be brute force checked
+The result of this is a list of interesting document id's which can then be brute force checked
 for the terms we believe are in there. We only believe because of the false positive property. 
 But the above is fast enough to run in a 
 few milliseconds cutting down on the total number of documents we need to inspect to a manageable level.
@@ -628,7 +654,8 @@ So with that done.
 Need to source the websites... thankfully lists of this exist, so I just downloaded them and filtered to anything
 ending with .au and merged them.
 
-I tried some open source crawlers, but just went back to a custom one locked per domain writing out the contents to a custom format.
+I tried some open source crawlers, but just went back to a custom one locked to a single domain writing out the 
+contents to a custom format.
 Dont overthink your crawlers beyond faking the user agent to googlebot.
 
 One advantage about using domain lists is they come with a rank value. Which we can use to get our own pagerank
@@ -689,16 +716,16 @@ for word, wordCount := range res.matchWords {
 </code></pre>
 <aside class="notes">
 So we have our pre-ranking with our cheap version of page-rank but you also want a query rank that 
-reranks based on whatever the user queries on. Otherwise you get really weird results.
+re-ranks based on whatever the user queries on. Otherwise you get really weird results.
 
 Ranking is one of those secret sauces things, but generally TF/IDF or BM25 works fine. Especially for keyword
-searches
-The above is BM25. Its not that hard to implement. 
+searches.
+The above is BM25. Its not that hard to implement and works pretty well.
 </aside>
 					</section>
 					<section>
 						<h2>Snippet Extraction</h2>
-						<p>https://github.com/boyter/cs/blob/master/snippet.go</p>
+						<p><a href="https://github.com/boyter/cs/blob/master/snippet.go">https://github.com/boyter/cs/blob/master/snippet.go</a></p>
 <blockquote>
 features, noble mien, and the report which was in general circulation within five minutes after his entrance, of his having ten thousand a year. The gentlemen pronounced him to be a fine
 </blockquote>
@@ -717,6 +744,8 @@ Im not going to walk though it, its fairly complex but the linked code I am part
 I based all my string tests on pride and prejudice (which I know more about than I probably should), with the above showing the 2 best matches for "ten thousand a year"
 
 This is eaily the most expensive portion of the search process consuming the most CPU time.
+
+So anything we can do to avoid running this code is a good idea.
 </aside>
 					</section>
 
@@ -796,11 +825,11 @@ _, _ = file.WriteString(fmt.Sprintf(`{Url:"%s",Title:"%s",Content:"%s",Score:%.4
 </code></pre>
 						<p>Write out to content.go.1 content.go.2 etc...</p>
 <aside class="notes">
-Now we have to build the index. I wrote a script to iterate all the crawled documents
+Now we have to build the index so we can deploy it. I wrote a script to iterate all the crawled documents
 trying to stuff them together into batches that would create a 50 mb zipped binary file.
 
-When done it writes out index, the frequencies and the document as Go code written to files
-we can the compile into the application.
+When done it writes out index, the frequencies and everything else the index needs as Go code written to files
+we can then compile into the application.
 </aside>
 					</section>
 
@@ -826,11 +855,11 @@ aws lambda update-function-configuration --function-name aws-lambda-search-contr
 <img src="./img/deployment.png" height="300px" style="border: none;" />
 
 <aside class="notes">
-Deployment is a simple matter of iterating over each of the content files we wrote out previously
-Then building the binary, zipping it and create it using the aws command line tools.
+Deployment is a simple matter of iterating over each of the content files we wrote out previously.
+Then building the binary, zipping it and creating it using the aws command line tools.
 
-I used the command line tools because creating 1000 lambdas in a single CF was painful
-I can quickly update them this way and I dont need to use S3 to store the binary at any point.
+I used the command line tools because creating 1000 lambdas in a cloudformation was painful and slow.
+Also I can quickly update or add new ones and I dont need to use S3 to store the binary at any point.
 
 Lastly we update the controller lambda to know tne names of workers and we are done.
 </aside>
@@ -849,21 +878,25 @@ Lastly we update the controller lambda to know tne names of workers and we are d
 						</ul>
 <aside class="notes">
 50 million documents. Interesting fact this is twice as many as the first version of Google.
-Its also done by one person in their spare time. Thats technology process for you.
+Done by one person in their spare time. Thats technology progress for you.
+
+Its about 1000 lambdas and fits well within the free storage tier.
 </aside>
 					</section>
 					<section>
 						<h2>bonzamate.com.au</h2>
 						<img src="./img/search1.png" height="500px" style="border: none;" /><br>
 <aside class="notes">
+Lastly I needed a domain, so I registered bonzamate.com.au
+
 So here is the UI. To make it look a little more real I added a news
-feed again fully serverless.
+feed which displays current news articles, also implemented in lambda.
 </aside>
 					</section>
 					<section>
 						<img src="./img/search2.png" height="500px" style="border: none;" /><br>
 <aside class="notes">
-The results of a search, with the relevant news on the right and results as expected.
+The results of a search, based on some news I knew should show the relevant news on the right and search results as expected.
 </aside>
 					</section>
 					<section>
@@ -879,6 +912,8 @@ In this case a search for HMAS Onslow shows the relevant wikipedia info on the r
 						<img src="./img/search4.png" height="500px" style="border: none;" /><br>
 <aside class="notes">
 Lastly a working vanity search for myself, because hey its my search engine.
+
+The results are as I would expect.
 </aside>
 					</section>
 					<section>
@@ -887,7 +922,9 @@ Lastly a working vanity search for myself, because hey its my search engine.
 <aside class="notes">
 Probably something like cha-ching once the free credits run out. 
 
-The results in cloudwatch over the last 6 months or so.
+But heres the cloudwatch outputs over the last 6 months or so.
+
+Once I solved some timeout issues its pretty stable.
 </aside>
 					</section>
 				</section>
@@ -897,7 +934,7 @@ The results in cloudwatch over the last 6 months or so.
 						<h2>Conclusions</h2>
 						<p>Go. I doubt I could have done it in another language.</p>
 						<p>Bloom filters are great!</p>
-						<p>AWS is ripe for abuse like this</p>
+						<p>AWS is ripe for abuse like this, DO IT!</p>
 						<p>AMD64 vs ARM64</p>
 						<aside class="notes">
 	So conclusions.
@@ -912,8 +949,8 @@ The results in cloudwatch over the last 6 months or so.
 	AWS is ripe for abuse, and you should.
 
 	Someone once asked me about ARM64. 
-	I did try Graviton lambdas, but the binaries were larger, so I needed more lambdas, 
-	so little to gain. 
+	I did try Graviton lambdas, but the compiled binaries were 20% larger, so I needed more lambdas, 
+	which made them less useful.
 						</aside>
 					</section>
 					<section>
@@ -943,7 +980,7 @@ in doing something like this yourself.
 				<section>
 					<h2>Why?</h2>
 					<ul>
-						<li>February 2021 the Australian Greens Party called for a publicly owned search engine to be created and be independent and accountable like the ABC.</li>
+						<li>Australian Greens Party called for a publicly owned search engine to be created similar to ABC.</li>
 						<li>Previously this approach has failed in Europe and Russia with Quaero and Sputnik</li>
 						<li>Australia is an exporter of research talent</li>
 						<li>I would love there to be more competition in the search space, and I would love to see an Australian search engine be part of it.</li>
@@ -951,15 +988,19 @@ in doing something like this yourself.
 					</ul>
 					<aside class="notes">
 I guess I am rather patriotic, and it bothers me that everyt major search engine used in Australia is foreign owned.
-Id love to see an Aussie search engine, and id love to see some investment in the space. It feels ripe for disruption right now,
+Id love to see an Aussie search engine, and id love to see some investment in the space. 
+It feels ripe for disruption right now,
 with engines like Kagi and Marginalia getting attention, and gen:ai apparently disrupting all of the larger players.
+Just feels like now is the time.
 					</aside>
 				</section>
 
 				<section>
 					<img src="./img/vendor_lockin_compressed.png" height="500px" style="border: none;" /><br>
 					<aside class="notes">
-Anyway, thank you for today. I leave you with this comic, partly inspired by this experiment, especially the final quote
+Anyway, thanks for listening. I hope you got something out of this. 
+
+I will leave you with this comic, which was partly inspired by this experiment.
 
 "Vendor lock in? They wish. All these vendors are locked in here with ME!"
 					</aside>
