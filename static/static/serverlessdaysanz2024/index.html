@@ -71,6 +71,8 @@ You can even skip ahead on the slides and head off for a coffee if you like. I w
 
 	Every part you see is one of those problems you lightly scratch and discover
 	people getting PhD's in. So it constantly keeps me engaged and learning.
+
+	I have a wonderful time playing with algorithms and such while working on them.
 						</aside>
 					</section>
 					<section>
@@ -109,6 +111,9 @@ There is a saying in computing.
 						<blockquote>Never do at runtime what you can do at compile time.</blockquote>
 						<aside class="notes">
 I decided to see how far I can take that idea, by using AWS Lambda to build a search engine. 
+
+Why AWS? I am most familiar with it, and AWS isnt running a search engine like google or microsoft, so 
+it seemed like a safer place.
 						</aside>
 					</section>
 
@@ -171,11 +176,11 @@ Brute force is a viable strategy, assuming you have a lot of force.
 
 Tools such as grep can walk gigabytes of content in seconds so this isnt a bad idea in theory.
 
-Taking a guess of storing ~100,000 items in a lambda, a modern 
-CPU string searching in memory should return in a few hundred milliseconds.
+Taking a guess of storing ~100,000 items, and searching over them which with any modern cpu would 
+return in a few hundred milliseconds.
 
 So I tried it. I created a Go file with 100,000 strings in a slice, and then wrote a simple loop 
-to run over that performing a search.
+to run over that performing a search and deployed it to lamba.
 						</aside>
 					</section>
 					<section>
@@ -183,8 +188,8 @@ to run over that performing a search.
 						<p>Several seconds per search...</p>
 						<img src="./img/lambdacpu.png" style="border: none;" />
 						<aside class="notes">
-Alas I underestimated how weak the CPU allotted to a lambda is, and searches took several seconds. 
-Even increasing the RAM to improve the CPU allotment didn't really help. 
+Alas I underestimated how weak the CPU allotted to a lambda is. Searches took several seconds. 
+Even bumping the RAM to improve the CPU allotment didn't really help. 
 
 My fallback plan was to embed an index into the lambda, allowing for a quick scan of the documents.
 						</aside>
