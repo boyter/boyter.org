@@ -27,7 +27,7 @@
 				<section>
 					<h1>Abusing Go, AWS Lambda and bloom filters to make a true Australian serverless search engine</h1>
 					<aside class="notes">
-Good morning Sydney!
+Hello everyone, I hope you are having a wonderful day.
 Sorry about the clickbait title, you need to standout in the selection process somehow. Its how I compensate
 for lack of skill.
 					</aside>
@@ -65,17 +65,19 @@ You can even skip ahead on the slides and head off for a coffee if you like. I w
 	string searching, regular expressions, data structures, line detection, duplicate detection, 
 	literal extraction, unicode, case insensitive matching etc...</p>
 	<aside class="notes">
+	So my hobby is building search engines.
+
 	Here are some of the things that go into any search engine.
 
 	Every part you see is one of those problems you lightly scratch and discover
-	people getting PhD's in. So it constantly keeps me interested and learning.
+	people getting PhD's in. So it constantly keeps me engaged and learning.
 						</aside>
 					</section>
 					<section>
 						<h2>searchcode.com</h2>
 						<img src="./img/searchcode.gif" height="500px;" style="border: none;" />
 						<aside class="notes">
-So a few years ago I was building a new index for searchcode from scratch which runs on a dedicated server.
+So a few years ago I was building a new index for searchcode.com from scratch which runs on a dedicated server.
 I mentioned this to a work colleague and he 
 asked why I didn't use AWS as generally for work everything lands there. 
 I mentioned something to the effect that you needed a lot of persistent storage, 
@@ -92,8 +94,8 @@ He mentioned perhaps using Lambda? And I responded its lack of persistance is a 
 							<li>Performance</li>
 						</ul>
 						<aside class="notes">
-Lamba's or any other serverless function on cloud work well for certain problems. 
-So long as you can rebuild state inside the lambda, you can use them. 
+Lamba's or any other serverless function work well for certain problems. 
+So long as you can rebuild state inside the lambda, or respond to events they work well.
 The lack of persistance is an issue in search because
 you either store the index in RAM, or on disk.
 
@@ -107,10 +109,6 @@ There is a saying in computing.
 						<blockquote>Never do at runtime what you can do at compile time.</blockquote>
 						<aside class="notes">
 I decided to see how far I can take that idea, by using AWS Lambda to build a search engine. 
-
-We get around the pack of persistance? By baking the index into the lambda themselves. 
-In other words, generate code which contains the index and compile that into the lambda binary. 
-Do it at compile time.
 						</aside>
 					</section>
 
@@ -126,12 +124,14 @@ Do it at compile time.
 						<aside class="notes">
 Some see constraints. I see free compute.
 
+We get around the pack of persistance? By baking the index into the lambda themselves. 
+In other words, generate code which contains the index and compile that into the lambda binary. 
+Do it at compile time.
+
 The plan, is then to shard the index using individual lambda's. 
 Each one holds a portion of the index compiled into the binary that we deploy. 
-Well we are limited to 50 MB per lambda after it is zipped and deployed into AWS, 
-so there is an upper limit on the size of the binary we can produce.
 
-This means the entire thing is 100% serverless, and 100% while its just sitting there.
+This means the entire thing is 100% serverless.
 
 The best part about this is that it solves one of the big problems with building a search engine. 
 That problem is that you need to pay for a heap of machines to sit there doing nothing up till someone 
@@ -165,12 +165,14 @@ func main() {
 </code></pre>
 						
 						<aside class="notes">
-Brute force is a viable stragey, assuming you have a lot of force.
+First thing I wanted to do was prove the theory. I started with a simple brute force search.
+
+Brute force is a viable strategy, assuming you have a lot of force.
 
 Tools such as grep can walk gigabytes of content in seconds so this isnt a bad idea in theory.
 
-Taking a guessof storing ~100,000 items in a lambda, a modern 
-CPU brute force string searching in memory should return in a few hundred milliseconds.
+Taking a guess of storing ~100,000 items in a lambda, a modern 
+CPU string searching in memory should return in a few hundred milliseconds.
 
 So I tried it. I created a Go file with 100,000 strings in a slice, and then wrote a simple loop 
 to run over that performing a search.
@@ -214,8 +216,11 @@ index = map[string][]int{
 						<aside class="notes">
 So here is the textbook 101 example.
 
-Its just a map or dictionary that points terms to document id's. 
-This is not compressed. Walking the lists for common terms can take a long time.
+So serverless days is found in documents 3 and 1337.
+
+Brinful asha is found in 45
+
+This is not compressed and walking those lists for common terms can take a long time.
 						</aside>
 					</section>
 					
@@ -224,7 +229,7 @@ This is not compressed. Walking the lists for common terms can take a long time.
 						<img src="./img/complex.png" style="border: none;" />
 						<aside class="notes">
 So we compress the lists to save space using elis fano compression, and
-have a data structure called a skip list so you can jump through the lists quickly.
+then you have to a data structure called a skip list so you can jump through the lists quickly.
 
 Because we are stuffing the index into a lambda we really want that compression, and we know
 lambdas are CPU weak so we want that performance.
@@ -259,7 +264,7 @@ There is a technique to search using bloom filters. However it helps if you know
 	<img src="./img/BloomFilter1.png" style="border: none;" />
 						<aside class="notes">
 So what is a bloom filter.
-In short a space efficent probablistic data structure.
+Its a space efficent probablistic data structure.
 
 You add items, and can check if it was added. 
 
@@ -322,9 +327,7 @@ to this filter.
 	<img src="./img/BloomFilter6.png" style="border: none;" />
 						<aside class="notes">
 Lastly we see an example of a false positive match. We hash and check the positions and they are all true.
-But we never added this term, the bits were supplied by other terms.
-
-Now while bloom filters do introduce false positives, which is something you have to deal with.
+But we never added this term, the bits were supplied by others.
 
 You will find that a lot of tweaking of bloom filters is to control the false positive rate.
 						</aside>
@@ -377,7 +380,7 @@ Searching is a really simple for loop.
 						<p>8x overhead per bit because of how languages work...</p>
 						<img src="./img/ram.jpg" height="500px" style="border: none;" />
 						<aside class="notes">
-Firtly in memory there is an 8x overhead when using booleans, because each bool is actually a byte in memory.
+Firstly there is an 8x overhead when using booleans, because each bool is actually a byte in memory.
 This excessabates the second problem.
 
 This search is slow... This comes down to how fetching bits out of 
@@ -405,6 +408,7 @@ bits.
 					</section>
 					<section>
 						<h2>Can we do better?</h2>
+						<p> In theory; theory and practice are the same. In practice they arent.</p>
 						<img src="./img/2048_bloom_3.png" style="border: none;" />
 						<aside class="notes">
 Because the bits are all within 512 bits of each other, we are likely to pull the entire filter across 
@@ -414,9 +418,6 @@ This is a big problem because accessing memory often isnt as fast as you expect.
 push more than 100 GB across the CPU per second.
 
 In theory; theory and practice are the same. In practice they arent.
-
-In reality you are more likely to get 50 GB. So if your index is 100 GB in size
-you are limited to 1 search every two seconds. 
 
 Can we do better?
 						</aside>
@@ -541,6 +542,8 @@ var bloomFilter = []uint64{1942, 1696, 1762, 496, 1776, 1954, 1970, 1536, 494, 1
 </code></pre>
 						<aside class="notes">
 This is what the filter looks like in code, where it literally is just a huge array of integers.
+
+For 50,000 documents its about 100 million integers.
 	</aside>
 					</section>
 
@@ -618,9 +621,9 @@ I tried some crawlers, but just went back to a custom one locked per domain writ
 Dont overthink your crawlers beyond faking the user agent to googlebot.
 
 One advantage about using domain lists is they come with a rank value. Which we can use to get our own pagerank
-without spending time implementing pagerank outselves.
+without spending time implementing it outselves.
 
-I used this value to influence the score giving a “cheap” version of pagerank.
+I used this value to influence the score giving a “cheap” ranking value.
 						</aside>
 					</section>
 					<section>
@@ -649,8 +652,8 @@ I used this value to influence the score giving a “cheap” version of pageran
 }]
 </code></pre>
 						<aside class="notes">
-Here is an example of a crawled document. Note I threw away all of the HTHL, which gives something like a 50x saving
-on disk storage. It does mean I have to recrawl if I change the index, but you need to crawl freqently anyway so.
+Here is an example of a crawled document. Note I threw away all of the HTML, which gives something like a 50x saving
+on disk storage. It does mean I have to recrawl if I change the index, but you need to crawl freqently anyway so the cost is minimal.
 
 						</aside>
 					</section>
@@ -677,7 +680,8 @@ for word, wordCount := range res.matchWords {
 So we have our pre-ranking with our cheap version of page-rank but you also want a query rank that 
 reranks based on whatever the user queries on. Otherwise you get really weird results.
 
-Ranking is one of those secret sauces things, but generally TF/IDF or BM25 works fine. The above is BM25. 
+Ranking is one of those secret sauces things, but generally TF/IDF or BM25 works fine. 
+The above is BM25. Its not that hard to implement. 
 </aside>
 					</section>
 					<section>
@@ -698,7 +702,7 @@ Also listed as one of the reasons inktomi (anyone remember them?) was beaten by 
 
 Im not going to walk though it, its fairly complex but the linked code I am particullary proud of.
 
-I based all my string tests on pride and prejudice, with the above showing the 2 best matches for "ten thousand a year"
+I based all my string tests on pride and prejudice (which I know more about than I probably should), with the above showing the 2 best matches for "ten thousand a year"
 
 This is eaily the most expensive portion of the search process.
 </aside>
@@ -707,6 +711,14 @@ This is eaily the most expensive portion of the search process.
 					<section>
 						<h2>Searching</h2>
 						<img src="./img/filterdown.png" height="500px" style="border: none;" /><br>
+<aside class="notes">
+So we now have everything we need to produce a search result.
+
+We start by filtering down using out bloom filter index.
+Then brute force search the results to remove the false matches.
+The rank the results, and sort them.
+Then get the top 20 results and extract the snippets and return.
+</aside>
 					</section>
 					<section>
 						<h2>Time to search</h2>
@@ -720,12 +732,14 @@ This is eaily the most expensive portion of the search process.
 </code></pre>
 
 <aside class="notes">
-Checking cloudwatch with the above implemented shows the following runtime’s for a variety of searches being 
+With all that done checking cloudwatch shows the following runtime's for a variety of 
+searches being 
 run, on a lambda allocated with 1024 MB of RAM.
 
 Keep in mind that the above times include ranking and snippet extraction as well and the result is ready to show to the user. 
-Its not just the time for the core search.						
-						
+Its not just the time for the core search.
+
+This is easily good enough to build our engine on.
 						</aside>
 					</section>
 				</section>
@@ -741,9 +755,7 @@ The workers contain the index, and when passed a query they search over their co
 and then returning the top 20 results. The controller waits for all the results to return, joins them together, 
 re-sorts and sends the top results back.
 
-Usually having a lambda call another lambda is a major anti pattern, and it could probably be removed. 
-I could just call the lambdas directly from the HTTP server at some point, although this way I get an API I can use
-for other purposes, and it decouples the index from the web server which feels nice.
+Lastly I call the API endpoint with a small http server and mark up the results.
 						</aside>
 					</section>
 					<section>
@@ -771,6 +783,13 @@ _, _ = file.WriteString(fmt.Sprintf(`{Url:"%s",Title:"%s",Content:"%s",Score:%.4
 			res.Score))
 </code></pre>
 						<p>Write out to content.go.1 content.go.2 etc...</p>
+<aside class="notes">
+Now we have to build the index. I wrote a script to iterate all the crawled documents
+trying to stuff them together into batches that would create a 50 mb zipped binary file.
+
+When done it writes out index, the frequencies and the document as Go code written to files
+we can the compile into the application.
+</aside>
 					</section>
 
 
@@ -794,7 +813,15 @@ aws lambda update-function-configuration --function-name aws-lambda-search-contr
 
 <img src="./img/deployment.png" height="300px" style="border: none;" />
 
+<aside class="notes">
+Deployment is a simple matter of iterating over each of the content files we wrote out previously
+Then building the binary, zipping it and create it using the aws command line tools.
 
+I used the command line tools because creating 1000 lambdas in a single CF was painful
+I can quickly update them this way and I dont need to use S3 to store the binary at any point.
+
+Lastly we update the controller lambda to know tne names of workers and we are done.
+</aside>
 					</section>
 				</section>
 
@@ -806,22 +833,46 @@ aws lambda update-function-configuration --function-name aws-lambda-search-contr
 							<li>~1000 lambda functions</li>
 							<li>23.6 GB (31% of 75 GB) FREE STORAGE!!!!</li>
 							<li>In fact the whole thing is FREE if not being called!</li>
+							<li>TRUE SERVERLESS SEARCH!</li>
 						</ul>
 					</section>
 					<section>
+						<h2>bonzamate.com.au</h2>
 						<img src="./img/search1.png" height="500px" style="border: none;" /><br>
+<aside class="notes">
+So here is the UI. To make it look a little more real I added a news
+feed again fully serverless.
+</aside>
 					</section>
 					<section>
 						<img src="./img/search2.png" height="500px" style="border: none;" /><br>
+<aside class="notes">
+The results of a search, with the relevant news on the right and results as expected.
+</aside>
 					</section>
 					<section>
 						<img src="./img/search3.png" height="500px" style="border: none;" /><br>
+<aside class="notes">
+It was still feeling empty so I parsed a wikipedia dump for Aussie content and added
+another serverless function with zeroclick information in it that is displayed if there is a match.
+
+In this case a search for HMAS Onslow shows the relevant wikipedia info on the right.
+</aside>
 					</section>
 					<section>
 						<img src="./img/search4.png" height="500px" style="border: none;" /><br>
+<aside class="notes">
+Lastly a working vanity search for myself, because hey its my search engine.
+</aside>
 					</section>
 					<section>
+						<p>What is the sound of 1000 lambdas searching themselves?</p>
 						<img src="./img/cloudwatch.png" height="500px" style="border: none;" /><br>
+<aside class="notes">
+Probably something like cha-ching once the free credits run out. 
+
+The results in cloudwatch over the last 6 months or so.
+</aside>
 					</section>
 				</section>
 
@@ -835,13 +886,18 @@ aws lambda update-function-configuration --function-name aws-lambda-search-contr
 						<aside class="notes">
 	So conclusions.
 	I doubt I could have done this in another language. 
-	Remember we compile the index as code, so we want a fast compiler.
+	Remember we compile the index as code, so we want a fast compiler, which Go has.
+	Java has the class file limits, Rust takes too long to compile, Python probably too slow.
 
-	Bloom filters are great.
+	Bloom filters are great. Such a simple data structure. 
+	People suggest things like xor or cuckuoo filters over them, but their simplicity 
+	makes them worth knowing about.
 
-	AWS is ripe for abuse.
+	AWS is ripe for abuse, and you should.
 
-	I did try ARM64 lambdas, but the binaries were larger, so I needed more lambdas, so little to gain.
+	Someone once asked me about ARM64. 
+	I did try Graviton lambdas, but the binaries were larger, so I needed more lambdas, 
+	so little to gain. 
 						</aside>
 					</section>
 					<section>
@@ -853,14 +909,18 @@ aws lambda update-function-configuration --function-name aws-lambda-search-contr
 						</ul>
 						<p>A minimal version of the bloom filter index is available for you to play with <a href="https://github.com/boyter/indexer">https://github.com/boyter/indexer</a></p>
 						<aside class="notes">
-	So I have a version of the bloom filter index for you to play with if interested.
+I was also asked about lambda layers, but the CPU is probably too weak to really use it,
+and besides then I would be paying for storage.
 
-	People often ask me if lambda layers would help, but I found the CPU to be too weak for it to have any effect.
+Its probably not a good idea to do things like this at scale, 
+as the cost can be quite high if it gets popular. I actaully had to take some very 
+aggressive measures against bots to avoid some large bills.
 
-	Its probably not a good idea to do things like this at scale, as the cost can be quite high if it gets popular.
+This might be a really good idea for static websites, especially with lambda urls?
 
-	It might be a really good idea for static websites, especially with lambda urls?
-						</aside>
+So I have a version of the bloom filter index for you to play with if interested 
+in doing something like this yourself.
+				</aside>
 					</section>
 				</section>
 
@@ -869,7 +929,9 @@ aws lambda update-function-configuration --function-name aws-lambda-search-contr
 					<aside class="notes">
 So thank you for today. I leave you with this comic, partly inspired by this experiment.
 
-Vendor lock in? They wish. All these vendors are locked in here with ME!
+I love the final quote.
+
+"Vendor lock in? They wish. All these vendors are locked in here with ME!"
 					</aside>
 				</section>
 
