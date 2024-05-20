@@ -47,7 +47,7 @@ Im not famous, but you can find me at these places.
 					</section>
 					<section>
 						<h2>https://boyter.org/</h2>
-						<p>Everything is <a href="https://boyter.org/">here</a>, so feel free to go to sleep</p>
+						<p>Everything is <a href="https://boyter.org/">there</a>, so feel free to go to sleep</p>
 						<img src="./img/halflisten.jpg" height="500px;" style="border: none;" />
 						<aside class="notes">
 For those who prefer to hang out on slack everything you are about to see is now available boyter.org
@@ -209,6 +209,8 @@ index = map[string][]int{
 }
 </code></pre>
 
+<p>not compressed, list walking can be slow</p>
+
 						<aside class="notes">
 So here is the textbook 101 example.
 
@@ -218,7 +220,7 @@ This is not compressed. Walking the lists for common terms can take a long time.
 					</section>
 					
 					<section>
-						<h2>Complexity</h2>
+						<h2>Add Complexity</h2>
 						<img src="./img/complex.png" style="border: none;" />
 						<aside class="notes">
 So we compress the lists to save space using elis fano compression, and
@@ -526,7 +528,7 @@ It also means when we do our & operation we are now searching 64 documents for e
 					<section>
 						<h2>Embed Code Example</h2>
 						<p>Example filter.</p>
-						<p>50000 * 2048 = 102,400,000 ints</p>
+						<p>50,000 * 2,048 = 102,400,000 ints</p>
 <pre><code style="font-size: 14px; line-height: 1em;">
 var bloomFilter = []uint64{1942, 1696, 1762, 496, 1776, 1954, 1970, 1536, 494, 134, 128, 1680, 0, 1536, 
 2016, 1952, 2047, 296, 1600, 1536, 0, 64, 1664, 1985, 2046, 2032, 1760, 1536, 416, 1536, 360, 1568, 256, 
@@ -589,6 +591,7 @@ few milliseconds cutting down on the total number of documents we need to inspec
 					<section>
 						<h2>Searching: Visually</h2>
 						<p>Perform & between each row, and if we see 0 skip to next block</p>
+						<p>~3 ms to run in lambda</p>
 						<img src="./img/bloomsearch.gif" height="500px" style="border: none;" /><br>
 						<aside class="notes">
 Visually the search looks a bit like this. Where it pulls back rows, 
@@ -653,6 +656,7 @@ on disk storage. It does mean I have to recrawl if I change the index, but you n
 					</section>
 					<section>
 						<h2>Query Ranking</h2>
+						<p>Post query ranking + Pre ranking = happy user</p>
 <pre><code style="font-size: 14px; line-height: 1em;">// defaults for BM25 which provide a good level of damping
 k1 := 1.2
 b := 0.75
@@ -798,7 +802,7 @@ aws lambda update-function-configuration --function-name aws-lambda-search-contr
 					<section>
 						<h2>Results...</h2>
 						<ul>
-							<li>~80 million documents indexed</li>
+							<li>~50 million documents indexed</li>
 							<li>~1000 lambda functions</li>
 							<li>23.6 GB (31% of 75 GB) FREE STORAGE!!!!</li>
 							<li>In fact the whole thing is FREE if not being called!</li>
@@ -842,12 +846,12 @@ aws lambda update-function-configuration --function-name aws-lambda-search-contr
 					</section>
 					<section>
 						<h2>Conclusions</h2>
-						<p>A minimal version of the bloom filter index is available for you to play with <a href="https://github.com/boyter/indexer">https://github.com/boyter/indexer</a></p>
 						<ul>
 							<li>Lambda layers... pointless for this, CPU weak</li>
 							<li>Its... probably not a good idea at this scale</li>
 							<li>Probably a really good idea for static websites?</li>
 						</ul>
+						<p>A minimal version of the bloom filter index is available for you to play with <a href="https://github.com/boyter/indexer">https://github.com/boyter/indexer</a></p>
 						<aside class="notes">
 	So I have a version of the bloom filter index for you to play with if interested.
 
