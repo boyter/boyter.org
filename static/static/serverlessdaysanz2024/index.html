@@ -603,13 +603,13 @@ Inside a lambda this runs in a few milliseconds.
 				<section>
 					<section>
 						<h2>Crawling</h2>
-						<p>Lists exist, just download 3 or 4 and merge.</p>
+						<p>Lists of top domains exist, just download 3 or 4 and merge.</p>
 						<pre><code style="font-size: 14px; line-height: 1em;">for y in listOfUrls:
 	get y</code></pre>
 						
 						<aside class="notes">
 Need to source the websites... thankfully lists of this exist, so I just downloaded them and filtered to anything
-ending with .au
+ending with .au and merged them.
 
 I tried some crawlers, but just went back to a custom one locked per domain writing out the contents to a custom format.
 Dont overthink your crawlers beyond faking the user agent to googlebot.
@@ -617,8 +617,7 @@ Dont overthink your crawlers beyond faking the user agent to googlebot.
 One advantage about using domain lists is they come with a rank value. Which we can use to get our own pagerank
 without spending time implementing pagerank outselves.
 
-I used this value to influence the score giving a 
-“cheap” version of pagerank, a pre-rank score.
+I used this value to influence the score giving a “cheap” version of pagerank.
 						</aside>
 					</section>
 					<section>
@@ -670,9 +669,16 @@ for word, wordCount := range res.matchWords {
     weight += step1 / step2
 }
 </code></pre>
+<aside class="notes">
+So we have our pre-ranking with our cheap version of page-rank but you also want a query rank that 
+reranks based on whatever the user queries on. Otherwise you get really weird results.
+
+Ranking is one of those secret sauces things, but generally TF/IDF or BM25 works fine. The above is BM25. 
+</aside>
 					</section>
 					<section>
 						<h2>Snippet Extraction</h2>
+						<p>https://github.com/boyter/cs/blob/master/snippet.go</p>
 <blockquote>
 features, noble mien, and the report which was in general circulation within five minutes after his entrance, of his having ten thousand a year. The gentlemen pronounced him to be a fine
 </blockquote>
@@ -681,11 +687,22 @@ features, noble mien, and the report which was in general circulation within fiv
 it. Dear, dear Lizzy. A house in town! Every thing that is charming! Three daughters married! Ten thousand a year! Oh, Lord! What will become of me. I shall go distracted.”
 </blockquote>
 
+<aside class="notes">
+Snippet extraction is one of those things that could be a talk of its own.
+
+Also listed as one of the reasons inktomi (anyone remember them?) was beaten by google. Because they didnt have it.
+
+Im not going to walk though it, its fairly complex but the linked code I am particullary proud of.
+
+I based all my string tests on pride and prejudice, with the above showing the 2 best matches for "ten thousand a year"
+
+This is eaily the most expensive portion of the search process.
+</aside>
 					</section>
 
 					<section>
 						<h2>Searching</h2>
-						<p>Bloom Filter Index -> Brute Force Search -> Rank -> Sort -> Snippet Extraction</p>
+						<img src="./img/filterdown.png" height="500px" style="border: none;" /><br>
 					</section>
 					<section>
 						<h2>Time to search</h2>
