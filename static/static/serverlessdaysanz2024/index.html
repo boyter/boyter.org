@@ -110,9 +110,11 @@ There is a saying in computing.
 					<section>
 						<blockquote>Never do at runtime what you can do at compile time.</blockquote>
 						<aside class="notes">
+						Never do at runtime what you can do at compile time. 
+
 I decided to see how far I can take that idea, by using AWS Lambda to build a search engine. 
 
-Why AWS? I am most familiar with it, and AWS isnt running a search engine like google or microsoft, so 
+Why AWS? I am most familiar with it, and AWS isnt running a search engine like google or microsoft cloud, so 
 it seemed like a safer place.
 						</aside>
 					</section>
@@ -127,22 +129,22 @@ it seemed like a safer place.
 								<li>AWS Lambda 400,000 seconds of compute time per month</li>
 							</ul>
 						<aside class="notes">
+So the idea.
+
 Some see constraints. I see free compute.
 
-We get around the pack of persistance? By baking the index into the lambda themselves. 
+How do ee get around the lack of persistance? By baking the index into the lambda itself. 
 In other words, generate code which contains the index and compile that into the lambda binary. 
 Do it at compile time.
 
-The plan, is then to shard the index using individual lambda's. 
+The plan, is to shard the index using individual lambda's. 
 Each one holds a portion of the index compiled into the binary that we deploy. 
 
 This means the entire thing is 100% serverless.
 
 The best part about this is that it solves one of the big problems with building a search engine. 
 That problem is that you need to pay for a heap of machines to sit there doing nothing up till someone 
-wants to perform a search.
-
-It will probably slide under the AWS Lambda Free tier.
+wants to perform a search. This by contrast could cost nothing.
 						</aside>
 					</section>
 				</section>
@@ -176,7 +178,7 @@ Brute force is a viable strategy, assuming you have a lot of force.
 
 Tools such as grep can walk gigabytes of content in seconds so this isnt a bad idea in theory.
 
-Taking a guess of storing ~100,000 items, and searching over them which with any modern cpu would 
+So given ~100,000 items, searching over them which with any modern cpu would 
 return in a few hundred milliseconds.
 
 So I tried it. I created a Go file with 100,000 strings in a slice, and then wrote a simple loop 
@@ -219,7 +221,9 @@ index = map[string][]int{
 <p>not compressed, list walking can be slow</p>
 
 						<aside class="notes">
-So here is the textbook 101 example.
+So here is the textbook 101 index.
+
+Its just a map or dictionary of strings to ids.
 
 So serverless days is found in documents 3 and 1337.
 
@@ -304,7 +308,7 @@ We add another term. Same process, hash 3 times and set the bits.
 	<img src="./img/BloomFilter4.png" style="border: none;" />
 						<aside class="notes">
 Another term added, where 2 of the bits overlap. This is an expected property of the filter
-and one of the ways they are space efficient.
+and one of the ways they are space efficient, by reusing bits.
 						</aside>
 					</section>
 					<section>
@@ -334,7 +338,8 @@ to this filter.
 Lastly we see an example of a false positive match. We hash and check the positions and they are all true.
 But we never added this term, the bits were supplied by others.
 
-You will find that a lot of tweaking of bloom filters is to control the false positive rate.
+You will find that a lot of tweaking of bloom filters is to control the false positive rate. 
+Either by making the filters bigger with more bits or tweaking the number of hashes.
 						</aside>
 					</section>
 
@@ -420,9 +425,7 @@ Because the bits are all within 512 bits of each other, we are likely to pull th
 the CPU.
 
 This is a big problem because accessing memory often isnt as fast as you expect. Modern CPU's can theoretically 
-push more than 100 GB across the CPU per second.
-
-In theory; theory and practice are the same. In practice they arent.
+push more than 100 GB across the CPU per second. In practice you get more like 20 to 50.
 
 Can we do better?
 						</aside>
@@ -438,7 +441,7 @@ Can we do better?
 						<p>Good enough for Dan Luu? Good enough for you.</p>
 						<img src="./img/bitfunnel.png" style="border: none;" />
 						<aside class="notes">
-In 2017 at SIGIR this paper about bitfunnel was released, detailing how bing uses
+In 2017 at SIGIR this paper about bitfunnel was released, detailing how bing.com uses
 bit signatures or bloom filters to power its fresh index.
 
 It won best paper at SIGIR, which is probably the most prestigious IR conferences.
@@ -466,7 +469,7 @@ but now each column does. Filled right to left.
 						<aside class="notes">
 With this done we only need to inspect the rows containing the bit positions of the query. 
 
-So like our previous search we are checking bit postitions 1 and 7 which are now rows 1 and 7.
+So like our previous search example we are checking bit postitions 1 and 7 which are now rows 1 and 7.
 						</aside>
 					</section>
 					<section>
@@ -619,16 +622,18 @@ Inside a lambda this runs in a few milliseconds.
 	get y</code></pre>
 						
 						<aside class="notes">
+So with that done.
+
 Need to source the websites... thankfully lists of this exist, so I just downloaded them and filtered to anything
 ending with .au and merged them.
 
-I tried some crawlers, but just went back to a custom one locked per domain writing out the contents to a custom format.
+I tried some open source crawlers, but just went back to a custom one locked per domain writing out the contents to a custom format.
 Dont overthink your crawlers beyond faking the user agent to googlebot.
 
 One advantage about using domain lists is they come with a rank value. Which we can use to get our own pagerank
 without spending time implementing it outselves.
 
-I used this value to influence the score giving a “cheap” ranking value.
+I used this value to influence the score giving a “cheap” pre-rank value.
 						</aside>
 					</section>
 					<section>
@@ -685,7 +690,8 @@ for word, wordCount := range res.matchWords {
 So we have our pre-ranking with our cheap version of page-rank but you also want a query rank that 
 reranks based on whatever the user queries on. Otherwise you get really weird results.
 
-Ranking is one of those secret sauces things, but generally TF/IDF or BM25 works fine. 
+Ranking is one of those secret sauces things, but generally TF/IDF or BM25 works fine. Especially for keyword
+searches
 The above is BM25. Its not that hard to implement. 
 </aside>
 					</section>
@@ -709,7 +715,7 @@ Im not going to walk though it, its fairly complex but the linked code I am part
 
 I based all my string tests on pride and prejudice (which I know more about than I probably should), with the above showing the 2 best matches for "ten thousand a year"
 
-This is eaily the most expensive portion of the search process.
+This is eaily the most expensive portion of the search process consuming the most CPU time.
 </aside>
 					</section>
 
@@ -840,6 +846,10 @@ Lastly we update the controller lambda to know tne names of workers and we are d
 							<li>In fact the whole thing is FREE if not being called!</li>
 							<li>TRUE SERVERLESS SEARCH!</li>
 						</ul>
+<aside class="notes">
+50 million documents. Interesting fact this is twice as many as the first version of Google.
+Its also done by one person in their spare time.
+</aside>
 					</section>
 					<section>
 						<h2>bonzamate.com.au</h2>
@@ -930,11 +940,25 @@ in doing something like this yourself.
 				</section>
 
 				<section>
+					<h2>Why?</h2>
+					<ul>
+						<li>February 2021 the Australian Greens Party called for a publicly owned search engine to be created and be independent and accountable like the ABC.</li>
+						<li>Previously this approach has failed in Europe and Russia with Quaero and Sputnik</li>
+						<li>Australia is an exporter of research talent</li>
+						<li>I would love there to be more competition in the search space, and I would love to see an Australian search engine be part of it.</li>
+						<li>If a single person, working in their spare time with zero budget can make a reasonable POC...</li>
+					</ul>
+					<aside class="notes">
+I guess I am rather patriotic, and it bothers me that everyt major search engine used in Australia is foreign owned.
+Id love to see an Aussie search engine, and id love to see some investment in the space. It feels ripe for disruption right now,
+with engines like Kagi and Marginalia getting attention, and gen:ai apparently disrupting all of the larger players.
+					</aside>
+				</section>
+
+				<section>
 					<img src="./img/vendor_lockin_compressed.png" height="500px" style="border: none;" /><br>
 					<aside class="notes">
-So thank you for today. I leave you with this comic, partly inspired by this experiment.
-
-I love the final quote.
+Anyway, thank you for today. I leave you with this comic, partly inspired by this experiment, especially the final quote
 
 "Vendor lock in? They wish. All these vendors are locked in here with ME!"
 					</aside>
