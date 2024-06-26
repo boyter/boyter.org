@@ -22,7 +22,6 @@ I am seriously considering writing content for the "Expert Excuses for Not Writi
 
 EDIT - I actually did write content and publish it as a book! [Expert Excuses for Not Writing Unit Tests](https://leanpub.com/expertexcusesfornotwritingunittests)
 
-
 ![Book Cover](/static/books/Cj0Up_hUUAAn8-g.jpg)
 ![Book Cover](/static/books/ChnulxvW0AEUs1J.jpg-large.jpg)
 ![Book Cover](/static/books/Cn1rWcbWcAAgsCA.jpg)
@@ -158,3 +157,7 @@ EDIT - I actually did write content and publish it as a book! [Expert Excuses fo
 ![Book Cover](/static/books/f8153cfdbe0a117e6386fa7051976063-2.jpeg)
 ![Book Cover](/static/books/fe79f4a4b464936db0762e1ee53427c7.png)
 ![Book Cover](/static/books/FGMeVj7VEAM7Zni.png)
+![Book Cover](/static/books/b1.jpg)
+![Book Cover](/static/books/b2.jpg)
+![Book Cover](/static/books/b3.jpg)
+![Book Cover](/static/books/b4.jpg)
