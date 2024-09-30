@@ -161,3 +161,4 @@ EDIT - I actually did write content and publish it as a book! [Expert Excuses fo
 ![Book Cover](/static/books/b2.jpg)
 ![Book Cover](/static/books/b3.jpg)
 ![Book Cover](/static/books/b4.jpg)
+![Book Cover](/static/books/gpt.jpg)
