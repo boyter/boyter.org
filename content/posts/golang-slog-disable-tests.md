@@ -23,5 +23,16 @@ func TestMain(m *testing.M) {
  exitVal := m.Run()
  os.Exit(exitVal)
 }
+{{</highlight>}}
 
+*EDIT* The nice thing about doing things in public is excellent people can show you better ways to achive things! Anton x'ed/tweeted responded with this <https://x.com/ohmypy/status/1866078171340185706> which allows you to condense the above into the below,
+
+{{<highlight go>}}
+// TestMain runs before any tests and applies globally for all tests in the package.
+func TestMain(m *testing.M) {
+ slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
+
+ exitVal := m.Run()
+ os.Exit(exitVal)
+}
 {{</highlight>}}
