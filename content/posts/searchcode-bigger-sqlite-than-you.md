@@ -35,7 +35,7 @@ dbRead, _ := connectSqliteDb("dbname.db")
 defer dbRead.Close()
 dbRead.SetMaxOpenConns(runtime.NumCPU())
 
-dbRead, _ := connectSqliteDb("dbname.db")
+dbWrite, _ := connectSqliteDb("dbname.db")
 defer dbWrite.Close()
 dbWrite.SetMaxOpenConns(1)
 {{</highlight>}}
