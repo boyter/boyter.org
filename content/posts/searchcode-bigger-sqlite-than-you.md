@@ -35,7 +35,7 @@ dbRead, _ := connectSqliteDb("dbname.db")
 defer dbRead.Close()
 dbRead.SetMaxOpenConns(runtime.NumCPU())
 
-dbRead, _ := connectSqliteDb("dbname.db")
+dbWrite, _ := connectSqliteDb("dbname.db")
 defer dbWrite.Close()
 dbWrite.SetMaxOpenConns(1)
 {{</highlight>}}
@@ -82,7 +82,7 @@ none       100%      4.3T         4.3T         4.3T
 zstd        23%      470G         1.9T         1.9T       
 ```
 
-So with everything setup and ready to do I flipped over the DNS entries to the new server and observed. Nothing appeared to go amiss, and so I left the updated DNS records in place. If you visit <https://searchcode.com/> you should be usingthe brand new code with SQLite backend. This post is already pretty long so I am not going to go through the new functionality that was released, instead saving it for another post.
+So with everything setup and ready to do I flipped over the DNS entries to the new server and observed. Nothing appeared to go amiss, and so I left the updated DNS records in place. If you visit <https://searchcode.com/> you should be using the brand new code with SQLite backend. This post is already pretty long so I am not going to go through the new functionality that was released, instead saving it for another post.
 
 As for SQLite? Well so far it appears to be working fine? While the schema searchcode uses is fairly simple, avoiding joins where possible and properly indexed I would not have expected SQLite to cope as well as it has. In fact making searchcode.com live with it was a giant leap of faith in it. I had no examples to follow were it to have issues, and while I had not done anything obviously wrong I was still deeply worried about hitting some unexpected issues. So far however this does not seem to be the case, with everything compared to the previous instance being much faster, from searches, to fetching pages and all of the backend processes that run.
 
