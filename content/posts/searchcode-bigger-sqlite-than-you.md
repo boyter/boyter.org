@@ -52,7 +52,7 @@ I looked around and found the following <https://phiresky.github.io/blog/2022/sq
 
 I was discussing the issue on the TechZing podcast discord when someone mentioned that while they had not tried compression in SQLite themselves but that I might want to consider compression on the filesystem level. Some searching around showed that this could be very viable option, <https://news.ycombinator.com/item?id=29148198> <https://trunc.org/learning/compressing-sqlite-with-zfs>.
 
-So I got to work on a few linux VM's with attached disks. Fiddling around with mounting disks with different filesystems in Linux is not something I had done since ReiserFS was a thing (I since discovered it has been removed from the kernel). I started looking at ZFS, since thats the only filesystem I knew supported encryption. Knowing nothing about ZFS I was suggested to look at BTRFS since it should in theory be simpler and turned out to be trivial to setup with zstd compression.
+So I got to work on a few linux VM's with attached disks. Fiddling around with mounting disks with different filesystems in Linux is not something I had done since ReiserFS was a thing (I since discovered it has been removed from the kernel). I started looking at ZFS, since thats the only filesystem I knew supported compression. Knowing nothing about ZFS I was suggested to look at BTRFS since it should in theory be simpler and turned out to be trivial to setup with zstd compression.
 
 Initial tests on a subset of the data showed a pretty drastic compression ratio.
 
