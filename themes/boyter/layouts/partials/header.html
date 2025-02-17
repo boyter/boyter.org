@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="{{ .Site.LanguageCode }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>{{ .Title }} | {{ .Site.Title }}</title>
+    <link rel="stylesheet" href="{{ "/css/pico.min.css" | relURL }}" />
+    {{/* <link rel="stylesheet" href="{{ "/css/fonts.css" | relURL }}" /> */}}
+    <link rel="alternate" type="application/rss+xml" title="boyter.org feed" href="https://boyter.org/index.xml"/>
+  </head>
+
+  <body>
+    {{ partial "head_custom.html" . }}
+    <main class="container">
+    
