@@ -41,16 +41,6 @@ Here's what I propose. Bring the person you want to interview in and have them a
 
 At the very least if you do need to screen candidates, have a very short coding test. Give them a short piece of code, of 20 lines or less and ask them to point out all the flaws in it. It allows you to craft the example to screen for specific strengths as well. For my current employer we have three such examples for Go, Java and React. The idea is that it should take less than 15 minutes for anyone to have a look through and point out the flaws. It also makes it very deterministic as you know ahead of time the flaws. For example the following snippet of Java has 3 obvious issues, those being pokemon exceptions, it will always return 0 and the indenting is not consistent. Be sure during your interview to revisit the code and talk it though with them. The candidate will be familiar with it at this point which helps overcome the interview nerves.
 
-{{<highlight java>}}
-} catch (Exception ex) {
-    return -1;
-}
-finally 
-{
-    return 0;
-}
-{{</highlight>}}
-
 The best interview process I have been with to date was actually the Microsoft one for a intern role many many moons ago. It involved several hours of interviews with different individuals discussing different technology roles to try and ascertain the best fit.
 
 When I walked out (I didn't get the role BTW) I felt like a better person. Not only were the discussions interesting, I learnt a lot from those conducting them and I felt like my time was valued. They even offered to cover my travel expenses which made me feel like they cared about my time investment. This is how the process is meant to work. Its as much about the person being interviewed as about the company. Consider it an investment in your advertising budget if you are tracking the time investment (yes it is an investment!) as a cost. Good interviews stick with people a long time and GREAT ones make those people want to praise your company.

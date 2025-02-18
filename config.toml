@@ -1,4 +1,4 @@
 baseurl = "https://boyter.org/"
 languageCode = "en-au"
 title = "Ben E. C. Boyter"
-theme = "xmin"
+theme = "boyter"
