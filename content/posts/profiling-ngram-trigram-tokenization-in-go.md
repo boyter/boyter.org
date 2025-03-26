@@ -3,33 +3,31 @@ title: Real World CPU profiling of ngram/trigram tokenization in Go to reduce in
 date: 2023-04-12
 ---
 
-Another progress update on https://searchcode.com where I was trying to reduce the time it takes to index source code. Since the this was a real world example of profiling code trying to reduce its cost I thought I would document how it went.
+Another progress update on <https://searchcode.com> where I was trying to reduce the time it takes to index source code. Since the this was a real world example of profiling code trying to reduce its cost I thought I would document how it went.
 
 The first step is to add code allowing the collection of a profile.
 
 I don't do this often enough in searchcode to have a want to enable/disable this so I just comment/uncomment this when needed. Note that I have this set to stop profiling 30 seconds after it starts, which is more than enough for me to identify CPU pressure as the index process is the first thing to start.
 
 {{<highlight go>}}
-f, _ := os.Create("profile.pprof")
+f, _:= os.Create("profile.pprof")
 _ = pprof.StartCPUProfile(f)
 go func() {
-	time.Sleep(30 * time.Second)
-	pprof.StopCPUProfile()
+ time.Sleep(30 * time.Second)
+ pprof.StopCPUProfile()
 }()
 {{</highlight>}}
 
-
-With that done, I start searchcode, wait 30 seconds for it to index and then can look at the profile.
-
-```
+With that done, I start searchcode, wait 30 seconds for it to index and then can look at the profile.```
 go tool pprof -http=localhost:8090 profile.pprof
+
 ```
 
-We get the following flame graph. 
+We get the following flame graph.
 
 ![profile searchcode.com](/static/profile-ngram/profile1.png)
 
-The bit I am most interested in is `index.(*CaissonIndex).Ngrams` because I know most of the other methods I have looked at in detail previously. 
+The bit I am most interested in is `index.(*CaissonIndex).Ngrams` because I know most of the other methods I have looked at in detail previously.
 
 ![profile searchcode.com](/static/profile-ngram/profile1_1.png)
 
@@ -37,35 +35,34 @@ The easiest thing to optimise there looks like the `runtime.growslice` operation
 
 {{<highlight go>}}
 func (ci *CaissonIndex) Ngrams(text string, size int) []string {
-	var runes = []rune(text)
-	ngrams := []string{}
-	for i := 0; i < len(runes); i++ {
-		if i+size < len(runes)+1 {
-			ngram := runes[i : i+size]
-			ngrams = append(ngrams, string(ngram)) // <-- PROBLEM HERE
-		}
-	}
-	return ngrams
+ var runes = []rune(text)
+ ngrams := []string{}
+ for i := 0; i < len(runes); i++ {
+  if i+size < len(runes)+1 {
+   ngram := runes[i : i+size]
+   ngrams = append(ngrams, string(ngram)) // <-- PROBLEM HERE
+  }
+ }
+ return ngrams
 }
 {{</highlight>}}
-
 
 I wrote this to be generic at the time in case I ever wanted to change the length of the ngrams, but in reality I only ever use trigrams. Knowing this, we can know how many ngrams we expect, and so rewrite the method to remove the append and instead allocate the slice once, then assign values in it. I could do that for the other method too, but being more explicit is a virtue.
 
 {{<highlight go>}}
 func (ci *CaissonIndex) Trigrams(text string) []string {
-	var runes = []rune(text)
-	if len(runes) <= 2 {
-		return []string{}
-	}
-	ngrams := make([]string, len(runes)-2)
-	for i := 0; i < len(runes); i++ {
-		if i+3 < len(runes)+1 {
-			ngram := runes[i : i+3]
-			ngrams[i] = string(ngram)
-		}
-	}
-	return ngrams
+ var runes = []rune(text)
+ if len(runes) <= 2 {
+  return []string{}
+ }
+ ngrams := make([]string, len(runes)-2)
+ for i := 0; i < len(runes); i++ {
+  if i+3 < len(runes)+1 {
+   ngram := runes[i : i+3]
+   ngrams[i] = string(ngram)
+  }
+ }
+ return ngrams
 }
 {{</highlight>}}
 

@@ -32,10 +32,9 @@ Oddly enough the above is good enough to ship and delight users. Also since comp
 
 However I was wondering is it possible to optimize the above? Either in terms of CPU or possibly more importantly memory usage.
 
-The above will match on any substring. So you could search for the letter `a` and expect results. However because of this it means multiple `a` characters could be redundant, as only the first is needed to be considered a match. Consider the following,
-
-```
+The above will match on any substring. So you could search for the letter `a` and expect results. However because of this it means multiple `a` characters could be redundant, as only the first is needed to be considered a match. Consider the following,```
 the fast theologian fastly ran
+
 ```
 
 The word `the` is redundant in the search because the word `theologian` also contains it. In fact if we apply this logic to the whole text we only need the following, ```theologian fastly ran```. Spaces are also redundant so the string ```theologianfastlyran``` will produce the same outputs for the same inputs as `the fast theologian fastly ran`.
@@ -117,9 +116,7 @@ func Benchmark_bruteSearchOptimize(b *testing.B) {
 
 I picked the search terms just based on what I know should exist inside the corpus as well as a worst case term that should not appear.
 
-So after running the above a few times we get results as follows.
-
-```
+So after running the above a few times we get results as follows.```
 goos: darwin
 goarch: arm64
 pkg: github.com/boyter/tenders

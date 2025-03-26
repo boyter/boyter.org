@@ -154,13 +154,13 @@ Lastly, and this is for you, this is how I built an index, not necessarily how y
 					<section>
 							<h2>Searching: Tokenisation</h2>
 							<p>Mapping / Stemming</p>
-	<pre><code style="font-size: 18px; line-height: 1em;">
+	```<code style="font-size: 18px; line-height: 1em;">
 "searchcode"         -> [searchcode]
 "sydney gophercon"   -> [sydney, gophercon]
 "likes liked likely" -> [like]
-	</code></pre>
+	</code>```
 	<p>Does not work for code!</p>
-	<pre><code style="font-size: 18px; line-height: 1em;">for(i=0;i++;i&lt;100)</pre></code>
+	```<code style="font-size: 18px; line-height: 1em;">for(i=0;i++;i&lt;100)```</code>
 							<aside class="notes">
 So one thing I need to cover is tokenisation. This is where you convert text into something you can index.
 Generally tokenisation is splitting on space characters you find in text.
@@ -174,9 +174,9 @@ and should work.
 						<h2>Searching code: Tokenisation</h2>
 						<p>Trigrams</p>
 						<small>This works for east asian languages too</small>
-<pre><code style="font-size: 18px; line-height: 1em;">"searchcode"   -> [sea, ear, arc, rch, chc, hco, cod, ode]
+```<code style="font-size: 18px; line-height: 1em;">"searchcode"   -> [sea, ear, arc, rch, chc, hco, cod, ode]
 "pppppppppppp" -> [ppp]
-</code></pre>
+</code>```
 						<aside class="notes">
 You can solve this problem by splitting on trigrams, this is where you break the text apart into characters of 3 
 and index those. 
@@ -191,12 +191,10 @@ They produce the same trigram.
 						<h2>Problems</h2>
 						<p>Creates long posting lists</p>
 						<p>Introduces false positives</p>
-<pre><code style="font-size: 18px; line-height: 1em;">"searchcode" -> [searchcode]</code></pre>
+```<code style="font-size: 18px; line-height: 1em;">"searchcode" -> [searchcode]</code>```
 						<p>vs</p>
-
-
-<pre><code style="font-size: 18px; line-height: 1em;">"searchcode" -> [sea, ear, arc, rch, chc, hco, cod, ode]
-</code></pre>
+```<code style="font-size: 18px; line-height: 1em;">"searchcode" -> [sea, ear, arc, rch, chc, hco, cod, ode]
+</code>```
 						<aside class="notes">
 Trigrams have their own problems.
 If we tokenise by trigrams we get a great deal more tokens we need to index. In our example 
@@ -206,7 +204,7 @@ it as plain space delimited text. This is an important consideration, because it
 					</section>
 					<section>
 						<h2>Trigram Generation<h2>
-<pre><code style="font-size: 14px; line-height: 1em;">func Trigrams(text string) []string {
+```<code style="font-size: 14px; line-height: 1em;">func Trigrams(text string) []string {
 	var runes = []rune(text)
 
 	if len(runes) <= 2 {
@@ -224,7 +222,7 @@ it as plain space delimited text. This is an important consideration, because it
 
 	return ngrams
 }
-</code></pre>
+</code>```
 					<aside class="notes">
 So here is some code to create trigrams given some input text.
 
@@ -255,9 +253,7 @@ which refer to documents that likely contain those terms, possibly ordered by re
 					</section>
 					<section>
 						<h2>Textbook 101 index</h2>
-						<p>2 examples, positional and non-positional</p>
-
-<pre><code style="font-size: 14px; line-height: 1em;">package main
+						<p>2 examples, positional and non-positional</p>```<code style="font-size: 14px; line-height: 1em;">package main
 
 func main() {
 	// non-positional index
@@ -272,7 +268,7 @@ func main() {
 	posIndex := map[string][]pos{} 
 	posIndex["gopher"] = append(posIndex["gopher"], pos{1337, []int{1, 2, 3, 99}})
 }
-</code></pre>
+</code>```
 
 						<aside class="notes">
 So here is the textbook 101 example.
@@ -325,7 +321,7 @@ Assvogel is an obsolete Afrikaans word for a South African vulture.
 					<section>
 						<h2>Problem 2</h2>
 						<h3>Compression</h3>
-						<pre><code style="font-size: 14px; line-height: 1em;">index := map[string][]int{} // this should be compressible right?</code></pre>
+						```<code style="font-size: 14px; line-height: 1em;">index := map[string][]int{} // this should be compressible right?</code>```
 						<p>Shannon Elias Fano</p>
 						<img src="./img/elias_fano.png" style="border: none;" />
 						<aside class="notes">
@@ -340,8 +336,8 @@ Don't worry you arent expected to understand how it works.
 					</section>
 					<section>
 						<h2>Complexity</h2>
-						<pre><code style="font-size: 16px; line-height: 1em;">index := map[string][]int{} // non-positional index
-</code></pre>
+						```<code style="font-size: 16px; line-height: 1em;">index := map[string][]int{} // non-positional index
+</code>```
 <p>vs</p>
 						<img src="./img/complex.png" style="border: none;" />
 						<aside class="notes">
@@ -455,9 +451,7 @@ You will find that a lot of tweaking of bloom filters is to control the false po
 					</section>
 
 					<section>
-						<h2>Go Bloom Filter</h2>
-
-<pre><code style="font-size: 14px; line-height: 1em;">package main
+						<h2>Go Bloom Filter</h2>```<code style="font-size: 14px; line-height: 1em;">package main
 
 import (
 	"fmt"
@@ -487,14 +481,12 @@ func main() {
 	if bloom[hash("house")] == false { fmt.Print("\nwas not added") }
 	if bloom[hash("boyter")] == true { fmt.Print("\nfalse positive! was never added!") }
 }
-</code></pre>
-
-<pre><code style="font-size: 14px; line-height: 1em;">$ go run main.go 
+</code>``````<code style="font-size: 14px; line-height: 1em;">$ go run main.go 
 0010000001000000
 probably added
 was not added
 false positive! was never added!
-</code></pre>
+</code>```
 
 						<aside class="notes">
 So here is a bloom filter implemented in go. The filter itself is 4 lines of code. A slice of booleans,
@@ -506,11 +498,11 @@ a function to hash and thats all you need. The output shows that terms were adde
 						<h2>Bloom filter: search</h2>
 					
 						<p>Check bit positions 1 and 7. Document 4 matches.</p>
-						<pre><code style="font-size: 14px; line-height: 1em;">for each bloomfilter
+						```<code style="font-size: 14px; line-height: 1em;">for each bloomfilter
 	for each bit
 		check if bit location in filter is set
 	if all matching bits are set
-		record possible match</code></pre>
+		record possible match</code>```
 
 						<img src="./img/bloom_naieve_search.gif" height="400px" style="border: none;" />
 
@@ -555,7 +547,7 @@ You can extend them to counting bloom filters, or put structs for positions.
 					<section>
 						<h2>Problems</h2>
 						<p>No free lunch...</p>
-<pre><code style="font-size: 14px; line-height: 1em;">package main
+```<code style="font-size: 14px; line-height: 1em;">package main
 			
 import (
 	"fmt"
@@ -574,11 +566,9 @@ func main() {
 	fmt.Println(memUsage())
 	_ = len(bigBloom)
 }
-</code></pre>
-
-<pre><code style="font-size: 14px; line-height: 1em;">$ go run main.go
+</code>``````<code style="font-size: 14px; line-height: 1em;">$ go run main.go
 0 MB
-95 MB</code></pre>
+95 MB</code>```
 						<aside class="notes">
 There are of course problems.
 
@@ -711,7 +701,7 @@ The result of this is it reduces memory access by a huge amount. Something like 
 					<section>
 						<h2>Pack the bits with bit set</h2>
 						<p>Use int64's to hold the filters in columns, and flip bits starting right to left.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">var bloomFilter []uint64
+```<code style="font-size: 14px; line-height: 1em;">var bloomFilter []uint64
 var bloomSize = 16
 var currentBlockDocumentCount = 0
 var currentBlockStartDocumentCount = 0
@@ -734,7 +724,7 @@ func Add(item []bool) error {
 
 	return nil
 }
-</code></pre>
+</code>```
 					<aside class="notes">
 The next step is to continue to save space.
 
@@ -752,7 +742,7 @@ and pass them into this. Very simple from a code perspective.
 					<section>
 						<h2>Result</h2>
 						<p>16 bit bloom filter, with 32 documents added. Less wasted space.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">0000000000000000000000000000000010100011111111111111111111111101
+```<code style="font-size: 14px; line-height: 1em;">0000000000000000000000000000000010100011111111111111111111111101
 0000000000000000000000000000000001110000000000010000100000000000
 0000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000100011111100000000000000000000
@@ -768,7 +758,7 @@ and pass them into this. Very simple from a code perspective.
 0000000000000000000000000000000000110000001000000001100000001000
 0000000000000000000000000000000010100010000111111110101010100001
 0000000000000000000000000000000001100011111100000000000000000000
-</code></pre>
+</code>```
 						<aside class="notes">
 This is what it looks like in memory after adding 32 documents. We have a 16 bit bloom filter, 
 with 16 int64's one after the other.
@@ -786,10 +776,10 @@ It also means when we do our & operation we are now searching 64 documents for e
 					<section>
 						<h2>Sharding</h2>
 						<p>Shard based on the length of the document we want to index.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">0000000100000000 // underfilled bloom filter
-1011111111111110 // overfilled bloom filter</code></pre>
+```<code style="font-size: 14px; line-height: 1em;">0000000100000000 // underfilled bloom filter
+1011111111111110 // overfilled bloom filter</code>```
 						<p>Result? Less wasted space. Squeeze every bit.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">
+```<code style="font-size: 14px; line-height: 1em;">
 ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
 │      index       ├─┬▶│  shard 512 bits  ├┬─▶│  block-1 64 docs │
 └──────────────────┘ │ └──────────────────┘│  └──────────────────┘
@@ -810,7 +800,7 @@ It also means when we do our & operation we are now searching 64 documents for e
                                            │  ┌──────────────────┐
                                            └─▶│  block-2 64 docs │
                                               └──────────────────┘
-</code></pre>
+</code>```
 						<aside class="notes">
 However the fix is still a little wasteful because smaller documents don't need large bloom filters.
 
@@ -831,11 +821,11 @@ single int slice in a shard. Each block contains 64 documents, but all exist in 
 					<section>
 						<h2>Copy the shards after indexing</h2>
 						<p>Result? Less fragmented memory, faster search.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">// attempt to save/organise memory shrink lists... https://go.dev/blog/slices-intro#TOC_6
+```<code style="font-size: 14px; line-height: 1em;">// attempt to save/organise memory shrink lists... https://go.dev/blog/slices-intro#TOC_6
 out := make([]int64, len(bloomFilter))
 copy(out, bloomFilter)
 bloomFilter = out
-</code></pre>
+</code>```
 						<aside class="notes">
 So when you are working with really large slices, and you constantly append to them, like searchcode does you can 
 get a great deal of value copying it over itself with a new slice you allocate up front.
@@ -845,9 +835,7 @@ The result is less memory fragmentration, which in our case means a faster searc
 					</section>
 					<section>
 						<h2>Frequency Concious Bloom Filter</h2>
-						<p>Rare terms need more hashes to reduce false positive rate</p>
-
-<pre><code style="font-size: 14px; line-height: 1em;">func (ci *CaissonIndex) DetermineHashCount(ngram string) int {
+						<p>Rare terms need more hashes to reduce false positive rate</p>```<code style="font-size: 14px; line-height: 1em;">func (ci *CaissonIndex) DetermineHashCount(ngram string) int {
 	// version 0.1
 	// if nothing that indicates its a very rare term so it needs the most hashes
 	// so set that up as the default
@@ -870,7 +858,7 @@ The result is less memory fragmentration, which in our case means a faster searc
 
 	return hashCount
 }
-</code></pre>
+</code>```
 						<aside class="notes">
 In bitfunnel one of the thing they implemented was Frequency Concious Bloom Filters.
 The reason for this is terms like "the" appear in almost every document. So you can get away with
@@ -888,10 +876,10 @@ This is an early prototype function I had for it... I itereated on this more tha
 						<h2>Result?</h2>
 						<p>Wasted time... For trigrams anyway</p>
 						<p>New algorithm is mind blowing.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">func DetermineHashCount(ngram string) int {
+```<code style="font-size: 14px; line-height: 1em;">func DetermineHashCount(ngram string) int {
 	return 2
 }
-</code></pre>
+</code>```
 						<aside class="notes">
 The result was a lot of wasted time actually.
 
@@ -907,7 +895,7 @@ trigrams being fairly common across all code with none being particiually unique
 					<section>
 						<h2>Restrict Parallelism</h2>
 						<p>Parallelism works... if you have CPU to spare</p>
-<pre><code style="font-size: 14px; line-height: 1em;">var sem = make(chan bool, 5) // counting semaphore
+```<code style="font-size: 14px; line-height: 1em;">var sem = make(chan bool, 5) // counting semaphore
 
 func doSearch() { // only 5 instances of this function can run
 	sem <- true
@@ -917,7 +905,7 @@ func doSearch() { // only 5 instances of this function can run
 
 	// Do CPU/Memory intensive stuff here
 }
-</code></pre>
+</code>```
 						<aside class="notes">
 This one seems counter intuitive. 
 
@@ -935,7 +923,7 @@ amazing language design.
 					<section>
 						<h2>Searching</h2>
 						<p>The core loop.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []int {
+```<code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []int {
 	var results []int
 	var res uint64
 
@@ -962,7 +950,7 @@ amazing language design.
 
 	return results
 }
-</code></pre>
+</code>```
 						<aside class="notes">
 The core search loop.
 

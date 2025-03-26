@@ -69,7 +69,7 @@ The above is pretty much all you need to get started with bloom filters. For a r
 
 Note that the false positive rate is actually a feature, and there are situations where you might want to drive it up or down to achieve your goal.
 
-If you are looking for bit more detail about how to implement one here is a gist https://gist.github.com/boyter/0cffa9ff8e2e7259d455594d744f1164 which has a bit more details and examples.
+If you are looking for bit more detail about how to implement one here is a gist <https://gist.github.com/boyter/0cffa9ff8e2e7259d455594d744f1164> which has a bit more details and examples.
 
 Note that bloom filters don't have any inbuilt limit to how many terms you can add. You can add as many terms to them as you want, but at some point it drives the false positive rate close to 100% making the filter effectively useless, so knowledge of how many terms you are going to store in it up front is a requirement of using them effectively.
 
@@ -93,25 +93,22 @@ You can extend this idea further as well. Say I want to determine the overlap be
 
 The idea of sharing reasonable proof of ownership is an interesting use case for bloom filters. Say for example you have obtained a list of hashed passwords and want to prove you have them without transmitting the hashes themselves. You could encode them all into a bloom filter configured with a high error rate.
 
-You can also use bloom filters to make a search engine. I first read about this idea on [Hacker News](https://www.stavros.io/posts/bloom-filter-search-engine/) with the idea being you build a bloom filter per document you want to index and then loop over each filter to check if terms are in each. This works at a small scale of a few thousand documents. 
+You can also use bloom filters to make a search engine. I first read about this idea on [Hacker News](https://www.stavros.io/posts/bloom-filter-search-engine/) with the idea being you build a bloom filter per document you want to index and then loop over each filter to check if terms are in each. This works at a small scale of a few thousand documents.
 
 However this is a fairly primitive version of a bloom filter search engine. You can do much better as it turns out.
 
-The nice thing about bloom filters is that you can query them using bitwise operations. In effect if you store each document in a filter of the same size, you end up with a collection of filters in a block that looks like the below for 3 documents with 8 bit bloom filters for each one.
-
-```
+The nice thing about bloom filters is that you can query them using bitwise operations. In effect if you store each document in a filter of the same size, you end up with a collection of filters in a block that looks like the below for 3 documents with 8 bit bloom filters for each one.```
 document1 10111010
 document2 01100100
 document3 00100111
+
 ```
 
-This is great because say you have search for a term with the hash `10010000` (note that the search filter must be as long as the documents you are searching) you can then step through each document applying bitwise AND operations to see if the result is zero and if not it means we might have a matching document. Bitwise operations are very fast on any CPU so the actual check is effectively free from a CPU point of view. The catch being you need to step through every part of memory for your whole corpus. 
+This is great because say you have search for a term with the hash `10010000` (note that the search filter must be as long as the documents you are searching) you can then step through each document applying bitwise AND operations to see if the result is zero and if not it means we might have a matching document. Bitwise operations are very fast on any CPU so the actual check is effectively free from a CPU point of view. The catch being you need to step through every part of memory for your whole corpus.
 
 There is a way to reduce this however. If you rotate the bit vectors you can then just check those which match your search term hash bit positions, so documents move from being rows to columns like so.
 
-In the below document 1 is now represented by column 1.
-
-```
+In the below document 1 is now represented by column 1.```
 term1 100
 term2 010
 term3 111
@@ -124,9 +121,7 @@ term8 001
 
 Then given our search `10010000` you would look at the bits for term1 and term4 (as bit position 1 and 4 are set). Then AND them together and you get `1` indicating that document 1 is a possible match for the search. It also reduced the number of bits we looked at for this query from 24 to 9. This is more impressive when you have larger filters (which you would expect).
 
-It looks like this,
-
-```
+It looks like this,```
 search 10010000
 
 positions 1 and 4 are set so we want to use those
@@ -150,24 +145,22 @@ However part of the bing.com managed to improve this algorithm even more. It's w
 
 The links you need to get started on how Bing does this are below,
 
- - http://bitfunnel.org/
- - https://www.youtube.com/watch?v=1-Xoy5w5ydM
- - https://www.youtube.com/watch?v=80LKF2qph6I
- - https://www.clsp.jhu.edu/events/mike-hopcroft-microsoft/
- - https://danluu.com/bitfunnel-sigir.pdf
+- <http://bitfunnel.org/>
+- <https://www.youtube.com/watch?v=1-Xoy5w5ydM>
+- <https://www.youtube.com/watch?v=80LKF2qph6I>
+- <https://www.clsp.jhu.edu/events/mike-hopcroft-microsoft/>
+- <https://danluu.com/bitfunnel-sigir.pdf>
 
 They are worth looking at!
 
 ## Similar data structures
 
-There are modified versions of bloom filters, as well as other similar structures. 
+There are modified versions of bloom filters, as well as other similar structures.
 
 Variants of bloom filters include compressed bloom filters, expiring and counting bloom filters. They use less memory, expire old keys and record how many times keys were added (allowing removal if you implement it correctly at the expense of memory).
 
 Another similar one is the cuckoo filter which works in a similar way to a bloom filter, except it has a inbuilt limit after which it will no longer add items, can delete items and has some different memory characteristics.
 
-
 ## Conclusion
 
-So, what started as me wanting to implement bitfunnel myself turned into a longer than I expected look at bloom filters in general. I have to admit they are now my new favourite data structure (wow... how much of a nerd do you have to be to have one of those) supplanting my previous which was the vector space. While I don't really have any use for bloom filters in much of what I do from day to day I'm hoping like https://boyter.org/posts/media-clipping-using-ffmpeg-with-cache-eviction-2-random-for-disk-caching-at-scale/ 2 random cache eviction I might get to use it one of these days.
-
+So, what started as me wanting to implement bitfunnel myself turned into a longer than I expected look at bloom filters in general. I have to admit they are now my new favourite data structure (wow... how much of a nerd do you have to be to have one of those) supplanting my previous which was the vector space. While I don't really have any use for bloom filters in much of what I do from day to day I'm hoping like <https://boyter.org/posts/media-clipping-using-ffmpeg-with-cache-eviction-2-random-for-disk-caching-at-scale/> 2 random cache eviction I might get to use it one of these days.

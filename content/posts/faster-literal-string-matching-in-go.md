@@ -3,7 +3,7 @@ title: Faster Literal String Matching in Go
 date: 2020-09-30
 ---
 
-**TL/DR:** I wrote a fast literal string matching library in Go get it here https://github.com/boyter/go-string/
+**TL/DR:** I wrote a fast literal string matching library in Go get it here <https://github.com/boyter/go-string/>
 
 Recently I rebuilt [searchcode](https://searchcode.com/) in Go, as [mentioned](https://boyter.org/posts/searchcode-rebuilt-with-go/).
 
@@ -19,11 +19,9 @@ I had previously written about some of the issues with the above when writing ab
 
 The generally always correct answer to case insensitive matching is to use Regular Expressions. However there can be issues with it. Firstly the regular expression engine in Go is slower than you think, and for matching string literals its a very large hammer for a smallish nail.
 
-So I wrote my own implementation which does the same thing but without touching the regular expression engine https://github.com/boyter/go-string/ thus making it much faster than using FindAllIndex for the majority of cases.
+So I wrote my own implementation which does the same thing but without touching the regular expression engine <https://github.com/boyter/go-string/> thus making it much faster than using FindAllIndex for the majority of cases.
 
-Talk is cheap... show me the benchmarks. Included below is the output from a small application I wrote. A small program which you supply a search string and a filename. I have tested it against a 550MB file. First it runs case insensitive search using FindAllIndex in the regex package, then against IndexAllIgnoreCase my own implementation. The number on the end of each line is the number of matches found.
-
-```
+Talk is cheap... show me the benchmarks. Included below is the output from a small application I wrote. A small program which you supply a search string and a filename. I have tested it against a 550MB file. First it runs case insensitive search using FindAllIndex in the regex package, then against IndexAllIgnoreCase my own implementation. The number on the end of each line is the number of matches found.```
 $ ./csperf ſecret 550MB
 File length 576683100
 
@@ -36,6 +34,7 @@ IndexAllIgnoreCase (custom)
 Scan took 2.04013314s 16680
 Scan took 2.019360935s 16680
 Scan took 1.996732171s 16680
+
 ```
 
 Note using the long s, `ſ` in the search term so both solutions are unicode aware!
@@ -46,11 +45,11 @@ If you are curious about I did this read on. Otherwise feel free to just suck do
 
 **So how does it work?**
 
-The code itself is reasonably [well commented](https://github.com/boyter/go-string/blob/master/index.go#L98) so you may want to just read the code. 
+The code itself is reasonably [well commented](https://github.com/boyter/go-string/blob/master/index.go#L98) so you may want to just read the code.
 
-In short it copies some techniques from tools like ripgrep. 
+In short it copies some techniques from tools like ripgrep.
 
-When looking at string matching algorithms, you run into algorithms such as Boyer-Moore, Aho-Corasick and Rabin-Carp. It may then surprise you to learn that Go's implementation of strings.Index does not use them, well at least not till the needle is over 64 characters when 64 bit compiled where it starts to use Rabin-Carp, presumably as a CPU cache line optimisation. 
+When looking at string matching algorithms, you run into algorithms such as Boyer-Moore, Aho-Corasick and Rabin-Carp. It may then surprise you to learn that Go's implementation of strings.Index does not use them, well at least not till the needle is over 64 characters when 64 bit compiled where it starts to use Rabin-Carp, presumably as a CPU cache line optimisation.
 
 What strings.Index actually does a simple loop through each byte checking for a match, and then when one is found starts checking against the needle. This means it does not do any byte skipping which Boyer-Moore does! Naturally, I was appalled by this and looked for a Boyer-Moore implementation to swap it out for. Turns out there is one inside the Go codebase which made me very curious. Why was it not used? Well after trying a few implementations each turned out to be much slower than the simple one Go uses. As it turns out, that implementation compiles down to fancy vector instructions on modern CPU's. It's pretty hard to beat silicon with algorithms, unless you algorithm happens to be massively more efficient so there was no trivial gains to be made there with a fancy algorithm.
 
@@ -58,4 +57,4 @@ So what actually happens in the code is that it takes the needle, and uses the f
 
 In theory Aho-Corasick would be faster than the above as you could use maybe the first 4 characters and use that for matching each byte, however I was not going for extreme performance, but something much faster than regular expressions. Also its reasonably simple to follow, while leveraging the Go SDK which is a massive win in my opinion.
 
-The result is currently running in searchcode. This replaces what was the slowest portion of the code in the old version of searchcode and is much faster reducing the load on the servers considerably. Every string runs through the implementation and as such its fairly battle tested. It might not be perfect, but there has been no crashes to date with the v1.0.0 tag release so it should be reasonably safe to use, but of course there is no warranty. As mentioned a few times the code is open and on github, so feel free to bash against it https://github.com/boyter/go-string and report bugs! If you do run into an interesting case where you use it let me know and ill add it to the README.
+The result is currently running in searchcode. This replaces what was the slowest portion of the code in the old version of searchcode and is much faster reducing the load on the servers considerably. Every string runs through the implementation and as such its fairly battle tested. It might not be perfect, but there has been no crashes to date with the v1.0.0 tag release so it should be reasonably safe to use, but of course there is no warranty. As mentioned a few times the code is open and on github, so feel free to bash against it <https://github.com/boyter/go-string> and report bugs! If you do run into an interesting case where you use it let me know and ill add it to the README.

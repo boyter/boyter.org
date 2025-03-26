@@ -3,33 +3,30 @@ title: Unicode support. What does that actually mean? 😃
 date: 2020-06-14
 ---
 
-Unicode support in my experience seems to be one of those hand wavy things where most people respond to the question of "Do you support unicode?" with 
+Unicode support in my experience seems to be one of those hand wavy things where most people respond to the question of "Do you support unicode?" with
 
 > Yeah we support emojis, so yes we support unicode! 😃😭😈
 
 Which is partially correct... It's certainly a good start. However unicode is more than emojis.
 
-So lets take a step back. What is unicode? It's actually easy to explain, here it is taken from the wiki page "A standard for representing the worlds text". That means it includes all the languages in the world, such as chinese characters, japanese writing systems, arabic and even nordic runes. As such you get all sorts of interesting things in the standard such as characters that display as white space but actually are not because they represent a nordic rune carved on the [side of the stone not visible from the front](https://www.youtube.com/watch?v=2yWWFLI5kFU). 
+So lets take a step back. What is unicode? It's actually easy to explain, here it is taken from the wiki page "A standard for representing the worlds text". That means it includes all the languages in the world, such as chinese characters, japanese writing systems, arabic and even nordic runes. As such you get all sorts of interesting things in the standard such as characters that display as white space but actually are not because they represent a nordic rune carved on the [side of the stone not visible from the front](https://www.youtube.com/watch?v=2yWWFLI5kFU).
 
 Being able to save these characters into your system as mentioned a very good start. Emoji's tending to be the yard-stick used to test a unicode support claim, because who doesn't love sprinkling them through everyday communication.
 
-However what true unicode support actually means, if you perform string operations on unicode characters are you able to process them correctly. Note I am not covering encoding here, but this classic [Joel on Software](https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/) post covers it well enough. Your programming language of choice might have functions to help you with this, or have they enabled on your string functions already. But lets consider what this entails. 
+However what true unicode support actually means, if you perform string operations on unicode characters are you able to process them correctly. Note I am not covering encoding here, but this classic [Joel on Software](https://www.joelonsoftware.com/2003/10/08/the-absolute-minimum-every-software-developer-absolutely-positively-must-know-about-unicode-and-character-sets-no-excuses/) post covers it well enough. Your programming language of choice might have functions to help you with this, or have they enabled on your string functions already. But lets consider what this entails.
 
 The first thing is that your language needs to know how to split and count strings based on the number of characters and not the bytes that represent them. If you count the number of characters in `Ⱥ` using the string function inside your language of choice, and get back the answer 1 then fantastic your language natively supports unicode. If you get back 2 then you are actually getting the count of the bytes it takes to represent the character. However there is more to unicode then knowing how many characters string holds. That thing being case folding rules.
 
-Case folding rules I hear you ask? 🙏	
+Case folding rules I hear you ask? 🙏
 
 In modern English generally a single upper-case character has a 1 to 1 mapping to a lower-case character. `A-a B-b C-c` etc... However once you move to older English and international languages this is no longer true. For old English once you include unicode characters all of a sudden you have to deal with things like `ſ`.
 
-According wikipedia the character `ſ` is a [long s](https://en.wikipedia.org/wiki/Long_s). Which means if you want to support unicode you need to ensure that if someone does a case insensitive comparison then the following examples are all string equivalent. 
-
-```
+According wikipedia the character `ſ` is a [long s](https://en.wikipedia.org/wiki/Long_s). Which means if you want to support unicode you need to ensure that if someone does a case insensitive comparison then the following examples are all string equivalent.```
 ſecret == secret == Secret
-```
-
-The above is just a simple example... consider the following (not all permutations included),
 
 ```
+
+The above is just a simple example... consider the following (not all permutations included),```
 ſatisfaction == satisfaction == ſatiſfaction == Satiſfaction == SatiSfaction === ſatiSfaction
 ```
 
@@ -39,10 +36,9 @@ The above is something to keep in mind from design to implementation. Because yo
 
 Actually it can be more complex than the above. The above is dealing with simple case folding rules, where a single character maps to a single character (although it could map to be multiple single characters). Full case folding rules mean that one character can actually map to multiple.
 
-Let's look at the German character [ß](https://en.wikipedia.org/wiki/%C3%9F). Which under full-case folding rules actually has two mappings, one to a single character and one to two characters.
-
-```
+Let's look at the German character [ß](https://en.wikipedia.org/wiki/%C3%9F). Which under full-case folding rules actually has two mappings, one to a single character and one to two characters.```
 groß -> GROẞ | GROSS
+
 ```
 
 When you upper-case groß you can get either GROẞ or GROSS. Depending on how old the person you are working with one might be considered correct or according to Council for German Orthography both can be correct.
@@ -86,21 +82,20 @@ For those curious here is a Go program which illustrates the difference in byte 
 package main
 
 import (
-	"fmt"
-	"strings"
+ "fmt"
+ "strings"
 )
 
 func main() {
-	fmt.Println("Ⱥ", strings.ToLower("Ⱥ"), len("Ⱥ"), len(strings.ToLower("Ⱥ")))
+ fmt.Println("Ⱥ", strings.ToLower("Ⱥ"), len("Ⱥ"), len(strings.ToLower("Ⱥ")))
 }
 {{</highlight>}}
 
-
 Keep in mind this is just scratching the surface of the edge cases in unicode. I'm sure there are heap of additional cases I have not yet run into nor covered (I was only trying to solve a single small problem) but this should at least give an idea as to the sort of problems you need to consider.
 
-There are also security implications to consider when working with unicode such at the ones rasied here https://eng.getwisdom.io/hacking-github-with-unicode-dotless-i/ where blindly lower casing email addresses results in a security issue.
+There are also security implications to consider when working with unicode such at the ones rasied here <https://eng.getwisdom.io/hacking-github-with-unicode-dotless-i/> where blindly lower casing email addresses results in a security issue.
 
-One last thing to consider is the performance cost of supporting unicode, which unless you pay special attention can be non trivial. Probably best illustrated by the ripgrep introduction blog https://blog.burntsushi.net/ripgrep/#linux_unicode_word and specifically the unicode aware test where some of the tools get a non trivial order of magnitude slow down cost by supporting it. 
+One last thing to consider is the performance cost of supporting unicode, which unless you pay special attention can be non trivial. Probably best illustrated by the ripgrep introduction blog <https://blog.burntsushi.net/ripgrep/#linux_unicode_word> and specifically the unicode aware test where some of the tools get a non trivial order of magnitude slow down cost by supporting it.
 
 So... key take-aways.
 
@@ -113,10 +108,10 @@ So... key take-aways.
 * There are also potential security issues that can come from not getting things right
 * There *can* be non trivial performance costs to support unicode
 
-So what to do? Well the first is obviously use well supported libraries that solve this problem for you. However be aware of the limitations they have. Know what case folding it supports for instance. I'd also suggest not claiming to have unicode support unless you are very explicit with what you support, or know in advance what the user expects. I would be inclined to ask "Can you develop that point please?" when faced with this question. 
+So what to do? Well the first is obviously use well supported libraries that solve this problem for you. However be aware of the limitations they have. Know what case folding it supports for instance. I'd also suggest not claiming to have unicode support unless you are very explicit with what you support, or know in advance what the user expects. I would be inclined to ask "Can you develop that point please?" when faced with this question.
 
 Saying "We support it this way" is acceptable in my books, but might come back to bite you if the customer expects something else. Lastly keep in mind the key take-aways above, especially the performance one. 👍
 
 Lastly... why would you ever investigate this? Well I have been working on a command line tool to search over text and code. I wanted it to be unicode aware, ran into performance issues with regular expressions in Go and decided to dive into learning how to do case insensitive searches while supporting unicode... now I am in awe at how anything actually works.
 
-HN Comments https://news.ycombinator.com/item?id=23524400
+HN Comments <https://news.ycombinator.com/item?id=23524400>

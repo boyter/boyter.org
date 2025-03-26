@@ -110,7 +110,7 @@ The why is that I write a lot of code outside of work and there are two projects
 					</section>
 					<section>
 						<h2>scc</h2>
-						<pre><code style="font-size: 14px; line-height: 1em;">$ scc redis 
+						```<code style="font-size: 14px; line-height: 1em;">$ scc redis 
 ───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
 ───────────────────────────────────────────────────────────────────────────────
@@ -148,7 +148,7 @@ Estimated People Required (organic) 21.428982
 ───────────────────────────────────────────────────────────────────────────────
 Processed 9425137 bytes, 9.425 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
-</code></pre>
+</code>```
 						<aside class="notes">
 The first is a tool called Sloc Cloc and Code (scc). Its a command line tool which given a code repository will 
 count all of the lines of code, comments, blank lines in multiple programming languages.
@@ -397,11 +397,11 @@ to a straight Python conversion and really worth it for Go's concurrency.
 					</section>
 					<section>
 						<h2>Channels and Pipes </h2>
-						<pre><code style="font-size: 14px; line-height: 1em;">
+						```<code style="font-size: 14px; line-height: 1em;">
 cat urllist.txt | xargs -P16 python parse.py
-						</code></pre>
+						</code>```
 
-						<pre><code style="font-size: 14px; line-height: 1em;">
+						```<code style="font-size: 14px; line-height: 1em;">
 ch := make(chan string)
 
 for i:=0; i<16; i++{
@@ -411,7 +411,7 @@ for i:=0; i<16; i++{
 for _, l := range urllist {
     ch <- l
 }
-						</code></pre>
+						</code>```
 						<aside class="notes">
 Going back to taco bell programming, Go fits in with this rather well. 
 It produces a single binary to deploy and run.
@@ -486,7 +486,7 @@ processed faster and saved on the s3 egress costs.
 					<section>
 						<h2>Go again...</h2>
 						<p>
-<pre><code style="font-size: 14px; line-height: 1em;">
+```<code style="font-size: 14px; line-height: 1em;">
 filesPerProject := map[int64]int64{}      // Number of files in each project in buckets IE projects with 10 files or projects with 2
 projectsPerLanguage := map[string]int64{} // Number of projects which use a language
 filesPerLanguage := map[string]int64{}    // Number of files per language
@@ -513,7 +513,7 @@ longest := Largest{}                                   // Holds details of the l
 longestPerLanguage := map[string]Largest{}             // longest file per language
 mostCommented := Largest{}                             // Holds details of the most commented file in lines
 mostCommentedPerLanguage := map[string]Largest{}       // most commented file per language
-</code></pre>
+</code>```
 						</p>
 						<aside class="notes">
 Since I was already working in Go I decided to just process the data in Go. I could reuse the structures I had already written,

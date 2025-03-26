@@ -18,7 +18,7 @@ categories:
 
 ---
 
-**UPDATE** The below is here for historical reasons, but since 2021 very out of date. See this post https://engineering.kablamo.com.au/posts/2021/quick-comparison-between-go-file-walk-implementations for an updated comparison.
+**UPDATE** The below is here for historical reasons, but since 2021 very out of date. See this post <https://engineering.kablamo.com.au/posts/2021/quick-comparison-between-go-file-walk-implementations> for an updated comparison.
 
 Whats the fastest way to get all the names of all files in a directory using Go? I had a feeling that the native walk might not be the fastest way to do it. A quick search showed that several projects claimed to be faster. Since the [application][1] I am currently working on needs a high performance scanner I thought I would try the main ones out.
 
@@ -28,23 +28,23 @@ Note that I have updated the code and the results based on feedback from reddit.
 package main
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
+ "fmt"
+ "os"
+ "path/filepath"
 )
 
 func main() {
-	count := 0
-	filepath.Walk("./", func(root string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
+ count := 0
+ filepath.Walk("./", func(root string, info os.FileInfo, err error) error {
+  if err != nil {
+   return err
+  }
 
-		count++
-		return nil
-	})
+  count++
+  return nil
+ })
 
-	fmt.Println(count)
+ fmt.Println(count)
 }
 {{</highlight>}}
 
@@ -52,24 +52,24 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"github.com/MichaelTJones/walk"
-	"os"
+ "fmt"
+ "github.com/MichaelTJones/walk"
+ "os"
 )
 
 func main() {
-	count := 0
-	walk.Walk("./", func(root string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
+ count := 0
+ walk.Walk("./", func(root string, info os.FileInfo, err error) error {
+  if err != nil {
+   return err
+  }
 
-		count++
+  count++
 
-		return nil
-	})
+  return nil
+ })
 
-	fmt.Println(count)
+ fmt.Println(count)
 }
 {{</highlight>}}
 
@@ -77,22 +77,22 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"github.com/iafan/cwalk"
-	"os"
+ "fmt"
+ "github.com/iafan/cwalk"
+ "os"
 )
 
 func main() {
-	count := 0
-	cwalk.Walk("./", func(root string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
+ count := 0
+ cwalk.Walk("./", func(root string, info os.FileInfo, err error) error {
+  if err != nil {
+   return err
+  }
 
-		count++
-		return nil
-	})
-	fmt.Println(count)
+  count++
+  return nil
+ })
+ fmt.Println(count)
 }
 {{</highlight>}}
 
@@ -100,29 +100,27 @@ func main() {
 package main
 
 import (
-	"fmt"
-	"github.com/karrick/godirwalk"
+ "fmt"
+ "github.com/karrick/godirwalk"
 )
 
 func main() {
-	count := 0
-	godirwalk.Walk("./", &godirwalk.Options{
-		Unsorted: true,
-		Callback: func(osPathname string, de *godirwalk.Dirent) error {
-			count++
-			return nil
-		},
-		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
-			return godirwalk.SkipNode
-		},
-	})
-	fmt.Println(count)
+ count := 0
+ godirwalk.Walk("./", &godirwalk.Options{
+  Unsorted: true,
+  Callback: func(osPathname string, de *godirwalk.Dirent) error {
+   count++
+   return nil
+  },
+  ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
+   return godirwalk.SkipNode
+  },
+ })
+ fmt.Println(count)
 }
 {{</highlight>}}
 
-And the results. All were run in the WSL for Linux on a Surface Book 2 against a recent checkout of the Linux kernel with there being 67359 files in the directory.
-
-```
+And the results. All were run in the WSL for Linux on a Surface Book 2 against a recent checkout of the Linux kernel with there being 67359 files in the directory.```
 $ hyperfine './cwalk' && hyperfine './godirwalk' && hyperfine './nativewalk' && hyperfine './walk'
 Benchmark #1: ./cwalk
   Time (mean ± σ):      1.812 s ±  0.059 s    [User: 368.4 ms, System: 6545.8 ms]
@@ -139,6 +137,7 @@ Benchmark #1: ./nativewalk
 Benchmark #1: ./walk
   Time (mean ± σ):      1.674 s ±  0.071 s    [User: 399.7 ms, System: 6383.3 ms]
   Range (min … max):    1.571 s …  1.769 s
+
 ```
 
 For comparison ripgrep which is probably the fastest disk scanner comes in at ~600ms. That is not a fair comparison though as it ignores certain directories but it gives you an idea of the upper bounds of useful performance.

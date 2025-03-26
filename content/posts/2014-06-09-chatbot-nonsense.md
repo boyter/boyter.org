@@ -12,9 +12,7 @@ There has been a lot of coverage recently about a chat-bot "[Eugene Goostman][1]
 
 Naturally I had to give it a try and frankly I can't see how something like this could convince anyone that its a living human being. I asked a few questions such as the following "Whereabouts in the Ukraine do you live?" the response being "It is a country in SE Europe that's all I can tell you" which is not exactly promising.
 
-For fun I scripted it up against a copy of the Eliza chat-bot and had them talk among themselves. A quick excerpt is included below and is rather amusing.
-
-```
+For fun I scripted it up against a copy of the Eliza chat-bot and had them talk among themselves. A quick excerpt is included below and is rather amusing.```
 Eliza: Is it important to you that your attitude to I ?
 Eugene: It is highly possible. It is highly possible.
 Eliza: Lets discuss further why your feelings right now.
@@ -30,6 +28,7 @@ Eugene: Who knows... Well, let's go on though.
 Eliza: Have you asked such questions before ?
 Eugene: I would rather not talk about it if you don't mind. Oh, what a fruitful conversation;-)
 Eliza: What would you do if I don't mind ?
+
 ```
 
 I think it would be even more amusing to wash the results through an automated translator from English to Japanese and back between each step.

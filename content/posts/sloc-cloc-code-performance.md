@@ -7,27 +7,25 @@ date: 2018-09-19
 
 This is now part of a series of blog posts about `scc` Sloc Cloc and Code which has now been optimised to be the fastest code counter for almost every workload. Read more about it at the following links.
 
- - [Sloc Cloc and Code - What happened on the way to faster Cloc 2018-04-16](https://boyter.org/posts/sloc-cloc-code/)
- - [Sloc Cloc and Code Revisited - A focus on accuracy 2018-08-28](https://boyter.org/posts/sloc-cloc-code-revisited/)
- - [Sloc Cloc and Code Revisited - Optimizing an already fast Go application 2018-09-19](https://boyter.org/posts/sloc-cloc-code-performance/)
- - [Sloc Cloc and Code a Performance Update 2019-01-09](https://boyter.org/posts/sloc-cloc-code-performance-update/)
- - [Sloc Cloc and Code Badges for Github/Bitbucket/Gitlab](https://boyter.org/posts/sloc-cloc-code-badges/)
+- [Sloc Cloc and Code - What happened on the way to faster Cloc 2018-04-16](https://boyter.org/posts/sloc-cloc-code/)
+- [Sloc Cloc and Code Revisited - A focus on accuracy 2018-08-28](https://boyter.org/posts/sloc-cloc-code-revisited/)
+- [Sloc Cloc and Code Revisited - Optimizing an already fast Go application 2018-09-19](https://boyter.org/posts/sloc-cloc-code-performance/)
+- [Sloc Cloc and Code a Performance Update 2019-01-09](https://boyter.org/posts/sloc-cloc-code-performance-update/)
+- [Sloc Cloc and Code Badges for Github/Bitbucket/Gitlab](https://boyter.org/posts/sloc-cloc-code-badges/)
 
-
-
-I don't want to make any false claims about the impact of `scc` and the blog post about it https://boyter.org/posts/sloc-cloc-code/ but following its release both `tokei` and `loc` were updated with impressive performance improvements. In addition a new tool `polyglot` http://blog.vmchale.com/article/polyglot-comparisons was released which also claimed performance as its main feature. Lastly the tool `gocloc` https://github.com/hhatto/gocloc appears to be getting updates as well. All good stuff.
+I don't want to make any false claims about the impact of `scc` and the blog post about it <https://boyter.org/posts/sloc-cloc-code/> but following its release both `tokei` and `loc` were updated with impressive performance improvements. In addition a new tool `polyglot` <http://blog.vmchale.com/article/polyglot-comparisons> was released which also claimed performance as its main feature. Lastly the tool `gocloc` <https://github.com/hhatto/gocloc> appears to be getting updates as well. All good stuff.
 
 I  finished that article with what I am now claiming as a prophetic statement,
 
 > Of course whats likely to happen now is that either the excellent authors of Tokei, Loc or Gocloc are going to double down on performance or someone else far smarter than I is going to show of their Rust/C/C++/D skills and implement a parser thats much faster than scc with duplicate detection and maybe complexity calculations. I would expect it to also be much faster than anything I could ever produce. It's possible that Tokei and Loc could run faster already just by compiling for the specific CPU they run on or through the SIMD optimizations that at time of writing are still to hit the main-line rust compiler.
 
-Totally claiming that I called it, at least when regarding performance. All the projects mentioned are getting renewed attention. However it was not Rust/C/C++ or even D that stepped up to be the new tool but `polyglot` written in ATS which is a language I had never heard of. That said `scc` is still the only tool with complexity estimates, and the author of `tokei` at least has explicitly has ruled it out as a change https://github.com/Aaronepower/tokei/issues/237
+Totally claiming that I called it, at least when regarding performance. All the projects mentioned are getting renewed attention. However it was not Rust/C/C++ or even D that stepped up to be the new tool but `polyglot` written in ATS which is a language I had never heard of. That said `scc` is still the only tool with complexity estimates, and the author of `tokei` at least has explicitly has ruled it out as a change <https://github.com/Aaronepower/tokei/issues/237>
 
 If my blog post in any way shape or form pushed forward the performance of code counters and resulted in the saving of countless amounts of time around the IT industry I will consider that the highlight of my career thus far.
 
 Of course being the person I am it also means I need to revisit `scc` and see what I can do to bring it back into contention on the performance front.
 
-I figured that since I was already making changes to improve accuracy https://boyter.org/posts/sloc-cloc-code-revisited/ I would have a poke through the source and see if there were any wins to made on the performance front. One large issue with this was that I spent a great amount of time making `scc` about as fast as I could the first time around. I seriously doubted when I started if there was going to be many things I missed, which is a naive thing to think.
+I figured that since I was already making changes to improve accuracy <https://boyter.org/posts/sloc-cloc-code-revisited/> I would have a poke through the source and see if there were any wins to made on the performance front. One large issue with this was that I spent a great amount of time making `scc` about as fast as I could the first time around. I seriously doubted when I started if there was going to be many things I missed, which is a naive thing to think.
 
 ### The quest for more speed
 
@@ -59,18 +57,15 @@ Every time the method is called it goes back to the language lookup and looks fo
 
 What does this translate to in the real world?
 
-Before 
-
-```
+Before```
 $ hyperfine 'scc redis'
 Benchmark #1: scc redis
   Time (mean ± σ):     239.7 ms ±  43.7 ms    [User: 607.0 ms, System: 822.3 ms]
   Range (min … max):   213.0 ms … 327.5 ms
-```
-
-After
 
 ```
+
+After```
 $ hyperfine 'scc redis'
 Benchmark #1: scc redis
   Time (mean ± σ):     199.7 ms ±  26.1 ms    [User: 608.0 ms, System: 716.6 ms]
@@ -79,9 +74,7 @@ Benchmark #1: scc redis
 
 Not a bad saving there. Following this easy win I started poking around the code-base and identified some additional lookups and method calls that could be removed. These changes were largely a result of changing the logic to skip whitespace characters which improve accuracy.
 
-The result of the above tweaks was that the complexity calculation inside `scc` is now calculated almost for free on small code bases and for a 10% time hit on larger ones. Trying it out on the redis code-base on a more powerful machine.
-
-```
+The result of the above tweaks was that the complexity calculation inside `scc` is now calculated almost for free on small code bases and for a 10% time hit on larger ones. Trying it out on the redis code-base on a more powerful machine.```
 $ hyperfine 'scc redis'
 Benchmark #1: scc ~/Projects/redis
   Time (mean ± σ):      93.2 ms ±   5.1 ms    [User: 183.4 ms, System: 398.2 ms]
@@ -91,23 +84,20 @@ $ hyperfine 'scc -c redis'
 Benchmark #1: scc -c ~/Projects/redis
   Time (mean ± σ):      91.7 ms ±   5.0 ms    [User: 178.1 ms, System: 408.5 ms]
   Range (min … max):    86.9 ms … 102.7 ms
+
 ```
 
 Only 2 ms difference between the run with complexity vs the one without when running against the redis source code. It does give an idea of just how inefficient that lookup was, and how those additional savings helped. So much so that a 100 ms run had no real difference in the runtime. I really did not expect there to be such a massive performance gain that easily.
 
-Moving on. Another thought I had was that the core matching algorithm has a very tight nested loop like so
-
-```
+Moving on. Another thought I had was that the core matching algorithm has a very tight nested loop like so```
 for match in complexity_checks:
   for char in match
     check if match 
 ```
 
-Loop in a loop can be a performance problem as I found in a previous play with performance https://boyter.org/2017/03/golang-solution-faster-equivalent-java-solution/ where flattening the loop improved an algorithms performance considerably in both Java and Go.
+Loop in a loop can be a performance problem as I found in a previous play with performance <https://boyter.org/2017/03/golang-solution-faster-equivalent-java-solution/> where flattening the loop improved an algorithms performance considerably in both Java and Go.
 
-So I tried flattening the loop. My first candidate to try was the complexity check logic. I turned the following structure which has a nested loop over the items, and then the bytes they have in turn,
-
-```
+So I tried flattening the loop. My first candidate to try was the complexity check logic. I turned the following structure which has a nested loop over the items, and then the bytes they have in turn,```
 [
   "for ",
   "for(",
@@ -121,11 +111,10 @@ So I tried flattening the loop. My first candidate to try was the complexity che
   "!= ",
   "== "
 ]
-```
-
-into the following representation,
 
 ```
+
+into the following representation,```
 "for _for(_if _if(_switch _while _else _||_&&_!=_=="
 ```
 
@@ -136,36 +125,33 @@ potentialMatch := true
 count := 0
 
 for i := 0; i < len(complexity); i++ {
-	if complexity[i] == 0 {
-		if potentialMatch {
-			return count - 1
-		}
+ if complexity[i] == 0 {
+  if potentialMatch {
+   return count - 1
+  }
 
-		// reset stats
-		count = 0
-		potentialMatch = true
-	}
+  // reset stats
+  count = 0
+  potentialMatch = true
+ }
 
-	if index+i >= endPoint || complexity[i] != fileJob.Content[index+i] {
-		potentialMatch = false
-	}
+ if index+i >= endPoint || complexity[i] != fileJob.Content[index+i] {
+  potentialMatch = false
+ }
 
-	count++
+ count++
 }
 {{</highlight>}}
 
-The theory being that by avoiding the nested loop it should have less bookkeeping to do. We just reset the state when we hit a null byte and continue processing. I was fairly confident that this would produce a meaningful result. A quick benchmark later, with the existing method and the new one.
+The theory being that by avoiding the nested loop it should have less bookkeeping to do. We just reset the state when we hit a null byte and continue processing. I was fairly confident that this would produce a meaningful result. A quick benchmark later, with the existing method and the new one.```
+BenchmarkCheckComplexity-8        3000000        466 ns/op
+BenchmarkCheckComplexityNew-8     2000000        699 ns/op
 
-```
-BenchmarkCheckComplexity-8      	 3000000	       466 ns/op
-BenchmarkCheckComplexityNew-8   	 2000000	       699 ns/op
 ```
 
 A meaningful result, but not the one I wanted. Turns out that at this small level of nested looping there is no performance to be gained here. In fact in this case the opposite occurred and it actually ran slower. This was especially annoying because any gains here could have been applied universally and would have really helped speed up the hot methods.
 
-Another thought was to do what the complexity check does in the checking for open matches (it finds open comments, strings etc..) and build a small list of the first bytes for each lookup and then loop that to see if we should process any further. As mentioned the complexity check does this and as such it was a fairly simple thing to add, since similar code already existed. Another benchmark later.
-
-```
+Another thought was to do what the complexity check does in the checking for open matches (it finds open comments, strings etc..) and build a small list of the first bytes for each lookup and then loop that to see if we should process any further. As mentioned the complexity check does this and as such it was a fairly simple thing to add, since similar code already existed. Another benchmark later.```
 github.com/boyter/scc/processor.checkForMatchMultiOpen (15.15%, 0.75s) "with byte check"
 github.com/boyter/scc/processor.checkForMatchMultiOpen (12.97%, 0.62s) "without byte check"
 ```
@@ -176,9 +162,7 @@ At this point I was running out of ideas.
 
 I decided I would have a look at changing the order of the if statements in the different state cases. Due to how they had a bailout condition ideally you want to hit the most common ones first in order to trigger these conditions and avoid additional processing. Note that this is a serious micro optimization. It only makes sense to even consider something like this because the application runs in a very tight loop.
 
-I started tweaking the order of the if conditions in the blank state processor. The results were rather surprising.
-
-```
+I started tweaking the order of the if conditions in the blank state processor. The results were rather surprising.```
 $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
   Time (mean ± σ):     551.7 ms ±  22.5 ms    [User: 1.936 s, System: 1.737 s]
@@ -193,13 +177,12 @@ $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
   Time (mean ± σ):     536.6 ms ±  10.2 ms    [User: 1.933 s, System: 1.754 s]
   Range (min … max):   516.5 ms … 574.7 ms
+
 ```
 
 I set hyperfine to run 50 times to try and remove any noise from the results and converge on a result. As you can see from the above, changing the if conditions on such a tight loop can actually improve performance quite a bit. In this case the time to process ended up taking ~10 ms less for the best order of the statements I found.
 
-With the blank state sorted I made the change permanent and had a look at the other conditions, starting with multi-line comments.
-
-```
+With the blank state sorted I made the change permanent and had a look at the other conditions, starting with multi-line comments.```
 $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
   Time (mean ± σ):     540.6 ms ±  20.0 ms    [User: 1.936 s, System: 1.825 s]
@@ -211,9 +194,7 @@ Benchmark #1: scc cpython
   Range (min … max):   502.6 ms … 577.8 ms
 ```
 
-Another small gain of almost ~10 ms from re-ordering the if statements. I then moved to the last state that with if conditionals, the code state. This state is where the application spends most of its time so any wins here are likely to yield the biggest benefits.
-
-```
+Another small gain of almost ~10 ms from re-ordering the if statements. I then moved to the last state that with if conditionals, the code state. This state is where the application spends most of its time so any wins here are likely to yield the biggest benefits.```
 Benchmark #1: scc cpython
   Time (mean ± σ):     522.9 ms ±   9.3 ms    [User: 1.890 s, System: 1.740 s]
   Range (min … max):   510.1 ms … 577.7 ms
@@ -222,21 +203,20 @@ $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
   Time (mean ± σ):     491.0 ms ±  10.2 ms    [User: 1.628 s, System: 1.763 s]
   Range (min … max):   476.3 ms … 539.5 ms
+
 ```
 
 Since this is where the application spends most of its time it does indeed give the biggest gain with about 30 ms of time shaved from the previous result.
 
 The final result of reordering the if statements? About 50 ms of processing time for the repository I chose which is almost a 10% processing time saving. For tight loops messing around with the order of if statements can produce results.
 
-The last idea I had to improve performance involved rethinking the problem. We know ahead of time which characters could cause a state change as we know which strings would cause a state change. If the character we are currently processing is the same as the first character of one of those strings then we know we need to continue to check if the state will change. However if it does not match then we can skip any conditional state change logic and just move to the next byte. 
+The last idea I had to improve performance involved rethinking the problem. We know ahead of time which characters could cause a state change as we know which strings would cause a state change. If the character we are currently processing is the same as the first character of one of those strings then we know we need to continue to check if the state will change. However if it does not match then we can skip any conditional state change logic and just move to the next byte.
 
 In short instead of looking for positive matches assuming they may be there, check quickly if there might be one and if not move on. This is similar to the complexity check logic I had previously added which improved performance by speeding up the best best case at the expense of selling out the worst case.
 
 Logically this makes sense. After all we spend most of the loop not moving between states. So why bother checking if we should move state and instead check if we shouldn't? In theory it should be less processing. Even if we only do this check inside the check code state there is potentially a massive gain here.
 
-Mercifully this was a quick thing to implement as it is very similar to the complexity check shortcut that is already in the code-base.
-
-```
+Mercifully this was a quick thing to implement as it is very similar to the complexity check shortcut that is already in the code-base.```
 $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
   Time (mean ± σ):     535.3 ms ±   8.0 ms    [User: 1.974 s, System: 1.751 s]
@@ -254,9 +234,7 @@ I then started thinking about the problem some more. The following struck me aft
 
 The application as written has a main loop which processes over every byte in the file. It keeps track of the state it is in and uses a switch over that state to know what processing should happen. I was wondering if rather than having a large single loop over the whole byte array, what if when we entered a new state we started a new loop which processed bytes until the state changed or we hit a newline? That is, rather than loop and check the state, change state and then loop. Would this be faster?
 
-In effect the loop structure of 
-
-```
+In effect the loop structure of```
 for byte in file
   switch
     code state
@@ -265,11 +243,10 @@ for byte in file
       process
     comment state
       process
-```
-
-becomes
 
 ```
+
+becomes```
 for byte in file
   switch
     code state
@@ -293,9 +270,7 @@ And the new profile output,
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/methods-refactor.png)
 
-Both of which suggest that the `shouldProcess` method is our next target. More importantly is what affect has this has on the core loop. I took version 1.9.0 of `scc` and tried it out against the current branch version on the Linux kernel.
-
-```
+Both of which suggest that the `shouldProcess` method is our next target. More importantly is what affect has this has on the core loop. I took version 1.9.0 of `scc` and tried it out against the current branch version on the Linux kernel.```
 Benchmark #1: ./scc1.9.0 linux
   Time (mean ± σ):      2.343 s ±  0.097 s    [User: 27.740 s, System: 0.868 s]
   Range (min … max):    2.187 s …  2.509 s
@@ -303,11 +278,12 @@ Benchmark #1: ./scc1.9.0 linux
 Benchmark #1: ./scc linux
   Time (mean ± σ):      1.392 s ±  0.019 s    [User: 19.415 s, System: 0.825 s]
   Range (min … max):    1.367 s …  1.430 s
+
 ```
 
 Wow! Almost a 50% reduction in the time to run. Pretty clearly that guess about moving to tighter loops worked. If you have a look at the original flame graph you can see that the `CountStats` method which ideally should be calling other methods has a large empty bar on its right side. This has shrunk with the above change. This suggests that even though this method should have been spending all its time processing state changes through methods `checkForMatchMultiOpen` `checkComplexity` `isWhitespace` `checkForMatchSingle` `checkForMatch` it was actually spending most of its time processing the loop. By breaking it into smaller tight loops it spends less time in this state, which speeds everything up.
 
-I was about to call it a day at this point when a colleague David https://github.com/dbaggerman raised a very interesting PR which promised to improve performance even more. He implemented something I should have considered a long time ago, bit-masks.
+I was about to call it a day at this point when a colleague David <https://github.com/dbaggerman> raised a very interesting PR which promised to improve performance even more. He implemented something I should have considered a long time ago, bit-masks.
 
 Thats right bit-masks. How in the heck of all thats holy did I forget bit-masks. The only explanation I can come up with is that for day to day programming I have needed bit-masks exactly 0 times. My day job is usually writing web API's where the network is by far the largest bottleneck. That said I still should have considered this, and frankly I am a little ashamed I did not.
 
@@ -317,23 +293,19 @@ A few PR fixes later and boom another performance gain. It also allowed me to si
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/methods-refactor-bitmask.png)
 
-Another very nice thing David raised was that there was contention for the number of go-routines launched when walking the file system https://github.com/boyter/scc/pull/31 and he graciously supplied a very nice nice patch which resolved the issue. It also had the nice benefit of reducing load on the go-routine scheduler which translated into some additional speed.
-
-```
+Another very nice thing David raised was that there was contention for the number of go-routines launched when walking the file system <https://github.com/boyter/scc/pull/31> and he graciously supplied a very nice nice patch which resolved the issue. It also had the nice benefit of reducing load on the go-routine scheduler which translated into some additional speed.```
 * linux-4.19-rc1 on a 4 core c5.xlarge:
 before: Time (mean ± σ):      4.680 s ±  0.727 s    [User: 17.920 s, System: 0.632 s]
 after:  Time (mean ± σ):      4.532 s ±  0.005 s    [User: 17.340 s, System: 0.705 s]
 ```
 
-The above made me think about the core loop as well It operates using a switch statement. A bit of searching about how Go optimise's switch statements turned up the following by Ken Thomson https://groups.google.com/forum/#!msg/golang-nuts/IURR4Z2SY7M/R7ORD_yDix4J 
+The above made me think about the core loop as well It operates using a switch statement. A bit of searching about how Go optimise's switch statements turned up the following by Ken Thomson <https://groups.google.com/forum/#!msg/golang-nuts/IURR4Z2SY7M/R7ORD_yDix4J>
 
 > jump tables become impossible. also note that go switches are different than c switches. non-constant cases have to be tested individually no matter what.
 
 Interesting. This means it might be possible to convert the switch over to just if/else statements or to a map of function and get some more speed. Alas trying this locally keep running into CPU throttling issues.
 
-I tried with an if statement against the Linux kernel on fresh virtual machine,
-
-```
+I tried with an if statement against the Linux kernel on fresh virtual machine,```
 Benchmark #1: ./scc-switch linux
   Time (mean ± σ):      3.278 s ±  0.012 s    [User: 24.999 s, System: 0.784 s]
   Range (min … max):    3.258 s …  3.293 s
@@ -341,18 +313,18 @@ Benchmark #1: ./scc-switch linux
 Benchmark #1: ./scc-if linux
   Time (mean ± σ):      3.288 s ±  0.016 s    [User: 25.085 s, System: 0.788 s]
   Range (min … max):    3.271 s …  3.321 s
+
 ```
+
 Which worked out to be slightly worse with the if statements. Hence I stuck with the switch. However it may be possible to change the switch to a map and as a result make things a little faster still. Something to consider in the future.
 
-Thinking what else could possibly speed things up David submitted yet another PR https://github.com/boyter/scc/pull/33 with something I had considered a while back and discarded for one reason or another which was using a trie structure to determine if there is a match or not. His implementation was better than mine and it looked like he was getting about a 15% speedup on some processes. 
+Thinking what else could possibly speed things up David submitted yet another PR <https://github.com/boyter/scc/pull/33> with something I had considered a while back and discarded for one reason or another which was using a trie structure to determine if there is a match or not. His implementation was better than mine and it looked like he was getting about a 15% speedup on some processes.
 
-I won't insult your intelligence by describing what a trie is, but here is a link if you need additional context https://en.wikipedia.org/wiki/Trie
+I won't insult your intelligence by describing what a trie is, but here is a link if you need additional context <https://en.wikipedia.org/wiki/Trie>
 
 Once nice thing about the trie is that because of how it works you can remove the bit-mask checks entirely, which means potentially less processing, and a faster program.
 
-The PR came with some timings.
-
-```
+The PR came with some timings.```
 4 cores, master: Time (mean ± σ): 6.360 s ± 0.007 s [User: 24.677 s, System: 0.679 s]
 4 cores, tries: Time (mean ± σ): 5.489 s ± 0.008 s [User: 21.145 s, System: 0.690 s]
 
@@ -365,36 +337,30 @@ The PR came with some timings.
 
 I merged the change in and started verifying. Sadly at first I noticed that the results were inconsistent.
 
-For example, the non trie version
-
-```
+For example, the non trie version```
 $ hyperfine 'scc -c ~/Projects/cpython'
 Benchmark #1: scc -c ~/Projects/cpython
   Time (mean ± σ):     481.4 ms ±  18.4 ms    [User: 1.100 s, System: 2.306 s]
   Range (min … max):   467.8 ms … 518.9 ms
-```
-
-vs trie version
 
 ```
+
+vs trie version```
 $ hyperfine 'scc -c ~/Projects/cpython'
 Benchmark #1: scc -c ~/Projects/cpython
   Time (mean ± σ):     526.2 ms ±  14.5 ms    [User: 1.334 s, System: 2.235 s]
   Range (min … max):   502.6 ms … 560.8 ms
 ```
 
-However thinking about how the application works. As mentioned before it spends most of its time not moving state. As such you want to identify this state as quickly as possible, even if it means redoing work when you do need to move. Putting the bit-mask back in for just the code state calculations,
-
-```
+However thinking about how the application works. As mentioned before it spends most of its time not moving state. As such you want to identify this state as quickly as possible, even if it means redoing work when you do need to move. Putting the bit-mask back in for just the code state calculations,```
 $ hyperfine 'scc -c ~/Projects/cpython'
 Benchmark #1: scc -c ~/Projects/cpython
   Time (mean ± σ):     505.2 ms ±  14.1 ms    [User: 1.034 s, System: 2.401 s]
   Range (min … max):   490.1 ms … 536.4 ms
-```
-
-Seems its worth keeping the bit-mask checks, at least for the hotter methods. However David had other ideas, and instead split out the trie similar to how the the bit-masks had worked so that they were more targeted per state. Following a merge,
 
 ```
+
+Seems its worth keeping the bit-mask checks, at least for the hotter methods. However David had other ideas, and instead split out the trie similar to how the the bit-masks had worked so that they were more targeted per state. Following a merge,```
 $ hyperfine 'scc -c ~/Projects/cpython'
 Benchmark #1: scc -c ~/Projects/cpython
   Time (mean ± σ):     430.6 ms ±  25.0 ms    [User: 554.5 ms, System: 2327.7 ms]
@@ -403,19 +369,18 @@ Benchmark #1: scc -c ~/Projects/cpython
 
 And now we are faster again for every repository I tried.
 
-In addition a nice pickup by Jeff Haynie https://github.com/jhaynie came through in a PR https://github.com/boyter/scc/pull/35 managed to remove some pointless allocations which should help performance just that little bit more. I suspect that this is more an issue for him as he is using `scc` in a long lived process but every little bit helps.
+In addition a nice pickup by Jeff Haynie <https://github.com/jhaynie> came through in a PR <https://github.com/boyter/scc/pull/35> managed to remove some pointless allocations which should help performance just that little bit more. I suspect that this is more an issue for him as he is using `scc` in a long lived process but every little bit helps.
 
-One thing I had identified in my original post about `scc` was that the Go garbage collector was a hindrance to performance. I had also tried turning it off with bad results on machines with less memory. As such I took a slightly different approach. By default `scc` turns the garbage collector off, and if by default 10000 files are parsed then it is turned back on. This results in a nice speed gain for smaller projects. Of course this did result in a bug https://github.com/boyter/scc/issues/32 where the GC gettings leaked out, but thankfully Jeff picked this one up as well and I modified the source to ensure that the scope was limited to the `scc` main function.
+One thing I had identified in my original post about `scc` was that the Go garbage collector was a hindrance to performance. I had also tried turning it off with bad results on machines with less memory. As such I took a slightly different approach. By default `scc` turns the garbage collector off, and if by default 10000 files are parsed then it is turned back on. This results in a nice speed gain for smaller projects. Of course this did result in a bug <https://github.com/boyter/scc/issues/32> where the GC gettings leaked out, but thankfully Jeff picked this one up as well and I modified the source to ensure that the scope was limited to the `scc` main function.
 
 I really wish Go would allow you to configure the GC to be throughput focused rather than latency focused. Seeing as this is possible in Java I imagine it might happen eventually.
 
-One annoying thing that comes out of the very tight benchmarks posted is that `scc` spends a non trivial amount of time parsing the JSON it uses for language features. For example over a few runs with the trace logging enabled I recorded the following,
-
-```
+One annoying thing that comes out of the very tight benchmarks posted is that `scc` spends a non trivial amount of time parsing the JSON it uses for language features. For example over a few runs with the trace logging enabled I recorded the following,```
 TRACE 2018-09-14T07:20:21Z: milliseconds build language features: 42
+
 ```
 
-That is 40 milliseconds spent every time `scc` is called just getting ready to parse. The most annoying part is that it gets worse with slower CPU's or if you CPU is being throttled for some reason. 
+That is 40 milliseconds spent every time `scc` is called just getting ready to parse. The most annoying part is that it gets worse with slower CPU's or if you CPU is being throttled for some reason.
 
 The entire step can actually be removed into a pre-process step of `go generate` and shave the time of every call to `scc` by a few milliseconds for each run.
 
@@ -425,7 +390,7 @@ The result of all of the above? It now appears that `scc` is almost not bottlene
 
 ![Flame Graph Final](/static/sloc-cloc-code-revisited/flame-final.png)
 
-The CPU flame is almost the same width as the disk access. This is an excellent result from where it started. It also means `scc` is getting to the point where there is little reason to investigate additional CPU savings (I will still take them if they come up of course!). 
+The CPU flame is almost the same width as the disk access. This is an excellent result from where it started. It also means `scc` is getting to the point where there is little reason to investigate additional CPU savings (I will still take them if they come up of course!).
 
 The big question though. With all of the above tweaks is `scc` able to pick the performance that `tokei`, `loc` and `polyglot` are throwing down?
 
@@ -435,23 +400,21 @@ All GNU/Linux tests were run on Digital Ocean 32 vCPU Compute optimized droplet 
 
 I am not running benchmarks on Windows or macOS this time but when I tried them out the results were similar.
 
-With that out of the way time for the usual benchmarks. Similar to the comparison by `tokei` https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md I have included a few tools, `tokei`, `cloc`, `scc`, `loc` and `polyglot`.
+With that out of the way time for the usual benchmarks. Similar to the comparison by `tokei` <https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md> I have included a few tools, `tokei`, `cloc`, `scc`, `loc` and `polyglot`.
 
 Tools under test
 
- - scc 1.10.0
- - tokei 8.0.0
- - loc 0.5.0
- - polyglot 0.5.13
- - gocloc b3aa5f37096bbbfa22803a532214a11dbefa0206
+- scc 1.10.0
+- tokei 8.0.0
+- loc 0.5.0
+- polyglot 0.5.13
+- gocloc b3aa5f37096bbbfa22803a532214a11dbefa0206
 
 I compiled `tokei` and `loc` on the machine used for testing using the latest version of Rust 1.29.
 
-I am not going to include any commentary about the benchmarks. 
+I am not going to include any commentary about the benchmarks.
 
-To start lets try the accuracy test using the `tokei` torture test file https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md#accuracy with the correct result being 1 file, 38 lines, 32 code lines, 2 comments and 5 blank lines.
-
-```
+To start lets try the accuracy test using the `tokei` torture test file <https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md#accuracy> with the correct result being 1 file, 38 lines, 32 code lines, 2 comments and 5 blank lines.```
 root@ubuntu-c-32-sgp1-01:~# ./scc tokeitest/
 -------------------------------------------------------------------------------
 Language                 Files     Lines     Code  Comments   Blanks Complexity
@@ -499,11 +462,11 @@ For code counters ideally what we want to test is the core loop of the applicati
 
 The result is that every tool over any random project is doing different amounts of work. As such I decided to create a totally artificial test, for which every tool under test produces the exact same result. This way each tool is has the same number of bytes they need to process to produce the same output. In theory this means we are benchmarking fairly between each and the differences should come down to how they walk the file system and the algorithm used in the core loop.
 
-To create this situation I picked the language Java (which all tools support) and used a modified file based on https://github.com/boyter/java-spelling-corrector/blob/master/src/com/boyter/SpellingCorrector/SpellingCorrector.java which is a Java spell-check class I wrote some time back. 
+To create this situation I picked the language Java (which all tools support) and used a modified file based on <https://github.com/boyter/java-spelling-corrector/blob/master/src/com/boyter/SpellingCorrector/SpellingCorrector.java> which is a Java spell-check class I wrote some time back.
 
 The file I am testing 150 lines in length with 117 lines of code, 0 comments and 33 blank lines. I picked it because it represents a reasonable file length and for the above every tool the code produced the same result. I will mention that `polyglot` was especially troublesome in this regard as it was the one that produced incorrect results most of the time. The version I was using appears to not count comment lines correctly and in the case of Python appeared to always ignore the first `#` comment for every file. I stripped out all comments in order for it to pass. Once done I re-purposed my script which create directories of different depths with files.
 
-https://github.com/boyter/scc/blob/master/examples/create_performance_test.py
+<https://github.com/boyter/scc/blob/master/examples/create_performance_test.py>
 
 With that done I was able to run each of the code counters in what hopefully is a fair way, by just pointing them at the root of the large directory tree which should produce the same results for every tool. The point of this is not to pick on any single counter, but instead to discover how fast the core counter and the file reading is with all other portions being as equal as possible.
 
@@ -580,13 +543,11 @@ This is the purely artificial benchmark I discussed above. Each of the 8 directo
 
 ![Benchmark Linux](/static/sloc-cloc-code-revisited/benchmark_linux_linux.png)
 
-* N.B. gocloc was removed from the graph as its results compressed the other counters so much results were hard to read.
+- N.B. gocloc was removed from the graph as its results compressed the other counters so much results were hard to read.
 
 #### Linuxes 10 copies of the linux kernel
 
-This test consists of 10 copies of the linux kernel in the following directory structure
-
-```
+This test consists of 10 copies of the linux kernel in the following directory structure```
 linuxes
 ├── linux0
 ├── linux1
@@ -598,6 +559,7 @@ linuxes
 ├── linux7
 ├── linux8
 └── linux9
+
 ```
 
 | Program | Runtime |
@@ -611,17 +573,17 @@ linuxes
 
 ![Benchmark Linuxes](/static/sloc-cloc-code-revisited/benchmark_linux_linuxes.png)
 
-* N.B. gocloc was removed from the graph as its results compressed the other counters so much results were hard to read.
+- N.B. gocloc was removed from the graph as its results compressed the other counters so much results were hard to read.
 
 ## Conclusions
 
-The trade off of building the trie structures when `scc` starts does slow down the application for smaller repositories such as `redis`. That said a slowdown of only 10 ms is probably worth it. Keeping in mind on linux that ~15 ms of overhead is usually the process starting, and that most people will not notice the difference between 15 ms and 30 ms for this sort of application, I think its an acceptable trade. Feel free to direct any hate over this decision to https://github.com/boyter/scc/. In short trie's sell out small repositories somewhat, but I believe it to be a worthwhile gain.
+The trade off of building the trie structures when `scc` starts does slow down the application for smaller repositories such as `redis`. That said a slowdown of only 10 ms is probably worth it. Keeping in mind on linux that ~15 ms of overhead is usually the process starting, and that most people will not notice the difference between 15 ms and 30 ms for this sort of application, I think its an acceptable trade. Feel free to direct any hate over this decision to <https://github.com/boyter/scc/>. In short trie's sell out small repositories somewhat, but I believe it to be a worthwhile gain.
 
 For every possible situation I tested `scc` is now comparably fast with every other tool even with complexity calculations enabled. Without them it is a similar story but you gain some additional speed. There is some more that can be done in `scc` itself to improve this still. Modifying how the language features are built would be a good start, but as mentioned this is only applicable on repositories that are small, so its unlikely to modify the benchmarks much.
 
 I honestly do believe that there is not much more performance to be gained from any of these code counting tools from where they are now. They are all getting close to the limits of what the disk and CPU can deliver. Both `tokei` and `loc` are pushing very close to this limit along with `scc`. Regardless I will be revisiting `scc` from time to time to see if I can get even more performance out of it.
 
-Lastly, all of the optimizations done in `scc` could be applied to any of the other tools and I would expect them to become faster than `scc` again, simply because rust in my tests produces slightly more efficient loops. I actually started my own project `rcc` https://github.com/boyter/rcc/ to port `scc` over to rust to see what the result would be. When I get some free time again its something I will continue to work on. 
+Lastly, all of the optimizations done in `scc` could be applied to any of the other tools and I would expect them to become faster than `scc` again, simply because rust in my tests produces slightly more efficient loops. I actually started my own project `rcc` <https://github.com/boyter/rcc/> to port `scc` over to rust to see what the result would be. When I get some free time again its something I will continue to work on.
 
 I am going to make another claim. That someone is going to copy what is now in `scc` into `tokei`, `loc`, `polyglot` or perhaps another new tool and get that additional boost, perhaps with a preflight trie which should reduce the startup time.
 

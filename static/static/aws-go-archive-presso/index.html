@@ -34,7 +34,7 @@
 					<p>
 					"Officially" technical lead at Kablamo read "code monkey".
 					
-					<pre><code style="font-size: 16px;">func produce(c Coffee, b Beer) (Code, Cloud, error)</code></pre>
+					```<code style="font-size: 16px;">func produce(c Coffee, b Beer) (Code, Cloud, error)</code>```
 					<p>
 
 					<p>I blog <a href="https://boyter.org/">boyter.org</a> I free software <a href="https://github/boyter/">github/boyter/</a> I run <a href="https://searchcode.com/">searchcode.com</a> also on the twitter <a href="https://twitter.com/boyter">@boyter</a></p>
@@ -160,7 +160,7 @@
 				<section>
 					<h2>Elastic Search Issues</h2>
 					<p>Main one. Queries across fields.</p>
-<pre><code style="font-size: 16px;">
+```<code style="font-size: 16px;">
 {
   "query_string": {
     "default_operator": "AND",
@@ -172,14 +172,14 @@
     "query": "keanu canada"
   }
 }
-</code></pre>
+</code>```
 				<p>Library support in Go not great. Stemming. Sorting. CPU bound.</p>
 				</section>
 
 				<section>
 					<h2>GOPATH + Monorepo</h2>
 					<p>Exploit GOPATH for multiple entry points into application.</p>
-					<pre><code style="font-size: 16px;">.
+					```<code style="font-size: 16px;">.
 ├── assets
 │   ├── imageproxy
 │   │   └── main.go
@@ -206,7 +206,7 @@
 │   └── transcodeStart
 │       └── commandline
 │           └── main.go
-					</code></pre>
+					</code>```
 				</section>
 
 				<section>
@@ -225,13 +225,13 @@
 				<section>
 					<h2>Go for S3 copy</h2>
 					<p>Excellent with SQS support. But have to code own multipart.</p>
-<pre><code style="font-size: 16px;">
+```<code style="font-size: 16px;">
 for _, sqsmsg := range messages.Messages {
 	// We don't want to wait for these to finish anymore but let them run in the background
 	// and finish whenever they are done and naturally exit. As such no need for a waitgroup
 	// here anymore
 	go func(sqsmsg *sqs.Message) {
-</code></pre>
+</code>```
 				</section>
 
 				<section>
@@ -270,9 +270,7 @@ for _, sqsmsg := range messages.Messages {
 
 				<section>
 					<h2>Really Helpful</h2>
-					<p>Have an endpoint that exposes <b>most</b> environment variables.</p>
-
-<pre><code style="font-size: 16px;">{
+					<p>Have an endpoint that exposes <b>most</b> environment variables.</p>```<code style="font-size: 16px;">{
   "environment": {
     "AppEnvironment": "PROD",
     "AudioMasterBucket": "archives.master.audio",
@@ -293,7 +291,7 @@ for _, sqsmsg := range messages.Messages {
     "VideoMasterBucket": "archives.master.video",
     "VideoProxyBucket": "archives.proxy.video"
   }
-}</code></pre>
+}</code>```
 
 				</section>
 

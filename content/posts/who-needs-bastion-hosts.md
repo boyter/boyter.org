@@ -9,9 +9,7 @@ However this is often a painful process if allowed at all, and so with permissio
 
 I thought this Go function worth keeping on my blog as something I can refer back to. Given a global database connection as `DB` function will take in any query, run it against the database, and return it in a formatted way which you can then display to the user. I tend to just return it as plain text from a protected route.
 
-It's not perfect, but good enough for those situations where you just want a small bit of information from the database. Note it has an explicit rollback to prevent any data loss, but I wouldn't trust my life to that and you can of course still run queries that slow down the database. As such use with caution.
-
-```go
+It's not perfect, but good enough for those situations where you just want a small bit of information from the database. Note it has an explicit rollback to prevent any data loss, but I wouldn't trust my life to that and you can of course still run queries that slow down the database. As such use with caution.```go
 package data
 
 import "database/sql"
@@ -20,58 +18,59 @@ import "database/sql"
 // since it rolls back the transaction at the end, its sort of limited in what can be done, so not quite as
 // evil as you would expect
 func EvilSql(s string) (string, error) {
-	tx := DB.Begin()
+ tx := DB.Begin()
 
-	rows, err := tx.Raw(s).Rows()
-	if err != nil {
-		return "", err
-	}
+ rows, err := tx.Raw(s).Rows()
+ if err != nil {
+  return "", err
+ }
 
-	// Get column names
-	columns, err := rows.Columns()
-	if err != nil {
-		return "", err
-	}
+ // Get column names
+ columns, err := rows.Columns()
+ if err != nil {
+  return "", err
+ }
 
-	// Make a slice for the values
-	values := make([]sql.RawBytes, len(columns))
+ // Make a slice for the values
+ values := make([]sql.RawBytes, len(columns))
 
-	// rows.Scan wants '[]interface{}' as an argument, so we must copy the
-	// references into such a slice
-	// See http://code.google.com/p/go-wiki/wiki/InterfaceSlice for details
-	scanArgs := make([]interface{}, len(values))
-	for i := range values {
-		scanArgs[i] = &values[i]
-	}
+ // rows.Scan wants '[]interface{}' as an argument, so we must copy the
+ // references into such a slice
+ // See <http://code.google.com/p/go-wiki/wiki/InterfaceSlice> for details
+ scanArgs := make([]interface{}, len(values))
+ for i := range values {
+  scanArgs[i] = &values[i]
+ }
 
-	data := ""
+ data := ""
 
-	// Fetch rows
-	for rows.Next() {
-		// get RawBytes from data
-		err = rows.Scan(scanArgs...)
-		if err != nil {
-			return "", err
-		}
+ // Fetch rows
+ for rows.Next() {
+  // get RawBytes from data
+  err = rows.Scan(scanArgs...)
+  if err != nil {
+   return "", err
+  }
 
-		// Now do something with the data.
-		// Here we just print each column as a string.
-		var value string
-		for i, col := range values {
-			// Here we can check if the value is nil (NULL value)
-			if col == nil {
-				value = "NULL"
-			} else {
-				value = string(col)
-			}
-			data += columns[i] + ": " + value + "\n"
-		}
-		data += "-----------------------------------\n"
-	}
+  // Now do something with the data.
+  // Here we just print each column as a string.
+  var value string
+  for i, col := range values {
+   // Here we can check if the value is nil (NULL value)
+   if col == nil {
+    value = "NULL"
+   } else {
+    value = string(col)
+   }
+   data += columns[i] + ": " + value + "\n"
+  }
+  data += "-----------------------------------\n"
+ }
 
-	// remove this because if we don't commit we can leave it open for the most part
-	tx.Rollback()
+ // remove this because if we don't commit we can leave it open for the most part
+ tx.Rollback()
 
-	return data, nil
+ return data, nil
 }
+
 ```

@@ -14,17 +14,18 @@ What ended up happening was this,
 
 My user rates the movies like so,
 
-<pre>
+```
 Movie 1:5
 Movie 2:4
-</pre>
+
+```
 
 The one I am comparing to rates them like this,
 
-<pre>
+```
 Movie 1:1
 Movie 2:1
-</pre>
+```
 
 Now because the ratings are so different the users should have almost a 0% relation. However it ended up giving a relation of 99% which is obviously wrong. Now there are two ways to improve this. Feed in more movies to check which will increase the distance between the users, or modify the ratings so they are more separate. So 1 = -5, 2 = -2, 3 =0, 4=2, 5=5.
 
@@ -36,7 +37,7 @@ Im not sure. I haven't put the code in to do this. I will do it tonight (its a 3
 
 Like Star Trek, Dislike Star Wars
 
-<pre>
+```
 Star Trek: Deep Space Nine: Season 3 0.805184646091
 Star Trek: The Next Generation: Season 5 0.77184885453
 The Twilight Zone: Vol. 26 0.763825884208
@@ -47,11 +48,11 @@ Star Trek V: The Final Frontier 0.64808961258
 Paul McCartney in Red Square 0.6261076108
 Petite Princess Yucie 0.605629573421
 P.D. James: A Mind to Murder 0.600064854695
-</pre>
+```
 
 Like Felicity season 1 and 2 but average thoughts about The Simpsons
 
-<pre>
+```
 Significant Others: The Series 1.42238853726
 Kiss the Bride 1.05870702711
 Bed of Roses 0.933097109352
@@ -62,11 +63,11 @@ Life as a House 0.754675623402
 Madonna: The Drowned World Tour 2001 0.707120938732
 He Knew He Was Right 0.700587353357
 Moonlight Mile 0.686709180519
-</pre>
+```
   
 Like Futurama
 
-<pre>
+```
 s-Cry-ed 2.84044588442
 Dragon Ball Z: World Tournament 2.78294438997
 The Incredibles 2.74329078582
@@ -77,11 +78,11 @@ Gantz 2.58889864606
 Boogiepop Phantom 2.52610181383
 Lain #1: Navi 2.52517642719
 Lady Snowblood 2.49056334915
-</pre>
+```
 
 Like Notting Hill, Love Actually and Bridget Jones Diary
 
-<pre>
+```
 Gilmore Girls: Season 3 2.40498354129
 Anne of Green Gables: The Sequel 2.31112342646
 The Best of Friends: Vol. 2 2.2402363423
@@ -93,11 +94,12 @@ Sabrina 2.07214029062
 Center Stage 2.06699886716
 La Femme Nikita: Season 3 2.03411556876
 Four Weddings and a Funeral 2.00530788895
-</pre>
+
+```
   
 Like The Evil Dead and Evil Dead 2
 
-<pre>
+```
 Gantz 2.79699784955
 Slayers: Excellent 2.71615415583
 Un Chien Andalou 2.63403044096
@@ -108,12 +110,12 @@ George Carlin: Personal Favorites 2.52094084529
 The Twilight Zone: Vol. 28 2.47219078634
 The Godfather 2.45901663416
 Godzilla vs. Gigan 2.38644476895
-</pre>
 
+```
 
 Like Terminator 1,2,3
 
-<pre>
+```
 Baki the Grappler 2.73392438406
 Stargate SG-1: Season 4 2.6963074589
 Adventures of Batman & Robin: Poison Ivy/The Penguin 2.6838141171
@@ -124,4 +126,5 @@ Dragon Ball: Commander Red Saga 2.51716360289
 Scrapped Princess 2.51142671664
 Fullmetal Alchemist 2.49570656834
 Terminator 2: Extreme Edition: Bonus Material 2.49400663766
-</pre>
+
+```

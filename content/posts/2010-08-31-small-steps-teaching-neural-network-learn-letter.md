@@ -24,7 +24,7 @@ The images we are going to use are the following,
       <p>
         <div id="attachment_280" style="width: 60px" class="wp-caption alignnone">
           <a href="http://www.wausita.com/wp-content/uploads/2010/08/A.gif"><img class="size-full wp-image-280" title="A" src="http://www.wausita.com/wp-content/uploads/2010/08/A.gif" alt="" width="50" height="50" /></a>
-          
+
           <p class="wp-caption-text">
             The Letter A
           </p>
@@ -52,10 +52,10 @@ The images we are going to use are the following,
               The next step is to write some code which takes the above pixel data and feeds it into the Neural Network.
             </p>
             
-            <pre>import bpnn
+            ```import bpnn
 import Loader
 
-if __name__ == '__main__':
+if **name** == '**main**':
   cla = Loader.Loader()
   hiddennodes = 2
 
@@ -68,8 +68,8 @@ if __name__ == '__main__':
 
   an = bpnn.NN(len(adata),hiddennodes,len(apat[0][1]))
   an.train(apat)
-  cla.savenn(an,filename='abnn.n')</pre>
-            
+  cla.savenn(an,filename='abnn.n')```
+
             <p>
               You can see that in the above we create a loader object which allows us to read images and networks. We then load our data, put it into the correct pattern for our Neural Network to train on, then train it and save the network.
             </p>
@@ -82,7 +82,7 @@ if __name__ == '__main__':
               Now running the above code we get the following,
             </p>
             
-            <pre>$python Step1.py
+            ```$python Step1.py
 error 4.42059
 error 0.71834
 error 0.71834
@@ -92,8 +92,8 @@ error 0.71834
 error 0.71834
 error 0.71834
 error 0.71834
-error 0.71834</pre>
-            
+error 0.71834```
+
             <p>
               What the above shows is the network learning. The important thing is that the error continues to decrease. In this case it lowers a bit, then stops. The reason for this can could be one of the following,
             </p>
@@ -114,7 +114,7 @@ error 0.71834</pre>
               To remedy this I have increased the number of hidden nodes to 3 to increase the learning power of the network and then run it again.
             </p>
             
-            <pre>$python Step1.py
+            ```$python Step1.py
 error 2.93246
 error 0.00048
 error 0.00023
@@ -124,8 +124,8 @@ error 0.00010
 error 0.00008
 error 0.00007
 error 0.00006
-error 0.00006</pre>
-            
+error 0.00006```
+
             <p>
               This is much better! The error continues to decrease and almost reaches 0. This means that our network has learnt the difference between our sample letter A and B.
             </p>
@@ -134,7 +134,8 @@ error 0.00006</pre>
               We can test this pretty easily with the following test script which uses unit tests to ensure we don't break the network in the future
             </p>
             
-            <pre>
+            ```
+
 import unittest
 import Loader
 
@@ -148,31 +149,28 @@ class TestStep1(unittest.TestCase):
     self.assertTrue(guess[0] > 0.95)
     self.assertTrue(guess[1] &lt; 0.05)
 
-
   def testLearnB(self):
     n = self.c.loadnn(filename='abnn.n')
     guess = n.guess(self.c.loadimagedata("./letters/B.gif",20,20))
     self.assertTrue(guess[1] > 0.95)
     self.assertTrue(guess[0] &lt; 0.05)
 
-if __name__ == '__main__':
-  unittest.main()
-</pre>
-            
+if **name** == '**main**':
+  unittest.main()```
+
             <p>
               Running this gives,
             </p>
             
-            <pre>$python TestStep1.py
-..
+            ```$python TestStep1.py
+
 ----------------------------------------------------------------------
+
 Ran 2 tests in 0.031s
 
-OK</pre>
-            
-            <p>
-              Looks like all is well. The next step and what will be in the next blog post is training our network so that it can identify from characters it has never seen before.
-            </p>
+OK```
+
+Looks like all is well. The next step and what will be in the next blog post is training our network so that it can identify from characters it has never seen before.
 
  [1]: http://www.wausita.com/wp-content/uploads/2010/08/Step1.zip
  [2]: http://arctrix.com/nas/python/bpnn.py

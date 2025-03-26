@@ -38,7 +38,7 @@
 								<img height="200px" src="./img/avatar.jpg" ><br>
 								Ben Boyter <a href="https://twitter.com/boyter">@boyter</a><br>
 								Code Monkey at <a href="https://www.kablamo.com.au/">Kablamo</a>.
-								<pre><code style="font-size: 16px;">func Produce(c Coffee, b Beer) (Code, Cloud, []error)</code></pre>
+								```<code style="font-size: 16px;">func Produce(c Coffee, b Beer) (Code, Cloud, []error)</code>```
 								
 							</p>
 							<aside class="notes">
@@ -162,7 +162,7 @@ The use of buffered channels in scc is mostly to ensure backpressure on the prev
 
 					<img src="./img/benchmark-file-walk.png" />
 
-<pre>
+```
 Case 0 Create a directory thats quite deep and put a 10000 files at the end
 Case 1 Create a directory thats quite deep and put 100 files in each folder
 Case 2 Create a directory that has a single level and put 10000 files in it
@@ -171,7 +171,7 @@ Case 4 Create a directory that with 10 subdirectories and 1000 files in each
 Case 5 Create a directory that with 20 subdirectories and 500 files in each
 Case 6 Create a directory that with 5 subdirectories and 2000 files in each
 Case 7 Create a directory that with 100 subdirectories and 100 files in each
-</pre>
+```
 <aside class="notes">So the first part of the pipeline. Walking the file system.
 
 As it turns out the native Go file walk is slow, comparatively.
@@ -217,10 +217,10 @@ In the end David Baggerman a Melbourne developer and contributor to scc wrote a 
 					Memory maps.<br><br>
 					Just use ioutil.ReadFile for small files.</p>
 
-					<pre>$ time scc linux
+					```$ time scc linux
 DEBUG 2018-03-27T21:34:26Z: milliseconds to walk directory: 7593
 --SNIP--
-scc linux  11.02s user 19.92s system 669% cpu 7.623 total</pre>
+scc linux  11.02s user 19.92s system 669% cpu 7.623 total```
 <aside class="notes">Now the second part of the pipeline.
 
 Reading the files from our lovely disks into memory.
@@ -266,7 +266,7 @@ I chose to use the state machine because in theory it should be the fastest meth
 
 				<section>
 					<h2>Results</h2>
-<pre>───────────────────────────────────────────────────────────────────────────────
+```───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
 ───────────────────────────────────────────────────────────────────────────────
 Go                          22      6506     1075       273     5158       1116
@@ -292,7 +292,7 @@ processor/helpers.go                  30        5         3       22          2
 main.go                              212        7         6      199          2
 processor/cocomo.go                   26        5         6       15          0
 processor/constants.go                 5        1         0        4          0
-examples/language/go.go               19        6         6        7          0</pre>
+examples/language/go.go               19        6         6        7          0```
 <aside class="notes">I wanted to try out the complexity estimate. This is some output for scc running against itself. Its showing us the results for each file, sorted by complexity. 
 
 I know the most complex file in the codebase is probably workers.go were most of the code processing logic lives, and thankfully scc is able to identify it.
@@ -301,7 +301,7 @@ I know the most complex file in the codebase is probably workers.go were most of
 
 				<section>
 					<h2>Problem</h2>
-					<pre>$ scc
+					```$ scc
 ───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
 ───────────────────────────────────────────────────────────────────────────────
@@ -334,7 +334,7 @@ Total                      706    227849    27452     34959   165438      32124
 Estimated Cost to Develop $5,769,821
 Estimated Schedule Effort 29.862934 months
 Estimated People Required 22.886772
-───────────────────────────────────────────────────────────────────────────────</pre>
+───────────────────────────────────────────────────────────────────────────────```
 					<aside class="notes">So I tweaked it till it was accruate and this is the result. You can see it counting the languages and whats in each for the redis project.
 
 						Sadly by making scc accurate I also took out all of the performance it had.
@@ -384,13 +384,13 @@ All of the performance improves fall into one of these categories.</aside>
 					<h2>Go Fast - Measure</h2>
 					<p>Your bottleneck is often not what you expect.</p>
 					<p>pprof</p>
-<pre>(pprof) top10
+```(pprof) top10
 Showing nodes accounting for 49.46s, 89.12% of 55.50s total
 Showing top 10 nodes out of 83
       flat  flat%   sum%        cum   cum%
     20.67s 37.24% 37.24%     20.70s 37.30%  runtime.cgocall
     17.41s 31.37% 68.61%     25.54s 46.02%  github.com/boyter/scc/processor.countStats
-</pre>
+```
 					<p>Flame Graphs</p>
 					<img src="./img/flame-graph.jpg" />
 					<aside class="notes">Next is to measure your performance.
@@ -421,16 +421,16 @@ If you think something is slow, prove it. Code speaks volumes.</aside>
 				<section>
 					<h2>Byte Comparison</h2>
 					<p>Which is fastest?</p>
-<pre><code style="font-size: 16px;">equal := reflect.DeepEqual(one, two)</code></pre>
-<pre><code style="font-size: 16px;">equal := bytes.Equal(one, two)</code></pre>
-<pre><code style="font-size: 16px;">equal := true
+```<code style="font-size: 16px;">equal := reflect.DeepEqual(one, two)</code>```
+```<code style="font-size: 16px;">equal := bytes.Equal(one, two)</code>```
+```<code style="font-size: 16px;">equal := true
 for j := 0; j < len(one); j++ {
 	if one[j] != two[j] {
 		equal = false
 		break
 	}
 }
-</code></pre>
+</code>```
 <aside class="notes">Here we have 3 ways of checking byte slices in Go for equality.
 
 The first uses reflection in the standard library.
@@ -444,11 +444,11 @@ So which do you think would be the fastest?</aside>
 
 				<section>
 					<h2>Byte Comparison Continued</h2>
-<pre>
+```
 BenchmarkCheckByteEqualityReflect-8                5000000 344.00 ns/op
 BenchmarkCheckByteEqualityBytes-8                300000000   5.52 ns/op
 BenchmarkCheckByteEqualityLoop-8                 500000000   3.76 ns/op
-</pre>
+```
 <p>Why?</p>
 <aside class="notes">So reflection as you probably guessed is right out. Reflection is almost always slow.
 
@@ -480,7 +480,7 @@ The right loops the bytes, switches to the state, and the loops again looking fo
 
 				<section>
 					<h2>Loop & Check VS Change & Loop</h2>
-<pre>
+```
 Benchmark #1: ./scc1 linux
   Time (mean ± σ):      2.343 s ±  0.097 s    [User: 27.740 s, System: 0.868 s]
   Range (min … max):    2.187 s …  2.509 s
@@ -488,7 +488,7 @@ Benchmark #1: ./scc1 linux
 Benchmark #1: ./scc2 linux
   Time (mean ± σ):      1.392 s ±  0.019 s    [User: 19.415 s, System: 0.825 s]
   Range (min … max):    1.367 s …  1.430 s
-</pre>
+```
 <p>Why?</p>
 <aside class="notes">As it turns out the method with the additional loop is actually faster. Why?
 
@@ -501,7 +501,7 @@ Well it turns out most code files don't change state that often. So despite the 
 						Serious micro-optimisation.<br>
 						
 					</p>
-<pre>
+```
 $ hyperfine -m 50 'scc1 cpython'
 Benchmark #1: scc1 cpython
   Time (mean ± σ):     522.9 ms ±   9.3 ms    [User: 1.890 s, System: 1.740 s]
@@ -511,7 +511,7 @@ $ hyperfine -m 50 'scc2 cpython'
 Benchmark #1: scc2 cpython
   Time (mean ± σ):     491.0 ms ±  10.2 ms    [User: 1.628 s, System: 1.763 s]
   Range (min … max):   476.3 ms … 539.5 ms
-</pre>
+```
 					<p>Why?</p>
 					<aside class="notes">So this is a serious micro optimisation but assuming you have a very tight loop you can sometimes eke out additional performance by juggling if statements. This is a combination of doing less and in some cases helping the CPU branch predictor.</aside>
 				</section>
@@ -520,8 +520,8 @@ Benchmark #1: scc2 cpython
 					<h2>Algorithms</h2>
 					<p>
 						How to check for conditions?
-						<pre>/* /** <%-- --> # //</pre>
-						<pre>for if each while switch && || != ==</pre>
+						```/* /** <%-- --> # //```
+						```for if each while switch && || != ==```
 						Loop. Bit-Masks. <a href="https://en.wikipedia.org/wiki/Trie">Trie</a><br>
 
 						<img src="./img/trie.png" height="150px" /><br>
@@ -558,7 +558,7 @@ In scc because its a short lived program it actually turns off the GC until a fi
 					<p>Support 200+ languages.</p>
 					<p>Also caching of filenames -> language</p>
 					<p>Most noticeable with smaller repositories</p>
-<pre>
+```
 Benchmark #1: scc-2.0.0 redis
   Time (mean ± σ):     124.4 ms ±   2.4 ms    [User: 168.6 ms, System: 289.1 ms]
   Range (min … max):   120.0 ms … 128.4 ms
@@ -566,7 +566,7 @@ Benchmark #1: scc-2.0.0 redis
 Benchmark #1: scc-2.1.0 redis
   Time (mean ± σ):      81.6 ms ±   5.0 ms    [User: 173.8 ms, System: 265.4 ms]
   Range (min … max):    75.5 ms …  97.1 ms
-</pre>
+```
 <aside class="notes">Another small but important change is lazy loading of language features. Because they are stored in the previously mentioned trie, the trie needs to be built for the language. It used to process all the languages in a single pass, but was changed to lazy load them in as required which gave a nice performance boost.</aside>
 				</section>
 
@@ -597,12 +597,12 @@ Byte Order Marks. So they are not actually required in UTF-8 and the spec sugges
 					<h2>4. Summerise</h2>
 					<p>Limited output (thankfully).</p>
 					<p><a href="https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go">String concatenation benchmark</a></p>
-<pre>
+```
 BenchmarkConcat-8              1000000  64850.00 ns/op
 BenchmarkBuffer-8            200000000      6.76 ns/op
 BenchmarkCopy-8             1000000000      3.06 ns/op
 BenchmarkStringBuilder-8     200000000      7.74 ns/op
-</pre>
+```
 
 				<p>Use StringBuilder to ensure >= Go 1.10</p>
 				<aside class="notes">Step four. Bring it all back to you.

@@ -7,15 +7,13 @@ date: 2019-01-09
 
 This is now part of a series of blog posts about `scc` Sloc Cloc and Code which has now been optimised to be the fastest code counter for almost every workload. Read more about it at the following links.
 
- - [Sloc Cloc and Code - What happened on the way to faster Cloc 2018-04-16](https://boyter.org/posts/sloc-cloc-code/)
- - [Sloc Cloc and Code Revisited - A focus on accuracy 2018-08-28](https://boyter.org/posts/sloc-cloc-code-revisited/)
- - [Sloc Cloc and Code Revisited - Optimizing an already fast Go application 2018-09-19](https://boyter.org/posts/sloc-cloc-code-performance/)
- - [Sloc Cloc and Code a Performance Update 2019-01-09](https://boyter.org/posts/sloc-cloc-code-performance-update/)
- - [Sloc Cloc and Code Badges for Github/Bitbucket/Gitlab](https://boyter.org/posts/sloc-cloc-code-badges/)
+- [Sloc Cloc and Code - What happened on the way to faster Cloc 2018-04-16](https://boyter.org/posts/sloc-cloc-code/)
+- [Sloc Cloc and Code Revisited - A focus on accuracy 2018-08-28](https://boyter.org/posts/sloc-cloc-code-revisited/)
+- [Sloc Cloc and Code Revisited - Optimizing an already fast Go application 2018-09-19](https://boyter.org/posts/sloc-cloc-code-performance/)
+- [Sloc Cloc and Code a Performance Update 2019-01-09](https://boyter.org/posts/sloc-cloc-code-performance-update/)
+- [Sloc Cloc and Code Badges for Github/Bitbucket/Gitlab](https://boyter.org/posts/sloc-cloc-code-badges/)
 
-
-
-I thought I had finished with my code counter Sloc Cloc and Code (AKA scc) https://github.com/boyter/scc/ for a while. The what I had hoped to be final blog post about it https://boyter.org/posts/sloc-cloc-code-performance/ however did mention that the building of the language features in it were a cause of slowdown,
+I thought I had finished with my code counter Sloc Cloc and Code (AKA scc) <https://github.com/boyter/scc/> for a while. The what I had hoped to be final blog post about it <https://boyter.org/posts/sloc-cloc-code-performance/> however did mention that the building of the language features in it were a cause of slowdown,
 
 > The trade off of building the trie structures when scc starts does slow down the application for smaller repositories such as redis. That said a slowdown of only 10 ms is probably worth it. Keeping in mind on linux that ~15 ms of overhead is usually the process starting, and that most people will not notice the difference between 15 ms and 30 ms for this sort of application, I think its an acceptable trade.
 
@@ -25,9 +23,7 @@ There are two ways to fix this. The first would be to build the structures and c
 
 A few hours of fiddling around and I made the change and had a release. I ended up adding mutex locks around the hash that holds the language features. I did investigate using the Sync Map that Go added back in version 1.9 but it turned out this was actually slower then the few locks I added, so I stuck with those.
 
-With the implementation done the results are quite good with the time down for every run compared to version 2.0.0. A quick example comparing 2.0.0 to 2.1.0 using the redis code-base.
-
-```
+With the implementation done the results are quite good with the time down for every run compared to version 2.0.0. A quick example comparing 2.0.0 to 2.1.0 using the redis code-base.```
 Benchmark #1: scc-2.1.0 redis
   Time (mean ± σ):      81.6 ms ±   5.0 ms    [User: 173.8 ms, System: 265.4 ms]
   Range (min … max):    75.5 ms …  97.1 ms
@@ -35,6 +31,7 @@ Benchmark #1: scc-2.1.0 redis
 Benchmark #1: scc-2.0.0 redis
   Time (mean ± σ):     124.4 ms ±   2.4 ms    [User: 168.6 ms, System: 289.1 ms]
   Range (min … max):   120.0 ms … 128.4 ms
+
 ```
 
 With that done, I moved over to using my standard test suite to see how it performed against the other new code counters.
@@ -43,14 +40,14 @@ With that done, I moved over to using my standard test suite to see how it perfo
 
 All GNU/Linux tests were run on Digital Ocean 32 vCPU Compute optimized droplet with 64 GB of RAM and a 400 GB SSD. The machine used was doing nothing else at the time and was created with the sole purpose of running the tests to ensure no interference from other processes. The OS used is Ubuntu 18.04 and the Rust programs were installed using cargo install. The programs `scc` and `polyglot` were downloaded from github.
 
-For further details about the benchmarks see https://boyter.org/posts/sloc-cloc-code-performance/
+For further details about the benchmarks see <https://boyter.org/posts/sloc-cloc-code-performance/>
 
 Tools under test
 
- - scc v2.1.0 (downloaded from github)
- - tokei v8.0.0 (compiled with Rust 1.31)
- - loc v0.5.0 (compiled with Rust 1.31)
- - polyglot v0.5.18 (downloaded from github)
+- scc v2.1.0 (downloaded from github)
+- tokei v8.0.0 (compiled with Rust 1.31)
+- loc v0.5.0 (compiled with Rust 1.31)
+- polyglot v0.5.18 (downloaded from github)
 
 #### Artificial
 
@@ -64,7 +61,7 @@ Tools under test
 
 ![Benchmark Artificial](/static/sloc-cloc-code-performance/benchmark_linux_artificial.png)
 
-#### Redis https://github.com/antirez/redis/
+#### Redis <https://github.com/antirez/redis/>
 
 | Program | Runtime |
 |---|---|
@@ -76,7 +73,7 @@ Tools under test
 
 ![Benchmark Redis](/static/sloc-cloc-code-performance/benchmark_linux_redis.png)
 
-#### CPython https://github.com/python/cpython
+#### CPython <https://github.com/python/cpython>
 
 | Program | Runtime |
 |---|---|
@@ -88,7 +85,7 @@ Tools under test
 
 ![Benchmark CPython](/static/sloc-cloc-code-performance/benchmark_linux_cpython.png)
 
-#### Linux Kernel https://github.com/torvalds/linux
+#### Linux Kernel <https://github.com/torvalds/linux>
 
 | Program | Runtime |
 |---|---|
@@ -114,4 +111,4 @@ Tools under test
 
 Times are still a little off when it comes to very small repositories such as redis, but considering there is only 6 ms in I would still count things as a massive win. Generally though the improvement makes `scc` as fast even with complexity calculations or faster without then all other tools for pretty much every case. A pretty nice improvement for a few hours work.
 
-You can get `scc` on github https://github.com/boyter/scc
+You can get `scc` on github <https://github.com/boyter/scc>

@@ -11,19 +11,19 @@ One of the things that I always have to look up (when doing it manually that is)
 Export a database from MySQL in one line NB password must follow -p without a space
 
 ```
-    mysqldump -u user -pPASSWORD mydatabase > mydatabase.sql
+mysqldump -u user -pPASSWORD mydatabase > mydatabase.sql
 ```
 
 Export all databases from MySQL
   
 ```
-    mysqldump -u root -pPASSWORD --all-databases > alldatabases.sql
+mysqldump -u root -pPASSWORD --all-databases > alldatabases.sql
 ```
 
 Export all databases from MySQL and compress
   
 ```
-    mysqldump -u root -pPASSWORD --all-databases | gzip > alldatabases.sql.gz
+mysqldump -u root -pPASSWORD --all-databases | gzip > alldatabases.sql.gz
 ```
 
 Hopefully that will save myself or someone else some time when it comes to creating database backups.

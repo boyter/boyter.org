@@ -13,8 +13,8 @@ So the question is, have you ever wanted to script mysqldump to dump each databa
 The below script is what I use for backing up multiple databases, and does the above.
 
 ```
-#!/bin/sh
-date=`date -I`</pre>
+# !/bin/sh
+date=`date -I
 
 for I in $(mysql -u root -pPASSWORD -e 'show databases' -s --skip-column-names);
 do

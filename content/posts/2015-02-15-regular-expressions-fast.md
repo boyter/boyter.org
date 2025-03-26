@@ -21,20 +21,17 @@ A quick look at the profiler showed that the "back of mind function" was now bec
 
 All of a sudden that function has become a major bottleneck.This needed to be resolved, to fix the worst case without selling out the best case which was very fast indeed. To get an understanding of what the function does you need to understand how searchcode works. When you search for a function of snippet searchcode tries to search for something that matches exactly what you are looking for first, and something containing anything in your query second. This means you end up with two match types, exact matches and fuzzy matches. The results are then processed by firstly trying to match the query exactly, and then going for a looser match.
 
-This was implemented initially though two regular expressions like the below,
-
-<pre>exact_match = re.compile(re.escape(search_term), re.IGNORECASE)
+This was implemented initially though two regular expressions like the below,```exact_match = re.compile(re.escape(search_term), re.IGNORECASE)
 loose_match = re.compile('|'.join([re.escape(x) for x in search_term.split(' ')], re.IGNORECASE)
-</pre>
+
+```
 
 As you can see they are compiled before being handed off to another function which uses them for the actual matching. These are fairly simple regular expressions with the first just looking for any match and the second a large OR match. Certainly you would not expect them to cause any performance issues. Reading the following on stack overflow regarding the differences <https://stackoverflow.com/questions/4901523/whats-a-faster-operation-re-match-search-or-str-find> certainly seems to suggest that unless you are doing thousands of matches the performance should be negligible.
 
-At heart searchcode is just a big string matching engine, and it does many thousands or hundreds of thousands of match operations for even a simple search. Since I don't actually use of the power of regular expressions the fix is to change the code so that we pass in an array of terms to search for and use a simple Python _in_ operator check.
-
-<pre>exact_match = [search_term.lower()]
+At heart searchcode is just a big string matching engine, and it does many thousands or hundreds of thousands of match operations for even a simple search. Since I don't actually use of the power of regular expressions the fix is to change the code so that we pass in an array of terms to search for and use a simple Python _in_ operator check.```exact_match = [search_term.lower()]
 loose_match = [s.lower().strip()
                 for s in search_term.split(' ')]
-</pre>
+```
 
 The results? Well remember we want to improve the worst case without selling out the best case, but the end result was pages that were taking nearly a minute to return were coming back in less than a second. All other queries seemed to come back either in the same time or faster.
 

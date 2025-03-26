@@ -15,7 +15,7 @@ The main thing to keep in mind with elastic (or any search service) is that ther
 
 As with most things you need to know what the user is trying to achieve before you can work on either.
 
-The first thing to do is determine what version of elastic you are working with. Either ask your operations person who set elastic up or alternatively load the elastic HTTP endpoint (locally it would be http://localhost:9200/) in your browser of choice,
+The first thing to do is determine what version of elastic you are working with. Either ask your operations person who set elastic up or alternatively load the elastic HTTP endpoint (locally it would be <http://localhost:9200/>) in your browser of choice,
 
 {{<highlight json>}}
 {
@@ -39,29 +39,28 @@ The first thing to do is determine what version of elastic you are working with.
 
 You should see something like the above. In this case the version number is 6.5.0. This is important to know as there have been breaking changes between the major versions and a lot of the books and documentation you are likely to encounter on-line will not be correct. This guide is written with version 6.5.0 in mind, but was tested with versions back in the 6.2.0 range.
 
-At this point you should investigate running elastic locally so you can avoid impacting anyone else, requiring network connectivity and to speed up local development. You have two options. The easiest is run a docker image. However due to licensing issues elastic (the company) has made this a little harder. A while ago elastic released the source code to XPack which is a collection of their propitiatory tools. You can read the release here https://www.elastic.co/blog/doubling-down-on-open however one catch is that it means you can accidentally run the XPack tools and potentially run into licensing issues. You can read the HN discussion here https://news.ycombinator.com/item?id=16487440
+At this point you should investigate running elastic locally so you can avoid impacting anyone else, requiring network connectivity and to speed up local development. You have two options. The easiest is run a docker image. However due to licensing issues elastic (the company) has made this a little harder. A while ago elastic released the source code to XPack which is a collection of their propitiatory tools. You can read the release here <https://www.elastic.co/blog/doubling-down-on-open> however one catch is that it means you can accidentally run the XPack tools and potentially run into licensing issues. You can read the HN discussion here <https://news.ycombinator.com/item?id=16487440>
 
-To avoid this and potentially avoid some angry emails I have set the below to use the OSS versions of elastic.
-
-```
+To avoid this and potentially avoid some angry emails I have set the below to use the OSS versions of elastic.```
 docker pull docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.0
 docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -d docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.0
+
 ```
 
-The above will pull the OSS version of elastic and run it on port 9200 on your local machine which is the default Elasticsearch port. Once started you can browse to http://localhost:9200/ and hopefully see the JSON like the above which we used to determine the version. If you need a different version you can find the docker images at https://www.docker.elastic.co/
+The above will pull the OSS version of elastic and run it on port 9200 on your local machine which is the default Elasticsearch port. Once started you can browse to <http://localhost:9200/> and hopefully see the JSON like the above which we used to determine the version. If you need a different version you can find the docker images at <https://www.docker.elastic.co/>
 
-Option two is to download and run elastic on your machine natively. I have tried the various methods they list including package managers and the like. I found the the easiest and most reliable was download the zip file from https://www.elastic.co/downloads/elasticsearch and then run `bin/elasticsearch` or `bin\elasticsearch.bat`. After a time it should start and you can browse to http://localhost:9200/ to verify.
+Option two is to download and run elastic on your machine natively. I have tried the various methods they list including package managers and the like. I found the the easiest and most reliable was download the zip file from <https://www.elastic.co/downloads/elasticsearch> and then run `bin/elasticsearch` or `bin\elasticsearch.bat`. After a time it should start and you can browse to <http://localhost:9200/> to verify.
 
 ## Communication
 
-The easiest way to communicate with elasticsearch is though restful HTTP requests. I personally found it easiest to do this when testing and trying ideas using Postman https://www.getpostman.com/ Once I had things working I converted them into code which made appropriate restful GET/POST/PUT/DELETE requests. CURL would work just as well for this, however I found that Postman's ability to control headers with drop-downs and saving of requests useful.
+The easiest way to communicate with elasticsearch is though restful HTTP requests. I personally found it easiest to do this when testing and trying ideas using Postman <https://www.getpostman.com/> Once I had things working I converted them into code which made appropriate restful GET/POST/PUT/DELETE requests. CURL would work just as well for this, however I found that Postman's ability to control headers with drop-downs and saving of requests useful.
 
 There are many different API wrappers for Elastic written for different languages, however I humbly suggest that you avoid them. The reasons being,
 
- * They are an abstraction on an abstraction which is the Elastic API
- * It removes you from knowing what is actually happening
- * You cannot easily convert between languages
- * Generally you cannot easily replay the HTTP requests using Postman or CURL
+* They are an abstraction on an abstraction which is the Elastic API
+* It removes you from knowing what is actually happening
+* You cannot easily convert between languages
+* Generally you cannot easily replay the HTTP requests using Postman or CURL
 
 I did try a few wrappers, but quickly discarded them in favor of direct HTTP calls based on the above reasons. Keep in mind this is just my opinion, but I found every wrapper more annoying then anything else and favor the ability to verify in postman before implementing the same thing in code.
 
@@ -73,9 +72,7 @@ I have included an export of the postman queries to assist with getting started 
 
 The next thing to understand is how elastic stores documents. Documents that are indexed need to go into an index and have a type. Indexes can contain one or more types. This may sound limiting but you can search over all indexes or all types within an index or just one type within an index if you require.
 
-Consider it logically like the below. You can search at any part of the tree which will search across all children, or pull back a specific document if you know the key.
-
-```
+Consider it logically like the below. You can search at any part of the tree which will search across all children, or pull back a specific document if you know the key.```
 ElasticSearch
 ├── Index1
 │   ├── Type1
@@ -157,12 +154,12 @@ Mappings define type and values in documents. You use them to specify that field
 
  > You have to define a mapping if you want to provide functionality such as aggregations or facets. You cannot add a mapping after indexing any document. To add one afterwards requires dropping the index and re-indexing the content.
 
-You define a mapping by putting to the index/type inside elastic before then adding a document. Consider For example our previous document defining Keanu Reeves. With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and will ignore malformed dates. Malformed dates being dates which have a non matching format or are empty. It will also treat the `type` field of the document as a single keyword allowing us to perform aggregations and facets on this field.
+You define a mapping by putting to the index/type inside elastic before then adding a document. Consider For example our previous document defining Keanu Reeves. With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and will ignore malformed dates. Malformed dates being dates which have a non matching format or are empty. It will also treat the `type` field of the document as a single keyword allowing us to perform aggregations and facets on this field.```
+PUT: <http://localhost:9200/film/>
+TYPE: application/json
 
 ```
-PUT: http://localhost:9200/film/
-TYPE: application/json
-```
+
 {{<highlight json>}}
 {
   "mappings": {
@@ -200,7 +197,7 @@ Almost everyone puts some "magic" on top of the queries, where the magic is tryi
 
 > Searching for * will return all documents limited to 10 by default
 
-To search across an index you have two options. 
+To search across an index you have two options.
 
 For basic search across everything and return the most relevant documents a basic GET request will work. Given that you should have elastic running locally you can browse to `http://localhost:9200/_search?q=keanu` which will perform a search across all indexes and all types. To restrict to an index you have created `http://localhost:9200/film/_search?q=keanu` and to restrict to a type inside that index `http://localhost:9200/film/actor/_search?q=keanu`
 
@@ -208,12 +205,11 @@ With the above you get all of the usual elastic syntax. Boolean searches `keanu 
 
 The other option is to post to the same endpoints using the elasticsearch syntax. This is more complex and involved but provides the option to perform facet/aggregations and as such is likely what you will need to do.
 
-If craft the following HTTP requests and POST like the following,
-
-```
+If craft the following HTTP requests and POST like the following,```
 POST: http://localhost:9200/film/actor/_search
 TYPE: application/json
 ```
+
 {{<highlight json>}}
 {
   "query": {
@@ -244,12 +240,12 @@ Things to note. This query is by default an AND search. This means adding additi
 
 If you are searching across multiple fields the terms you are searching for need to be in all of them.
 
-This is especially annoying if your plan to search over multiple specific fields is something like the below,
+This is especially annoying if your plan to search over multiple specific fields is something like the below,```
+POST: <http://localhost:9200/film/actor/_search>
+TYPE: application/json
 
 ```
-POST: http://localhost:9200/film/actor/_search
-TYPE: application/json
-```
+
 {{<highlight json>}}
 {
   "query": {
@@ -272,7 +268,7 @@ TYPE: application/json
 }
 {{</highlight>}}
 
-Believe it or not it will not match anything as Elastic is looking for a single field that has both terms of keanu and canada in it. To get around this you have two options. The first is to educate your users and the second is to modify elastic and how it indexes. 
+Believe it or not it will not match anything as Elastic is looking for a single field that has both terms of keanu and canada in it. To get around this you have two options. The first is to educate your users and the second is to modify elastic and how it indexes.
 
 If you educate your users to put AND in between the terms that will resolve the issue. This is something you can put into your "magic" on top of the search however, it means you need to parse the users queries which can be problematic.
 
@@ -304,12 +300,11 @@ The below has a special field which I called `_everything` but could be whatever
 }
 {{</highlight>}}
 
-At this point the following search will work.
-
-```
+At this point the following search will work.```
 POST: http://localhost:9200/film/actor/_search
 TYPE: application/json
 ```
+
 {{<highlight json>}}
 {
   "query": {
@@ -337,24 +332,22 @@ The new addition is searching against the `_everything` field. Note that we keep
 
 ## Get Document By Id
 
-If you have your documents stored in elastic and you know the id you can access them from elastic directly without going back to your primary data store. In effect you are treating elastic as a document cache. If you do this consider adding a fall-back to your primary data store in the case that elastic goes down for a more reliable system. You will need to do this anyway if you want to do updates to ensure that you can re-sync everything anyway. 
+If you have your documents stored in elastic and you know the id you can access them from elastic directly without going back to your primary data store. In effect you are treating elastic as a document cache. If you do this consider adding a fall-back to your primary data store in the case that elastic goes down for a more reliable system. You will need to do this anyway if you want to do updates to ensure that you can re-sync everything anyway.
 
-To get a single document out of elastic you use a GET HTTP request against the index/type/id that you want to get and it will be returned as a JSON file for you
+To get a single document out of elastic you use a GET HTTP request against the index/type/id that you want to get and it will be returned as a JSON file for you```
+GET: <http://localhost:9200/film/actor/id>
 
-```
-GET: http://localhost:9200/film/actor/id
 ```
 
 ## Highlights / Snippets
 
 Highlights are how you show the relevant portion of the search to your user. Usually they just consist of a relevant potion of text extracted from the document with the matching terms highlighted. I am not sure how elastic actually achieves this under the hood, but if you are curious you can read [Building a Search Result Extract/Snippet/Highlight generator in PHP](https://boyter.org/2013/04/building-a-search-result-extract-generator-in-php/) which explains how I created one some years ago and compared it to other solutions.
 
-Thankfully elastic can do this for you saving you the effort. Add highlight to your query and it will return highlights for the matching fields.
-
-```
+Thankfully elastic can do this for you saving you the effort. Add highlight to your query and it will return highlights for the matching fields.```
 POST: http://localhost:9200/film/actor/_search
 TYPE: application/json
 ```
+
 {{<highlight json>}}
 {
   "query": {
@@ -397,12 +390,12 @@ Sticking with our example of Keanu you can see that in the below mock-up that we
 
 Facets are the result of setting the keyword type in the mapping. Once you have set the mapping then added the document you can then request facets to be produced for that field.
 
-To generate facts for a search you want to run a search with some aggregations set.
+To generate facts for a search you want to run a search with some aggregations set.```
+POST: <http://localhost:9200/film/actor/_search>
+TYPE: application/json
 
 ```
-POST: http://localhost:9200/film/actor/_search
-TYPE: application/json
-```
+
 {{<highlight json>}}
 {
   "query": {
@@ -453,12 +446,11 @@ When run against an index with the mapping setup you will get back in your respo
 
 Which is a sum of each of the unique keys based on the field you specified. You can have multiple aggregation types if you have multiple facets, with each having the key of the name you set in your aggregation request.
 
-Once you have the facet you can then filter results down to just those containing it. You can do this like the below example that will filter down to a any document where the type is set to "Actor".
-
-```
+Once you have the facet you can then filter results down to just those containing it. You can do this like the below example that will filter down to a any document where the type is set to "Actor".```
 POST: http://localhost:9200/film/actor/_search
 TYPE: application/json
 ```
+
 {{<highlight json>}}
 {
   "query": {
@@ -500,8 +492,6 @@ TYPE: application/json
   }
 }
 {{</highlight>}}
-
-
 
 ## Size / Pages
 
@@ -553,10 +543,9 @@ Size is the number of results to return and from is from which count you want to
 
 ## Deleting
 
-Dropping or deleting an index is actually scarily simple. You need only send a HTTP DELETE to the index you want to remove. 
+Dropping or deleting an index is actually scarily simple. You need only send a HTTP DELETE to the index you want to remove.```
+DELETE: <http://localhost:9200/film/>
 
-```
-DELETE: http://localhost:9200/film/
 ```
 
 The above will return the below if the index exists and it was able to be deleted.
@@ -569,9 +558,7 @@ The above will return the below if the index exists and it was able to be delete
 
 > I always read the above using the Red Alert Soviet voice in my head which causes me to giggle to the annoyance of my colleagues
 
-To delete a single document from the index you need to know its id which you can find by using a query and looking at the value `_id` which for auto generated id's will be something like `x-Apn2cB5wabZ-h5-SLf`. To remove it you send a DELETE against the index/type with the id like so.
-
-```
+To delete a single document from the index you need to know its id which you can find by using a query and looking at the value `_id` which for auto generated id's will be something like `x-Apn2cB5wabZ-h5-SLf`. To remove it you send a DELETE against the index/type with the id like so.```
 DELETE: http://localhost:9200/film/actor/x-Apn2cB5wabZ-h5-SLf
 ```
 
@@ -669,12 +656,12 @@ TF is term frequency just means how often does the word appear in the document. 
 
 As such a word is considered important if it does not appear very often across all document. A search for this word would rank a document with multiple occurrences of this word higher then a document with a single occurrence. In addition to the above shorter fields outrank longer ones. So things like titles tend to outrank fields with large bodies of text.
 
-Elastic search also used to apply the Vector Space model to ranking at query time, but I am not sure if this is still the case. If you want some detail about the Vector Space model you can read the following, 
+Elastic search also used to apply the Vector Space model to ranking at query time, but I am not sure if this is still the case. If you want some detail about the Vector Space model you can read the following,
 
- - [Vector space search model explained](https://boyter.org/2011/06/vector-space-search-model-explained/)
- - [Vector space search engine in Python](https://boyter.org/2010/08/build-vector-space-search-engine-python/)
- - [C# Vector Space Implementation](https://boyter.org/2013/08/c-vector-space-implementation/ )
- - [GoLang Vector Space implementation](https://boyter.org/2013/08/golang-vector-space-implementation/)
+* [Vector space search model explained](https://boyter.org/2011/06/vector-space-search-model-explained/)
+* [Vector space search engine in Python](https://boyter.org/2010/08/build-vector-space-search-engine-python/)
+* [C# Vector Space Implementation](https://boyter.org/2013/08/c-vector-space-implementation/ )
+* [GoLang Vector Space implementation](https://boyter.org/2013/08/golang-vector-space-implementation/)
 
 This is a query time ranking algorithm run at search time. Due to the way it works it ranks documents of similar length as being a closer match, which in practice means that when used against standard search terms it also ranks shorter fields as being more relevant over longer ones.
 
@@ -690,7 +677,7 @@ If someone ever does ask to explain how the ranking works for a specific query y
   "query": {
 {{</highlight>}}
 
-The response of which will include something like the following which is horribly verbose, but very explicit in what is happening under the hood. You can find details of what this actually means on the elastic documentation https://www.elastic.co/guide/en/elasticsearch/reference/current/search-explain.html
+The response of which will include something like the following which is horribly verbose, but very explicit in what is happening under the hood. You can find details of what this actually means on the elastic documentation <https://www.elastic.co/guide/en/elasticsearch/reference/current/search-explain.html>
 
 {{<highlight json>}}
 "_explanation": {
@@ -723,7 +710,7 @@ The response of which will include something like the following which is horribl
                         },
                         {
                             "value": 1,
-                            "description": "tfNorm, computed as (freq * (k1 + 1)) / (freq + k1 * (1 - b + b * fieldLength / avgFieldLength)) from:",
+                            "description": "tfNorm, computed as (freq *(k1 + 1)) / (freq + k1* (1 - b + b * fieldLength / avgFieldLength)) from:",
                             "details": [
                                 {
                                     "value": 1,
@@ -762,7 +749,7 @@ The response of which will include something like the following which is horribl
 
 ## Search Tips / Tricks
 
-Given the below document here are some searches you can use against it, and why you might want to do them. I do recommend checking https://www.cheatography.com/jelle/cheat-sheets/elasticsearch-query-string-syntax/ for a general purpose elasticsearch cheat sheet.
+Given the below document here are some searches you can use against it, and why you might want to do them. I do recommend checking <https://www.cheatography.com/jelle/cheat-sheets/elasticsearch-query-string-syntax/> for a general purpose elasticsearch cheat sheet.
 
 {{<highlight json>}}
 {
@@ -776,8 +763,7 @@ Given the below document here are some searches you can use against it, and why 
 }
 {{</highlight>}}
 
-
-`fact:canada` 
+`fact:canada`
 
 Will search inside the field fact for the term canada. Use when you want to target a single field inside documents of if you have a field that is not searched by default.
 
@@ -805,11 +791,11 @@ Search where * is replaced by zero or more of any character.
 
 Search using regular expression. Note not all regular expressions will work. These searches can be very powerful, but generally you can do 99% of what you require without them. Included here just to show that it is possible.
 
-`kean~` 
+`kean~`
 
 Fuzzy or sloppy search. Will search for words within 2 characters edit distance of the above by default. Can modify this to specify how fuzzy the search will be.
 
-`keanu~1` 
+`keanu~1`
 
 Fuzzy search within distance of 1 character. An example of using this would be `keanu~1 -keanu` which would find all misspellings of Keanu. The shorter the word the less effective this is and you should look at using ? wildcards instead. You can use values of 1 or 2 for the distance.
 

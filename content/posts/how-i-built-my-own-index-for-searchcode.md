@@ -7,20 +7,20 @@ date: 2022-11-22
 
 I present what I belive is a unique index for indexing and searching source code. It copies ideas from Bing bitfunnel implementation to create a very fast, memory efficient trigram index over source code.
 
- - searchcode.com is now using a custom built index written by yours truly
- - It indexes 180-200 million documents and 75 billions lines of code
- - The index works using bloom filters sharded by unique document trigrams
- - It borrows some of the core ideas of bitfunnel used in microsoft's bing
- - The use of trigrams inside a bloom filter search is as far as I can tell unique
- - It lowered the index search times from many seconds to ~40ms across searchcode
- - End user searches still take around 300 ms to process though
- - It also improved search relevance and reliability
- - Architecture wise things became simpler, as the new index sits on a single machine not four
- - It uses caddy as the reverse proxy and redis as a level 2 cache
- - The index sits entirely in memory on a 16 core 5950x CPU and 128 GB RAM machine
- - It currently processes close to a million searches every day
- - I also gave the site a new look and feel which is much better than what it looked like previously
- - I had an absolute blast learning and building it
+- searchcode.com is now using a custom built index written by yours truly
+- It indexes 180-200 million documents and 75 billions lines of code
+- The index works using bloom filters sharded by unique document trigrams
+- It borrows some of the core ideas of bitfunnel used in microsoft's bing
+- The use of trigrams inside a bloom filter search is as far as I can tell unique
+- It lowered the index search times from many seconds to ~40ms across searchcode
+- End user searches still take around 300 ms to process though
+- It also improved search relevance and reliability
+- Architecture wise things became simpler, as the new index sits on a single machine not four
+- It uses caddy as the reverse proxy and redis as a level 2 cache
+- The index sits entirely in memory on a 16 core 5950x CPU and 128 GB RAM machine
+- It currently processes close to a million searches every day
+- I also gave the site a new look and feel which is much better than what it looked like previously
+- I had an absolute blast learning and building it
 
 # What Happened?
 
@@ -39,7 +39,6 @@ The result of my effort can be viewed at [searchcode.com](https://searchcode.com
 ![searchcode new](/static/searchcode/screenshot3.jpg)
 
 A little over a year's worth of effort and I can now talk/write about it. I consider it the pinnacle of my development career to date, and I am very proud of my achievement. Feel free to read further if you would like to learn how I did it, what I was thinking etc... What follows is a collection of my development thoughts and ideas.
-
 
 # Development Thoughts
 
@@ -105,22 +104,22 @@ Listing down the "requirements" and constraints we have.
 
 ### Requirements
 
- - We don't need to support wildcard queries or OR search, AND by default but be able to implement them later...
- - We need to be able to search special characters
- - We want to be able to update quickly as its a write heavy workload
- - We need to support filters on source (github/bitbucket etc...) and code language
- - It's a free website, so we can deal with some downtime or inaccuracy
- - We want searches to process in a 200 ms time budget with no cache (lower is better though)
- - Want to embed into searchcode itself to avoid expensive network calls
- - We want to store the entire index in RAM, since RAM is cheap (so they say...)
- - We don't need to do any term rewriting (where you map NY to new york and or search for both)
- 
+- We don't need to support wildcard queries or OR search, AND by default but be able to implement them later...
+- We need to be able to search special characters
+- We want to be able to update quickly as its a write heavy workload
+- We need to support filters on source (github/bitbucket etc...) and code language
+- It's a free website, so we can deal with some downtime or inaccuracy
+- We want searches to process in a 200 ms time budget with no cache (lower is better though)
+- Want to embed into searchcode itself to avoid expensive network calls
+- We want to store the entire index in RAM, since RAM is cheap (so they say...)
+- We don't need to do any term rewriting (where you map NY to new york and or search for both)
+
 ### Constraints
 
- - We have a higher that normal term count per document than normal web content
- - We are using Go so we have to think about the impact of the garbage collector
- - This is a side project, so whatever is done needs to be achievable by a single person who works on this in their spare time
- - We are not going to release this as open source, because if someone wants it they can pay for a copy dammit
+- We have a higher that normal term count per document than normal web content
+- We are using Go so we have to think about the impact of the garbage collector
+- This is a side project, so whatever is done needs to be achievable by a single person who works on this in their spare time
+- We are not going to release this as open source, because if someone wants it they can pay for a copy dammit
 
 Why use Go I hear you ask? Why not C++/Rust/C/Zig! I know 3 languages reasonably well. Those being Java, C# and Go. The current version of searchcode.com is written in Go which is the main reason for using it. Blekko back in the day was supposedly written using Perl so I don't think performance should be an issue here. Plus I would really like to get this embedded into the application itself to avoid those pesky slow network calls.
 
@@ -135,64 +134,72 @@ So there are a few ways to search across content or build an index that I am awa
 Brute Force, note that this isn't an index strategy per say, but worth discussing anyway. Assuming you can get the entire corpus you are searching into RAM it is possible to brute force search. I'm including it here so I have the advantages and disadvantages, but suffice to say I have about 30 GB of RAM I can use to hold the index (note this is now 128 GB but still too small), which is nowhere near enough to hold the searchcode corpus. That said the problem is pretty brute forcible given enough CPU and RAM. Note that I do not have enough CPU/RAM to achieve this.
 
 Advantages
- - 100% space efficient (for the index anyway) since there isn't one
- - Easy to query/write
- - Can determine TF easily as its a positional "index"
- - Scales (assuming you are prepared to pay)
- - Constant performance
+
+- 100% space efficient (for the index anyway) since there isn't one
+- Easy to query/write
+- Can determine TF easily as its a positional "index"
+- Scales (assuming you are prepared to pay)
+- Constant performance
 
 Disadvantages
- - Slow... at scale if you cannot fit your corpus in RAM
- - Harder to scale because gotta duplicate all the data
- - Writing high performance string searches is a very hard problem
- 
+
+- Slow... at scale if you cannot fit your corpus in RAM
+- Harder to scale because gotta duplicate all the data
+- Writing high performance string searches is a very hard problem
+
 ### Inverted Index
 
 Inverted index. This is pretty much building a map/dictionary of terms to documents and then intersecting them and ranking. One issue with this technique is that you end up with enormous term lists, known as posting lists for common terms. We cannot use stop words to reduce this because we need to index all the content as trigrams, meaning we will get huge posting lists.
 
 Advantages
- - Easy to query
- - Does not miss terms
- - Can easily store term frequency alongside terms creating a positional index
- - Fast and easy; intersecting posting lists is something you can hand off to your most junior developer (at least initially)
- - Query execution time is related to the number of returned results
+
+- Easy to query
+- Does not miss terms
+- Can easily store term frequency alongside terms creating a positional index
+- Fast and easy; intersecting posting lists is something you can hand off to your most junior developer (at least initially)
+- Query execution time is related to the number of returned results
 
 Disadvantages
- - Hard to update documents usually have to rebuild the index or do delta + merge strategy
- - Need to implement skip lists or compression on the posting lists at scale
- - Queries can be slow due to the complexity of the list structures
+
+- Hard to update documents usually have to rebuild the index or do delta + merge strategy
+- Need to implement skip lists or compression on the posting lists at scale
+- Queries can be slow due to the complexity of the list structures
 
 ### Trie
 
-Trie for example https://github.com/typesense/typesense which uses Adaptive Radix Tree https://stackoverflow.com/questions/50127290/data-structure-for-fast-full-text-search
+Trie for example <https://github.com/typesense/typesense> which uses Adaptive Radix Tree <https://stackoverflow.com/questions/50127290/data-structure-for-fast-full-text-search>
 
 Advantages
- - Constant lookup time
- - Potential to be space efficient if key terms share the same prefixes
- - Easy to do wildcard queries
- - Can store TF alongside terms as a positional index
+
+- Constant lookup time
+- Potential to be space efficient if key terms share the same prefixes
+- Easy to do wildcard queries
+- Can store TF alongside terms as a positional index
 
 Disadvantages
- - Can take up more space if lots of prefixes
- - Not friendly to GC due to the use of pointers (problem for Go)
- - Need to implement skip lists or compression on the posting lists at scale
+
+- Can take up more space if lots of prefixes
+- Not friendly to GC due to the use of pointers (problem for Go)
+- Need to implement skip lists or compression on the posting lists at scale
 
 ### Bit Signatures
 
-This is something I remember reading about years ago, and found this link to prove I had not lost my mind https://www.stavros.io/posts/bloom-filter-search-engine/ At the time I thought it was neat but not very practical... However then it turns out that Bing has been using this technique over its entire web corpus http://bitfunnel.org/ https://www.youtube.com/watch?v=1-Xoy5w5ydM
+This is something I remember reading about years ago, and found this link to prove I had not lost my mind <https://www.stavros.io/posts/bloom-filter-search-engine/> At the time I thought it was neat but not very practical... However then it turns out that Bing has been using this technique over its entire web corpus <http://bitfunnel.org/> <https://www.youtube.com/watch?v=1-Xoy5w5ydM>
 
 Advantages
- - Stupidly fast if careful (bitwise operations are almost free from a CPU point of view)
- - Space/Memory efficient
- - Easy to update/delete modify existing terms
- - Reasonably simple algorithms to code (good for one person)
+
+- Stupidly fast if careful (bitwise operations are almost free from a CPU point of view)
+- Space/Memory efficient
+- Easy to update/delete modify existing terms
+- Reasonably simple algorithms to code (good for one person)
 
 Disadvantages
- - Cannot store term frequency information along terms as its a non-positional index
- - Produces false positive matches
- - Query execution time is linear in the collection size (bitfunnel is about reducing this to an extent)
- - Memory bandwidth of the machine limits how large the index can grow on a single machine
- - Done poorly has to process the entire index
+
+- Cannot store term frequency information along terms as its a non-positional index
+- Produces false positive matches
+- Query execution time is linear in the collection size (bitfunnel is about reducing this to an extent)
+- Memory bandwidth of the machine limits how large the index can grow on a single machine
+- Done poorly has to process the entire index
 
 ## Inverted Index Calculations
 
@@ -209,7 +216,6 @@ For the inverted index we need in effect a large map of string to integer arrays
 So let's assume there is a "free" mapping of strings to integers somewhere allowing us to use an integer for the words. We don't have one but for the moment while working things out let's assume so. Let's also assume we have less than 4 billion terms (I think Bing/Google have something like 10 billion per shard but we are simplifying here) so we can use a 32 bit integer to save some space.
 
 We can store this information, mapping terms (as an integer) to an array of documents containing that term.
-
 
 {{<highlight go>}}
 map[uint32][]uint32
@@ -241,7 +247,7 @@ Before you email me about ribbon or xor filters, yes I am aware of them, I have 
 
 One of the things I was most curious about was how many bits Bing used for the bloom filters in bitfunnel. While it's entirely dependent on how large the documents are (since large documents have more terms) just having an idea helps when it comes to guessing. It took a while for me to pick it up but it was mentioned that they are around 1500 bits.
 
-Using our guesstimate of 1320 unique trigrams, we can use the following calculator https://hur.st/bloomfilter/ to determine how large a document would be in our index.
+Using our guesstimate of 1320 unique trigrams, we can use the following calculator <https://hur.st/bloomfilter/> to determine how large a document would be in our index.
 
 Going with 1320 trigrams and a 1% false positive rate we get `12653` bits or 1.5 KB per document to store the index. That's an impressive space saving there.
 
@@ -257,8 +263,7 @@ In reality putting everything into memory isn't the universal panacea to improvi
 
 Anyway in terms of space we have a reasonable winner, and after reviewing how bitfunnel worked I was just itching to write a version of it. After all, there are only so many technical papers you can read about something before wanting to put the ideas into practice.
 
-I am not going to write about bloom filters or how to implement them. I covered this in it's own post which you can read if you are so inclined https://boyter.org/posts/bloom-filter/
-
+I am not going to write about bloom filters or how to implement them. I covered this in it's own post which you can read if you are so inclined <https://boyter.org/posts/bloom-filter/>
 
 ### Bit Vector Rotation
 
@@ -268,22 +273,18 @@ This took me a bit to understand because all the examples used in bitfunnel were
 
 Consider a bloom filter with the following properties.
 
- - 3 documents.
- - 8 bit vector or bloom filter.
- - Single hash function, so each term added is hashed once and flips one bit.
+- 3 documents.
+- 8 bit vector or bloom filter.
+- Single hash function, so each term added is hashed once and flips one bit.
 
-
-Normal view, where we have documents as rows and the columns contain the bloom filter.
-
-```
+Normal view, where we have documents as rows and the columns contain the bloom filter.```
 document1 10111010
 document2 01100100
 document3 00100111
-```
-
-Rotated view, where we have terms as the rows and columns are for a single document.
 
 ```
+
+Rotated view, where we have terms as the rows and columns are for a single document.```
 term1 001
 term2 101
 term3 011
@@ -296,16 +297,13 @@ term8 100
 
 So when you search for a term such as "dog" you hash that term, and fetch that row. So assuming it hashed to the 5th bit we would know that row 5 would be the one to look at and that document1 potentially contains dog.
 
-Working with two or more terms is just as easy. Assuming you have "cat dog" where cat hashes to term 2, you get rows 5 for dog and 2 for cat.
-
-```
+Working with two or more terms is just as easy. Assuming you have "cat dog" where cat hashes to term 2, you get rows 5 for dog and 2 for cat.```
 101
 100
-```
-
-Then you logically & them together and look for which column remains set.
 
 ```
+
+Then you logically & them together and look for which column remains set.```
 101 & 100 = 100
 ```
 
@@ -315,7 +313,7 @@ We also have an idea about how optimal this can be based on the talk from [Dan L
 
 Considering I am planning on storing 20x the documents mentioned in the talk, and am also working in a far slower language compared to C++, I'd be happy if I can get down to 20 ms for each query, which seems doable. I suspect that most of it comes down to memory bandwidth. The CPU I use as mentioned has about 40 GB/s bandwidth. As such avoiding scanning all the memory is the main thing I need to worry about.
 
-The other thing that's really useful to note is that the number of hash functions per term added varies. You hash rare terms more than common terms. This reduces the false positive rate for rare terms. You can find details about this here https://www.clsp.jhu.edu/events/mike-hopcroft-microsoft/ The technique itself is known as a "frequency conscious bloom filter".
+The other thing that's really useful to note is that the number of hash functions per term added varies. You hash rare terms more than common terms. This reduces the false positive rate for rare terms. You can find details about this here <https://www.clsp.jhu.edu/events/mike-hopcroft-microsoft/> The technique itself is known as a "frequency conscious bloom filter".
 
 I did the same thing in searchcode. I ran over all of the source code I had calculating the most common trigrams. On system startup searchcode loads these terms into memory and uses them to determine the number of hashes any trigram needs before being added to the index. Because trigrams tend to have more repeating words and less dimensionality than normal words we don't need any more than 3 hashes to achieve a good result based on my tests. The function to determine this looks like the below,
 
@@ -347,43 +345,39 @@ The index is a 100% non-positional memory index, based on bloom filters, sharded
 
 The index is split into shards which are further split into 8-12 buckets. Each bucket has a differently configured bloom filter, designed to save space while preserving a target false positive value. A result of this is that buckets contain documents of similar length with the smaller bloom filters getting shorter documents.
 
-When a document is enqueued to be indexed, it is routed to the appropriate shard, and the number of distinct trigrams in that document is calculated. This is important because there is a relationship between the number of trigrams and the number of bits set within the bloom filter. In order to avoid wasting space, a bucket is chosen which gives an appropriate amount of bits set, where the idea is to lower the false positive rate without wasting memory. Documents are truncated to ensure they don't overfill bloom filters, so even if searchcode is working with 1 MB file, only the head of that file will be added to the index, without overfilling its filter.
-
-
-```
+When a document is enqueued to be indexed, it is routed to the appropriate shard, and the number of distinct trigrams in that document is calculated. This is important because there is a relationship between the number of trigrams and the number of bits set within the bloom filter. In order to avoid wasting space, a bucket is chosen which gives an appropriate amount of bits set, where the idea is to lower the false positive rate without wasting memory. Documents are truncated to ensure they don't overfill bloom filters, so even if searchcode is working with 1 MB file, only the head of that file will be added to the index, without overfilling its filter.```
 ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
 │     caisson      ├─┬▶│  caisson shard   ├┬─▶│     bucket-1     │
 └──────────────────┘ │ └──────────────────┘│  └──────────────────┘
-                     │                     │                      
+                     │                     │
                      │                     │  ┌──────────────────┐
                      │                     ├─▶│     bucket-2     │
                      │                     │  └──────────────────┘
-                     │                     │                      
+                     │                     │
                      │                     │  ┌──────────────────┐
                      │                     └─▶│     bucket-3     │
                      │                        └──────────────────┘
-                     │                                            
-                     │                                            
+                     │
+                     │
                      │ ┌──────────────────┐   ┌──────────────────┐
                      └▶│  caisson shard   ├┬─▶│     bucket-1     │
                        └──────────────────┘│  └──────────────────┘
-                                           │                      
+                                           │
                                            │  ┌──────────────────┐
                                            ├─▶│     bucket-2     │
                                            │  └──────────────────┘
-                                           │                      
+                                           │
                                            │  ┌──────────────────┐
                                            └─▶│     bucket-3     │
                                               └──────────────────┘
+
 ```
 
 Once the target filter is picked, the document is added, with the bits in the bloom filter being flipped right to left. It also saves other details about the document such as what language it is, its source and its size.
 
 In memory the buckets look like the following, which is just a huge slice of 64 bit integers one after the other. These are organised into blocks, consisting of as many integers as there are bits in the bloom filter. So a 512 bit bloom filter would have 512 integers in each block, with each block containing 64 documents.
 
-When the 64th document is added filling the left most bits, another block is appended onto the current one, and the bits start filling right the left again.
-
-```
+When the 64th document is added filling the left most bits, another block is appended onto the current one, and the bits start filling right the left again.```
 ┌──────────────────┐    ┌───────────────────────────────────────────────────────────────────┐
 │      bucket      │───▶│                                                                   │
 └──────────────────┘    │ 0011100000000000000000000000000011010010000000000000010000111111  │
@@ -549,14 +543,13 @@ fn main() {
 }
 {{</highlight>}}
 
-Followed by a quick compile and run,
-
-```
+Followed by a quick compile and run,```
 $ go run main.go && cargo run --release
 time: 11205 ms
     Finished release [optimized] target(s) in 0.03s
      Running `target/release/rusttest`
 time: 8412 ms
+
 ```
 
 Interesting. Rust is faster as you would probably expect, but not so much faster that you still wouldn't have a problem.
@@ -571,9 +564,7 @@ for i:=0;i<1_000_000;i++ {
 }
 {{</highlight>}}
 
-Which speeds up the Go version a bit. In addition, I tried this with the latest version of Go 1.19 and it sped up yet again from my previous attempts running faster than the Rust version. I have no idea how to do a non allocation version in Rust, but even without on my machine Go is now faster for this task. Remember to upgrade your compiler people! Still not fast enough for my purposes, but hey free performance is always good.
-
-```
+Which speeds up the Go version a bit. In addition, I tried this with the latest version of Go 1.19 and it sped up yet again from my previous attempts running faster than the Rust version. I have no idea how to do a non allocation version in Rust, but even without on my machine Go is now faster for this task. Remember to upgrade your compiler people! Still not fast enough for my purposes, but hey free performance is always good.```
 $ go run 1/main.go && go run 2/main.go 
 time: 6383 ms                              <-- non allocating runtime here
 time: 6783 ms
@@ -602,7 +593,7 @@ What about ranking?
 
 We don't actually need anything too fancy for searchcode. I doubt anyone is trying to game its search results, so spam isn't an issue nor is keyword stuffing. Anything that affects the ranking in a negative way can just be removed from the index. While web search engines tend to use thousands of signals in order to know how to rank, searchcode can get by with something simple such as TF/IDF or BM25. Thankfully I have already implemented both (including the Lucene TF/IDF variant) for other projects, so a little copy paste and done.
 
-Sourcegraph, another code search engine, had Steve Yegge write about this actually, https://about.sourcegraph.com/blog/new-search-ranking however it was posted very recently and is included here since its relevant, but did not impact anything I have done.
+Sourcegraph, another code search engine, had Steve Yegge write about this actually, <https://about.sourcegraph.com/blog/new-search-ranking> however it was posted very recently and is included here since its relevant, but did not impact anything I have done.
 
 The question being can my implementation of it work fast enough over millions of matches. At what point is it too slow and eating into our 200 ms target time budget?
 
@@ -614,7 +605,7 @@ This roughly works out to be about 250 GB of data you need to filter through and
 
 Now is it even possible to rank and sort that much data in under 500 ms which Google returns in?
 
-The terasort benchmark allows us to at least get an idea about this. It's a benchmark based on sorting 1 TB of random data as quickly as possible. I tried to find a recent result for this, but this https://www.wired.com/insights/2012/11/breaking-the-minute-barrier-for-terasort/ from 2012 shows that Google was able to sort the 1 TB of data in 54 seconds, using 4000+ CPU cores.
+The terasort benchmark allows us to at least get an idea about this. It's a benchmark based on sorting 1 TB of random data as quickly as possible. I tried to find a recent result for this, but this <https://www.wired.com/insights/2012/11/breaking-the-minute-barrier-for-terasort/> from 2012 shows that Google was able to sort the 1 TB of data in 54 seconds, using 4000+ CPU cores.
 
 Let's assume it could be done in half the time with current CPU's. So 1 TB in 27 seconds, then let's do it for the 250 GB of data divided by 5 gives us 5.4 seconds. At this point I am fairly skeptical that Google is actually ranking the entire set. Even if they threw 5x the servers at it. Plus think of the cost. It was said that at the time the terasort record cost about $9. Let's assume it gets massively more efficient over time and say that it costs $1 for every search on Google for a common term to rank.
 
@@ -631,7 +622,7 @@ So back to my problem trying out on my local machine a rank and sort for 1 milli
 Ranking is the easy one to speed up. We run it in parallel. That brings it down to 10 ms for 1 million documents. We can also flip from [Lucene TF/IDF](https://opensourceconnections.com/blog/2015/10/16/bm25-the-next-generation-of-lucene-relevation/) to pure TF/IDF for a small saving, changing the line
 
 {{<highlight go>}}
-weight += math.Sqrt(tf) * idf * (1 / math.Sqrt(float64(results[i].wordCount)))
+weight += math.Sqrt(tf) *idf* (1 / math.Sqrt(float64(results[i].wordCount)))
 {{</highlight>}}
 
 to
@@ -652,7 +643,7 @@ Regardless, this new idea is actually fairly easy to code.
 
 {{<highlight go>}}
 var topResults []*doc
-aboveScore := (maxScore / 100) * 95
+aboveScore := (maxScore / 100)* 95
 for len(topResults) <= 1_000 {
     for i:=0;i<len(results);i++ {
         if results[i].score >= aboveScore { // must be >= or infinite loop here, so be careful!
@@ -675,7 +666,6 @@ In fact after all the above and some other tweaks I was able to get it ranking 5
 The reality is though that I am likely to cut off any further processing if we get something like 100,000 or something documents. It's not like I let you page through them anyway. Also at 100,000 documents on my laptop I can rank, collect and sort in ~3 ms which is probably fast enough for my purposes.
 
 The last step for ranking I implemented is some "page rank". There is nothing fancy done here
-
 
 # Other Tweaks
 
@@ -702,11 +692,11 @@ It’s code I wrote... so naturally there have been a few crashes since it went 
 The second was more annoying. I started getting out of memory kill events in the syslog. This was especially worrying because I had explicitly written searchcode to never exhaust the total amount of system memory. My theory was that due to the high level searches running I was bumping into a RAM issue, which never surfaced in regular testing.
 
 Thinking about our requirements and constraints. One thing to consider early on is how to do searches in your index. You have two main options. The first is to allow searches in parallel and the latter is to not do that. However the choice between might not be as simple as you would think. It also greatly impacts the design of the system.
- 
+
 Most would think, of course, do it in parallel! Process in parallel so that way people wait less. But do they? As more searches come in, the average time for each search goes up. Consider the situation that 10 people all search at the same time. Lets also assume that each search takes 1 second. Given limited resources which is true for most cases it means all 10 searches are shared across the system. As such everyone gets 1/10th of the system to search with and end up waiting 10 seconds for a result.
- 
+
 However, consider doing it in serial. While all came in at once only one can go first, and that person's search returns in 1 second. The second was waiting on the first and their search took 2 seconds. The third takes 3 seconds etc... till the last one who had a 10 second wait. Which is the better result? I would argue the latter.
- 
+
 There are a few other advantages to doing your searches in serial. You can attempt to consume all the resources you have at your disposal to give a good result, you don't have to worry about memory issues since you should know how much memory you need at any one time.
 
 So as a hail mary I added a counting semaphore over the search function in order to control memory usage. This would allow some level of parallelism. Thankfully this is very simple to do in Go.
@@ -724,13 +714,8 @@ func doSearch() { // only 5 instances of this function can run
 
 With that added I restarted the service, waited for it to get the level of scale that was crashing previously and thankfully it resolved the issue. The result was finally a stable service. Hurrah!
 
-Well if you got this far you now know how every search in searchcode.com works. You are also pretty hardcore, and as such might be interested in an add on service I want to offer. In short you can use searchcode to check if any code in another codebase has been copied, and as such is potentially a licence violation. 
+Well if you got this far you now know how every search in searchcode.com works. You are also pretty hardcore, and as such might be interested in an add on service I want to offer. In short you can use searchcode to check if any code in another codebase has been copied, and as such is potentially a licence violation.
 
 I supply a binary file, you point it at your code, it produces some non-reversible hashes, which it uploads. The hashes are then checked against every line of code searchcode is aware of and lets you know if it finds copied functions. Oh and the binary file? Yours to keep, and you can use it to find duplicate content in your own codebase, without ever talking to searchcode.
 
 If that sounds interesting to you, feel free to contact me using the methods listed below.
-
-
-
-
-

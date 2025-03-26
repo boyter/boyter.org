@@ -9,47 +9,42 @@ This page is a work in progress and something I will add to as I remember things
 
 ### Static Analysis
 
-https://golangci-lint.run/usage/install/
+<https://golangci-lint.run/usage/install/>
 
 Install that and run `golangci-lint run ./...` from the root when checking in.
 
-https://golangci-lint.run/usage/false-positives/
+<https://golangci-lint.run/usage/false-positives/>
 
 Use the above to mute issues raised such as using `defer` or ignoring json.Marshall errors.
 
 ### JSON
 
-If JSON is being used and turns up in traces an easy option is to use the following.
-
-```
+If JSON is being used and turns up in traces an easy option is to use the following.```
 import (
     jsoniter "github.com/json-iterator/go"
 )
 
 var json = jsoniter.ConfigCompatibleWithStandardLibrary
+
 ```
 
 ### Run Tests
 
-Remember you need ... spread to have them run recursively.
-
-```
+Remember you need ... spread to have them run recursively.```
 go test ./...
 ```
 
-### Unique Codes
+### Unique Codes```
 
-```
 grep -r uniqueCode . | grep -o '"[a-z0-9]*"' | sort | uniq -c | grep -v '  1 '
+
 ```
 
 ### Logging
 
-Use zerolog for logging. https://github.com/rs/zerolog
+Use zerolog for logging. <https://github.com/rs/zerolog>
 
-For every log message use the following format,
-
-```
+For every log message use the following format,```
 log.Error().Str(uniqueCode, "1d0223bc").Err(err).Msg("error with getting user from database")
 ```
 
@@ -57,17 +52,14 @@ Where uniqueCode is a constant defined somewhere as `uniqueCode` and then for th
 
 This allows for quick finding of the line that produced an error or message.
 
-To confirm that unique codes are in fact unique use the following,
-
-```
+To confirm that unique codes are in fact unique use the following,```
 grep -r uniqueCode . | grep -o '"[a-z0-9]*"' | sort | uniq -c | grep -v '   1 '
+
 ```
 
 Which will return values if something is not actually unique.
 
-Setting logging up is pretty simple, with the following,
-
-```
+Setting logging up is pretty simple, with the following,```
 switch strings.ToLower(config.LogLevel) {
 case "debug":
     zerolog.SetGlobalLevel(zerolog.DebugLevel)
@@ -82,21 +74,16 @@ default:
 
 ### Building
 
-Use the following if targetting ARM Linux
-
-```
+Use the following if targetting ARM Linux```
 GOOS=linux GOARCH=arm64 go build -ldflags="-s -w"
+
 ```
 
 The build flag is there to reduce the size of the binary.
 
-
 ### Router
 
-Use https://github.com/gorilla/mux and be sure to set the following, 
-
-
-```
+Use <https://github.com/gorilla/mux> and be sure to set the following,```
 router := mux.NewRouter().StrictSlash(true)
 ```
 

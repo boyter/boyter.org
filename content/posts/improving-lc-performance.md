@@ -3,37 +3,35 @@ title: Improving lc's performance - Optimising the hell out of a Go application
 date: 2028-05-27
 ---
 
-https://blog.sourced.tech/post/gld/
+<https://blog.sourced.tech/post/gld/>
 
-Oh its on now. I can take a log of what I learn from optimising https://boyter.org/posts/sloc-cloc-code/ and apply it here.
+Oh its on now. I can take a log of what I learn from optimising <https://boyter.org/posts/sloc-cloc-code/> and apply it here.
 
-Called out publicly. Its on now anonymous internet person, this slight against my honour cannot be bourne! To be honest I was starting to add license checking into http://searchcode.com/ and http://searchcodeserver.com/ and was looking though how I implemented anyway.
+Called out publicly. Its on now anonymous internet person, this slight against my honour cannot be bourne! To be honest I was starting to add license checking into <http://searchcode.com/> and <http://searchcodeserver.com/> and was looking though how I implemented anyway.
 
-I my defence License Checker referred to as `lc` from now on was never designed to be fast. In fact as it came from a Python script any performance improvements were a result of moving from Go and not though me trying to be clever. The application is single threaded for a start. It was quite literally the first thing I have ever seriously attempted in Go. However since I spent time with Sloc Cloc and Code (`scc`) https://boyter.org/posts/sloc-cloc-code/ where the main goal was performance I felt that it was time to look at `lc` with fresh eyes and see what can be done.
+I my defence License Checker referred to as `lc` from now on was never designed to be fast. In fact as it came from a Python script any performance improvements were a result of moving from Go and not though me trying to be clever. The application is single threaded for a start. It was quite literally the first thing I have ever seriously attempted in Go. However since I spent time with Sloc Cloc and Code (`scc`) <https://boyter.org/posts/sloc-cloc-code/> where the main goal was performance I felt that it was time to look at `lc` with fresh eyes and see what can be done.
 
-One thing I did was download the source of https://blog.sourced.tech/post/gld/ referred to as `license-detector` from now on and had a trawl through the code in order to determine what they were doing differently (isn't free/open source software wonderful). The first thing I noticed was how they walk the file tree.
+One thing I did was download the source of <https://blog.sourced.tech/post/gld/> referred to as `license-detector` from now on and had a trawl through the code in order to determine what they were doing differently (isn't free/open source software wonderful). The first thing I noticed was how they walk the file tree.
 
 In the main.go entrypoint it has the following.
 
 {{<highlight go>}}
 wg.Add(nargs)
 for i, arg := range args {
-	go func(i int, arg string) {
-		defer wg.Done()
-		matches, err := process(arg)
-		res := result{Arg: arg, Matches: matches, Err: err, ErrStr: ""}
-		if err != nil {
-			res.ErrStr = err.Error()
-		}
-		results[i] = res
-	}(i, arg)
+ go func(i int, arg string) {
+  defer wg.Done()
+  matches, err := process(arg)
+  res := result{Arg: arg, Matches: matches, Err: err, ErrStr: ""}
+  if err != nil {
+   res.ErrStr = err.Error()
+  }
+  results[i] = res
+ }(i, arg)
 }
 wg.Wait()
 {{</highlight>}}
 
-So they are running parallel walkers through the directories of their tests. My first thought is that this is rather unfair to `lc` as it was build to produce SPDX outputs. Because of this requirement it is unable to walk through the tree in parallel. It needs to check for a license at the root, and only then is it possible to run it in parallel. The tree looks like so,
-
-```
+So they are running parallel walkers through the directories of their tests. My first thought is that this is rather unfair to `lc` as it was build to produce SPDX outputs. Because of this requirement it is unable to walk through the tree in parallel. It needs to check for a license at the root, and only then is it possible to run it in parallel. The tree looks like so,```
 dataset
 ├── 30DaysofSwift
 │   └── README.md
@@ -49,39 +47,37 @@ dataset
 ├── ace
 │   ├── LICENSE
 │   └── Readme.md
+
 ```
 
 Because they run `lc` at the root it checks the root directory for license files, where-as `license-detector` starts takes in `*` and expands that out to 956 directories launching a seperate go-routine for each one. This is a limitiation of how `lc` works. However it is worth noting that we can copy the trick. Check the root for license files and then spawn a goroutine for each directory. This is how `scc` works as well and something to keep in mind.
 
 With that handicap in mind I tried it out on a single directory to force it to be single threaded. The resulting test showed that all of the threading was done at this high level. In fact you can see it pretty easily by running it like so (I used `lc` as the repository to check)
 
-Checking the directory below,
-
-```
+Checking the directory below,```
 $ time license-detector lc
 ---
 license-detector lc  8.03s user 0.33s system 95% cpu 8.733 total
 ```
 
-And from inside the directory,
-
-```
+And from inside the directory,```
 $ time license-detector *
-license-detector *  10.78s user 0.64s system 101% cpu 11.228 total
+license-detector*  10.78s user 0.64s system 101% cpu 11.228 total
+
 ```
 
 The different runtimes is a huge tip off that one of them is running in parallel. The fact that the the one running in parallel was slower is a little bit of a suprise though.
 
 The other thing I wanted to check was the accuracy. This was especially important to me as I had spent considerable amounts of time trying to make `lc` as accurate as possible. From the blog post, the goals were,
 
- - Favor false positives over false negatives (target data mining instead of compliance).
- - Perform fast.
- - Detect as many licenses as possible on the hand-collected and hand-checked dataset of 1,000 top-starred repositories on GitHub.
- - Comply with SPDX licenses list and detection guidelines.
+- Favor false positives over false negatives (target data mining instead of compliance).
+- Perform fast.
+- Detect as many licenses as possible on the hand-collected and hand-checked dataset of 1,000 top-starred repositories on GitHub.
+- Comply with SPDX licenses list and detection guidelines.
 
 A further quote on the first `means that we should rather label a project with a slightly inaccurate license than miss its license completely`. Fair enough but against the goals I had for `lc`. I would rather accuracy. Also I think it might be possible to have both given a clever implementation.
 
-On other issue is that if you allow your program to have inaccurate results than just printing `MIT` for as many files as there are is a reasonable attempt as it is likely to correct at least 30% of the time https://www.blackducksoftware.com/top-open-source-licenses and will be as fast as anything.
+On other issue is that if you allow your program to have inaccurate results than just printing `MIT` for as many files as there are is a reasonable attempt as it is likely to correct at least 30% of the time <https://www.blackducksoftware.com/top-open-source-licenses> and will be as fast as anything.
 
 In the post the numbers sited for accuracy (and speed) are as such,
 
@@ -90,9 +86,7 @@ In the post the numbers sited for accuracy (and speed) are as such,
 | go-license-detector | 99% (897/902) | 13.5 |
 | lc | 88% (797/902) | 548 |
 
-The accuracy number is a little suspect based on the above. For a start it means that a license file was identified and some license attached to it even if it is incorrect. I was a little curious where the 879 number came from. It looked like it was related to how the speed tests were run,
-
-```
+The accuracy number is a little suspect based on the above. For a start it means that a license file was identified and some license attached to it even if it is incorrect. I was a little curious where the 879 number came from. It looked like it was related to how the speed tests were run,```
 $ time license-detector * | grep -Pzo '\n[-0-9a-zA-Z]+\n\tno license' | grep -Pa '\tno ' | wc -l
 62
 license-detector *  82.28s user 7.50s system 447% cpu 20.041 total
@@ -103,7 +97,7 @@ wc -l  0.00s user 0.00s system 0% cpu 20.028 total
 
 For `lc` it was run like so
 
-    $ time lc . | grep -vE 'NOASSERTION|----|Directory' | cut -d" " -f1 | sort | uniq | wc -l
+    time lc . | grep -vE 'NOASSERTION|----|Directory' | cut -d" " -f1 | sort | uniq | wc -l
 
 Given the above `license-detector` produces the number 62. Given that there are 958 repositories, and 902 with licenese files it appears that its taken by `958 - 62` which is actually 896, but the % of 99.4 percent is correct. However running a benchmark using `time` is not ideal unless you run it multiple times to avoid the OS cache kicking in. Its why I use `hyperfine` for these sort of things. The blog post does not mention anything about avoiding this trap, but I am going to assume it was done in good faith and run multiple times.
 
@@ -113,32 +107,32 @@ I did make one tweak though. I added `readme` to the regular expression matcher 
 
 {{<highlight go>}}
 var (
-	licenseFileNames = []string{
-		"li[cs]en[cs]e(s?)",
-		"legal",
-		"copy(left|right|ing)",
-		"unlicense",
-		"l?gpl([-_ v]?)(\\d\\.?\\d)?",
-		"bsd",
-		"mit",
-		"apache",
-		"readme",
-	}
-	licenseFileRe = regexp.MustCompile(
-		fmt.Sprintf("^(|.*[-_. ])(%s)(|[-_. ].*)$",
-			strings.Join(licenseFileNames, "|")))
+ licenseFileNames = []string{
+  "li[cs]en[cs]e(s?)",
+  "legal",
+  "copy(left|right|ing)",
+  "unlicense",
+  "l?gpl([-_ v]?)(\\d\\.?\\d)?",
+  "bsd",
+  "mit",
+  "apache",
+  "readme",
+ }
+ licenseFileRe = regexp.MustCompile(
+  fmt.Sprintf("^(|.*[-*. ])(%s)(|[-*. ].*)$",
+   strings.Join(licenseFileNames, "|")))
 )
 
 func findPossibleLicenseFiles(fileList []string) []string {
-	var possibleList []string
+ var possibleList []string
 
-	for _, filename := range fileList {
-		if licenseFileRe.MatchString(strings.ToLower(filename)) {
-			possibleList = append(possibleList, filename)
-		}
-	}
+ for _, filename := range fileList {
+  if licenseFileRe.MatchString(strings.ToLower(filename)) {
+   possibleList = append(possibleList, filename)
+  }
+ }
 
-	return possibleList
+ return possibleList
 }
 {{</highlight>}}
 
@@ -152,31 +146,25 @@ The reason this is slow is that it builds a concordance required for the vector 
 
 Lastly one other thing that bothered me is that `lc` as a SPDX tool calculates the MD5, SHA1 and SHA256 hash for everything it looks at. Since it was done in a fairly stupid way it is also slow as it iterates the bytes in the file at least 3 times just for the hashing algorithms. Again this was a stupid decision by me but it means the benchmark was not truly fair, as `lc` is doing considerably more work. For the benchmark that was run however there was no need to calculate these values at all as they are never displayed unless the output format is SPDX.
 
-
 With a fair idea of where the performance issues lets get started. I am not going to take this as far as I went with `scc` which was more about seeing how much performance I could squeeze out of Go but I am going to make this run a lot faster.
 
 At heart `lc` is a similar application to `scc`. Read through a directory, open the files, check for some strings and save those into a list. As such they share some optimisations that we can use.
 
 The first I thought about was the faster tree walk. However I don't think thats easily possible in this case. Because of the SPDX requirement I need `lc` to know what was in the previous directories. It might be possible to use a cache to solve this but we shall see.
 
-For scanning a file we can use the usual boyer-moore trick of skipping as many bytes as are in 'SPDX-License-Identifier:' to speed up checking for inline licenses. 
+For scanning a file we can use the usual boyer-moore trick of skipping as many bytes as are in 'SPDX-License-Identifier:' to speed up checking for inline licenses.
 
 Of course the other big thing to improve is that when I wrote lc I made it single threaded. Even just a simple fix there would improve performance by however many CPU's the user has.
 
-
 What I wanted to do is move to processing pipelines. So to start by building a very fast way of finding candidate files. The catch is the way licenses are identified. Because a licence file begins at the top of a directory and affects those below it means that I needed a way to keep this information and have it available to sub folders. We also need to look inside each directory as we process looking for new license files.
 
-
-Looking
-
-```
+Looking```
 $ time lc .
 lc .  196.88s user 1.64s system 106% cpu 3:07.12 total
-```
-
-to
 
 ```
+
+to```
 $ time ./lc .
 ./lc .  29.59s user 0.98s system 614% cpu 4.975 total
 ```
@@ -185,15 +173,12 @@ Not a bad improvement. It would appear that moving over to multi processing has 
 
 I also added in the tweak to remove the hash calculation if the output is going to be the default tabular.
 
-After tweaking the processing pipeline and running against the sample that sourced had on my local machine I had the following runtime.
-
-```
+After tweaking the processing pipeline and running against the sample that sourced had on my local machine I had the following runtime.```
 lc .  73.19s user 2.48s system 698% cpu 10.837 total
-```
-
-compared to license-detectors runtime of
 
 ```
+
+compared to license-detectors runtime of```
 license-detector *  47.34s user 4.30s system 519% cpu 9.935 total
 ```
 
@@ -201,7 +186,7 @@ Which is a good place to be. In fact there are a few things I can tweak in `lc` 
 
 For the benchmark we are comparing against this means lc is processing everything twice.
 
-However before that I decided to track down some bugs. The first being why were multiple keywords matching a single license. Each group of keywords is meant to be a unique ngram https://boyter.org/2017/05/identify-software-licenses-python-vector-space-search-ngram-keywords/ however when run the application was finding multiples. This should have never happened. The results should be close to binary, it either is a certain license because it contains the ngrams or not.
+However before that I decided to track down some bugs. The first being why were multiple keywords matching a single license. Each group of keywords is meant to be a unique ngram <https://boyter.org/2017/05/identify-software-licenses-python-vector-space-search-ngram-keywords/> however when run the application was finding multiples. This should have never happened. The results should be close to binary, it either is a certain license because it contains the ngrams or not.
 
 A quick look at the script to produce them indicated that there is indeed a bug in the way that the ngrams were calculated. When fixed however the script which was written in Python was horribly slow. I figured in for a penny in for a pound I would rewrite it in Go and get the benefits of a faster runtime along with some parallelism.
 
@@ -219,19 +204,17 @@ Now is the time to work on performance.
 
 Running against the sample directory
 
-	lc ~/Projects/lc  70.38s user 2.12s system 723% cpu 10.020 total
+ lc ~/Projects/lc  70.38s user 2.12s system 723% cpu 10.020 total
 
-	license-detector ~/Projects/lc/*  48.50s user 3.39s system 523% cpu 9.903 total
+ license-detector ~/Projects/lc/*  48.50s user 3.39s system 523% cpu 9.903 total
 
 Not much in it. However remember that lc is needlessly processing the file twice. Resolving that gives the following runtime.
 
-	lc ~/Projects/lc  42.58s user 2.34s system 683% cpu 6.569 total
+ lc ~/Projects/lc  42.58s user 2.34s system 683% cpu 6.569 total
 
 Great. From slightly slower to about 30% faster.
 
-There is one other tweak that could be done however. It would be far faster to check the top 20 most common licenses first, and only fall back to checking the rest if there was no match.
-
-```
+There is one other tweak that could be done however. It would be far faster to check the top 20 most common licenses first, and only fall back to checking the rest if there was no match.```
 (pprof) top20
 Showing nodes accounting for 28.63s, 94.86% of 30.18s total
 Dropped 175 nodes (cum <= 0.15s)
@@ -257,8 +240,8 @@ Showing top 20 nodes out of 48
      0.07s  0.23% 94.43%     25.33s 83.93%  github.com/boyter/lc/parsers.keywordGuessLicense.func1
      0.07s  0.23% 94.67%      0.17s  0.56%  runtime.scanobject
      0.06s   0.2% 94.86%      3.48s 11.53%  regexp.(*Regexp).replaceAll
-```
 
+```
 
 At some point it was time to look at accuracy. I decided I wanted to do at least two tests. The first would be to run the license detectors against the samples given from the SPDX project itself. All licence detectors should get close to 100% accuracy on this test.
 
@@ -266,15 +249,13 @@ Since I was at it I decided to check times in here as well. This is actually a m
 
 To do so a script was created `create_accuracy_checker.py` which takes the license file at the root of lc and uses that to build a collection of directories each named after the SPDX identifier name with a single licence file named `LICENSE.txt` in it. Keep in mind that the file which this is all based on contains my own inclusion of the fair source license which most other tools are unlikely to have.
 
-Then the second script `check_accuracy.py` as run. This collects the list of directories, and then calls each application to report on the licenses in each directory and determine if it was sucessful in identifying it or not. The number of correct guesses is returned and used to calculate success. 
+Then the second script `check_accuracy.py` as run. This collects the list of directories, and then calls each application to report on the licenses in each directory and determine if it was sucessful in identifying it or not. The number of correct guesses is returned and used to calculate success.
 
 I coded it to work with the following license detectors because I was able to get them to run.
 
-https://github.com/google/licenseclassifier
+<https://github.com/google/licenseclassifier>
 
-The results,
-
-```
+The results,```
 $ python check_accuracy.py
 count::370
 checking::lc
@@ -291,9 +272,9 @@ Don't pay too much attention to the time values. They are just taken using pytho
 
 What is more interesting is the correct count and percentage accuracy. Oddly enough the tool owned by Google is by far the least accurate. Most suprising to me is that `askalono` and `license-detector` despite being trained on the SDPX licenses are unable to break the 90% correct mark for this test. `lc` by contrast is 99.7% accurate and only misses out on a single license which is the Diffmark license. I don't know why but I do have this captured in the unit tests to be resolved at some point.
 
-This is a nice start, but what about the reference 1k dataset https://github.com/src-d/go-license-detector/blob/master/licensedb/dataset.zip that sourced used in their blog post.
+This is a nice start, but what about the reference 1k dataset <https://github.com/src-d/go-license-detector/blob/master/licensedb/dataset.zip> that sourced used in their blog post.
 
-This required a bit more work. Mostly because I don't know what license each should be. 
+This required a bit more work. Mostly because I don't know what license each should be.
 
 Firstly I needed to determine what licenses I should expect to come back for each. I briefly considered doing this by hand, before deciding to write a script that would run each of the tools against each folder and allow me to identify where disprenacies were. I could then manually check which ones were problematic and inspect them to determine the actual licence. With that information I could then determine what the true license was and get an idea about which tool is the most accurate.
 
@@ -306,15 +287,9 @@ Most confused licenses
 Most common licenses
 Least common licenses
 
-
-
-
 The nice thing about engineering solutions is that they quite often work. Not only that the work well. It might not be as fancy as using machine learning or other some other method but the results speak for themselves.
 
 What questions do people have? What license is this file? What licence is the product? What licenses are used in this project? What licenses do I think ths project is under?
-
-
-
 
 SCRATCHPAD
 

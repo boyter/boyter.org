@@ -74,7 +74,7 @@ Note. I do not have a PhD in applied search, nor do I work in the space professi
 					<section>
 						<h2>Searching code</h2>
 						<p>Trigrams</p>
-	<pre><code style="font-size: 18px; line-height: 1em;">searchcode ->	sea
+	```<code style="font-size: 18px; line-height: 1em;">searchcode ->	sea
 		ear
 		arc
 		rch
@@ -82,7 +82,7 @@ Note. I do not have a PhD in applied search, nor do I work in the space professi
 		hco
 		cod
 		ode
-	</code></pre>
+	</code>```
 						<aside class="notes">So code search is in some ways easier than text, because you don't need to try to understand language in the way that you do when dealing with english, japanese or russian. Splitting on chinese or japanese words for example is painful.
 
 	You can solve this problem in code using whats known as trigrams, where you break the text apart into characters of 3 and index those. You can actually use any number you want for ngrams, but trigrams work best when indexing source code.
@@ -96,7 +96,7 @@ Note. I do not have a PhD in applied search, nor do I work in the space professi
 					</section>
 					<section>
 					<h2>line 98: caisson.go</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">func Trigrams(text string) []string {
+```<code style="font-size: 14px; line-height: 1em;">func Trigrams(text string) []string {
 	var runes = []rune(text)
 
 	if len(runes) <= 2 {
@@ -114,7 +114,7 @@ Note. I do not have a PhD in applied search, nor do I work in the space professi
 
 	return ngrams
 }
-</code></pre>
+</code>```
 					<aside class="notes">
 					When you look at how this is called you will notice logic to split in spaces first and then index things larger than 3. This avoids indexing spaces which reduces the size of the bloom filter.
 					
@@ -128,9 +128,9 @@ Note. I do not have a PhD in applied search, nor do I work in the space professi
 				<section>
 					<h2>How to build an index</h2>
 					<p>Inverted index. Most common way to do it.</p>
-<pre><code style="font-size: 14px; line-height: 1em;">map[string][]struct{}
+```<code style="font-size: 14px; line-height: 1em;">map[string][]struct{}
 map[string][]int64{} 
-</code></pre>
+</code>```
 					<ul>
 						<li>Posting lists</li>
 						<li>Need to implement skip lists or compression on the posting lists at scale</li>
@@ -286,7 +286,7 @@ This is one one of the reasons this as an approach fell out of favor in the 70's
 				<section>
 						<h2>Add</h2>
 						<h2>line 187: caisson.go</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">var bloomFilter []uint64
+```<code style="font-size: 14px; line-height: 1em;">var bloomFilter []uint64
 
 func Add(item []bool) error {
 	if len(item) != BloomSize {
@@ -313,7 +313,7 @@ func Add(item []bool) error {
 
 	return nil
 }
-</code></pre>
+</code>```
 					<aside class="notes">So given that lets build out bloom filter by adding documents.
 					
 					What this does is takes in boolean slice, checks if its the right size, then checks if we need to add a new 
@@ -325,7 +325,7 @@ func Add(item []bool) error {
 				<section>
 					<h2>Optimise</h2>
 					<h2>line 187: caisson.go</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">1001010000001111000001111001101110100011111111111111111111111101
+```<code style="font-size: 14px; line-height: 1em;">1001010000001111000001111001101110100011111111111111111111111101
 0110111101101010111111111001001101110000000000010000100000000000
 0000000000001000000000000000000000000000000000000000000000000000
 0000000000001001000010110000001000100011111100000000000000000000
@@ -341,7 +341,7 @@ func Add(item []bool) error {
 0000000000001000001000010000000000110000001000000001100000001000
 0000000000001000001010010000000010100010000111111110101010100001
 0000000000001000000000010000011001100011111100000000000000000000
-</code></pre>
+</code>```
 					<aside class="notes">This is done so as to not waste memory. In the code its done by packing 64 documents into a bloom filter block or bucket. 
 
 So if a bloom filter had 16 bits, we keep 16 uint64's in a slice.
@@ -355,7 +355,7 @@ It also becomes very fast to walk this because its a simple for loop. And we all
 
 				<section>
 					<h2>searchcode...</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">
+```<code style="font-size: 14px; line-height: 1em;">
 ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
 │     caisson      ├─┬▶│  shard 512 bits  ├┬─▶│     bucket-1     │
 └──────────────────┘ │ └──────────────────┘│  └──────────────────┘
@@ -380,7 +380,7 @@ It also becomes very fast to walk this because its a simple for loop. And we all
                                            │  ┌──────────────────┐
                                            └─▶│     bucket-3     │
                                               └──────────────────┘
-</code></pre>
+</code>```
 					<aside class="notes">In searchcode its a little more in depth because it actually changes the size of the bloom filters based on the size of the document its indexing.
 
 What happens is when a document is indexed, it breaks it into unique trigrams, and then finds a bloom filter where it will be stored with a target bit density. If the document has a small amount of trigrams it ends up in a smaller bloom filter of say 256 bits, and if larger it goes into a larger one up to 4096.
@@ -395,7 +395,7 @@ Where shards represent a different bloom filter size, say 512 of 2048 bits, and 
 				<section>
 						<h2>Searching</h2>
 						<h2>line 20: caisson.go</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []uint32 {
+```<code style="font-size: 14px; line-height: 1em;">func Search(queryBits []uint64) []uint32 {
 	var results []uint32
 	var res uint64
 
@@ -426,7 +426,7 @@ Where shards represent a different bloom filter size, say 512 of 2048 bits, and 
 
 	return results
 }
-</code></pre>
+</code>```
 					<aside class="notes">With the index done we can now search.
 					
 					The core search algorithm is as follows. 
@@ -450,7 +450,7 @@ Once we have these id its a matter of reaching out to our primary data store, pu
 
 				<section>
 						<h2>Size</h2>
-<pre><code style="font-size: 14px; line-height: 1em;">$ scc --no-cocomo caisson.go
+```<code style="font-size: 14px; line-height: 1em;">$ scc --no-cocomo caisson.go
 ───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
 ───────────────────────────────────────────────────────────────────────────────
@@ -460,7 +460,7 @@ Total                        1       235       41        52      142         36
 ───────────────────────────────────────────────────────────────────────────────
 Processed 6746 bytes, 0.007 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
-</code></pre>
+</code>```
 					<aside class="notes">As you can see its a short bit of code. Only about 150 lines. I really encourage you to have a look and play with it.</aside>
 				</section>
 

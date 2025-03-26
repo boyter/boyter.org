@@ -16,28 +16,25 @@ You have to consider how you run these tools. They are something you run every n
 
 That said if you don't want to pay that penalty, say you are running scc over and over on different code bases, consider including it as a library.
 
-The other thing is that benchmarks that run and end this quickly are subject to a lot of system noise. Lets look at something a bit harder to really see whats up.
-
-```
+The other thing is that benchmarks that run and end this quickly are subject to a lot of system noise. Lets look at something a bit harder to really see whats up.```
 $ hyperfine 'scc valkey' 'stto valkey'
 Benchmark 1: scc valkey
   Time (mean ± σ):      51.0 ms ±   9.9 ms    [User: 180.5 ms, System: 93.8 ms]
   Range (min … max):    39.1 ms …  97.0 ms    29 runs
- 
+
 Benchmark 2: stto valkey
   Time (mean ± σ):     19.676 s ±  1.167 s    [User: 20.607 s, System: 33.182 s]
   Range (min … max):   18.715 s … 22.304 s    10 runs
- 
+
 Summary
   scc valkey ran
   385.53 ± 78.11 times faster than stto valkey
+
 ```
 
 Here I ran scc and stto over a checkout of the Valkey redis fork. Ouch. However I know that walking directories multi-threaded is especially painful when one argument is given like this, so lets try it again in the directory itself. Incidentally if the author of stto wants to solve this <https://github.com/boyter/gocodewalker> which will also give proper .gitignore support (more on this later). Note there is a to be gained performance uplift needed in that code, I just haven't gotten around to adding it yet. Want to help?
 
-So running inside the directory gives the following,
-
-```
+So running inside the directory gives the following,```
 $ hyperfine 'scc' 'stto'
 Benchmark 1: scc
   Time (mean ± σ):      56.9 ms ±   4.8 ms    [User: 194.8 ms, System: 100.9 ms]
@@ -58,10 +55,10 @@ Scc processed 1,545 files and 421,341 lines, while stto processed 536 files of 2
 
 I had previously created a Python script that creates folders with files that all counters count correctly and equally to ensure I can gauge performance correctly, with identical work between all counters. You can find it here <https://github.com/boyter/scc/blob/master/examples/performance_tests/create_performance_test.py>
 
-With that run lets try it out. Note that for each case I changed into the directory I was testing to overcome the afore mentioned issue.
+With that run lets try it out. Note that for each case I changed into the directory I was testing to overcome the afore mentioned issue.```
 
-```
 # Case 0
+
 # Create a directory thats quite deep and put 10000 files at the end
 
 Summary
@@ -69,6 +66,7 @@ Summary
     1.07 ± 0.07 times faster than stto
 
 # Case 1
+
 # Create a directory thats quite deep and put 100 files in each folder
 
 Summary
@@ -76,6 +74,7 @@ Summary
     1.02 ± 0.26 times faster than scc -c
 
 # Case 2
+
 # Create a directory that has a single level and put 10000 files in it
 
 Summary
@@ -83,6 +82,7 @@ Summary
     1.05 ± 0.09 times faster than stto
 
 # Case 3
+
 # Create a directory that has a two levels with 10000 directories in the second with a single file in each
 
 Summary
@@ -90,6 +90,7 @@ Summary
     1.11 ± 0.11 times faster than stto
 
 # Case 4
+
 # Create a directory that with 10 subdirectories and 1000 files in each
 
 Summary
@@ -97,6 +98,7 @@ Summary
     1.12 ± 0.14 times faster than stto
 
 # Case 5
+
 # Create a directory that with 20 subdirectories and 500 files in each
 
 Summary
@@ -104,6 +106,7 @@ Summary
     1.15 ± 0.22 times faster than stto
 
 # Case 6
+
 # Create a directory that with 5 subdirectories and 2000 files in each
 
 Summary
@@ -111,20 +114,20 @@ Summary
     1.07 ± 0.15 times faster than stto
 
 # Case 7
+
 # Create a directory that with 100 subdirectories and 100 files in each
 
 Summary
   scc -c ran
     1.32 ± 0.16 times faster than stto
+
 ```
 
 Cool, so close to a dead heat in one with stto being slightly faster and scc winning everything else. Note I didn't warm the this, so scc has to eat the performance penalty of waiting for the OS to warm the disk cache for this. I was in a hurry.
 
 How about accuracy? I did a quick check on the performance test python file, and the results from scc and stto were off... This was due to my guess of multiline strings, and a quick check of the stto repo shows this to be the case.
 
-Lastly how about .gitignore support?
-
-```
+Lastly how about .gitignore support?```
 $ tree -a
 .
 ├── 0
@@ -134,9 +137,7 @@ $ tree -a
 
 ```
 
-The .gitignore in this case just ignores the file in the directory. As such we expect 1 file to be counted. The result?
-
-```
+The .gitignore in this case just ignores the file in the directory. As such we expect 1 file to be counted. The result?```
 $ scc --no-cocomo --no-size
 ───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
@@ -153,8 +154,9 @@ $ stto
 | java      |          2 |             300 |  66 |        0 |  234 |
 +-----------+------------+-----------------+-----+----------+------+
 
-Stats:
+Stats
 =======
+
 Present working directory:  /Users/boyter/Documents/projects/performance_test/tmp
 Total sub-directories:     1
 Git initialized: false

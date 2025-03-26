@@ -3,7 +3,7 @@ title: Reading files quickly in Rust
 date: 2018-08-20
 ---
 
-I have been wanting to learn Rust for a while now. I did play with it some time back https://boyter.org/2017/09/working-rust/ for solving some of the project Euler problems and was reasonably impressed with how it turned out. However as I had no practical use for it at the time I ended up investing more time in Go. 
+I have been wanting to learn Rust for a while now. I did play with it some time back <https://boyter.org/2017/09/working-rust/> for solving some of the project Euler problems and was reasonably impressed with how it turned out. However as I had no practical use for it at the time I ended up investing more time in Go.
 
 Go as it turns out is a pretty decent language, and somewhat akin to Python in terms of getting things done. There is usually one obvious way to solve any problem. I was even very happy with the performance I was getting out of it. As such I took on building the fastest version of a count lines of code program I could using Go `scc` which you can read about at [sloc cloc and code](https://boyter.org/posts/sloc-cloc-code/).
 
@@ -29,39 +29,39 @@ Knowing already how to do so in Go I wrote a simple program using the fastest fi
 package main
 
 import (
-	"fmt"
-	"github.com/karrick/godirwalk"
-	"io/ioutil"
+ "fmt"
+ "github.com/karrick/godirwalk"
+ "io/ioutil"
 )
 
 func main() {
-	godirwalk.Walk("./", &godirwalk.Options{
-		Unsorted: true,
-		Callback: func(osPathname string, info *godirwalk.Dirent) error {
-			if !info.IsDir() {
-				content, err := ioutil.ReadFile(osPathname)
-				bytesCount := 0
+ godirwalk.Walk("./", &godirwalk.Options{
+  Unsorted: true,
+  Callback: func(osPathname string, info *godirwalk.Dirent) error {
+   if !info.IsDir() {
+    content, err := ioutil.ReadFile(osPathname)
+    bytesCount := 0
 
-				if err == nil {
-					for index := 0; index < len(content); index++ {
-						if content[index] == 0 {
-							fmt.Println(fmt.Sprintf("./%s bytes=%d binary file", osPathname, bytesCount))
-							break
-						}
+    if err == nil {
+     for index := 0; index < len(content); index++ {
+      if content[index] == 0 {
+       fmt.Println(fmt.Sprintf("./%s bytes=%d binary file", osPathname, bytesCount))
+       break
+      }
 
-						bytesCount++
-					}
+      bytesCount++
+     }
 
-					fmt.Println(fmt.Sprintf("./%s bytes=%d", osPathname, bytesCount))
-				}
-			}
+     fmt.Println(fmt.Sprintf("./%s bytes=%d", osPathname, bytesCount))
+    }
+   }
 
-			return nil
-		},
-		ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
-			return godirwalk.SkipNode
-		},
-	})
+   return nil
+  },
+  ErrorCallback: func(osPathname string, err error) godirwalk.ErrorAction {
+   return godirwalk.SkipNode
+  },
+ })
 }
 {{</highlight>}}
 
@@ -98,21 +98,21 @@ fn main() {
 }
 {{</highlight>}}
 
-I then compiled rust in release mode `cargo build --release` and to ensure they both produced the same output tried them both on the same directory with 172 files.
+I then compiled rust in release mode `cargo build --release` and to ensure they both produced the same output tried them both on the same directory with 172 files.```
 
-```
 # bboyter @ SurfaceBook2 in ~/Projects/rust on git:master x [15:36:35]
+
 $ ./go | sort | uniq | sha256sum
 0fcf9a1b41ef48053f1f2264c8ecc5076aff4d914d23ec82204e84fa22d6ea57  -
 
 # bboyter @ SurfaceBook2 in ~/Projects/rust on git:master x [15:38:11]
+
 $ ./rust | sort | uniq | sha256sum
 0fcf9a1b41ef48053f1f2264c8ecc5076aff4d914d23ec82204e84fa22d6ea57  -
-```
-
-With the above confirming they both produced the same results I went and did a quick benchmark,
 
 ```
+
+With the above confirming they both produced the same results I went and did a quick benchmark,```
 $ hyperfine './go' && hyperfine './rust'
 Benchmark #1: ./go
   Time (mean ± σ):      29.1 ms ±   2.4 ms    [User: 4.0 ms, System: 25.4 ms]
@@ -123,7 +123,7 @@ Benchmark #1: ./rust
   Range (min … max):    99.3 ms … 108.5 ms
 ```
 
-Clearly I have done something wrong here. It seems at odd that Go would be so much faster in this case. Looking again at the Rust docs its possible to read the file into a Vector from the start. Since the Go code actually reads the whole file into memory this seemed like a likely candidate as to the difference. 
+Clearly I have done something wrong here. It seems at odd that Go would be so much faster in this case. Looking again at the Rust docs its possible to read the file into a Vector from the start. Since the Go code actually reads the whole file into memory this seemed like a likely candidate as to the difference.
 
 In fact what is actually happening in the above Rust is that it is performing a syscall to fetch every byte. Changing it to be in line with the Go version is not too hard.
 
@@ -162,9 +162,7 @@ fn main() {
 }
 {{</highlight>}}
 
-And the benchmark after another release compile.
-
-```
+And the benchmark after another release compile.```
 Benchmark #1: ./go
   Time (mean ± σ):      28.6 ms ±   2.9 ms    [User: 3.8 ms, System: 28.5 ms]
   Range (min … max):    24.3 ms …  39.4 ms
@@ -172,13 +170,12 @@ Benchmark #1: ./go
 Benchmark #1: ./rust
   Time (mean ± σ):      45.0 ms ±   3.4 ms    [User: 1.7 ms, System: 41.4 ms]
   Range (min … max):    40.2 ms …  56.0 ms
+
 ```
 
 Thats a bit more like it. Seems like Rust is one of these languages that has a few ways to do things and if you do it the wrong way performance can suffer. It is better, but still not great though.
 
-Just to be sure my laptop was not influsing the result I created a Digital Ocean instance and tried it out on a copy of the linux kernel.
-
-```
+Just to be sure my laptop was not influsing the result I created a Digital Ocean instance and tried it out on a copy of the linux kernel.```
 root@ubuntu-c-16-sgp1-01:~/linux# hyperfine './go' && hyperfine './rust'
 Benchmark #1: ./go
   Time (mean ± σ):      1.131 s ±  0.022 s    [User: 708.5 ms, System: 534.7 ms]
@@ -189,9 +186,9 @@ Benchmark #1: ./rust
   Range (min … max):    2.198 s …  2.255 s
 ```
 
-Seems it was not a case of just my laptop being silly. Wondering if perhaps the first version was faster on linux I copied that up and ran it. It took even longer. 
+Seems it was not a case of just my laptop being silly. Wondering if perhaps the first version was faster on linux I copied that up and ran it. It took even longer.
 
-Not sure what was wrong I turned to the Rust subreddit https://www.reddit.com/r/rust/comments/98japr/newbie_to_rust_question_about_reading_files_from/
+Not sure what was wrong I turned to the Rust subreddit <https://www.reddit.com/r/rust/comments/98japr/newbie_to_rust_question_about_reading_files_from/>
 
 A few decent responses there I managed to modify my code to the below. The changes are to set up the buffer Vector outside the core loop and clear it and reload each run. It also removes the to_string calls (which made almost no difference).
 
@@ -235,9 +232,7 @@ fn main() -> Result<(), io::Error> {
 }
 {{</highlight>}}
 
-With the following runtime.
-
-```
+With the following runtime.```
 Benchmark #1: ./go
   Time (mean ± σ):      51.8 ms ±   4.0 ms    [User: 7.8 ms, System: 50.2 ms]
   Range (min … max):    46.8 ms …  66.2 ms
@@ -245,11 +240,10 @@ Benchmark #1: ./go
 Benchmark #1: ./rust
   Time (mean ± σ):      57.0 ms ±   3.7 ms    [User: 2.2 ms, System: 52.8 ms]
   Range (min … max):    51.7 ms …  68.0 ms
-```
-
-Which is much closer to what I was expecting. Incidentally this introduced me to the `?` [operator](https://stackoverflow.com/questions/42917566/what-is-this-question-mark-operator-about) in Rust. Trying it out on a much larger repository, which is a fresh checkout of the Linux kernel.
 
 ```
+
+Which is much closer to what I was expecting. Incidentally this introduced me to the `?` [operator](https://stackoverflow.com/questions/42917566/what-is-this-question-mark-operator-about) in Rust. Trying it out on a much larger repository, which is a fresh checkout of the Linux kernel.```
 Benchmark #1: ./go
   Time (mean ± σ):      1.661 s ±  0.046 s    [User: 1.069 s, System: 0.658 s]
   Range (min … max):    1.563 s …  1.722 s

@@ -5,7 +5,7 @@ date: 2023-04-11
 
 **TL;DR:** If you don't need to preserve order of the elements, sort the slice first and dedupe.
 
-I have been working on https://searchcode.com a fair bit recently, having been dealing with memory issues which were causing it to crash with out of memory exceptions. The cause of that was due to backtracking regular expressions in the syntax highlighter, which will be the subject of another post sometime.
+I have been working on <https://searchcode.com> a fair bit recently, having been dealing with memory issues which were causing it to crash with out of memory exceptions. The cause of that was due to backtracking regular expressions in the syntax highlighter, which will be the subject of another post sometime.
 
 As a result of the above I have spent a fair amount of time looking at memory profiles. One thing that stood out to me when doing so was a call I made to remove duplicate values from an array/slice of uint64. A fairly simple fuction that appeared often enough in the output.
 
@@ -13,16 +13,16 @@ I had previously written it to use a map, iterate through the array and remove t
 
 {{<highlight go>}}
 func DedupeUint64Old(elements []uint64) []uint64 {
-	encountered := map[uint64]bool{}
-	var result []uint64
-	for v := range elements {
-		if !encountered[elements[v]] == true {
-			encountered[elements[v]] = true
-			result = append(result, elements[v])
-		}
-	}
+ encountered := map[uint64]bool{}
+ var result []uint64
+ for v := range elements {
+  if !encountered[elements[v]] == true {
+   encountered[elements[v]] = true
+   result = append(result, elements[v])
+  }
+ }
 
-	return result
+ return result
 }
 {{</highlight>}}
 
@@ -32,131 +32,123 @@ Since I was trying to remove memory pressure I reimplemented it. By sorting the 
 
 {{<highlight go>}}
 func DedupeUint64(s []uint64) []uint64 {
-	if len(s) < 2 {
-		return s
-	}
-	sort.Slice(s, func(x, y int) bool { return s[x] > s[y] })
-	var e = 1
-	for i := 1; i < len(s); i++ {
-		if s[i] == s[i-1] {
-			continue
-		}
-		s[e] = s[i]
-		e++
-	}
+ if len(s) < 2 {
+  return s
+ }
+ sort.Slice(s, func(x, y int) bool { return s[x] > s[y] })
+ var e = 1
+ for i := 1; i < len(s); i++ {
+  if s[i] == s[i-1] {
+   continue
+  }
+  s[e] = s[i]
+  e++
+ }
 
-	return s[:e]
+ return s[:e]
 }
 {{</highlight>}}
 
-
 Wondering if I was about to lose some performance but save on the memory pressure I wrote a few benchmarks. I could then determine if it was worth it.
 
-The results for an array of length 10 with random integers.
-
-```
+The results for an array of length 10 with random integers.```
 BenchmarkDedupeUint64
-BenchmarkDedupeUint64-8             	 9487034	       126.9 ns/op
+BenchmarkDedupeUint64-8               9487034        126.9 ns/op
 BenchmarkDedupeUint64Old
-BenchmarkDedupeUint64Old-8   	         1939953	       618.0 ns/op
-```
-
-Another benchmark for much longer arrays with random integers.
+BenchmarkDedupeUint64Old-8             1939953        618.0 ns/op
 
 ```
+
+Another benchmark for much longer arrays with random integers.```
 BenchmarkDedupeUint64
-BenchmarkDedupeUint64-8             	   26967	    120721 ns/op
+BenchmarkDedupeUint64-8                 26967     120721 ns/op
 BenchmarkDedupeUint64Old
-BenchmarkDedupeUint64Old-8   	           10000	    814634 ns/op
+BenchmarkDedupeUint64Old-8               10000     814634 ns/op
 ```
 
-Benchmark where all of the elements in the array are the same IE input of more than one element but only one should be returned.
-
-```
+Benchmark where all of the elements in the array are the same IE input of more than one element but only one should be returned.```
 BenchmarkDedupeUint64Old
-BenchmarkDedupeUint64Old-8   	           10000	    109336 ns/op
+BenchmarkDedupeUint64Old-8               10000     109336 ns/op
 BenchmarkDedupeUint64
-BenchmarkDedupeUint64-8             	   10000	    112851 ns/op
-```
-
-Then a test with random ints picked from the first 100 (so there will be some duplicates).
+BenchmarkDedupeUint64-8                 10000     112851 ns/op
 
 ```
+
+Then a test with random ints picked from the first 100 (so there will be some duplicates).```
 BenchmarkDedupeUint64Old
-BenchmarkDedupeUint64Old-8   	           10000	    726771 ns/op
+BenchmarkDedupeUint64Old-8               10000     726771 ns/op
 BenchmarkDedupeUint64
-BenchmarkDedupeUint64-8             	   10000	    348226 ns/op
+BenchmarkDedupeUint64-8                 10000     348226 ns/op
 ```
 
-Finally a test where there are random numbers from the first 2048 ints.
-
-```
+Finally a test where there are random numbers from the first 2048 ints.```
 BenchmarkDedupeUint64Old
-BenchmarkDedupeUint64Old-8   	           10000	    437698 ns/op
+BenchmarkDedupeUint64Old-8               10000     437698 ns/op
 BenchmarkDedupeUint64
-BenchmarkDedupeUint64-8             	   10000	    126301 ns/op
+BenchmarkDedupeUint64-8                 10000     126301 ns/op
+
 ```
 
 Someone requested the benchmark code, and I have added what I think was as close as possible to what I had implemented below.
 
 {{<highlight go>}}
 func BenchmarkDedupeUint64_10(b *testing.B) {
-	r := rand.New(rand.NewSource(int64(b.N)))
-	rands := make([]uint64, 10)
-	for i := 0; i < 10; i++ {
-		rands[i] = r.Uint64()
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		DedupeUint64(rands)
-	}
+ r := rand.New(rand.NewSource(int64(b.N)))
+ rands := make([]uint64, 10)
+ for i := 0; i < 10; i++ {
+  rands[i] = r.Uint64()
+ }
+ b.ResetTimer()
+ for i := 0; i < b.N; i++ {
+  DedupeUint64(rands)
+ }
 }
 
 func BenchmarkDedupeUint64_AllRandom(b *testing.B) {
-	r := rand.New(rand.NewSource(int64(b.N)))
-	rands := make([]uint64, b.N)
-	for i := 0; i < b.N; i++ {
-		rands[i] = r.Uint64()
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		DedupeUint64(rands)
-	}
+ r := rand.New(rand.NewSource(int64(b.N)))
+ rands := make([]uint64, b.N)
+ for i := 0; i < b.N; i++ {
+  rands[i] = r.Uint64()
+ }
+ b.ResetTimer()
+ for i := 0; i < b.N; i++ {
+  DedupeUint64(rands)
+ }
 }
 
 func BenchmarkDedupeUint64_AllDuplicates(b *testing.B) {
-	rands := make([]uint64, b.N)
-	for i := 0; i < b.N; i++ {
-		rands[i] = 123
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		DedupeUint64(rands)
-	}
+ rands := make([]uint64, b.N)
+ for i := 0; i < b.N; i++ {
+  rands[i] = 123
+ }
+ b.ResetTimer()
+ for i := 0; i < b.N; i++ {
+  DedupeUint64(rands)
+ }
 }
 
 func BenchmarkDedupeUint64_Random100(b *testing.B) {
-	r := rand.New(rand.NewSource(int64(b.N)))
-	rands := make([]uint64, b.N)
-	for i := 0; i < b.N; i++ {
-		rands[i] = uint64(r.Int63n(100))
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		DedupeUint64(rands)
-	}
+ r := rand.New(rand.NewSource(int64(b.N)))
+ rands := make([]uint64, b.N)
+ for i := 0; i < b.N; i++ {
+  rands[i] = uint64(r.Int63n(100))
+ }
+ b.ResetTimer()
+ for i := 0; i < b.N; i++ {
+  DedupeUint64(rands)
+ }
 }
 
 func BenchmarkDedupeUint64_Random2048(b *testing.B) {
-	r := rand.New(rand.NewSource(int64(b.N)))
-	rands := make([]uint64, b.N)
-	for i := 0; i < b.N; i++ {
-		rands[i] = uint64(r.Int63n(2048))
-	}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		DedupeUint64(rands)
-	}
+ r := rand.New(rand.NewSource(int64(b.N)))
+ rands := make([]uint64, b.N)
+ for i := 0; i < b.N; i++ {
+  rands[i] = uint64(r.Int63n(2048))
+ }
+ b.ResetTimer()
+ for i := 0; i < b.N; i++ {
+  DedupeUint64(rands)
+ }
 }
 {{</highlight>}}
 
@@ -166,4 +158,4 @@ I thought this slightly interesting, and it was unexpected. Which is the case fo
 
 **EDIT** Someone wisely pointed out you should use a struct not interface which actually uses 16 bytes of space. Someone else wisely wanted to check my benchmark code which I have now included.
 
-Hacker News Comments: https://news.ycombinator.com/item?id=35536250#35537552
+Hacker News Comments: <https://news.ycombinator.com/item?id=35536250#35537552>

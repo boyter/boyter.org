@@ -16,7 +16,7 @@ The vector space isn't actually that complicated, but getting your head around h
 
 ```
   1 2 3  4
-+---------+                                                                 
++---------+
  012345678
 ```
 
@@ -27,7 +27,7 @@ The above is trying to show along the X axis the count of our word "boffin" that
    |
    +
   1X2 3  4
-+---------+                                                                 
++---------+
  012345678
 ```
 
@@ -38,27 +38,29 @@ What you can see quite clearly is that the closest document to our search (label
      |
      +
   1 2X3  4
-+---------+                                                                 
++---------+
  012345678
+
 ```
 
 You can now see that documents 2 and 3 are equally close to our search document, followed by document 1 and document 4.
 
-So far so good. We can work out how close any two "boffin" documents are and thus work out how relevent they are to a search. Let's add another word to our index. Our new documents are going to contain the words "boffin" and "head"
+So far so good. We can work out how close any two "boffin" documents are and thus work out how relevant they are to a search. Let's add another word to our index. Our new documents are going to contain the words "boffin" and "head"
 
 ```
- +                                                            
-8|     3                                                      
-7|                                                            
-6|                                                            
-5|                                                            
-4|        4                                                   
-3|                                                            
-2| 1                                                          
-1|                                                            
-0|   2                                                        
- +---------+                                                  
+ +
+8|     3
+7|
+6|
+5|
+4|        4
+3|
+2| 1
+1|
+0|   2
+ +---------+
   012345678
+
 ```
 
 Along the X axis we still have the count for the word boffin. However we also have a Y axis which represents the count of the term "head". Thus document 1 has 1 "boffin" word in it and 2 "head" words. You can also see that document 1 is closer to document 2 then document 3. Those of you who remember high school should remember this fellow.
@@ -73,13 +75,14 @@ Document 1 Distances
 1 to 2 = 2.83
 1 to 3 = 7.28
 1 to 4 = 7.21
+
 ```
 
 Assuming now that we had a search which had the terms "boffin head head" we can work out that the next most relevant documents would be 1 (exact match) followed by 2, 4 and 3, simply by calculating out the distances and ordering by them.
 
 So far so good. Now to the next step, adding a third dimension which would represent a third word. It follows the same basic idea as before, just we need to do a few extra calculations' to work out which documents are closest to each other. I am not going to do this here but im sure you can see how its a natural progression of the idea.
 
-Now the "magic" of the vector space is realising that if you can work out the distance between two documents when cast in 1d (first example) 2d (second example) and 3d space, you can continue to do so in 4d, 5d, 6d etc&#8230; You can't represent it in the physical world, but in the mathematical world it works perfectly. This is the trick behind the vector space model and how it calculates how close any documents are.
+Now the "magic" of the vector space is realizing that if you can work out the distance between two documents when cast in 1d (first example) 2d (second example) and 3d space, you can continue to do so in 4d, 5d, 6d etc&#8230; You can't represent it in the physical world, but in the mathematical world it works perfectly. This is the trick behind the vector space model and how it calculates how close any documents are.
 
 Additional reading over the topic can be found here,
 
@@ -97,7 +100,5 @@ Additional reading over the topic can be found here,
 
  [1]: http://www.wausita.com/captcha/
  [2]: http://la2600.org/talks/files/20040102/Vector_Space_Search_Engine_Theory.pdf
- [3]: http://dl.dropbox.com/u/21583935/searchcode/blog/pythagoras.jpg
- [4]: http://en.wikipedia.org/wiki/Pythagoras#Pythagorean_theorem
  [5]: http://www.thebananatree.org/vector_space/vector_space.html
  [6]: http://en.wikipedia.org/wiki/Vector_space_model

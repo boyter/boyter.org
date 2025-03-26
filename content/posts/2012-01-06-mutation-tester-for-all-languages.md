@@ -17,7 +17,7 @@ Unable to find one that met my requirements (or worked at all) I wrote the below
 Usage is pretty simple,
 
 ```
-python mutator.py DIRECTORY EXTENTION
+python mutator.py DIRECTORY EXTENSION
 ```
 
 Where directory is the directory you want to recursively target and extension is the file extension you want to target. You can get the code [here at github][1].

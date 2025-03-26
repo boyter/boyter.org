@@ -195,16 +195,16 @@
 					</section>
 					<section data-background="https://s3.amazonaws.com/hakim-static/reveal-js/image-placeholder.png">
 						<h2>Image Backgrounds</h2>
-						<pre><code class="hljs">&lt;section data-background="image.png"&gt;</code></pre>
+						```<code class="hljs">&lt;section data-background="image.png"&gt;</code>```
 					</section>
 					<section data-background="https://s3.amazonaws.com/hakim-static/reveal-js/image-placeholder.png" data-background-repeat="repeat" data-background-size="100px">
 						<h2>Tiled Backgrounds</h2>
-						<pre><code class="hljs" style="word-wrap: break-word;">&lt;section data-background="image.png" data-background-repeat="repeat" data-background-size="100px"&gt;</code></pre>
+						```<code class="hljs" style="word-wrap: break-word;">&lt;section data-background="image.png" data-background-repeat="repeat" data-background-size="100px"&gt;</code>```
 					</section>
 					<section data-background-video="https://s3.amazonaws.com/static.slid.es/site/homepage/v1/homepage-video-editor.mp4,https://s3.amazonaws.com/static.slid.es/site/homepage/v1/homepage-video-editor.webm" data-background-color="#000000">
 						<div style="background-color: rgba(0, 0, 0, 0.9); color: #fff; padding: 20px;">
 							<h2>Video Backgrounds</h2>
-							<pre><code class="hljs" style="word-wrap: break-word;">&lt;section data-background-video="video.mp4,video.webm"&gt;</code></pre>
+							```<code class="hljs" style="word-wrap: break-word;">&lt;section data-background-video="video.mp4,video.webm"&gt;</code>```
 						</div>
 					</section>
 					<section data-background="http://i.giphy.com/90F8aUepslB84.gif">
@@ -217,7 +217,7 @@
 					<p>
 						Different background transitions are available via the backgroundTransition option. This one's called "zoom".
 					</p>
-					<pre><code class="hljs">Reveal.configure({ backgroundTransition: 'zoom' })</code></pre>
+					```<code class="hljs">Reveal.configure({ backgroundTransition: 'zoom' })</code>```
 				</section>
 
 				<section data-transition="slide" data-background="#b5533c" data-background-transition="zoom">
@@ -225,12 +225,12 @@
 					<p>
 						You can override background transitions per-slide.
 					</p>
-					<pre><code class="hljs" style="word-wrap: break-word;">&lt;section data-background-transition="zoom"&gt;</code></pre>
+					```<code class="hljs" style="word-wrap: break-word;">&lt;section data-background-transition="zoom"&gt;</code>```
 				</section>
 
 				<section>
 					<h2>Pretty Code</h2>
-					<pre><code class="hljs" data-trim contenteditable>
+					```<code class="hljs" data-trim contenteditable>
 function linkify( selector ) {
   if( supports3DTransforms ) {
 
@@ -245,7 +245,7 @@ function linkify( selector ) {
     }
   }
 }
-					</code></pre>
+					</code>```
 					<p>Code syntax highlighting courtesy of <a href="http://softwaremaniacs.org/soft/highlight/en/description/">highlight.js</a>.</p>
 				</section>
 
@@ -347,11 +347,11 @@ function linkify( selector ) {
 					<p>
 						Additionally custom events can be triggered on a per slide basis by binding to the <code>data-state</code> name.
 					</p>
-					<pre><code class="javascript" data-trim contenteditable style="font-size: 18px;">
+					```<code class="javascript" data-trim contenteditable style="font-size: 18px;">
 Reveal.addEventListener( 'customevent', function() {
 	console.log( '"customevent" has fired' );
 } );
-					</code></pre>
+					</code>```
 				</section>
 
 				<section>

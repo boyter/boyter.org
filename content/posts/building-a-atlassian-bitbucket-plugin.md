@@ -7,11 +7,9 @@ So I thought I would try to implement Sloc Cloc and Code into Atlassian's Bitbuc
 
 To start vist the following and follow the instructions for your OS of choice. I am using Windows with WSL so I actually ended up following the guid for both Linux and Windows and can safely report both worked flawlessly.
 
-https://developer.atlassian.com/server/framework/atlassian-sdk/set-up-the-atlassian-plugin-sdk-and-build-a-project/
+<https://developer.atlassian.com/server/framework/atlassian-sdk/set-up-the-atlassian-plugin-sdk-and-build-a-project/>
 
-Keep in mind you need a good internet connection and some free time as this process takes a very long time to get started. Once setup it will create a series of command line tools for you to use which I have listed below.
-
-```
+Keep in mind you need a good internet connection and some free time as this process takes a very long time to get started. Once setup it will create a series of command line tools for you to use which I have listed below.```
 atlas-clean                                atlas-create-confluence-plugin             atlas-create-jira5-plugin                  atlas-debug                                atlas-remote-test
 atlas-clean.bat                            atlas-create-confluence-plugin.bat         atlas-create-jira5-plugin.bat              atlas-debug.bat                            atlas-remote-test.bat
 atlas-cli                                  atlas-create-confluence-plugin-module      atlas-create-jira-plugin                   atlas-help                                 atlas-ruin
@@ -28,6 +26,7 @@ atlas-create-bitbucket-plugin              atlas-create-home-zip                
 atlas-create-bitbucket-plugin.bat          atlas-create-home-zip.bat                  atlas-create-stash-plugin.bat              atlas-release.bat                          atlas-version.bat
 atlas-create-bitbucket-plugin-module       atlas-create-jira4-plugin                  atlas-create-stash-plugin-module           atlas-release-rollback
 atlas-create-bitbucket-plugin-module.bat   atlas-create-jira4-plugin.bat              atlas-create-stash-plugin-module.bat       atlas-release-rollback.bat
+
 ```
 
 `atlas-run` is probably the most useful and the one you are likely to use the most.
@@ -38,18 +37,13 @@ As far as I can tell atlas appears to be for the most part a collection of shell
 
 On linux they appear to just be links to `/usr/share/atlassian-plugin-sdk-8.0.7/bin` where the actual scripts live.
 
-
 As with any maven project, if you import anything through atlas commands or modifying the `pom.xml` file you will need to download new dependancies the moment you run another atlast command or through your IDE if you have maven support. As such you are going to have a better time with a solid internet connection.
 
+<https://developer.atlassian.com/server/bitbucket/how-tos/beginner-guide-to-bitbucket-server-plugin-development/>
 
-https://developer.atlassian.com/server/bitbucket/how-tos/beginner-guide-to-bitbucket-server-plugin-development/
+<https://developer.atlassian.com/server/bitbucket/tutorials-and-examples/decorating-the-user-account/>
 
+If you follow this article, I suggest after creating the plugin to run `atlas-run` and get everything working. This will download a bunch of dependancies and ensures you are ready to rock and roll which you can confirm by browsing to <http://localhost:7990/bitbucket/dashboard> when it has finished starting.
 
-
-https://developer.atlassian.com/server/bitbucket/tutorials-and-examples/decorating-the-user-account/
-
-If you follow this article, I suggest after creating the plugin to run `atlas-run` and get everything working. This will download a bunch of dependancies and ensures you are ready to rock and roll which you can confirm by browsing to http://localhost:7990/bitbucket/dashboard when it has finished starting.
-
-
-https://marketplace.atlassian.com/addons/app/bitbucket
-https://developer.atlassian.com/platform/marketplace/creating-a-marketplace-listing/
+<https://marketplace.atlassian.com/addons/app/bitbucket>
+<https://developer.atlassian.com/platform/marketplace/creating-a-marketplace-listing/>

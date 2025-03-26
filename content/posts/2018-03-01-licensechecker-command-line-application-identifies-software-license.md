@@ -32,9 +32,7 @@ It is reasonably well tested (always room for improvement), and while there are 
 
 Some sample outputs of what it can produce follow.
 
-Example output of licencechecker running against itself in tabular format while ignoring the .git, licenses and vendor directories
-
-<pre>$ lc -pbl .git,vendor,licenses -f tabular .
+Example output of licencechecker running against itself in tabular format while ignoring the .git, licenses and vendor directories```$ lc -pbl .git,vendor,licenses -f tabular .
 Directory            File                    License                            Confidence  Size
 .                    .gitignore              (MIT OR Unlicense)                 100.00%     275B
 .                    .travis.yml             (MIT OR Unlicense)                 100.00%     188B
@@ -61,38 +59,29 @@ parsers              helpers_test.go         (MIT OR Unlicense)                 
 parsers              structs.go              (MIT OR Unlicense)                 100.00%     679B
 scripts              build_database.py       (MIT OR Unlicense)                 100.00%     4.6K
 scripts              include.go              (MIT OR Unlicense)                 100.00%     951B
-</pre>
 
-To write out the results to a CSV file
+```
 
-<pre>$ lc --format csv -output licences.csv --pathblacklist .git,licenses,vendor .</pre>
+To write out the results to a CSV file```$ lc --format csv -output licences.csv --pathblacklist .git,licenses,vendor .```
 
-Or to a valid SPDX 2.1 file
+Or to a valid SPDX 2.1 file```$ lc -f spdx -o spdx_example.spdx --pbl .git,vendor,licenses -dn licensechecker -pn licensechecker .```
 
-<pre>$ lc -f spdx -o spdx_example.spdx --pbl .git,vendor,licenses -dn licensechecker -pn licensechecker .</pre>
+You can specify multiple directories as additional arguments and all results will be merged into a single output```$ lc -f tabular ./examples/identifier ./scripts```
 
-You can specify multiple directories as additional arguments and all results will be merged into a single output
-
-<pre>$ lc -f tabular ./examples/identifier ./scripts</pre>
-
-You can also specify files and directories as additional arguments
-
-<pre>$ lc -f tabular README.md LICENSE ./examples/identifier
+You can also specify files and directories as additional arguments```$ lc -f tabular README.md LICENSE ./examples/identifier
 Directory              File               License                        Confidence  Size
                        README.md          NOASSERTION                    100.00%     7.5K
                        LICENSE            MIT                            94.83%      1.1K
 ./examples/identifier  LICENSE            GPL-3.0+ AND MIT               95.40%      1K
 ./examples/identifier  LICENSE2           MIT AND GPL-3.0+               99.65%      35K
 ./examples/identifier  has_identifier.py  (MIT OR GPL-3.0+) AND GPL-2.0  100.00%     428B
-</pre>
+```
 
 What follows is a brief overview of how it currently works.
 
 Licencechecker works by comparing files against the list of licenses supplied by SPDX.org with the addition of the Fair Source License which I needed for my own purposes.
 
-First the command line arguments are checked to see if they refer to file or a folder. The difference between the two is that if it is a folder the whole folder is first scanned to see if it can identify any files which indicate a license. This can be controlled using the argument licensefiles which by default is set to look for filenames which contain the string license, copying or readme. For example the following files would be identified as potentially containing a license.
-
-<pre>LICENSE
+First the command line arguments are checked to see if they refer to file or a folder. The difference between the two is that if it is a folder the whole folder is first scanned to see if it can identify any files which indicate a license. This can be controlled using the argument licensefiles which by default is set to look for filenames which contain the string license, copying or readme. For example the following files would be identified as potentially containing a license.```LICENSE
     LICENCE
     license.md
     COPYING.txt
@@ -100,7 +89,8 @@ First the command line arguments are checked to see if they refer to file or a f
     COPYRIGHT
     UNLICENSE
     README.md
-</pre>
+
+```
 
 These are then taken as potential root licenses under which all other files would be marked against.
 
@@ -114,22 +104,19 @@ At the end the matches if any are sorted by and the most likely match is returne
 
 Note that only the most recent root licenses are taken into account, so if a project with a root license of MIT has a sub folder with a root license of GPL-2.0+ files in that root folder will be marked as being GPL-2.0+ and not MIT.
 
-For individual files the file is scanned in the same way but in addition is scanned for any SPDX indicators such as,
-
-<pre>SPDX-License-Identifier: GPL-3.0-only
-</pre>
+For individual files the file is scanned in the same way but in addition is scanned for any SPDX indicators such as,```SPDX-License-Identifier: GPL-3.0-only
+```
 
 Which will take precedence over any fuzzy matching. The indicators must match known SPDX licenses or they will be disregarded.
 
 When finished the license determined is based on the SDPX identifiers if present, fuzzy matching if over the confidence value and then the root license(s). If multiples match they are treated as an AND.
 
-Take for example,
-
-<pre>Directory              File               License                        Confidence  Size
+Take for example,```Directory              File               License                        Confidence  Size
 ./examples/identifier  has_identifier.py  (MIT OR GPL-3.0+) AND GPL-2.0  100.00%     428B
-</pre>
 
-The root licenses were identified as being both MIT and GPL-3.0+ however inside the code itself it has a GPL-2.0 identifier. As such the license of the file is either MIT AND GPL-2.0 OR GPL-3.0+ OR GPL-2.0. The indicator for the license like this is based on SPDX examples and as specified in the SPDX specification https://spdx.org/spdx-specification-21-web-version
+```
+
+The root licenses were identified as being both MIT and GPL-3.0+ however inside the code itself it has a GPL-2.0 identifier. As such the license of the file is either MIT AND GPL-2.0 OR GPL-3.0+ OR GPL-2.0. The indicator for the license like this is based on SPDX examples and as specified in the SPDX specification <https://spdx.org/spdx-specification-21-web-version>
 
 Currently licencechecker (lc) does not indicate if a project may be in violation of license requirements. Assuming there is some sort of license compatibility chart in the future this would be something to add at a later point.
 

@@ -15,13 +15,11 @@ So for our hosted app we have the DNS in GoDaddy. We are going to change over to
 
 DNS has what's known as records. These are mappings between the domain and various services the dommain uses. The main ones you need to worry about are A and MX. The A records are mapping between the domain name and an IPv4 address, so the way you actually connect to your server. MX records are used for email. You may eventually need to use AAAA records which are similar to A but map to an IPv6 record.
 
-To do this we need to find the name servers for Vultr. 
+To do this we need to find the name servers for Vultr.
 
 STEPS TO DO THE ABOVE HERE
 
-To verify the above you can use the `dig` command. Check that the domain you are digging points to the IP address of your server.
-
-```
+To verify the above you can use the `dig` command. Check that the domain you are digging points to the IP address of your server.```
 bboyter@Conan:~$ dig portfold.com
 
 ; <<>> DiG 9.10.3-P4-Ubuntu <<>> portfold.com
@@ -42,15 +40,15 @@ portfold.com.           1799    IN      A       128.199.81.117
 ;; SERVER: 127.0.0.1#53(127.0.0.1)
 ;; WHEN: Sat Aug 19 10:33:41 AEST 2017
 ;; MSG SIZE  rcvd: 57
+
 ```
 
-
-https://www.digitalocean.com/community/tutorials/how-to-configure-dns-round-robin-load-balancing-for-high-availability
-https://en.wikipedia.org/wiki/Round-robin_DNS
+<https://www.digitalocean.com/community/tutorials/how-to-configure-dns-round-robin-load-balancing-for-high-availability>
+<https://en.wikipedia.org/wiki/Round-robin_DNS>
 
 One thing that people commonly ask is how to ensure high availability using the above. The way you do this is to known as round robin DNS. You can set two A records to different IP addresses. When your browser makes a request to portfold.com after querying DNS it will get back two IP addresses. It will then try each one by one until it gets a response.
 
-Keep in mind this is not a perfect system. Taken from wikipedia `There is no standard procedure for deciding which address will be used by the requesting application, a few resolvers attempt to re-order the list to give priority to numerically "closer" networks. Some desktop clients do try alternate addresses after a connection timeout of 30–45 seconds. `
+Keep in mind this is not a perfect system. Taken from wikipedia `There is no standard procedure for deciding which address will be used by the requesting application, a few resolvers attempt to re-order the list to give priority to numerically "closer" networks. Some desktop clients do try alternate addresses after a connection timeout of 30–45 seconds.`
 
 So while you may have multiple machines that the application can connect two all your clients might end up on one anyway.
 
@@ -62,11 +60,9 @@ STEPS TO DO THE ABOVE HERE
 
 We then verify by logging into our exisiting email provider (gmail) and try sending an email though. Assuming you don't get a bounce back it probably worked and you should get an email within 30 minutes.
 
-
 What about www?
 
-It's often overlooked that when you went to www.somesite.com you were actually visiting the www subdomain of that site. The reason for this is mostly historical these days but at the time the internet was not mostly websites, but a mix of ftp, gopher, telnet and other protocols. To make it obvious it was a website the subdomain www was added. However its not actually required as you can serve a website from any domain, for example ftp.somesite.com if running a webserve is totally valid. That said while its not required it is very common to setup www and redirect it to your root domain, or the reverse where you redirect to the www domain (Google does this).
-
+It's often overlooked that when you went to <www.somesite.com> you were actually visiting the www subdomain of that site. The reason for this is mostly historical these days but at the time the internet was not mostly websites, but a mix of ftp, gopher, telnet and other protocols. To make it obvious it was a website the subdomain www was added. However its not actually required as you can serve a website from any domain, for example ftp.somesite.com if running a webserve is totally valid. That said while its not required it is very common to setup www and redirect it to your root domain, or the reverse where you redirect to the www domain (Google does this).
 
 Getting Secure
 -----------------------

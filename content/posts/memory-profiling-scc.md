@@ -3,15 +3,13 @@ title: Memory Profiling Sloc Cloc and Code - The goal to outperfom Tokei
 date: 2098-04-25
 ---
 
-https://blog.golang.org/profiling-go-programs
+<https://blog.golang.org/profiling-go-programs>
 
 Switch over to use `github.com/pkg/profile` and then `defer profile.Start(profile.MemProfile).Stop()` at the start
 
 all over commands work as expected
 
-![Memory Profile](/static/memory-profiling-scc/profile_start.png)
-
-```
+![Memory Profile](/static/memory-profiling-scc/profile_start.png)```
 (pprof) top20
 Showing nodes accounting for 821.33kB, 97.59% of 841.58kB total
 Dropped 10 nodes (cum <= 4.21kB)
@@ -37,9 +35,8 @@ Showing top 20 nodes out of 76
     4.52kB  0.54% 96.60%     8.71kB  1.03%  runtime.allocm
     4.32kB  0.51% 97.11%     4.32kB  0.51%  os.newFile
     4.05kB  0.48% 97.59%   259.71kB 30.86%  io/ioutil.readAll
-```
 
-```
+``````
 (pprof) list github.com/boyter/scc/processor.processConstants
 Total: 841.58kB
 ROUTINE ======================== github.com/boyter/scc/processor.processConstants in C:\Users\bboyter\Documents\Go\src\github.com\boyter\scc\processor\processor.go
@@ -105,13 +102,9 @@ ROUTINE ======================== github.com/boyter/scc/processor.processConstant
          .          .     96:                   StringChecks:      stringChecks,
 ```
 
-
 Looking at inuse objects
 
-    go tool pprof --inuse_objects
-
-
-```
+    go tool pprof --inuse_objects```
 (pprof) top20
 Showing nodes accounting for 5849, 99.59% of 5873 total
 Dropped 23 nodes (cum <= 29)
@@ -137,10 +130,8 @@ Showing top 20 nodes out of 63
         32  0.54% 99.37%         32  0.54%  github.com/boyter/scc/vendor/github.com/monochromegane/go-gitignore.(*patterns).add
         12   0.2% 99.57%         29  0.49%  os.openDir
          1 0.017% 99.59%       3740 63.68%  github.com/boyter/scc/vendor/github.com/karrick/godirwalk.Walk
-```
+``````
 
-
-```
 (pprof) list github.com/boyter/scc/processor.processConstants
 Total: 5873
 ROUTINE ======================== github.com/boyter/scc/processor.processConstants in C:\Users\bboyter\Documents\Go\src\github.com\boyter\scc\processor\processor.go
@@ -149,7 +140,7 @@ ROUTINE ======================== github.com/boyter/scc/processor.processConstant
          .          .     39:func processConstants() {
          .          .     40:   var database map[string]Language
          .          .     41:   startTime := makeTimestampMilli()
-         .          .     42:   data, _ := base64.StdEncoding.DecodeString(languages)
+         .          .     42:   data, _:= base64.StdEncoding.DecodeString(languages)
          .        268     43:   json.Unmarshal(data, &database)
          .          .     44:
          .          .     45:   if Trace {
@@ -158,7 +149,7 @@ ROUTINE ======================== github.com/boyter/scc/processor.processConstant
          .          .     48:
          .          .     49:   startTime = makeTimestampNano()
          .          .     50:   for name, value := range database {
-         .          .     51:           for _, ext := range value.Extensions {
+         .          .     51:           for_, ext := range value.Extensions {
          1          1     52:                   ExtensionToLanguage[ext] = name
          .          .     53:           }
          .          .     54:   }
@@ -180,7 +171,7 @@ ROUTINE ======================== github.com/boyter/scc/processor.processConstant
        345        345     70:                   complexityChecks = append(complexityChecks, []byte(v))
          .          .     71:           }
          .          .     72:
-         .          .     73:           for _, v := range value.LineComment {
+         .          .     73:           for_, v := range value.LineComment {
        257        257     74:                   singleLineComment = append(singleLineComment, []byte(v))
          .          .     75:           }
          .          .     76:
@@ -191,7 +182,7 @@ ROUTINE ======================== github.com/boyter/scc/processor.processConstant
          .          .     81:                   })
          .          .     82:           }
          .          .     83:
-         .          .     84:           for _, v := range value.Quotes {
+         .          .     84:           for_, v := range value.Quotes {
         85         85     85:                   stringChecks = append(stringChecks, OpenClose{
        256        256     86:                           Open:  []byte(v[0]),
          .          .     87:                           Close: []byte(v[1]),
@@ -204,6 +195,7 @@ ROUTINE ======================== github.com/boyter/scc/processor.processConstant
          .          .     94:                   MultiLineComment:  multiLineComment,
          .          .     95:                   SingleLineComment: singleLineComment,
          .          .     96:                   StringChecks:      stringChecks,
+
 ```
 
 The above is all wrong. It only becomes apparent because the repository tested was so small.

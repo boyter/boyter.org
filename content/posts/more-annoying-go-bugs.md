@@ -15,10 +15,9 @@ When a record is being edited a flag "This is being edited" is added to the reco
 
 I spent a lot of time looking through this. Then penny dropped when given some additional information "Oh we wanted to put a timestamp in the edit message".
 
-Tracking back to how this message is created, and we find this code.
-
-```
+Tracking back to how this message is created, and we find this code.```
 var EditedMessage string = time.Now().UTC().Format(time.RFC3339) + ": this record is being edited."
+
 ```
 
 A global variable, assigned on the start of the application. However this also means the time is set only once, on application startup.
@@ -37,16 +36,15 @@ As a result randomly you could clear flags, but not always, and sometimes when t
 
 Changing the EditedMessage global to be a function which returned a new time every time it was called, and then modifying the string comparison to look for "this record is being edited" rather than `==` to know which flags to remove.
 
-
 ### Problem #2
 
 Function which allowed pushing to an external system was pushing the files into the root location of a directory rather than a specific folder which was required. This functionality was working previously, and no code changes had been made to the components that dealt with this recently. It was working in production without issue, and running the same code as other places.
 
-### Diagnosis 
+### Diagnosis
 
 So this was a bit annoying to track down. This functionality has multiple touch points including durable queues, databases and multiple processes to read from and process each.
 
-Looking through the code showed that there were no errors thrown, confirmed by inspecting the logs, and the entries in the database were correct. It was only on learning the next day that there was a database change made, but only in one environment which had the problem that the penny dropped. 
+Looking through the code showed that there were no errors thrown, confirmed by inspecting the logs, and the entries in the database were correct. It was only on learning the next day that there was a database change made, but only in one environment which had the problem that the penny dropped.
 
 The process when determining where to push the file reads from a SQS queue, and then pulls the matching record from the database. The database is where the location is contained, and so I zeroed in on that as the problem.
 

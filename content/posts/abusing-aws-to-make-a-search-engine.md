@@ -5,9 +5,9 @@ date: 2021-09-14
 
 **TL/DR** I wrote an Australian search engine. You can view it at [bonzamate.com.au](https://bonzamate.com.au). It's interesting because it runs its own index, only indexes Australian websites, is written by an Australian for Australians and hosted in Australia. It's interesting technically because it runs almost entirely serverless using AWS Lambda, and uses bit slice signatures or bloom filters for the index similar to Bing. I also found out the most successful code I have ever written is PHP, despite never being a professional PHP developer.
 
-If you like the content below, register your interest for a book on the subject https://leanpub.com/creatingasearchenginefromscratch/
+If you like the content below, register your interest for a book on the subject <https://leanpub.com/creatingasearchenginefromscratch/>
 
-## The idea...
+## The idea
 
 So I am in the middle of building a new index for [searchcode](https://searchcode.com/) from scratch. No real reason beyond I find it interesting. I mentioned this to a work colleague and he asked why I didn't use AWS as generally for work everything lands there. I mentioned something to the effect that you needed a lot of persistent storage, or RAM to keep the index around which is prohibitively expensive. He mentioned perhaps using Lambda? And I responded its lack of persistance is a problem... At that point I trailed off. Something occurred to me.
 
@@ -23,7 +23,7 @@ The plan, is then to shard the index using individual lambda's. Each one holds a
 
 Why multiple lambdas? Well we are limited to 50 MB per lambda after it is zipped and deployed into AWS, so there is an upper limit on the size of the binary we can produce. However, we can scale out nicely to 1,000 lambda's (by default in a new AWS account) so assuming we can stuff ~100,000 documents into a lambda we could build an index containing ~100,000,000 pages, on the entry level AWS tier. Assuming Amazon didn't stop you it should be possible to grow this sort of index to billions of pages too as lambda does scale out to 10's of thousands of lambdas, although I suspect AWS might have something to say about that.
 
-The best part about this is that it solves one of the big problems with building a search engine. That problem is that you need to pay for a heap of machines to sit there doing nothing up till someone wants to perform a search. When you first start your search service nobody is using it so you have this massive upfront cost that sits idle most of the time. With lambda, you pay nothing unless it is being used. It also scales so, should you become popular overnight in theory AWS should deal with the load for you. 
+The best part about this is that it solves one of the big problems with building a search engine. That problem is that you need to pay for a heap of machines to sit there doing nothing up till someone wants to perform a search. When you first start your search service nobody is using it so you have this massive upfront cost that sits idle most of the time. With lambda, you pay nothing unless it is being used. It also scales so, should you become popular overnight in theory AWS should deal with the load for you.
 
 Another benefit here is that it means we don't need to pay for the storage of the index because we are abusing lambda's size limits to store the index.
 
@@ -31,25 +31,25 @@ AWS by default gives 75 GB of space to store all your lambda's, but remember how
 
 That should be enough for a proof of concept. In fact looking at the free tier limits of AWS...
 
-> AWS Lambda	1,000,000 free requests per month for AWS Lambda	
+> AWS Lambda 1,000,000 free requests per month for AWS Lambda
 >
-> AWS Lambda	400,000 seconds of compute time per month for AWS Lambda
+> AWS Lambda 400,000 seconds of compute time per month for AWS Lambda
 
-It will probably slide under the AWS Lambda Free tier as well for running even if we try many thousands of searches a month. If not, perhaps AWS will reach out and offer me some credits for being such a good sport, so I can iterate on the idea and build it out further. 
+It will probably slide under the AWS Lambda Free tier as well for running even if we try many thousands of searches a month. If not, perhaps AWS will reach out and offer me some credits for being such a good sport, so I can iterate on the idea and build it out further.
 
 Hey AWS, im doing something crazy! You know my number. So call me maybe?
 
-Incidentally searching around for prior art I found this blog post https://www.morling.dev/blog/how-i-built-a-serverless-search-for-my-blog/ about building something similar using lucene, but without storing the content and only on a single lambda.
+Incidentally searching around for prior art I found this blog post <https://www.morling.dev/blog/how-i-built-a-serverless-search-for-my-blog/> about building something similar using lucene, but without storing the content and only on a single lambda.
 
 As for why AWS? No real reason other than I am most familiar with their platform. This should work on Google or Azure, although its debatable if you should build a search engine on a platform that is run by a company that has its own. As for language choice, I went with Go. The reasons being I am familiar with it, its reasonably fast, but most importantly it compiles quickly, which is important when you are getting the compiler to do more work, and should speed up the index update time.
 
-## Proving the theory...
+## Proving the theory
 
 The first thing to do was see if this was even possible.
 
 So the first thing I considered was putting content directly into lambda's, and then brute force searching across that content. Considering our guess of storing ~100,000 items in a lambda, a modern CPU brute force string searching in memory should return in a few hundred milliseconds. Modern CPU's are very fast.
 
-So I tried it. I created a Go file with 100,000 strings in a slice, and then wrote a simple loop to run over that performing a search. I used a library I had written about a year ago https://github.com/boyter/go-string to do this which provides faster case insensitive search for string literals than regex.
+So I tried it. I created a Go file with 100,000 strings in a slice, and then wrote a simple loop to run over that performing a search. I used a library I had written about a year ago <https://github.com/boyter/go-string> to do this which provides faster case insensitive search for string literals than regex.
 
 Alas I underestimated how weak the CPU allotted to a lambda is, and searches took several seconds. Even increasing the RAM to improve the CPU allotment didn't really help. My fallback plan was to embed an index into the lambda, allowing for a quick scan over that index before looking at the content directly.
 
@@ -63,29 +63,29 @@ I did not use a frequency conscious bloom filter for this implementation, nor th
 
 {{<highlight go>}}
 func preSearch(queryBits []uint64) []uint64 {
-	var results []uint64
-	var res uint64
+ var results []uint64
+ var res uint64
 
-	for i := 0; i < len(bloomFilter); i += 2048 {
-		res = bloomFilter[queryBits[0]+uint64(i)]
+ for i := 0; i < len(bloomFilter); i += 2048 {
+  res = bloomFilter[queryBits[0]+uint64(i)]
 
-		for j := 1; j < len(queryBits); j++ {
-			res = res & bloomFilter[queryBits[j]+uint64(i)]
-			if res == 0 {
-				break
-			}
-		}
+  for j := 1; j < len(queryBits); j++ {
+   res = res & bloomFilter[queryBits[j]+uint64(i)]
+   if res == 0 {
+    break
+   }
+  }
 
-		if res != 0 {
-			for j := 0; j < 64; j++ {
-				if res&(1<<j) > 0 {
-					results = append(results, uint64(64*(i/2048)+j))
-				}
-			}
-		}
-	}
+  if res != 0 {
+   for j := 0; j < 64; j++ {
+    if res&(1<<j) > 0 {
+     results = append(results, uint64(64*(i/2048)+j))
+    }
+   }
+  }
+ }
 
-	return results
+ return results
 }
 {{</highlight>}}
 
@@ -93,15 +93,14 @@ The result of the above returns a list of interesting document id's which can th
 
 Once the candidates are picked, they are then processed using the brute force search I tried before, and those results are then passed off for ranking. Once that's done they are sorted, and the top 20 results have a snippet created and the result returned.
 
-Checking cloudwatch with the above implemented shows the following runtime's for a variety of searches being run, on a lambda allocated with 1024 MB of RAM.
+Checking cloudwatch with the above implemented shows the following runtime's for a variety of searches being run, on a lambda allocated with 1024 MB of RAM.```
+2021-09-13T14:33:34.114+10:00 Duration: 142.89 ms Billed Duration: 143 ms
+2021-09-13T14:34:26.427+10:00 Duration: 6.44 ms Billed Duration: 7 ms
+2021-09-13T14:35:15.851+10:00 Duration: 3.40 ms Billed Duration: 4 ms
+2021-09-13T14:35:28.738+10:00 Duration: 1.10 ms Billed Duration: 2 ms
+2021-09-13T14:35:44.979+10:00 Duration: 6.11 ms Billed Duration: 7 ms
+2021-09-13T14:36:15.089+10:00 Duration: 70.31 ms Billed Duration: 71 ms
 
-```
-2021-09-13T14:33:34.114+10:00	Duration: 142.89 ms Billed Duration: 143 ms
-2021-09-13T14:34:26.427+10:00	Duration: 6.44 ms Billed Duration: 7 ms 
-2021-09-13T14:35:15.851+10:00	Duration: 3.40 ms Billed Duration: 4 ms 
-2021-09-13T14:35:28.738+10:00	Duration: 1.10 ms Billed Duration: 2 ms 
-2021-09-13T14:35:44.979+10:00	Duration: 6.11 ms Billed Duration: 7 ms 
-2021-09-13T14:36:15.089+10:00	Duration: 70.31 ms Billed Duration: 71 ms 
 ```
 
 The larger times are usually caused by a search for a really common term, which produces more results, hence more work. This can actually be cut down with some early termination logic, which I implemented later. Keep in mind that the above times include ranking and snippet extraction as well and the result is ready to show to the user. Its not just the time for the core search.
@@ -116,13 +115,13 @@ So early termination was something I was aware of but never really investigated.
 
 Then I started reading about early termination algorithms and stumbled into a huge branch of research I never knew existed. A few links about it that I found are included below.
 
- - https://www.usenix.org/system/files/conference/atc18/atc18-gong.pdf
- - https://github.com/migotom/heavykeeper/blob/master/heavy_keeper.go
- - https://medium.com/@ariel.shtul/-what-is-tok-k-and-how-is-it-done-in-redisbloom-module-acd9316b35bd
- - https://www.microsoft.com/en-us/research/wp-content/uploads/2012/08/topk.pdf
- - http://fontoura.org/papers/lsdsir2013.pdf
- - https://www.researchgate.net/profile/Zemani-Imene-Mansouria/publication/333435122_MWAND_A_New_Early_Termination_Algorithm_for_Fast_and_Efficient_Query_Evaluation/links/5d0606a5a6fdcc39f11e3f0f/MWAND-A-New-Early-Termination-Algorithm-for-Fast-and-Efficient-Query-Evaluation.pdf
- - https://dl.acm.org/doi/10.1145/1060745.1060785
+- <https://www.usenix.org/system/files/conference/atc18/atc18-gong.pdf>
+- <https://github.com/migotom/heavykeeper/blob/master/heavy_keeper.go>
+- <https://medium.com/@ariel.shtul/-what-is-tok-k-and-how-is-it-done-in-redisbloom-module-acd9316b35bd>
+- <https://www.microsoft.com/en-us/research/wp-content/uploads/2012/08/topk.pdf>
+- <http://fontoura.org/papers/lsdsir2013.pdf>
+- <https://www.researchgate.net/profile/Zemani-Imene-Mansouria/publication/333435122_MWAND_A_New_Early_Termination_Algorithm_for_Fast_and_Efficient_Query_Evaluation/links/5d0606a5a6fdcc39f11e3f0f/MWAND-A-New-Early-Termination-Algorithm-for-Fast-and-Efficient-Query-Evaluation.pdf>
+- <https://dl.acm.org/doi/10.1145/1060745.1060785>
 
 I didn't know there was so much research about this. The more you learn the more you realise you know so little. Seems a lot of people get a Ph.D. out of research in this area. I quickly backed away from some of the techniques above (they are way above my pay grade) and just wrote a simple implementation to bail out once it had enough results, but with a guess as to how many would have been found had we kept going.
 
@@ -132,7 +131,7 @@ With this done, searches worked well enough in a lambda, returning in under 100 
 
 There are a heap of places to get a list of domains these days, which can serve as your seed list for crawling. People used to use DMOZ back in the day, but it no longer exists and its replacement does not offer downloads.
 
-The following page https://hackertarget.com/top-million-site-list-download/ has a list of places you can pull top domains from, helping build this out.
+The following page <https://hackertarget.com/top-million-site-list-download/> has a list of places you can pull top domains from, helping build this out.
 
 Considering all of the media search laws going on in Australia (at the time I started toying with this) I realized I can make this an Australian search engine, and maybe get some attention. There are some other advantages to this as well. The first being that because you need to have an ABN to get a .au domain it naturally lowers the amount of spam I would need to deal with. It also ensures that there is a subset of domains thats actually feasible to crawl in reasonable time frame.
 
@@ -140,13 +139,11 @@ So I picked a few sources from the lists in the above link, then pulled out all 
 
 ## Crawling Some Data
 
-Crawling 12 million domains seems like a trivial task, up until you try it. A million pages is something you should [taco bell program](http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html), but more than than needs a bit more work. You can read up on crawlers all over the internet, but I was using Go so this link https://flaviocopes.com/golang-web-crawler/ seemed fairly useful. Further reading suggested using http://go-colly.org as it is a fairly decent Go crawler library. I took this advice and wrote a quick crawler using Colly, but kept running in memory issues with it. Probably due to how I used it, and not a fault of the Colly itself. I tried for a bit to resolve the issues, but in the end gave up. Colly is one of those tools I think I need to learn more about, but in this case I just want to move on.
+Crawling 12 million domains seems like a trivial task, up until you try it. A million pages is something you should [taco bell program](http://widgetsandshit.com/teddziuba/2010/10/taco-bell-programming.html), but more than than needs a bit more work. You can read up on crawlers all over the internet, but I was using Go so this link <https://flaviocopes.com/golang-web-crawler/> seemed fairly useful. Further reading suggested using <http://go-colly.org> as it is a fairly decent Go crawler library. I took this advice and wrote a quick crawler using Colly, but kept running in memory issues with it. Probably due to how I used it, and not a fault of the Colly itself. I tried for a bit to resolve the issues, but in the end gave up. Colly is one of those tools I think I need to learn more about, but in this case I just want to move on.
 
 So I wrote a custom crawler. I locked it to only downloading for a single domain I supplied. I then had it process the documents as it went to extract out the content I wanted to index. This content I kept as a collection of JSON documents dumped one per line into a file, which I then stuffed into a tar.gz file for later processing and indexing.
 
-An example prettified truncated document follows. The content you see there is what is actually passed into the indexer, and potentially stored in the index. 
-
-```
+An example prettified truncated document follows. The content you see there is what is actually passed into the indexer, and potentially stored in the index.```
 {
     "url": "https://engineering.kablamo.com.au/",
     "title": [
@@ -171,7 +168,7 @@ An example prettified truncated document follows. The content you see there is w
 
 There are a few problems with this technique. The first is that by discarding the HTML if you have a bug in your processing code you need to re-crawl the page. It also adds more overhead to the crawler since part of the index process is is being done in the crawler. Crawlers are normally very CPU light but bandwidth heavy.
 
-The advantage however is that the indexing can be a little faster, and it reduces the disk space needed to store content before indexing. The disk space reduction is not trivial, and can be something like 1000x depending on the content on the page. For the samples I tired it was a 50x reduction on average. 
+The advantage however is that the indexing can be a little faster, and it reduces the disk space needed to store content before indexing. The disk space reduction is not trivial, and can be something like 1000x depending on the content on the page. For the samples I tired it was a 50x reduction on average.
 
 I then set my crawlers off, firstly going for breadth by getting a few  and getting as many of those 12 million domains as I could, and then again with depth to pull more pages. With the files ready I was ready to index. I ran the crawlers mostly on my own desktop, and on one of the servers for searchcode.
 
@@ -179,7 +176,7 @@ Crawling incidentally I think is the biggest issue with making a new search engi
 
 ## Ranking
 
-Ranking is one of those secret sauce things that makes or breaks a search engine. I didn't want to overthink this so I implemented [BM25 ranking](https://en.wikipedia.org/wiki/Okapi_BM25) for the main ranking calculation. I actually implemented TF/IDF as well but generally the results were similar for the things I tried. I then added in some logic to rank matches in domains/urls and titles higher than content, penalize smaller matching documents and reward longer ones (to offset the bias thats in BM25). 
+Ranking is one of those secret sauce things that makes or breaks a search engine. I didn't want to overthink this so I implemented [BM25 ranking](https://en.wikipedia.org/wiki/Okapi_BM25) for the main ranking calculation. I actually implemented TF/IDF as well but generally the results were similar for the things I tried. I then added in some logic to rank matches in domains/urls and titles higher than content, penalize smaller matching documents and reward longer ones (to offset the bias thats in BM25).
 
 Ranking using BM25 or TF/IDF however means you need to store global document frequencies. You also need average document length for BM25. So those are two other things that need to be written into the index. Thankfully they can be calculated pretty easily at index time.
 
@@ -203,7 +200,7 @@ for word, wordCount := range res.matchWords {
 }
 {{</highlight>}}
 
-Of course everyone knows that PageRank by Google is what propelled Google to the top of the search heap... Actually I don't know how true that is and I suspect that speed and not being a portal helped, but regardless, pagerank requires processing your documents multiple times to produce the rank score for the domain or page. It takes a long time to do this, and while the whole thing beautiful mathematically, its not very practical especially for a single person working on this in their spare time. 
+Of course everyone knows that PageRank by Google is what propelled Google to the top of the search heap... Actually I don't know how true that is and I suspect that speed and not being a portal helped, but regardless, pagerank requires processing your documents multiple times to produce the rank score for the domain or page. It takes a long time to do this, and while the whole thing beautiful mathematically, its not very practical especially for a single person working on this in their spare time.
 
 Can we find an easier way to do this? Some shortcut? Well yes. Turns out that all of the document sources where I got the domains, list those domains in order of popularity. So I used this value to influence the score giving a "cheap" version of pagerank. Adding the domain popularity into the index when building it provides some pre-ranking of documents.
 
@@ -251,26 +248,26 @@ What's interesting to me about this is that Relevanssi (as wordpress plugin) has
 
 Anyway I had already ruled out this code as not being good enough. As such I expanded my search. Here is a collection of links I found relevant to this specific problem, and a cached version as PDF's just in case there is some link rot and you cannot get that document you want.
 
- - [Practical Relevance Ranking for 11 Million Books, Part 3: Document Length Normalization.](https://www.hathitrust.org/blogs/large-scale-search/practical-relevance-ranking-11-million-books-part-3-document-length-normali) [[Cached PDF]](</static/abusing-aws-lambda/snippet/Practical Relevance Ranking for 11 Million Books, Part 3_ Docum... _ HathiTrust Digital Library.pdf>)
- - [UnifiedHighlighter.java](https://github.com/apache/lucene-solr/blob/master/lucene/highlighter/src/java/org/apache/lucene/search/uhighlight/UnifiedHighlighter.java) [[Cached PDF]](</static/abusing-aws-lambda/snippet/lucene-solr_UnifiedHighlighter.java at master · apache_lucene-solr.pdf>)
- - [Package org.apache.lucene.search.vectorhighlight](https://lucene.apache.org/core/7_0_0/highlighter/org/apache/lucene/search/vectorhighlight/package-summary.html) [[Cached PDF]](</static/abusing-aws-lambda/snippet/org.apache.lucene.search.vectorhighlight Lucene 7.0.0 API.pdf>)
- - [How scoring works in Elasticsearch](https://www.compose.com/articles/how-scoring-works-in-elasticsearch/) [[Cached PDF]](</static/abusing-aws-lambda/snippet/How scoring works in Elasticsearch - Compose Articles.pdf>)
- - [6 not so obvious things about Elasticsearch](https://blog.softwaremill.com/6-not-so-obvious-things-about-elasticsearch-422491494aa4) [[Cached PDF]](</static/abusing-aws-lambda/snippet/6 not so obvious things about Elasticsearch - SoftwareMill Tech Blog.pdf>)
- - [Elasticsearch unified-highlighter doc reference](https://github.com/elastic/elasticsearch/blob/master/docs/reference/search/request/highlighting.asciidoc#unified-highlighter) [[Cached PDF]](</static/abusing-aws-lambda/snippet/elasticsearch_highlighting.asciidoc at master · elastic_elasticsearch>)
- - [Elasticsearch unified-highligher reference](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/search-request-highlighting.html#unified-highlighter) [[Cached PDF]](</static/abusing-aws-lambda/snippet/Highlighting _ Elasticsearch Reference [6.8] _ Elastic.pdf>)
- - [Extracting Relevant Snippets from Web Documents through Language Model based Text Segmentation](http://www.public.asu.edu/~candan/papers/wi07.pdf) [[Cached PDF]](</static/abusing-aws-lambda/snippet/wi07.pdf>)
- - [Keyword Extraction for Social Snippets](https://faculty.ist.psu.edu/jessieli/Publications/WWW10-ZLi-KeywordExtract.pdf) [[Cached PDF]](</static/abusing-aws-lambda/snippet/WWW10-ZLi-KeywordExtract.pdf>)
- - [Fast Generation of Result Snippets in Web Search](https://www.researchgate.net/publication/221299008_Fast_generation_of_result_snippets_in_web_search) [[Cached PDF]](</static/abusing-aws-lambda/snippet/Fast_generation_of_result_snippets_in_web_search.pdf>)
- - [A LITERATURE STUDY OF EMBEDDINGS ON SOURCE CODE](https://arxiv.org/pdf/1904.03061.pdf) [[Cached PDF]](</static/abusing-aws-lambda/snippet/1904.03061.pdf>)
- - [The smallest relevant text snippet for search results](https://web.archive.org/web/20141230232527/http://rcrezende.blogspot.com/2010/08/smallest-relevant-text-snippet-for.html) [[Cached PDF]](</static/abusing-aws-lambda/snippet/RCRezende Blog_ The smallest relevant text snippet for search results.pdf>)
- - [C# Finding relevant document snippets for search result display](https://stackoverflow.com/questions/282002/c-sharp-finding-relevant-document-snippets-for-search-result-display) [[Cached PDF]](</static/abusing-aws-lambda/snippet/algorithm - C# Finding relevant document snippets for search result display - Stack Overflow.pdf>)
- - [Given a document, select a relevant snippet
- ](https://stackoverflow.com/questions/2829303/given-a-document-select-a-relevant-snippet) [[Cached PDF]](</static/abusing-aws-lambda/snippet/statistics - Given a document, select a relevant snippet - Stack Overflow.pdf>)
- - [Reverse Engineering Sublime Text’s Fuzzy Match](https://www.forrestthewoods.com/blog/reverse_engineering_sublime_texts_fuzzy_match/) [[Cached PDF]](</static/abusing-aws-lambda/snippet/Reverse Engineering Sublime Text’s Fuzzy Match - ForrestTheWoods.pdf>)
+- [Practical Relevance Ranking for 11 Million Books, Part 3: Document Length Normalization.](https://www.hathitrust.org/blogs/large-scale-search/practical-relevance-ranking-11-million-books-part-3-document-length-normali) [[Cached PDF]](</static/abusing-aws-lambda/snippet/Practical Relevance Ranking for 11 Million Books, Part 3_ Docum... _ HathiTrust Digital Library.pdf>)
+- [UnifiedHighlighter.java](https://github.com/apache/lucene-solr/blob/master/lucene/highlighter/src/java/org/apache/lucene/search/uhighlight/UnifiedHighlighter.java) [[Cached PDF]](</static/abusing-aws-lambda/snippet/lucene-solr_UnifiedHighlighter.java at master · apache_lucene-solr.pdf>)
+- [Package org.apache.lucene.search.vectorhighlight](https://lucene.apache.org/core/7_0_0/highlighter/org/apache/lucene/search/vectorhighlight/package-summary.html) [[Cached PDF]](</static/abusing-aws-lambda/snippet/org.apache.lucene.search.vectorhighlight Lucene 7.0.0 API.pdf>)
+- [How scoring works in Elasticsearch](https://www.compose.com/articles/how-scoring-works-in-elasticsearch/) [[Cached PDF]](</static/abusing-aws-lambda/snippet/How scoring works in Elasticsearch - Compose Articles.pdf>)
+- [6 not so obvious things about Elasticsearch](https://blog.softwaremill.com/6-not-so-obvious-things-about-elasticsearch-422491494aa4) [[Cached PDF]](</static/abusing-aws-lambda/snippet/6 not so obvious things about Elasticsearch - SoftwareMill Tech Blog.pdf>)
+- [Elasticsearch unified-highlighter doc reference](https://github.com/elastic/elasticsearch/blob/master/docs/reference/search/request/highlighting.asciidoc#unified-highlighter) [[Cached PDF]](</static/abusing-aws-lambda/snippet/elasticsearch_highlighting.asciidoc at master · elastic_elasticsearch>)
+- [Elasticsearch unified-highligher reference](https://www.elastic.co/guide/en/elasticsearch/reference/6.8/search-request-highlighting.html#unified-highlighter) [[Cached PDF]](</static/abusing-aws-lambda/snippet/Highlighting _ Elasticsearch Reference [6.8] _ Elastic.pdf>)
+- [Extracting Relevant Snippets from Web Documents through Language Model based Text Segmentation](http://www.public.asu.edu/~candan/papers/wi07.pdf) [[Cached PDF]](</static/abusing-aws-lambda/snippet/wi07.pdf>)
+- [Keyword Extraction for Social Snippets](https://faculty.ist.psu.edu/jessieli/Publications/WWW10-ZLi-KeywordExtract.pdf) [[Cached PDF]](</static/abusing-aws-lambda/snippet/WWW10-ZLi-KeywordExtract.pdf>)
+- [Fast Generation of Result Snippets in Web Search](https://www.researchgate.net/publication/221299008_Fast_generation_of_result_snippets_in_web_search) [[Cached PDF]](</static/abusing-aws-lambda/snippet/Fast_generation_of_result_snippets_in_web_search.pdf>)
+- [A LITERATURE STUDY OF EMBEDDINGS ON SOURCE CODE](https://arxiv.org/pdf/1904.03061.pdf) [[Cached PDF]](</static/abusing-aws-lambda/snippet/1904.03061.pdf>)
+- [The smallest relevant text snippet for search results](https://web.archive.org/web/20141230232527/http://rcrezende.blogspot.com/2010/08/smallest-relevant-text-snippet-for.html) [[Cached PDF]](</static/abusing-aws-lambda/snippet/RCRezende Blog_ The smallest relevant text snippet for search results.pdf>)
+- [C# Finding relevant document snippets for search result display](https://stackoverflow.com/questions/282002/c-sharp-finding-relevant-document-snippets-for-search-result-display) [[Cached PDF]](</static/abusing-aws-lambda/snippet/algorithm - C# Finding relevant document snippets for search result display - Stack Overflow.pdf>)
+- [Given a document, select a relevant snippet
+](https://stackoverflow.com/questions/2829303/given-a-document-select-a-relevant-snippet) [[Cached PDF]](</static/abusing-aws-lambda/snippet/statistics - Given a document, select a relevant snippet - Stack Overflow.pdf>)
+- [Reverse Engineering Sublime Text’s Fuzzy Match](https://www.forrestthewoods.com/blog/reverse_engineering_sublime_texts_fuzzy_match/) [[Cached PDF]](</static/abusing-aws-lambda/snippet/Reverse Engineering Sublime Text’s Fuzzy Match - ForrestTheWoods.pdf>)
 
 Of the above documents the most promising to turned out to be the information I found on rcrezende.blogspot.com and the source code of Lucene. I took some of the ideas from the descriptions of both and then implemented an algorithm fused with the scoring techniques of the reverse engineered Sublime Text fuzzy matching.
 
-I had previously worked on this for another project (which I should finish one of these days). The algorithm is fairly well documented so for those interested please look at the source code https://github.com/boyter/cs/blob/master/processor/snippet.go to see how it works in depth. It's not 100% the same as the one I used, but very close.
+I had previously worked on this for another project (which I should finish one of these days). The algorithm is fairly well documented so for those interested please look at the source code <https://github.com/boyter/cs/blob/master/processor/snippet.go> to see how it works in depth. It's not 100% the same as the one I used, but very close.
 
 The results for our sample search "ten thousand a year" returns the below snippet,
 
@@ -313,12 +310,12 @@ for _, v := range bloom {
 }
 sb.WriteString("}")
 
-_, _ = file.WriteString(fmt.Sprintf(`{Url:"%s",Title:"%s",Content:"%s",Score:%.4f,Adult:%t},`,
-			res.Url,
-			res.Title,
-			res.Content,
-			res.Score,
-			res.Adult))
+*,* = file.WriteString(fmt.Sprintf(`{Url:"%s",Title:"%s",Content:"%s",Score:%.4f,Adult:%t},`,
+   res.Url,
+   res.Title,
+   res.Content,
+   res.Score,
+   res.Adult))
 {{</highlight>}}
 
 Once the block is written, it is then compiled and uploaded into AWS replacing the previous lambda. If its a new lambda, its deployed into AWS and the controller lambda has its environment variables update to know about the new lambda, at which point new searches will hit it and the index grows.
@@ -327,7 +324,7 @@ The result? Something like the below, where you can see multiple lambda's deploy
 
 ![aws lambda search deployment](/static/abusing-aws-lambda/deployment.png)
 
-There is some room for improvement here to make more optimal use of the lambda size. I purposely made the indexer not push the limits as it's size estimation is a little off and it can make mistakes. As such it tends to aim for lambdas about 40 MB in size. This should be easy to resolve when I get the time and should allow the number of documents stored in each lambda to increase by about 15%. This would also lower the number of deployed lambdas. 
+There is some room for improvement here to make more optimal use of the lambda size. I purposely made the indexer not push the limits as it's size estimation is a little off and it can make mistakes. As such it tends to aim for lambdas about 40 MB in size. This should be easy to resolve when I get the time and should allow the number of documents stored in each lambda to increase by about 15%. This would also lower the number of deployed lambdas.
 
 ## Putting it all together
 
@@ -350,7 +347,7 @@ Lastly I also needed a website to serve it all up. I want to protect index itsel
 
 Since I run my blog (this one) on a VPS in Australia, and use Caddy as the main server, I just added a new entry there and pointed DNS at it. I also added some IP restrictions (want to avoid being spammed) and a cheap cache for repeated queries.
 
-Seeing as I was going to the effort, I also added a quick info box output similar to the ones you see on Bing/Google/DuckDuckGo which present some information for you based on wikipedia entries. Same idea as the workers, with the content compiled into a binary. 
+Seeing as I was going to the effort, I also added a quick info box output similar to the ones you see on Bing/Google/DuckDuckGo which present some information for you based on wikipedia entries. Same idea as the workers, with the content compiled into a binary.
 
 I pulled down the wikipedia abstracts data set and then kept anything mentioning Australian content. The abstracts data set is actually pretty bad with lots of broken content so I had to put some effort in to filter that out. I have plans to try processing wikipedia itself at some point to produce this in the future.
 
@@ -374,7 +371,7 @@ Anyway you can try the result for yourself at [Bonzamate](https://bonzamate.com.
 
 For those who don't speak Aussie it means "first rate" or "excellent" + mate. It's something you might say to your buddies.
 
-> "How was the footy?" 
+> "How was the footy?"
 >
 > "It was bonza mate!"
 
@@ -394,39 +391,39 @@ Side panel information results appear from time to time as well like this exampl
 
 ![bonzamate](/static/abusing-aws-lambda/hmasbathurst.png)
 
-Searches for websites I commonly check, https://bonzamate.com.au/?q=ozbargain https://bonzamate.com.au/?q=sbs https://bonzamate.com.au/?q=abc worked as expected showing the site I was looking for at or near the top of the results page.
+Searches for websites I commonly check, <https://bonzamate.com.au/?q=ozbargain> <https://bonzamate.com.au/?q=sbs> <https://bonzamate.com.au/?q=abc> worked as expected showing the site I was looking for at or near the top of the results page.
 
 A few other interesting searches I tried that seemed to produce results I would expect,
 
- - https://bonzamate.com.au/?q=australia+united+party
- - https://bonzamate.com.au/?q=%22craig+kelly%22
- - https://bonzamate.com.au/?q=charles+sturt+university
- - https://bonzamate.com.au/?q=bar+luca
- - https://bonzamate.com.au/?q=best+burger+melbourne
- - https://bonzamate.com.au/?q=pfizer+research
- - https://bonzamate.com.au/?q=tom+glover+pfizer
- - https://bonzamate.com.au/?q=norfolk+island
- - https://bonzamate.com.au/?q=having+baby+in+canberra
- - https://bonzamate.com.au/?q=asian+history
+- <https://bonzamate.com.au/?q=australia+united+party>
+- <https://bonzamate.com.au/?q=%22craig+kelly%22>
+- <https://bonzamate.com.au/?q=charles+sturt+university>
+- <https://bonzamate.com.au/?q=bar+luca>
+- <https://bonzamate.com.au/?q=best+burger+melbourne>
+- <https://bonzamate.com.au/?q=pfizer+research>
+- <https://bonzamate.com.au/?q=tom+glover+pfizer>
+- <https://bonzamate.com.au/?q=norfolk+island>
+- <https://bonzamate.com.au/?q=having+baby+in+canberra>
+- <https://bonzamate.com.au/?q=asian+history>
 
 What I do find about the above searches is that they are as you would expect Australian centric. So searching for asian history produces results that finds [this page](https://www.asianaustralianleadership.com.au/eminent-asian-australians), which is something I wouldn't find as easily on Google/Bing even with the region set.
 
-So what about that porn filter? Well a search for porn itself https://bonzamate.com.au/?q=porn produces nothing that I would describe as porn. Books about food porn and such. Trying some other search for swear words and such seemed to work as expected, so that seems reasonable. Of course you can always switch into mixed results, or inverse the search to only browse them.
+So what about that porn filter? Well a search for porn itself <https://bonzamate.com.au/?q=porn> produces nothing that I would describe as porn. Books about food porn and such. Trying some other search for swear words and such seemed to work as expected, so that seems reasonable. Of course you can always switch into mixed results, or inverse the search to only browse them.
 
 Searches for news are useful too, although as the results being ephemeral are harder to link to. Please forgive the subject choice, but I am fairly confident at time of posting they will have something to show.
 
- - https://bonzamate.com.au/news/?q=covid
- - https://bonzamate.com.au/news/?q=wine
- - https://bonzamate.com.au/news/?q=china
- - https://bonzamate.com.au/news/?q=darwin
+- <https://bonzamate.com.au/news/?q=covid>
+- <https://bonzamate.com.au/news/?q=wine>
+- <https://bonzamate.com.au/news/?q=china>
+- <https://bonzamate.com.au/news/?q=darwin>
 
 Clearly there are a few bugs. The highlighting of quoted search for example does not work, although the search does do it as expected. There are some issues with duplicate content as both www and non www are treated as different domains, which they are but anyway. Something I will get around to resolving later.
 
-For those trying their own searches, remember that this harkens back to the days of old school keyword search engines. You type terms, and the engine matches only documents that contain those exact terms. There are no keyword substitutions such as converting `pub chatswood` into `(pub || tavern || bar || nightclub || hotel) chatswood` which is what happens in Google and Bing. Query expansion like this is something I would like to add as an option that can be controlled by the user, assuming of course I can find a decent list to allow this. Gigablast appears to have one, but it looks less than exhaustive [mysynonyms.txt](https://github.com/gigablast/open-source-search-engine/blob/master/mysynonyms.txt). 
+For those trying their own searches, remember that this harkens back to the days of old school keyword search engines. You type terms, and the engine matches only documents that contain those exact terms. There are no keyword substitutions such as converting `pub chatswood` into `(pub || tavern || bar || nightclub || hotel) chatswood` which is what happens in Google and Bing. Query expansion like this is something I would like to add as an option that can be controlled by the user, assuming of course I can find a decent list to allow this. Gigablast appears to have one, but it looks less than exhaustive [mysynonyms.txt](https://github.com/gigablast/open-source-search-engine/blob/master/mysynonyms.txt).
 
 ## The Future?
 
-In February 2021 the Australian Greens Party called for a publicly owned search engine to be created and be independent and accountable like the ABC. [[1]](https://www.itnews.com.au/news/the-greens-want-a-publicly-owned-search-engine-to-replace-google-560574)[[2]](https://www.abc.net.au/radio/newsradio/greens-call-for-publicly-owned-search-engine/13115664)
+In February 2021 the Australian Greens Party called for a publicly owned search engine to be created and be independent and accountable like the ABC. [[1]][https://www.itnews.com.au/news/the-greens-want-a-publicly-owned-search-engine-to-replace-google-560574]([2)](<https://www.abc.net.au/radio/newsradio/greens-call-for-publicly-owned-search-engine/13115664>)
 
 This was generally mocked by many Australians, including the media which had forced Google's hand into threating to leave Australia by lobbying for the government to make Google and Facebook to pay for news content. [[3]](https://www.abc.net.au/news/2021-01-28/accc-pursues-google-ad-dominance-facebook-tech-giants-news-code/13098804)
 
@@ -440,5 +437,4 @@ Of course general purpose search is an entirely different ball game to CoDA. But
 
 Regardless I plan on iterating on Bonzamate as I get more time. I really want to fix the info box to pull in all of the Australian wikipedia content, and I want to grow the index more, and improve the ranking. Having site filters and categories are also on the list of things I would like to add. Fixing those annoying bugs is something on the list too.
 
-This post has gone on long enough. Want your site indexed? Want to talk to me? What general information? Want to give me lots of money to build this out? Just want to hurl some abuse? Want access to the API's (I might need to charge for this, but I 100% will allow remixing of results). Hit me up ben@boyter.org or via [slack](https://join.slack.com/t/bonzamate/shared_invite/zt-vqirpo0j-RpISyyAXVNqvkIvXm27EkQ). You can also message me on twitter [@boyter](https://twitter.com/boyter) if you want to get an invite or just want to chat.
-
+This post has gone on long enough. Want your site indexed? Want to talk to me? What general information? Want to give me lots of money to build this out? Just want to hurl some abuse? Want access to the API's (I might need to charge for this, but I 100% will allow remixing of results). Hit me up <ben@boyter.org> or via [slack](https://join.slack.com/t/bonzamate/shared_invite/zt-vqirpo0j-RpISyyAXVNqvkIvXm27EkQ). You can also message me on twitter [@boyter](https://twitter.com/boyter) if you want to get an invite or just want to chat.

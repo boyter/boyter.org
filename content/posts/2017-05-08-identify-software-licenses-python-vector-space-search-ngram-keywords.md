@@ -139,17 +139,11 @@ So what we would normally do about now is add keyword weighting to the terms so 
 
 Thinking about it what we really want is to find keywords or a collection of multiple keywords that we know to be unique for each license. Then all we need to is check the text for the presence of those keywords. The catch being we need to ensure that they are unique for each license. To do so what I think will work is break the license up into collections of works of length 1-10 and check for unique-ness against the other licenses. The technical term for these terms is ngram.
 
-An example would be,
+An example would be,```Lorem ipsum dolor sit amet consetetur sadipscing elitr```
 
-<pre>Lorem ipsum dolor sit amet consetetur sadipscing elitr</pre>
+bi-grams```[('lorem', 'ipsum'), ('ipsum', 'dolor'), ('dolor', 'sit'), ('sit', 'amet'), ('amet', 'consetetur'), ('consetetur', 'sadipscing'), ('sadipscing', 'elitr')]```
 
-bi-grams
-
-<pre>[('lorem', 'ipsum'), ('ipsum', 'dolor'), ('dolor', 'sit'), ('sit', 'amet'), ('amet', 'consetetur'), ('consetetur', 'sadipscing'), ('sadipscing', 'elitr')]</pre>
-
-tri-grams
-
-<pre>[('lorem', 'ipsum', 'dolor'), ('ipsum', 'dolor', 'sit'), ('dolor', 'sit', 'amet'), ('sit', 'amet', 'consetetur'), ('amet', 'consetetur', 'sadipscing'), ('consetetur', 'sadipscing', 'elitr')]</pre>
+tri-grams```[('lorem', 'ipsum', 'dolor'), ('ipsum', 'dolor', 'sit'), ('dolor', 'sit', 'amet'), ('sit', 'amet', 'consetetur'), ('amet', 'consetetur', 'sadipscing'), ('consetetur', 'sadipscing', 'elitr')]```
 
 Thankfully this is pretty easy to do in Python so I borrowed an existing bit of code to do it for me, <http://locallyoptimal.com/blog/2013/01/20/elegant-n-gram-generation-in-python/>
 
@@ -164,9 +158,7 @@ For the record I am totally aware that NTLK can also do this but since I don't c
 
 We can then generate ngrams for each license, then check for its uniqueness in every other one. If no matches found then woohoo we have a gram that uniquely matches the license.
 
-Some simple but stupid code was written [parse2.py][11] which does exactly this. Turns out that language is a lot more distinctive for licenses then I first thought,
-
-<pre>0BSD 188
+Some simple but stupid code was written [parse2.py][11] which does exactly this. Turns out that language is a lot more distinctive for licenses then I first thought,```0BSD 188
 AAL 1985
 Abstyles 437
 Adobe-2006 1234
@@ -179,7 +171,7 @@ AFL-2.1 67
 AFL-3.0 452
 Afmparse 959
 AGPL-1.0 2212
-...truncated...</pre>
+...truncated...```
 
 For the BSD Zero Clause License there are apparently 188 unique ngrams between a length of 2-10 words in it. For the Affero General Public License v1.0 there are a whopping 2212! The numbers were so high that I changed the ngrams to start at 5 to 10. This dropped the numbers found by about 25% which seems about right as you would expect the most unique combinations of words to exist at the upper range of ngrams.
 
@@ -187,26 +179,20 @@ One problem I noticed with this is that a lot of the ngrams are based on names t
 
 However the performance issue that I was worried about before popped up. it was taking a long time to process. Not surprising considering the actual implementation consists of multiple nested loops. With the encouraging result that there is a lot of uniqueness for most licenses I tried just searching for ngrams of 4-5 words long to speed things up. Assuming we didn't find 0 matches then happy days we can try implementing using what we have and everything should be fine. A few small tweaks later and I ran it again.
 
-Doh! As it turns out some are not unique enough. The culprits,
-
-<pre>Artistic-1.0
+Doh! As it turns out some are not unique enough. The culprits,```Artistic-1.0
 BSD-3-Clause
 MIT-CMU
 MPL-1.1
 MPL-2.0-no-copyleft-exception
-MPL-2.0</pre>
+MPL-2.0```
 
-I modified the code to just loop those ones with a more exhaustive search to find what worked. With ngrams of length 2-10 still there was not enough uniqueness. So I went all out, ngrams from length 2-35.
+I modified the code to just loop those ones with a more exhaustive search to find what worked. With ngrams of length 2-10 still there was not enough uniqueness. So I went all out, ngrams from length 2-35.```Artistic-1.0 120
+BSD-3-Clause 21```
 
-<pre>Artistic-1.0 120
-BSD-3-Clause 21</pre>
-
-This resolved the issue for Artistic-1.0 and BSD-3-Clause but we still have nothing for the following licenses,
-
-<pre>MIT-CMU
+This resolved the issue for Artistic-1.0 and BSD-3-Clause but we still have nothing for the following licenses,```MIT-CMU
 MPL-1.1
 MPL-2.0-no-copyleft-exception
-MPL-2.0</pre>
+MPL-2.0```
 
 Something is wrong here.
 
@@ -214,32 +200,26 @@ Turns out some of these are particularly troubling. The Mozilla Public License 1
 
 How about a hybrid approach?
 
-If we cannot definitively say using keywords what license the file is, then we can fall back to the vector space to rank based on those without keywords. To do so I flushed the results of the last run into the database file using 7-8 ngrams for everything except Artistic-1.0 and BSD-3-Clause which checked for ngrams with a range of 2-35. The results of this produced the following licenses with their number of unique ngrams,
-
-<pre>0BSD 25
+If we cannot definitively say using keywords what license the file is, then we can fall back to the vector space to rank based on those without keywords. To do so I flushed the results of the last run into the database file using 7-8 ngrams for everything except Artistic-1.0 and BSD-3-Clause which checked for ngrams with a range of 2-35. The results of this produced the following licenses with their number of unique ngrams,```0BSD 25
 AAL 246
 Abstyles 54
 Adobe-2006 163
 Adobe-Glyph 210
 ADSL 78
 ...truncated...
-Fair-Source-0.9 267</pre>
+Fair-Source-0.9 267```
 
 Most seem to have over 100 or so unique ngrams which means they will probably work pretty well, and as expected the only exceptions are the MPL licenses which has nothing unique about it compared to every other license.
 
 I ended up cleaning up the code at this point and improving on the loops so thankfully it took only a few minutes to run. Some of the original runs were taking tens of minutes due to inefficient code so this was a big win. The resulting file was on the heavy side though at 20 megabytes and crashed most editors when I tried to read it. To resolve this I truncated down to at most 50 unique ngrams per license to see how this worked in the real world. This file weighed in a much more realistic 3 megabytes.
 
-I then created [attempt2.py][12] which used the new database using keywords to guess which license the applications had applicable. Firstly I tried it against searchcode-server itself. With the result that the LICENCE file found was indeed the Fair Source License. I then tried it against GCC. Its interesting to note that this resulted in its COPYING file being marked as containing both the GPL-2.0 and LGPL-2.1. At first I thought this might have been a bug in my logic but it seems it was actually correct. The offending ngram used to match was
+I then created [attempt2.py][12] which used the new database using keywords to guess which license the applications had applicable. Firstly I tried it against searchcode-server itself. With the result that the LICENCE file found was indeed the Fair Source License. I then tried it against GCC. Its interesting to note that this resulted in its COPYING file being marked as containing both the GPL-2.0 and LGPL-2.1. At first I thought this might have been a bug in my logic but it seems it was actually correct. The offending ngram used to match was```"street, fifth floor, boston, ma 02110-1301 usa"```
 
-<pre>"street, fifth floor, boston, ma 02110-1301 usa"</pre>
-
-Which is supposed to be unique to LGPL-2.1 but included in this case. Since we actually have 813 (but truncated to 50) ngrams for each I figured we might as well when checking see if MOST (70%) of the keywords are there, and if so mark it as a match otherwise ignore. This resutled in the following for GCC
-
-<pre>COPYING GPL-2.0
+Which is supposed to be unique to LGPL-2.1 but included in this case. Since we actually have 813 (but truncated to 50) ngrams for each I figured we might as well when checking see if MOST (70%) of the keywords are there, and if so mark it as a match otherwise ignore. This resutled in the following for GCC```COPYING GPL-2.0
 COPYING.LIB GPL-2.0
 COPYING.RUNTIME GPL-2.0
 COPYING3 GPL-3.0
-COPYING3.LIB GPL-3.0</pre>
+COPYING3.LIB GPL-3.0```
 
 Which is correct. In fact further tests on various other repositories worked until I hit the react-armory which is under the BSD Clear License. Turns out most of the ngrams generated for it actually involve the project name meaning they are useless. Annoyingly the ngram of length 3 "BSD Clear License" which is unique was missed because the parser was set to look from 7-8 ngrams. Urgh.
 
@@ -249,23 +229,17 @@ Due to how painful this was getting to test manually I started to build a small 
 
 At this point I tried the same technique across all the files in repositories. Using the previous example of searchcode-server I would have expected that the cache.js file would be marked as MIT license as before. This however was not the case. Because I had the keyword match script as a sliding scale where it needed a few matches to be considered positive it was missing out on this one as there were only a few matches.
 
-I decided at this time to integrate the Vector Space back in. If a file was marked with any license, we would then confirm using the Vector Space and if it was able to have a high degree of confidence over the license that matched then it would be marked as the license. After adding this logic I managed to get the following output,
-
-<pre>Bens-MBP:license boyter$ python attempt2.py
+I decided at this time to integrate the Vector Space back in. If a file was marked with any license, we would then confirm using the Vector Space and if it was able to have a high degree of confidence over the license that matched then it would be marked as the license. After adding this logic I managed to get the following output,```Bens-MBP:license boyter$ python attempt2.py
 0.988840442861 Fair-Source-0.9 /searchcode-server/LICENSE.txt
-0.442713859889 MIT /searchcode-server/src/main/resources/public/js/cache.js</pre>
+0.442713859889 MIT /searchcode-server/src/main/resources/public/js/cache.js```
 
-Exactly what I was looking for. All of the tests I had previously written also passed with this logic. With a simple change to only check the top of the file where the header would be by cutting the string down to the length of the license I was able to improve the result considerably,
-
-<pre>Bens-MBP:license boyter$ python attempt2.py
+Exactly what I was looking for. All of the tests I had previously written also passed with this logic. With a simple change to only check the top of the file where the header would be by cutting the string down to the length of the license I was able to improve the result considerably,```Bens-MBP:license boyter$ python attempt2.py
 0.988840442861 Fair-Source-0.9 /searchcode-server/LICENSE.txt
-0.985719098155 MIT /searchcode-server/src/main/resources/public/js/cache.js</pre>
+0.985719098155 MIT /searchcode-server/src/main/resources/public/js/cache.js```
 
 That is a seriously cool result. Not only was the code able to identify the licences, it did so with a very high percentage of confidence to boot.
 
-I tried running it over a collection of projects I had checked out including GCC, Linux and WordPress
-
-<pre>0.993261478239 BSD-3-Clause-Clear /armory-react/LICENSE
+I tried running it over a collection of projects I had checked out including GCC, Linux and WordPress```0.993261478239 BSD-3-Clause-Clear /armory-react/LICENSE
  0.999679612780 GPL-3.0 /decodingcaptchas/LICENSE
  0.980796066053 OFL-1.1 /decodingcaptchas/lib/font/source-sans-pro/LICENSE
  0.999692799354 GPL-3.0 /freemoz/LICENSE
@@ -369,40 +343,38 @@ I tried running it over a collection of projects I had checked out including GCC
  0.999792346238 GPL-2.0 /wordpress/wp-content/themes/twentyfourteen/genericons/LICENSE.txt
  0.999792346238 GPL-2.0 /wordpress/wp-content/themes/twentythirteen/fonts/LICENSE.txt
  0.999792346238 GPL-2.0 /wordpress/wp-includes/js/plupload/license.txt
- 0.999932589474 LGPL-2.1 /wordpress/wp-includes/js/tinymce/license.txt</pre>
+ 0.999932589474 LGPL-2.1 /wordpress/wp-includes/js/tinymce/license.txt```
 
 Rather cool. Lots of licenses identified with quite a lot of confidence.
 
 There is however one issue I am overlooking. Take for example a project which includes another project in a sub directory. What license should be displayed for the files that are in the latter? In this case I would expect that they are marked with both. It would be very nice to see this information.
 
-One final issue is what to do when there are multiple license files in the root directory. GCC is an example of this and it has 4 licenses defined in the root. The idea being you take which one is most applicable to your project.
-
-<pre>0.999792347852 GPL-2.0 /gcc/COPYING
+One final issue is what to do when there are multiple license files in the root directory. GCC is an example of this and it has 4 licenses defined in the root. The idea being you take which one is most applicable to your project.```0.999792347852 GPL-2.0 /gcc/COPYING
 0.999922926136 LGPL-2.1 /gcc/COPYING.LIB
 0.99967961278 GPL-3.0 /gcc/COPYING3
-0.999902746595 LGPL-3.0 /gcc/COPYING3.LIB</pre>
+0.999902746595 LGPL-3.0 /gcc/COPYING3.LIB```
 
 Looking at the SPDX specification the rule is to define them as being under all. This is the exact text regarding this,
 
 > _Representing Multiple Licenses_
-> 
+>
 > _Multiple licenses can be represented using a SPDX license expression as defined in Appendix IV. A set of licenses must be enclosed in parentheses (this is a convention for SPDX expressions). As further described there:_
-> 
+>
 > _When there is a choice between licenses ("disjunctive license"), they should be separated with "OR". If presented with a choice between two or more licenses, use the disjunctive binary "OR" operator to construct a new license expression._
   
->  _Similarly when multiple licenses need to be simultaneously applied ("conjunctive license"), they should be separated with "AND". If required to simultaneously comply with two or more licenses, use the conjunctive binary "AND" operator to construct a new license expression._
+> _Similarly when multiple licenses need to be simultaneously applied ("conjunctive license"), they should be separated with "AND". If required to simultaneously comply with two or more licenses, use the conjunctive binary "AND" operator to construct a new license expression._
   
->  _In some cases, a set of license terms apply except under special circumstances, in this case, use the "WITH" operator followed by one of the recognized exception identifiers._
+> _In some cases, a set of license terms apply except under special circumstances, in this case, use the "WITH" operator followed by one of the recognized exception identifiers._
   
->  _Sometimes a set of license terms apply except under special circumstances. In this case, use the binary "WITH" operator to construct a new license expression to represent the special exception situation._
+> _Sometimes a set of license terms apply except under special circumstances. In this case, use the binary "WITH" operator to construct a new license expression to represent the special exception situation._
   
->  _Examples:_
-> 
+> _Examples:_
+>
 > _SPDX-License-Identifier: (GPL-2.0 OR MIT)_
   
->  _SPDX-License-Identifier: (LGPL-2.1 AND BSD-2-CLAUSE)_
+> _SPDX-License-Identifier: (LGPL-2.1 AND BSD-2-CLAUSE)_
   
->  _SPDX-License-Identifier: (GPL-2.0+ WITH Bison-exception-2.2)_
+> _SPDX-License-Identifier: (GPL-2.0+ WITH Bison-exception-2.2)_
 
 This was taken from <https://spdx.org/spdx-specification-21-web-version> Appendix V: Using SPDX short identifiers in Source Files
 
@@ -410,9 +382,7 @@ Fair enough. We then need to write one last version of our license guesser which
 
 For this I simply copied the existing attempt2.py and created [attempt3.py][14] which should hopefully be the last version for this. What we now need to do is walk the tree, and every time we encounter a license file, keep track of the license that the file should be under, and for any file that is a child of that license mark as such. When we leave the directory then we pop the license off.
 
-Thankfully this was a very easy change to implement. I used a project which I knew to already have some mixed licenses and ran over it.
-
-<pre>&gt;&gt;&gt;&gt;&gt;&gt;&gt; /decodingcaptchas/LICENSE GPL-3.0
+Thankfully this was a very easy change to implement. I used a project which I knew to already have some mixed licenses and ran over it.```&gt;&gt;&gt;&gt;&gt;&gt;&gt; /decodingcaptchas/LICENSE GPL-3.0
  &gt;&gt;&gt;&gt;&gt;&gt;&gt; /decodingcaptchas/LICENSE GPL-3.0
  &gt;&gt;&gt;&gt;&gt;&gt;&gt; /decodingcaptchas/LICENSE GPL-2.0
  &gt;&gt;&gt;&gt;&gt;&gt;&gt; /decodingcaptchas/LICENSE GPL-2.0
@@ -470,7 +440,7 @@ Thankfully this was a very easy change to implement. I used a project which I kn
  /decodingcaptchas/test/test-markdown-slide-attributes.js GPL-2.0 GPL-3.0
  /decodingcaptchas/test/test-markdown.js GPL-2.0 GPL-3.0
  /decodingcaptchas/test/test-pdf.js GPL-2.0 GPL-3.0
- /decodingcaptchas/test/test.js GPL-2.0 GPL-3.0</pre>
+ /decodingcaptchas/test/test.js GPL-2.0 GPL-3.0```
 
 What this shows is each file along with each license that the program believes it to belong to. Files prefixed with >>>>>>> indicate a license file which changes the licenses of the files below it.
 

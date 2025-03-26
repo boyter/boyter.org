@@ -16,8 +16,7 @@ categories:
   - Tip
 
 ---
-Posted more for my personal use (I have to look it up every time) but here is how to run a mysqldump without impacting performance on the box. It sets the ionice and nice values to be as low as possible (but still run) and uses a single transaction and ups the max packet size for MySQL.
-
-```
+Posted more for my personal use (I have to look it up every time) but here is how to run a mysqldump without impacting performance on the box. It sets the ionice and nice values to be as low as possible (but still run) and uses a single transaction and ups the max packet size for MySQL.```
 ionice -c2 -n7 nice -n19 mysqldump -u root -p DATABASE --single-transaction --max_allowed_packet=512M > FILENAME
+
 ```

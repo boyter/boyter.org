@@ -7,10 +7,9 @@ I have always been a big fan of SQLite and recently was using it with Go/Golang.
 
 I could have solved this by throwing a mutex lock around the database writes, but thats something I could easily mess up by missing the mutex and locking the database at the wrong time. I could also have retries with a backoff which isn't a bad idea for resilience, but overkill for my situation.
 
-A better solution and one that is hard to search for online is to limit the number of open connections.
-
-```Go
+A better solution and one that is hard to search for online is to limit the number of open connections.```Go
 db.SetMaxOpenConns(1);
+
 ```
 
 Setting the above after getting your SQLite database connection will totally resolve the issue. It does in theory lower your read performance, but my brief tests to confirm/deny this didn't indicate any major difference for the sort of load I am expecting.

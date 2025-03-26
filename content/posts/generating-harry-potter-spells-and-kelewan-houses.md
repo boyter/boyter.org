@@ -3,15 +3,13 @@ title: Generating Harry Potter Spell Names and Kelewan House Names
 date: 2018-10-28
 ---
 
-Occasionally I try to branch out from working on https://searchcode.com/ https://searchcodeserver.com/ or https://github.com/boyter/scc and find something that I find interesting to toy around with. Usually I go for something that will only take a few hours to play around with.
+Occasionally I try to branch out from working on <https://searchcode.com/> <https://searchcodeserver.com/> or <https://github.com/boyter/scc> and find something that I find interesting to toy around with. Usually I go for something that will only take a few hours to play around with.
 
-I had recently re-read a book series I remember loving a while ago which is the Empire Trilogy of books by Feist and Wurts https://en.wikipedia.org/wiki/Empire_Trilogy One of the things that stuck out to me as I was reading was that the names seemed to be a blend of Korean/Japanese/Chinese/Aztec and seems to follow a standard structure.
+I had recently re-read a book series I remember loving a while ago which is the Empire Trilogy of books by Feist and Wurts <https://en.wikipedia.org/wiki/Empire_Trilogy> One of the things that stuck out to me as I was reading was that the names seemed to be a blend of Korean/Japanese/Chinese/Aztec and seems to follow a standard structure.
 
 I started wondering how hard it would be to generate names of houses, clans, parties and Lord/Ladies based on the names in the book. So I started recording all the names I came across for later use.
 
-If I were more intelligent I would have fed them though some of the more fancy AI/DL techniques that are all the rage these days, but it seemed like overkill. What I did instead was break them up based on syllable's then randomly join them together. The results I think turned out rather well.
-
-```
+If I were more intelligent I would have fed them though some of the more fancy AI/DL techniques that are all the rage these days, but it seemed like overkill. What I did instead was break them up based on syllable's then randomly join them together. The results I think turned out rather well.```
 Lady Malia of house Shonpan and clan Omechan member of the Jade Eye Party
 Lady Irshi of house Ekecas and clan Shonla member of the Party for Progress
 Lady Jaanlan of house Tustai and clan Shonnawai member of the War Party
@@ -37,11 +35,10 @@ Lord Kaidar of house Awati and clan Zhachan member of the New Party
 Lord Zankai of house Mintai and clan Iocani member of the Summer Wind Party
 Lord Hokai of house Xachaaka and clan Iochan member of the Silver Party
 Lord Detora of house Tujun and clan Shonzawai member of the Jade Eye Party
-```
-
-However it made me wonder if this simple technique applies to other things. Could I for instance generate Harry Potter Spell names?
 
 ```
+
+However it made me wonder if this simple technique applies to other things. Could I for instance generate Harry Potter Spell names?```
 Scourliafy
 Exlify Muffio
 Epihidtor
@@ -66,4 +63,4 @@ Revhidio Impelrius
 
 Turns out it works reasonably well there. Same technique, get a list of spell names, break them into syllable's and then combine them together to produce what look like spell names from the series.
 
-You can get the source for both of the above at https://github.com/boyter/spells and https://github.com/boyter/empire-building
+You can get the source for both of the above at <https://github.com/boyter/spells> and <https://github.com/boyter/empire-building>

@@ -9,31 +9,25 @@ Now the answer is firstly performance, but the second is that writing all the co
 
 So I tried it out. Pulling some existing code I had <https://github.com/boyter/indexer> I was able to modify it slightly to create a bloom filter backed by SQLite.
 
-I then populated it with some random values in order to simulate a bloom filter and ran some queries over it using two different select approaches. The first being where each portion of the filter is pulled back by a single select, and another where all of the values needed to be checked were pulled back. In effect
-
-```
+I then populated it with some random values in order to simulate a bloom filter and ran some queries over it using two different select approaches. The first being where each portion of the filter is pulled back by a single select, and another where all of the values needed to be checked were pulled back. In effect```
 select num from bloom where id = ?
-```
-
-vs
 
 ```
+
+vs```
 select num from bloom where id in (?,?,?,?,?,?,?);
 ```
 
 The reason for both is that the first has the potential to perform less disk seeks since it can calculate the bloom matches and skip later ones if not required, while the latter could be more efficient since SQLite can do everything in a single select operation.
 
-Populating the index with 64,000 documents produced the following runtimes when searching.
-
-```
+Populating the index with 64,000 documents produced the following runtimes when searching.```
 > abc
 serial 7839 31.975417ms
 serial modified 7839 22.238459ms
-```
-
-As you would expect the second SQL selecting everything was faster, since with 2 hashes per trigram this would only need at most 6 rows to be pulled back into memory. However with a longer search term the reverse is true,
 
 ```
+
+As you would expect the second SQL selecting everything was faster, since with 2 hashes per trigram this would only need at most 6 rows to be pulled back into memory. However with a longer search term the reverse is true,```
 > abcdefghijklmnopqrstuvwxyz
 serial 0 74.158208ms
 serial modified 0 146.137125ms

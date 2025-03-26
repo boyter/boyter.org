@@ -30,31 +30,23 @@ Also keep in mind that with this install everything is running on a single insta
 
 Prerequisites are that you have a Ubuntu instance running somewhere. If you want to run the fly execute command you will also need a valid domain name to point at your machine. This is an annoying thing caused by GoLang when using SSL certs. Turns out you cannot set a hostfile entry and use it as such. You can in a insecure non SSL mode but otherwise cannot.
 
-If you are using a virual machine from DigitalOcean/AWS/Vultr or other you will need to add some swap space. I noticed a lot of issues where this was missing. You can do so by running the following commands which will configure your server to have 4G of swap space,
-
-<pre>sudo fallocate -l 4G /swapfile
+If you are using a virual machine from DigitalOcean/AWS/Vultr or other you will need to add some swap space. I noticed a lot of issues where this was missing. You can do so by running the following commands which will configure your server to have 4G of swap space,```sudo fallocate -l 4G /swapfile
  sudo chmod 600 /swapfile
  sudo mkswap /swapfile
  sudo swapon /swapfile
- sudo echo "/swapfile none swap sw 0 0" &gt;&gt; /etc/fstab</pre>
+ sudo echo "/swapfile none swap sw 0 0" &gt;&gt; /etc/fstab```
 
-We will need to get the concourse binary, and to make it executable. For convenience and to match the concourse documentation lets also rename it to concourse. To do so run the following command.
+We will need to get the concourse binary, and to make it executable. For convenience and to match the concourse documentation lets also rename it to concourse. To do so run the following command.```wget https://github.com/concourse/concourse/releases/download/v2.6.0/concourse_linux_amd64 && mv concourse_linux_amd64 concourse && chmod +x concourse```
 
-<pre>wget https://github.com/concourse/concourse/releases/download/v2.6.0/concourse_linux_amd64 && mv concourse_linux_amd64 concourse && chmod +x concourse</pre>
-
-We now need to generate the keys that concourse requires.
-
-<pre>mkdir keys
+We now need to generate the keys that concourse requires.```mkdir keys
  cd keys
 
 ssh-keygen -t rsa -f tsa_host_key -N '' && ssh-keygen -t rsa -f worker_key -N '' && ssh-keygen -t rsa -f session_signing_key -N '' && cp worker_key.pub authorized_worker_keys
- cd ..</pre>
+ cd ..```
 
 The above commands will create a directory called keys and setup all of the keys that concourse 2.6.0 requires.
 
-We can now create some helper scripts which we can use to run concourse easily.
-
-<pre>pico concourse.sh
+We can now create some helper scripts which we can use to run concourse easily.```pico concourse.sh
 
 ./concourse web \
  --basic-auth-username main \
@@ -62,14 +54,12 @@ We can now create some helper scripts which we can use to run concourse easily.
  --session-signing-key ./keys/session_signing_key \
  --tsa-host-key ./keys/tsa_host_key \
  --tsa-authorized-keys ./keys/authorized_worker_keys \
- --external-url https://YOURDNSHERE/ \
+ --external-url <https://YOURDNSHERE/> \
  --postgres-data-source postgres://concourse:concourse@127.0.0.1/concourse
 
-chmod +x concourse.sh</pre>
+chmod +x concourse.sh```
 
-This script will start running concourse. Keep in mind that the username and password used here are for the main group and as such you should protect them as they have the ability to create additional groups on your concourse instance.
-
-<pre>pico worker.sh
+This script will start running concourse. Keep in mind that the username and password used here are for the main group and as such you should protect them as they have the ability to create additional groups on your concourse instance.```pico worker.sh
 
 ./concourse worker \
  --work-dir /opt/concourse/worker \
@@ -77,86 +67,56 @@ This script will start running concourse. Keep in mind that the username and pas
  --tsa-public-key ./keys/tsa_host_key.pub \
  --tsa-worker-private-key ./keys/worker_key
 
-chmod +x worker.sh</pre>
+chmod +x worker.sh```
 
 This script will spin up a worker which will communicate with the main concourse instance and do all the building. It can be useful to lower the priority of this command using nice and ionice if you are running on a single core machine.
 
-Now we need to install all of the postgresql packages required,
+Now we need to install all of the postgresql packages required,```apt-get update && apt-get install -y postgresql postgresql-contrib```
 
-<pre>apt-get update && apt-get install -y postgresql postgresql-contrib</pre>
+Once this is done we can create the database to be used```sudo -u postgres createdb concourse```
 
-Once this is done we can create the database to be used
-
-<pre>sudo -u postgres createdb concourse</pre>
-
-Then login to postgresql and create a user to connect to the database
-
-<pre>sudo -u postgres psql
+Then login to postgresql and create a user to connect to the database```sudo -u postgres psql
  CREATE USER concourse WITH PASSWORD 'concourse'
  GRANT ALL PRIVILEGES ON DATABASE "concourse" to concourse
- \du</pre>
+ \du```
 
-We also need to need to edit the pg_hba file allowing us to make the connection,
+We also need to need to edit the pg_hba file allowing us to make the connection,```sudo pico /etc/postgresql/9.5/main/pg_hba.conf```
 
-<pre>sudo pico /etc/postgresql/9.5/main/pg_hba.conf</pre>
+Scroll down and look for the following line,```host all all 127.0.0.1/32 md5```
 
-Scroll down and look for the following line,
+and change the md5 on the end to trust```host all all 127.0.0.1/32 trust```
 
-<pre>host all all 127.0.0.1/32 md5</pre>
-
-and change the md5 on the end to trust
-
-<pre>host all all 127.0.0.1/32 trust</pre>
-
-Then save the file and restart postgresql
-
-<pre>service postgresql restart</pre>
+Then save the file and restart postgresql```service postgresql restart```
 
 At this point everything we need to run concourse should be there. You will need to setup the concourse scripts we created earlier to run as a service, or just run them in a screen session if you are in a hurry.
 
-What we want to do now is expose it to the big bad internet.
+What we want to do now is expose it to the big bad internet.```apt-get install nginx```
 
-<pre>apt-get install nginx</pre>
+Create a directory using either the domain name you want to use, a desired name or anything if you are going to connect to things using IP addresses.```mkdir -p /etc/nginx/ssl/mydesireddomain.com```
 
-Create a directory using either the domain name you want to use, a desired name or anything if you are going to connect to things using IP addresses.
+Nowe we want to swtich to the directory and setup the self signed TLS/SSL keys.```cd /etc/nginx/ssl/mydesireddomain.com
+ openssl genrsa -des3 -out server.key 1024```
 
-<pre>mkdir -p /etc/nginx/ssl/mydesireddomain.com</pre>
-
-Nowe we want to swtich to the directory and setup the self signed TLS/SSL keys.
-
-<pre>cd /etc/nginx/ssl/mydesireddomain.com
- openssl genrsa -des3 -out server.key 1024</pre>
-
-Enter whatever you want for the passphrase but remember it!
-
-<pre>openssl req -new -key server.key -out server.csr</pre>
+Enter whatever you want for the passphrase but remember it!```openssl req -new -key server.key -out server.csr```
 
 Enter the passhrase entered. The most important thing here is that when asked for the Common Name or FQDN you need to enter in the desired domain name.
 
-With that done we need to sign the key.
+With that done we need to sign the key.```cp server.key server.key.org
+ openssl rsa -in server.key.org -out server.key```
 
-<pre>cp server.key server.key.org
- openssl rsa -in server.key.org -out server.key</pre>
-
-Remember to enter the same pass phrase as before. Finally sign they key with an expiry of 9999 days.
-
-<pre>openssl x509 -req -days 9999 -in server.csr -signkey server.key -out server.crt</pre>
+Remember to enter the same pass phrase as before. Finally sign they key with an expiry of 9999 days.```openssl x509 -req -days 9999 -in server.csr -signkey server.key -out server.crt```
 
 Make a copy of the file server.crt which will be needed for the concourse fly tool to talk to the server if you are using self signed certs.
 
-With that done lets enable the site,
+With that done lets enable the site,```sudo nano /etc/nginx/sites-available/mydesireddomain.com```
 
-<pre>sudo nano /etc/nginx/sites-available/mydesireddomain.com</pre>
-
-And enter in the following details,
-
-<pre>upstream concourse_app_server {
+And enter in the following details,```upstream concourse_app_server {
  server localhost:8080;
  }
 
 server {
  listen 80 default_server;
- rewrite ^ https://MYIPADDRESSORDOAMIN$request_uri? permanent;
+ rewrite ^ <https://MYIPADDRESSORDOAMIN$request_uri>? permanent;
  }
 
 server {
@@ -173,22 +133,18 @@ location / {
  proxy_redirect off;
  proxy_pass http://concourse_app_server;
  }
- }</pre>
+ }```
 
 The above nginx config defines an upstream concourse server running on port 8080. It then defines a server listening on port 80 that redirects all traffic to the same server on HTTPS. The last server config defines out site, sets up the keys and forwards everything to the upstream concourse server.
 
-We can now enable it,
-
-<pre>sudo ln -s /etc/nginx/sites-available/mydesireddomain.com /etc/nginx/sites-enabled/mydesireddomain.com
+We can now enable it,```sudo ln -s /etc/nginx/sites-available/mydesireddomain.com /etc/nginx/sites-enabled/mydesireddomain.com
  rm -f /etc/nginx/sites-available/default
 
-service nginx restart</pre>
+service nginx restart```
 
 We need to remove the default file above because nginx will not allow you to have two default servers.
   
-At this point everything should be working. You should now be able to connect to your concourse server like so,
-
-<pre>fly --target myciserver login --team-name myteamname --concourse-url https://MYIPADDRESSORDOAMIN --ca-cert ca.crt</pre>
+At this point everything should be working. You should now be able to connect to your concourse server like so,```fly --target myciserver login --team-name myteamname --concourse-url https://MYIPADDRESSORDOAMIN --ca-cert ca.crt```
 
 Where the file ca.crt exists whereever you are running fly. Everything at this point should work and you can browse to your concourse server.
 

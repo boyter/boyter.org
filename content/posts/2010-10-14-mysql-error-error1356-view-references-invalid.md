@@ -1,5 +1,5 @@
 ---
-title: 'MySQL Error – Error:1356: View references invalid..'
+title: 'MySQL Error – Error:1356: View references invalid.'
 author: Ben E. Boyter
 type: post
 date: 2010-10-14T02:50:45+00:00

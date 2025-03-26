@@ -25,30 +25,25 @@ This is part 4 of a 5 part series.
 
 So previously we had 4 main issues identified. Im going to go with low hanging fruit and add a simple porn filter.
 
-Probably the easiest way to remove porn at this point is to just blacklist it unless someone explicitly asks to see it. I had a quick look at the sort of terms that ranked for porn and came up with the following blacklist, using what I had seen and some terms from here [porn blacklist keyword filter http://www.gnutellaforums.com/limewire-tips-tricks/60590-keywords-filter.html][8]
-
-```porn|naked|teens|pussy|sex|nasty|mature|crossdresser|couples|girlfriend|wives|pornstar|cock|fuck|shit|cunt|nude|lesbian|sexy|ass|ladyboy|granny|cum|boob|breast|exposing|milf|erotic|bdsm|live|penis|horny|slut|nudist|upskirt|boobs|tits|amateur|hottest|adult|teen|babe|1yo|2yo|3yo|4yo|5yo|6yo|7yo|8yo|9yo|10yo|11yo|12yo|13yo|14yo|15yo|16yo|17yo|incest|jailbait|kdv|kiddie|kiddy|kinder|Lolita|lsm|mbla|molested|ninfeta|pedo|phat|pjk|pthc|ptsc|premature|preteen|pthc|qsh|qwerty|r@ygold|raped|teensex|yovo|Pr0nStarS|tranny|transvest|XXX|Anal|Asshole|Bangbros|Barely|Blow|Blowjob|Bondage|brazzers|Camera_Phone|Centerfold|Clitoris|Cock|Cum|Cunt|Deepthroat|Diaper|Drilled|EROTRIX|Facial|Femjoy|Fetish|Fisting|fotos|FTV|Fuck|Gangbang|Gay|Handjob|Hardcore|Headjob|hidden_cam|Hustler|Jenna|Lesbo|Masturbat|MILF|nackte|naken|Naturals|Nipple|Nubile|Onlytease|Orgasm|Orgy|Penis|Penthouse|Playboy|Porn|Profileasian|Profileblond|Pussy|Scroops|selfpic|spunky_teens|strapon|strappon|Suck|TeenTraps|tittie|titty|tranny|transvest|twat|vagina|webcam|Whore|XPUSS|Amateur|Blonde|Brunette|Naked|Naughty|Private|Redhead|Sex|Slut|Strips|Teen|Young|wet|girl|video|taboo|nastiest```
+Probably the easiest way to remove porn at this point is to just blacklist it unless someone explicitly asks to see it. I had a quick look at the sort of terms that ranked for porn and came up with the following blacklist, using what I had seen and some terms from here [porn blacklist keyword filter http://www.gnutellaforums.com/limewire-tips-tricks/60590-keywords-filter.html][8]```porn|naked|teens|pussy|sex|nasty|mature|crossdresser|couples|girlfriend|wives|pornstar|cock|fuck|shit|cunt|nude|lesbian|sexy|ass|ladyboy|granny|cum|boob|breast|exposing|milf|erotic|bdsm|live|penis|horny|slut|nudist|upskirt|boobs|tits|amateur|hottest|adult|teen|babe|1yo|2yo|3yo|4yo|5yo|6yo|7yo|8yo|9yo|10yo|11yo|12yo|13yo|14yo|15yo|16yo|17yo|incest|jailbait|kdv|kiddie|kiddy|kinder|Lolita|lsm|mbla|molested|ninfeta|pedo|phat|pjk|pthc|ptsc|premature|preteen|pthc|qsh|qwerty|r@ygold|raped|teensex|yovo|Pr0nStarS|tranny|transvest|XXX|Anal|Asshole|Bangbros|Barely|Blow|Blowjob|Bondage|brazzers|Camera_Phone|Centerfold|Clitoris|Cock|Cum|Cunt|Deepthroat|Diaper|Drilled|EROTRIX|Facial|Femjoy|Fetish|Fisting|fotos|FTV|Fuck|Gangbang|Gay|Handjob|Hardcore|Headjob|hidden_cam|Hustler|Jenna|Lesbo|Masturbat|MILF|nackte|naken|Naturals|Nipple|Nubile|Onlytease|Orgasm|Orgy|Penis|Penthouse|Playboy|Porn|Profileasian|Profileblond|Pussy|Scroops|selfpic|spunky_teens|strapon|strappon|Suck|TeenTraps|tittie|titty|tranny|transvest|twat|vagina|webcam|Whore|XPUSS|Amateur|Blonde|Brunette|Naked|Naughty|Private|Redhead|Sex|Slut|Strips|Teen|Young|wet|girl|video|taboo|nastiest```
 
 Keep in mind the above is a VERY agressive filter and will most likely filter out some non porn sites as well.
 
-Chucking this though a simple regex inside the search class allows us to eliminate 99% of the porn results based on my simple tests. The relevent chage is below,
-
-```
+Chucking this though a simple regex inside the search class allows us to eliminate 99% of the porn results based on my simple tests. The relevent chage is below,```
 preg_match_all(SEARCH_PORNFILTER, $document[0][1].$document[0][2], $matches);
 
 // if they want to see porn, or its not porn
 if($seeporn || count($matches[0]) &lt;= 1) {
-	$doc[] = $document;
-	$count++;
-	if($count == SEARCH_DOCUMENTRETURN) {
-		break;
-	}
+ $doc[] = $document;
+ $count++;
+ if($count == SEARCH_DOCUMENTRETURN) {
+  break;
+ }
 }
+
 ```
 
-Pretty easy, we check if the user wants to see porn and if so just add it otherwise we check using the above blacklist. If there are 2 or more matches in the blacklist then we consider the match porn and ignore it. The seeporn variable is set in the constructor like so,
-
-```function dosearch($searchterms,$seeporn=SEARCH_DISPLAYPORN)```
+Pretty easy, we check if the user wants to see porn and if so just add it otherwise we check using the above blacklist. If there are 2 or more matches in the blacklist then we consider the match porn and ignore it. The seeporn variable is set in the constructor like so,```function dosearch($searchterms,$seeporn=SEARCH_DISPLAYPORN)```
 
 Trying it out on some questionable searches shows that it works fairly well. One example I tried was "sex" and the first few results were,
 
@@ -66,7 +61,7 @@ The easiest way to fix this with our current implementation is to improve our ra
 
 Ranking however isn't the easiet thing in the world. Google and Bing use hundreds of signals which determine a pages rank. These include terms, page speed, user behaviour, incoming links, how large the site is, terms locations, terms weight in html etc&#8230;. We have almost none of that. However everyone needs to start somewhere so here are a few ideas I had off the top of my head to use as signals.
 
-1. If the URL contains the search term, and how much of the url it is, IE a search for "microsoft" should rank higher for "http://microsoft.com" then "http://trymicrosoftoffice.com/"
+1. If the URL contains the search term, and how much of the url it is, IE a search for "microsoft" should rank higher for "<http://microsoft.com>" then "<http://trymicrosoftoffice.com/>"
 
 2. If the title contains the search term, and how much of the title it is. IE a search for "google email" will match the title "Gmail: Email from Google" more so then "The Tea Party" which is currently ranking above it.
 
@@ -74,46 +69,42 @@ Ranking however isn't the easiet thing in the world. Google and Bing use hundred
 
 4. Use the quantcast id as a factor in the ranking.
 
-All of the above look good to me. Lets do the lot. Our ranker interface probably needs to have an additional method added which can rank an individual document based on the term. This is defined in the iranker like so,
+All of the above look good to me. Lets do the lot. Our ranker interface probably needs to have an additional method added which can rank an individual document based on the term. This is defined in the iranker like so,```public function rankDocument($term, $document);```
 
-```public function rankDocument($term, $document);```
-
-And now for the implementation.
-
-```
+And now for the implementation.```
 define('RANKER_TITLEWEIGHT', 1000);
 define('RANKER_URLWEIGHT', 6000);
 define('RANKER_URLWEIGHTLOOSE', 2000);
 define('RANKER_TERMWEIGHT', 100);
 
 public function rankDocument($term, $document) {
-	$cleanurl = $this->_cleanString($document[0]);
-	$cleantitle = $this->_cleanString($document[1]);
-	$cleanmeta = $this->_cleanString($document[2]);
-	$rank = $document[3];
+ $cleanurl = $this->_cleanString($document[0]);
+ $cleantitle = $this->_cleanString($document[1]);
+ $cleanmeta = $this->_cleanString($document[2]);
+ $rank = $document[3];
 
-	preg_match_all('/ '.$term.' /i', $cleanurl, $urlcount);
-	preg_match_all('/'.$term.'/i', $cleanurl, $urlcountloose);
-	preg_match_all('/ '.$term.' /i', $cleantitle, $titlecount);
-	preg_match_all('/ '.$term.' /i', $cleanmeta, $pagecount);
+ preg_match_all('/ '.$term.' /i', $cleanurl, $urlcount);
+ preg_match_all('/'.$term.'/i', $cleanurl, $urlcountloose);
+ preg_match_all('/ '.$term.' /i', $cleantitle, $titlecount);
+ preg_match_all('/ '.$term.' /i', $cleanmeta, $pagecount);
 
-	$words_in_url 			= count($urlcount[0]);
-	$words_in_url_loose 	= count($urlcountloose[0]);
-	$words_in_title 		= count($titlecount[0]);
-	$words_in_meta 			= count($pagecount[0]);
+ $words_in_url    = count($urlcount[0]);
+ $words_in_url_loose  = count($urlcountloose[0]);
+ $words_in_title   = count($titlecount[0]);
+ $words_in_meta    = count($pagecount[0]);
 
-	$weight = (   $words_in_meta * RANKER_TERMWEIGHT
-				+ $words_in_title * RANKER_TITLEWEIGHT
-				+ $words_in_url * RANKER_URLWEIGHT
-				+ $words_in_url_loose * RANKER_URLWEIGHTLOOSE
-			);
+ $weight = (   $words_in_meta * RANKER_TERMWEIGHT
+    + $words_in_title * RANKER_TITLEWEIGHT
+    + $words_in_url * RANKER_URLWEIGHT
+    + $words_in_url_loose * RANKER_URLWEIGHTLOOSE
+   );
 
-	// Normalise between 1 and 10 and then invert so
-	// top 100 sites are 9.9 something and bottom 100 are 0.1
-	$normailise = 10-(1 + ($rank-1)*(10-1)) / (1000000 - 1);
-	$newweight = intval($weight * $normailise);
+ // Normalise between 1 and 10 and then invert so
+ // top 100 sites are 9.9 something and bottom 100 are 0.1
+ $normailise = 10-(1 + ($rank-1)*(10-1)) / (1000000 - 1);
+ $newweight = intval($weight * $normailise);
 
-	return $newweight;
+ return $newweight;
 }
 ```
 

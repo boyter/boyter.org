@@ -2,14 +2,10 @@
 
 ## _Keep it simple, but not simpler_
 
-**XMin** is a Hugo theme written by [Yihui Xie](https://yihui.name) in about four hours: half an hour was spent on the Hugo templates, and 3.5 hours were spent on styling. The main motivation for writing this theme was to provide a really minimal example to beginners of Hugo templates. This XMin theme contains about 130 lines of code in total, including the code in HTML templates and CSS (also counting empty lines).
+**XMin** is a Hugo theme written by [Yihui Xie](https://yihui.name) in about four hours: half an hour was spent on the Hugo templates, and 3.5 hours were spent on styling. The main motivation for writing this theme was to provide a really minimal example to beginners of Hugo templates. This XMin theme contains about 130 lines of code in total, including the code in HTML templates and CSS (also counting empty lines).```bash
+find . -not -path '_/exampleSite/_' \( -name '_.html' -o -name '_.css' \) | xargs wc -l
 
-
-```bash
-find . -not -path '*/exampleSite/*' \( -name '*.html' -o -name '*.css' \) | xargs wc -l
-```
-
-```
+``````
        5 ./layouts/404.html
       12 ./layouts/_default/single.html
       18 ./layouts/_default/list.html

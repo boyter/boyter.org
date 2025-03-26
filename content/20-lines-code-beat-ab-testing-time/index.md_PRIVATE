@@ -36,9 +36,7 @@ But the most enticing part is that **you can set it and forget it**. [If your ti
 
 The multi-armed bandit problem takes its terminology from a casino. You are faced with a wall of slot machines, each with its own lever. You suspect that some slot machines pay out more frequently than others. How can you learn which machine is the best, and get the most coins in the fewest trials?
 
-Like many techniques in machine learning, the [simplest strategy][4] is [hard to beat][5]. More complicated techniques are worth considering, but they may eke out only a few hundredths of a percentage point of performance. One strategy that has been shown to perform well time after time in practical problems is the _epsilon-greedy_ method. We always keep track of the number of pulls of the lever and the amount of rewards we have received from that lever. 10% of the time, we choose a lever at random. The other 90% of the time, we choose the lever that has the highest expectation of rewards.
-
-<pre>def choose():
+Like many techniques in machine learning, the [simplest strategy][4] is [hard to beat][5]. More complicated techniques are worth considering, but they may eke out only a few hundredths of a percentage point of performance. One strategy that has been shown to perform well time after time in practical problems is the _epsilon-greedy_ method. We always keep track of the number of pulls of the lever and the amount of rewards we have received from that lever. 10% of the time, we choose a lever at random. The other 90% of the time, we choose the lever that has the highest expectation of rewards.```def choose():
     if math.random() &lt; 0.1:
         # exploration!
         # choose a random lever 10% of the time.
@@ -54,7 +52,7 @@ Like many techniques in machine learning, the [simplest strategy][4] is [hard to
 
 def reward(choice, amount):
     # add the reward to the total for the given lever.
-</pre>
+```
 
 ## Why does this work?
 
