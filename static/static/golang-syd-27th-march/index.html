@@ -28,7 +28,7 @@
 		<div class="slides">
 			<section>
 				<h1>searchcode.com's SQLite database is probably bigger than yours</h1>
-				<code>-rw-r--r-- 1 searchcode searchcode 6.4T Feb 17 04:30 searchcode.db</code>
+
 				<aside class="notes">So yeah... as it says the database is probably bigger than yours..</aside>
 			</section>
 
@@ -45,19 +45,18 @@
 
 
 			<section>
-				<img src="./img/searchcode.png" height="500px;" style="border: none;" />
-				<code>-rw-r--r-- 1 searchcode searchcode 6.4T Feb 17 04:30 searchcode.db</code>
+				<img src="./img/searchcode.png" height="500px;" style="border: none;" /><br>
+				<code
+					style="font-size: 14px; line-height: 1em;">-rw-r--r-- 1 searchcode searchcode 6.4T Feb 17 04:30 searchcode.db</code>
 				<aside class="notes">I have talked about searchcode.com before, and the talks will continue until morale
 					improves.
 
 					Actually im not sure if it is the largest SQLite database in the world. I did find some random
-					thread with someone talking about a 7TB one they worked on. Im fairly confident some CERN intern has
-					a 100TB one working away somewhere they forgot about too.
+					thread with someone talking about a 7TB one they worked on, but no reciepts to prove it. Im fairly
+					confident some CERN intern has a 100TB one working away somewhere they forgot about thats just
+					sucking up LCH data.
 
 					Its the largest one I know of thats public facing though.
-
-					Seriously though its where I get to try all the crazy ideas I have at scale. Also I promise not to
-					add any LLM or AI content to this, we are going old school baby.
 				</aside>
 			</section>
 
@@ -93,33 +92,16 @@ dbWrite.SetMaxOpenConns(1)
 </code></pre>
 
 				<aside class="notes">
-					So given our trigram terms we now need to index them. There are a few ways to do this. Lets walk
-					through a few.
+					So there are few problems with SQlite, the first being that you run into "the database is locked" a
+					fair bit when using it. This is because SQLite is a file based database and only allows a single
+					write connection at a time. This is a problem if you are trying to read and write at the same time.
 
-					A posting list is the slice of struct or int64 containing the document's have that term.
+					Most people in Go solve this with a single connection and a mutex. However I found a post somewhere
+					where they suggested having two connections, one for reading and one for writing.
 
-					So "set" is found inside documents 1,77 and 345
+					The above is how you implement such a thing.
 
-					A positional index is one that stores where the term was found in the document.
-
-					So "set" as position 5 and 56 inside document 77
-
-					This is really useful for phrase searches and ranking.
-					In theory you can then use the index to reconstruct the document entirely. One catch with this is
-					that your index becomes larger than the thing you are indexing.
-
-					Done simply these are a bit of code you can had over to your cousin or most junior developer.
-
-					Skip lists are something you end up needing to implement because when searching multiple terms you
-					look for
-					the intersection of multiple posting lists and it speeds things up and something you need to add to
-					scale this approach.
-
-					They are an interesting data structure worth looking up on wikipedia. When you start adding
-					compression using ellias phano to reduce the size they quickly become complex, and it becomes easy
-					to tank your performance.
-
-
+					Note there is a second step to this... which is to set the pragma settings.
 				</aside>
 			</section>
 
@@ -145,9 +127,11 @@ pragma busy_timeout = 5000;`)
 	return db, nil
 }
 </code></pre>
-				<small>Do lowercase SQL be a rebel!</small>
+				<small>You can like just do things, like lowercase SQL</small>
 
 				<aside class="notes">
+					Tada the pragma settings you need. The above is what I use for searchcode.
+
 					PRAGMA journal_mode = wal;
 					What it does: Switches the database to Write-Ahead Logging (WAL) mode instead of the default
 					rollback journal mode.
@@ -232,21 +216,50 @@ pragma busy_timeout = 5000;`)
 
 			<section>
 				<h2>SQLite cross compiling</h2>
-				<p>https://github.com/mattn/go-sqlite3</p>
-				<code>GOOS=linux GOARCH=amd64 go build -ldflags="-s -w"</code>
-				<p>https://modernc.org/sqlite</p>
+				<code
+					style="font-size: 14px; line-height: 1em;">GOOS=linux GOARCH=amd64 go build -ldflags="-s -w"</code>
+				<p><a href="https://github.com/mattn/go-sqlite3">https://github.com/mattn/go-sqlite3</a></p>
+				<p><a href="https://modernc.org/sqlite">https://modernc.org/sqlite</a> <---- use this</p>
 
+
+						<aside class="notes">
+							So you can cross compile Go as you are probably aware, im working on a Mac but I target x64
+							linux. Cross compiling being one of the best things about Go.
+
+							This becomes problematic when you include C dependencies such as the most commonly used
+							SQLite driver which is the mattn one. Setting up cross compiling toolchains for C is
+							something I think I have done once in my life. Normally I would just create a virtual
+							machine for each target to build, however I wanted to build and debug locally with just the
+							Go toolchain.
+
+							Note it's possible to do this with the Zig toolchain these days... Its meant to be a lot
+							easier than setting up the C ones.
+							I am not familiar with this.
+
+							So the answer I turned to was the modernc sqlite driver, which is a pure Go implementation
+							of SQLite. It is not as fast as the C one, but worked out to be fast enough for my needs.
+						</aside>
+			</section>
+
+			<section>
+				<h2>SQLC: The BEST ORM for Go</h2>
+				<p><a href="https://sqlc.dev/">https://sqlc.dev/</a></p>
 
 				<aside class="notes">
-					Possible to do this with the Zig toolchain these days... I am not familiar with this.
+					I am not a fan of any existing ORM, with the exception of entity framework for C#. Ask me about that
+					later.
 
+					In Go I have tried most of them, GORM, sqlbuilder, raw SQL.
 
+					Raw SQL was the one I liked the most, but I also hate having to boilerplate... SQL being one.
+
+					SQLC is the best of both worlds. You write your SQL, and it generates the Go code for you.
 				</aside>
 			</section>
 
 			<section>
 				<h2>Conversion</h2>
-
+				<p>Converting 6 TB of data...</p>
 
 				<pre><code style="font-size: 14px; line-height: 1em;">increment := 10_000
 for i := 0; i < totalRowCount; i += increment {
@@ -267,7 +280,12 @@ for i := 0; i < totalRowCount; i += increment {
 }
 				</code></pre>
 				<aside class="notes">
-					One problem I hit was I needed to convert close to a billion rows. Now, you can queue up the rows to
+					So data conversions are usually one of those things that takes months of planning... however with a
+					team of 1 which was me, I was able to do this in under a week.
+
+					One problem I hit was I needed to convert close to a billion rows.
+
+					Now, you can queue up the rows to
 					insert but something thats faster and easier is to just batch them using transactions. This is a
 					simple example of how you can do that. Note there is no error handling in the example above.
 
