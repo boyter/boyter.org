@@ -127,7 +127,7 @@ pragma busy_timeout = 5000;`)
 	return db, nil
 }
 </code></pre>
-				<small>You can like just do things, like lowercase SQL</small>
+				<small>You can just do things, such as lowercase SQL</small>
 
 				<aside class="notes">
 					Tada the pragma settings you need. The above is what I use for searchcode.
@@ -245,6 +245,8 @@ pragma busy_timeout = 5000;`)
 				<h2>SQLC: The BEST ORM for Go</h2>
 				<p><a href="https://sqlc.dev/">https://sqlc.dev/</a></p>
 
+				<img src="./img/schema.png" height="500px;" style="border: none;" /><br>
+
 				<aside class="notes">
 					I am not a fan of any existing ORM, with the exception of entity framework for C#. Ask me about that
 					later.
@@ -253,7 +255,18 @@ pragma busy_timeout = 5000;`)
 
 					Raw SQL was the one I liked the most, but I also hate having to boilerplate... SQL being one.
 
-					SQLC is the best of both worlds. You write your SQL, and it generates the Go code for you.
+					SQLC is the best of both worlds. You write your SQL, and it generates the Go code for you based on
+					that and it also verifies the query against the supplied schema. This falls into Go's strengths of
+					code generation and static typing.
+
+					The only issue it has is that it does not work for dynamic queries, so where you have dynamic
+					filters,
+					in which case you write a SQL query that does most of what you need, then add a new Go file next to
+					the generated
+					code that has your filter and attach it to the *Queries struct.
+
+					In short SQLC is amazing. We have used it at Kablamo on a few projects now nobody has had an issue
+					with it
 				</aside>
 			</section>
 
@@ -283,24 +296,86 @@ for i := 0; i < totalRowCount; i += increment {
 					So data conversions are usually one of those things that takes months of planning... however with a
 					team of 1 which was me, I was able to do this in under a week.
 
-					One problem I hit was I needed to convert close to a billion rows.
+					One problem I hit was I needed to convert close to a billion rows. Selecting is fine, but when you
+					write you tank your performance because the writes happen on each row.
 
-					Now, you can queue up the rows to
-					insert but something thats faster and easier is to just batch them using transactions. This is a
-					simple example of how you can do that. Note there is no error handling in the example above.
+					You can of course write batch inserts...
 
-					For searchcode I was able to convert the whole database, so 10 tables at close to a billion rows
+					But much easier is to just batch them using transactions. This is a
+					simple example of how you can do that. Note no error handling.
+
+					For searchcode I was able to convert the whole database, so 10 tables at about a billion rows
 					using code like the above in about 48 hours, but I was limited because the database was a spinning
 					rust HDD and I was writing to the same disk I was reading from.
 
-					So appox 4 TB read and 6 TB written in 48 hours. Not bad for a single thread on a single spinning
+					So appox 6.4 TB read and 6.4 TB written in 48 hours. Not bad for a single thread on a single
+					spinning
 					rust HDD.
+				</aside>
+			</section>
+
+			<section>
+				<h2>Compression...</h2>
+				<p>Compress and Uncompress</p>
+
+				<pre><code style="font-size: 14px; line-height: 1em;">select uncompress(content) from code;
+insert into code (content) values (compress(?));</code></pre>
+
+				<pre><code style="font-size: 14px; line-height: 1em;">PRAGMA compression = 'zip';</code></pre>
+
+				<p><a href="https://phiresky.github.io/blog/2022/sqlite-zstd/">sqlite-zstd</a> "WARNING: I wouldn't
+					trust it with my data (yet)."</p>
+
+				<aside class="notes">
+					One of the things I did back in MySQL was compress the data. MySQL comes with a built in compress
+					and uncompress function.
+
+					Handy tip, if you ever want to transfer that data over the wire and decompress on a client, its just
+					gzip missing the header. Useful if you want to save some transfer bytes.
+
+					SQLite does not have a built in compress function. Unless you pay them... and I don't think it works
+					in
+				</aside>
+			</section>
+
+			<section>
+				<h2>BTRFS</h2>
+
+				<pre><code style="font-size: 14px; line-height: 1em;">sudo apt update
+sudo apt install btrfs-progs
+# help identify all the disks
+lsblk
+
+# format
+mkfs.btrfs /dev/disk/DISK_ID
+
+# make mount point
+mkdir -p /mnt/MY_DISK
+
+# mount
+sudo mount -o compress=zstd:5 /dev/disk/by-id/DISK_ID /mnt/MY_DISK
+
+# add to fstab
+echo '/dev/disk/by-id/DISK_ID /mnt/MY_DISK btrfs compress=zstd:3 0 2' | sudo tee -a /etc/fstab
+</code></pre>
+
+
+				<aside class="notes">
+					One of the things I did back in MySQL was compress the data. MySQL comes with a built in compress
+					and uncompress function.
+
+					Handy tip, if you ever want to transfer that data over the wire and decompress on a client, its just
+					gzip missing the header. Useful if you want to save some transfer bytes.
+
+					SQLite does not have a built in compress function. Unless you pay them... and I don't think it works
+					in
 				</aside>
 			</section>
 
 
 			<section>
 				<h2>Compression Results</h2>
+				<p>48 hours to transfer DB to new server!</p>
 				<pre><code style="font-size: 14px; line-height: 1em;">$ compsize /mnt/data/searchcode.db
 Processed 1 file, 16481352 regular extents (16481360 refs), 0 inline.
 Type       Perc     Disk Usage   Uncompressed Referenced  
@@ -311,6 +386,36 @@ zstd        23%      470G         1.9T         1.9T
 				<aside class="notes">Not quite as good as I got in my tests, but still considerably smaller
 
 					Note you need to use compsize to calculate this, as ls is unaware of the compression.</aside>
+			</section>
+
+			<section>
+				<h2>Backups.</h2>
+				<pre><code style="font-size: 14px; line-height: 1em;">b2 upload_file searchcode ./searchcode_analyse.db</code></pre>
+				<p>Future state <a href="https://litestream.io/">https://litestream.io/</a></p>
+				<aside class="notes">Using backblaze to save some money. Just do the above...
+					If you are looking to improve things, use litestream which hooks into the WAL and streams it to
+					to the bucket storage for you.
+				</aside>
+			</section>
+
+
+
+			<section>
+				<h2>Results...</h2>
+				<p>It just works.</p>
+				<p>Was a little worried at first, but now I am using it for a lot more than it could previously cope
+					with.</p>
+				<p>More flexible, can create more databases to handle other things, just another file.</p>
+				<p>Databases can be treated like tables.</p>
+
+				<aside class="notes">
+					As for SQLite? Well so far it appears to be working fine? While the schema searchcode uses is fairly
+					simple, avoiding joins where possible and properly indexed I would not have expected SQLite to cope
+					as well as it has. In fact making searchcode.com live with it was a giant leap of faith in it.
+
+					Everything compared to the previous instance being much faster, from searches, to fetching pages and
+					all of the backend processes that run against the database.
+				</aside>
 			</section>
 
 
