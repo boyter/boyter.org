@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-	<title>Golang-Syd 25th May 2023</title>
+	<title>Golang-Syd 27th March 2025</title>
 
 	<link rel="stylesheet" href="css/reveal.css">
 	<link rel="stylesheet" href="css/theme/black.css">
@@ -31,17 +31,6 @@
 
 				<aside class="notes">So yeah... as it says the database is probably bigger than yours..</aside>
 			</section>
-
-			<!-- <section>
-					<h2>Who are you?</h2>
-					<p>
-					"Officially" technical lead/principle at Kablamo but a "code monkey" at heart.</p>
-					<p>I blog <a href="https://boyter.org/">boyter.org</a> I free software <a href="https://github/boyter/">github/boyter/</a> I run <a href="https://searchcode.com/">searchcode.com</a> also on the twitter <a href="https://twitter.com/boyter">@boyter</a> activitypub <a href="https://honk.boyter.org/boyter">@boyter@honk.boyter.org</a></p>
-					<aside class="notes">Not going to bore you too much with who I am because you don't care.
-					
-					Aside, I was going to do a talk about how you can destroy the fediverse with a few lines of code... then thought better of it. If you want that  in the future go hassle Chewy or Katie.
-					</aside>
-				</section> -->
 
 
 			<section>
@@ -361,14 +350,18 @@ echo '/dev/disk/by-id/DISK_ID /mnt/MY_DISK btrfs compress=zstd:3 0 2' | sudo tee
 
 
 				<aside class="notes">
-					One of the things I did back in MySQL was compress the data. MySQL comes with a built in compress
-					and uncompress function.
+					So if you are prepared to get your linux hands dirty you can do transparent disk compression using
+					ZFS or BTRFS. I went with BTRFS because it was easier to setup.
 
-					Handy tip, if you ever want to transfer that data over the wire and decompress on a client, its just
-					gzip missing the header. Useful if you want to save some transfer bytes.
+					I also used ZSTD as in my tests it works a lot better than gzip.
 
-					SQLite does not have a built in compress function. Unless you pay them... and I don't think it works
-					in
+					Funny story, I havent looked at doing this sort of thing in a long time. Last time I checked BTRFS
+					was not considered stable and ReiserFS was a thing.
+
+					ReiserFS has since been removed from the kernel, and BTRFS is now the default system for some
+					distros.
+
+					Its actually not that hard to configure, although I ran into issues when trying to validate it.
 				</aside>
 			</section>
 
@@ -383,9 +376,13 @@ TOTAL       76%      4.8T         6.3T         6.3T
 none       100%      4.3T         4.3T         4.3T       
 zstd        23%      470G         1.9T         1.9T
 </code></pre>
-				<aside class="notes">Not quite as good as I got in my tests, but still considerably smaller
+				<aside class="notes">Not quite as good as I got in my tests, but still considerably smaller.
 
-					Note you need to use compsize to calculate this, as ls is unaware of the compression.</aside>
+					When I tested it on some sample data I was getting greater than 50% compression. This is not that
+					good.
+
+					Note you need to use compsize to calculate this, as ls is unaware of the compression of the file,
+					which makes sense.</aside>
 			</section>
 
 			<section>
@@ -398,11 +395,10 @@ zstd        23%      470G         1.9T         1.9T
 				</aside>
 			</section>
 
-
-
 			<section>
 				<h2>Results...</h2>
 				<p>It just works.</p>
+				<img src="./img/sqlite_read_big.png" style="border: none; max-height: 100px;" />
 				<p>Was a little worried at first, but now I am using it for a lot more than it could previously cope
 					with.</p>
 				<p>More flexible, can create more databases to handle other things, just another file.</p>
@@ -418,23 +414,18 @@ zstd        23%      470G         1.9T         1.9T
 				</aside>
 			</section>
 
-
-
-
-
-
 			<section>
 				<h2>Thank You!</h2>
-				<p>Presentation located at <a
-						href="https://boyter.org/static/golang-syd-25th-may/">https://boyter.org/static/golang-syd-25th-may/</a>
-					or just go to boyter.org and I will link it up tomorrow.</p>
+				<p>Presentation located at <a href="https://boyter.org/">https://boyter.org/</a>
+					or just go to boyter.org and I will link it up once I fix hugo.</p>
+				<p>Or read the blog post <a
+						href="https://boyter.org/posts/searchcode-bigger-sqlite-than-you/">https://boyter.org/posts/searchcode-bigger-sqlite-than-you/</a>
+				</p>
 				<aside class="notes">
-					Of course... probably nobody using searchcode probably cares that its running on a unique bloom
-					filter trigram backed index with
-					ideas borrowed from bing. But I know... and now you do too.
+					Thank you for listening to me ramble on about SQLite and searchcode.com. I hope you found it
+					interesting and informative.
 
-					Now this is meant to be interactive, so ill bring the code up and we can talk about whatever you
-					like given time and get some questions out of the way.
+					Feel free to ask me any questions, I am happy to answer them.
 				</aside>
 			</section>
 
