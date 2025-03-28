@@ -19,7 +19,8 @@ categories:
   - Unit Testing
 
 ---
-[<img class="alignnone size-full wp-image-674" style="float: right;" src="http://www.boyter.org/wp-content/uploads/2013/07/200px-Philip_Stanhope_4th_Earl_of_Chesterfield.png" alt="Philip Stanhope" width="200" height="239" />][1]
+
+![Philip Stanhope](/static/200px-Philip_Stanhope_4th_Earl_of_Chesterfield-150x150.png)
 
 Philip Dormer Stanhope, 4th Earl of Chesterfield (pictured) managed to embarrass me in front of my peers in 2010. Sort of. In truth it was my hubris that caused the incident. Here is how it happened and what I learnt through the process.
 
@@ -33,10 +34,14 @@ Integration is hard. Really hard. Ask anyone where most of their debugging time 
 
 Wait a minute, didn't you just say that was tested? Yep I did. For the exact condition that threw the error too. Turns out that SQL Server only supports dates from 1753, whereas .NET supports 1 and 9999. Why does SQL server only support dates from 1753? That's due to to the [Calendar (New Style) Act 1750][2] which our friend Philip Stanhope debated for. Turns out the Sybase developers didn't want to add the additional code to calculate dates correctly before 1753 and after so they set that date to be the epoch. This of course caused my code the blow up, and me to get very embarrassed.
 
-The fix BTW to check if its a valid SQL server date is pretty simple,```static bool isValidSqlDate(DateTime date)
+The fix BTW to check if its a valid SQL server date is pretty simple,
+
+```
+bool isValidSqlDate(DateTime date)
 {
   return ((date &gt;= (DateTime)SqlDateTime.MinValue) && (date &lt;= (DateTime)SqlDateTime.MaxValue));
-}```
+}
+```
 
 So what did I learn from this experience?
 
@@ -46,9 +51,8 @@ The second is that it pays to be quietly confident rather then vocally confident
 
 For fun I have included my code comment below I added once I figured this all out. Hail to ye o' merry man indeed.
   
-<small></small>
-
-<pre style="font-size: 0.7em;">/*
+```
+/*
  *      Philip Dormer Stanhope, 4th Earl of Chesterfield
  *
  *      it is because of him we need to validate dates before 1753 in SQL Server
@@ -95,10 +99,8 @@ For fun I have included my code comment below I added once I figured this all ou
  *       ////::///++osssso.`````-://+++//:/::://///:::///:/ss++++++++++oosoo+oy
  *       /:::::://+++oooo+.```.:///+/////////::///::://:+yso+++++ooosyyhddmdhhd
  *       /:::::////+++o/.` `-:///////////////:/:/://::oysooooooooossyyhhhddddmm
- */```
+ */
+ ```
 
-&nbsp;
-
- [1]: https://en.wikipedia.org/wiki/Philip_Stanhope%2C_4th_Earl_of_Chesterfield
  [2]: https://en.wikipedia.org/wiki/Chesterfield%27s_Act
  [3]: http://stackoverflow.com/questions/3374969/what-is-the-secret-behind-being-a-good-software-developer

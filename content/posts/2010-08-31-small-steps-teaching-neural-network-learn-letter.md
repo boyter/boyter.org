@@ -18,41 +18,18 @@ To get started we are going to need the following,
 
 The images we are going to use are the following,
 
-<table>
-  <tr>
-    <td>
-      <p>
-        <div id="attachment_280" style="width: 60px" class="wp-caption alignnone">
-          <a href="http://www.wausita.com/wp-content/uploads/2010/08/A.gif"><img class="size-full wp-image-280" title="A" src="http://www.wausita.com/wp-content/uploads/2010/08/A.gif" alt="" width="50" height="50" /></a>
+>The Letter A - image lost to time
 
-          <p class="wp-caption-text">
-            The Letter A
-          </p>
-        </div></td> 
-        
-        <td>
-          <p>
-            <div id="attachment_281" style="width: 60px" class="wp-caption alignnone">
-              <a href="http://www.wausita.com/wp-content/uploads/2010/08/B.gif"><img class="size-full wp-image-281" title="B" src="http://www.wausita.com/wp-content/uploads/2010/08/B.gif" alt="" width="50" height="50" /></a>
-              
-              <p class="wp-caption-text">
-                The Letter B
-              </p>
-            </div></td> </tr> </tbody> </table> 
-            
-            <p>
-              Our goal is to teach a neural network to tell the difference between the above. There are two ways we can look at feeding data into our network. The first is to just convert each of the pixels in the image into an input. So for a 10&#215;10 image you would need 100 input neurons. The second is to try and describe what the letter looks like. This can mean describing the thickness of lines at various cut points etc&#8230;
-            </p>
-            
-            <p>
-              The first is the easiest to code so I am going to go with that. The first thing we need is a way to open the image and convert it to a list of data. I am going to just iterate over each row and for each pixel that's black add a 1 to a list otherwise a 0. I also added some methods to save and load the network to disk.
-            </p>
-            
-            <p>
-              The next step is to write some code which takes the above pixel data and feeds it into the Neural Network.
-            </p>
-            
-            ```import bpnn
+>The Letter B - image lost to time
+
+Our goal is to teach a neural network to tell the difference between the above. There are two ways we can look at feeding data into our network. The first is to just convert each of the pixels in the image into an input. So for a 10&#215;10 image you would need 100 input neurons. The second is to try and describe what the letter looks like. This can mean describing the thickness of lines at various cut points etc&#8230;
+
+The first is the easiest to code so I am going to go with that. The first thing we need is a way to open the image and convert it to a list of data. I am going to just iterate over each row and for each pixel that's black add a 1 to a list otherwise a 0. I also added some methods to save and load the network to disk.
+
+The next step is to write some code which takes the above pixel data and feeds it into the Neural Network.
+
+```
+import bpnn
 import Loader
 
 if **name** == '**main**':
@@ -68,21 +45,17 @@ if **name** == '**main**':
 
   an = bpnn.NN(len(adata),hiddennodes,len(apat[0][1]))
   an.train(apat)
-  cla.savenn(an,filename='abnn.n')```
+  cla.savenn(an,filename='abnn.n')
+  ```
 
-            <p>
-              You can see that in the above we create a loader object which allows us to read images and networks. We then load our data, put it into the correct pattern for our Neural Network to train on, then train it and save the network.
-            </p>
-            
-            <p>
-              The important thing to look at here is the number of hiddennodes. This is something you will have to play with in order to make your network efficient. I have set it to 2 for the moment.
-            </p>
-            
-            <p>
-              Now running the above code we get the following,
-            </p>
-            
-            ```$python Step1.py
+You can see that in the above we create a loader object which allows us to read images and networks. We then load our data, put it into the correct pattern for our Neural Network to train on, then train it and save the network.
+
+The important thing to look at here is the number of hiddennodes. This is something you will have to play with in order to make your network efficient. I have set it to 2 for the moment.
+
+Now running the above code we get the following,
+
+```
+$python Step1.py
 error 4.42059
 error 0.71834
 error 0.71834
@@ -92,29 +65,19 @@ error 0.71834
 error 0.71834
 error 0.71834
 error 0.71834
-error 0.71834```
+error 0.71834
+```
 
-            <p>
-              What the above shows is the network learning. The important thing is that the error continues to decrease. In this case it lowers a bit, then stops. The reason for this can could be one of the following,
-            </p>
-            
-            <ul>
-              <li>
-                Not enough hidden nodes &#8211; So not enough memory to "learn" the difference
-              </li>
-              <li>
-                Not enough training time &#8211; Unlikely since the error isn't decreasing
-              </li>
-              <li>
-                Not enough inputs &#8211; Unlikely since we have 400 inputs but is possible
-              </li>
-            </ul>
-            
-            <p>
-              To remedy this I have increased the number of hidden nodes to 3 to increase the learning power of the network and then run it again.
-            </p>
-            
-            ```$python Step1.py
+What the above shows is the network learning. The important thing is that the error continues to decrease. In this case it lowers a bit, then stops. The reason for this can could be one of the following,
+
+- Not enough hidden nodes &#8211; So not enough memory to "learn" the difference
+- Not enough training time &#8211; Unlikely since the error isn't decreasing
+- Not enough inputs &#8211; Unlikely since we have 400 inputs but is possible
+
+To remedy this I have increased the number of hidden nodes to 3 to increase the learning power of the network and then run it again.
+
+```
+$python Step1.py
 error 2.93246
 error 0.00048
 error 0.00023
@@ -124,18 +87,14 @@ error 0.00010
 error 0.00008
 error 0.00007
 error 0.00006
-error 0.00006```
+error 0.00006
+```
 
-            <p>
-              This is much better! The error continues to decrease and almost reaches 0. This means that our network has learnt the difference between our sample letter A and B.
-            </p>
-            
-            <p>
-              We can test this pretty easily with the following test script which uses unit tests to ensure we don't break the network in the future
-            </p>
-            
-            ```
+This is much better! The error continues to decrease and almost reaches 0. This means that our network has learnt the difference between our sample letter A and B.
 
+We can test this pretty easily with the following test script which uses unit tests to ensure we don't break the network in the future
+
+```
 import unittest
 import Loader
 
@@ -156,19 +115,20 @@ class TestStep1(unittest.TestCase):
     self.assertTrue(guess[0] &lt; 0.05)
 
 if **name** == '**main**':
-  unittest.main()```
+  unittest.main()
+```
 
-            <p>
-              Running this gives,
-            </p>
-            
-            ```$python TestStep1.py
+Running this gives,
+
+```
+$python TestStep1.py
 
 ----------------------------------------------------------------------
 
 Ran 2 tests in 0.031s
 
-OK```
+OK
+```
 
 Looks like all is well. The next step and what will be in the next blog post is training our network so that it can identify from characters it has never seen before.
 

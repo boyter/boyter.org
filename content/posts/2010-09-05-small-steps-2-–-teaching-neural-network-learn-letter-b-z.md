@@ -10,7 +10,9 @@ So in the previous article we managed to get our [neural network to learn the di
 
 **Get the source to everything below in [Step2][2]**
 
-Now the code below is rather un-pythonic but it does show us loading each of the letters and then training the network to learn that an A is an A and that every other letter is not an A. I had initially tried to teach it how to recognise each letter however I found this resulted in a huge neural network which was slow to train. For the moment teaching the network what an A is should be fine for now.```import bpnn
+Now the code below is rather un-pythonic but it does show us loading each of the letters and then training the network to learn that an A is an A and that every other letter is not an A. I had initially tried to teach it how to recognise each letter however I found this resulted in a huge neural network which was slow to train. For the moment teaching the network what an A is should be fine for now.
+
+```import bpnn
 import Loader
 
 if **name** == '**main**':
@@ -79,11 +81,15 @@ if **name** == '**main**':
   an = bpnn.NN(len(adata),hiddennodes,1)
   an.train(apat)
 
-  cla.savenn(an,filename='aznn.n')```
+  cla.savenn(an,filename='aznn.n')
+```
 
 Again like before what the above does is open up each of our sample images and then trains the network on them. I ended up playing around with the number of nodes and managed to get a low error rate with 25 inputs and 3 hidden nodes. This is interesting as the last network used 400 inputs and 3 hidden nodes, and at first I was skeptical if the network had learnt this pattern correctly.
 
-Of course we need something to test the effectiveness of our network and so I created the below test script which should take care of this and should let us see if the network does work correctly.```import unittest
+Of course we need something to test the effectiveness of our network and so I created the below test script which should take care of this and should let us see if the network does work correctly.
+
+```
+import unittest
 import Loader
 
 class TestClassifyAfromB(unittest.TestCase):
@@ -109,15 +115,20 @@ class TestClassifyAfromB(unittest.TestCase):
       self.assertTrue(guess[0] &lt; 0.05)
 
 if **name** == '**main**':
-  unittest.main()```
+  unittest.main()
+```
 
-The above is just a quick and dirty test and the results of which are,```$python TestStep2.py
+The above is just a quick and dirty test and the results of which are,
+
+```
+$python TestStep2.py
 ...
 ----------------------------------------------------------------------
 
 Ran 3 tests in 0.015s
 
-OK```
+OK
+```
 
 All good! The next goal is to build a large sample of different letters in different fonts and get the network to pick out the letter A from many examples. This will indicate that it has learnt the pattern of what an A looks like rather then the letter A as given in the above examples.
 

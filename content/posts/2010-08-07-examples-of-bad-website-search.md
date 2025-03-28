@@ -9,7 +9,7 @@ url: /2010/08/examples-of-bad-website-search/
 ---
 I thought I would post some examples of websites with bad website search. Rather then pick on some small blogs lets go after the big boys. Starting with eBay.
 
-"There was a screenshot of ebay here at one point but now it is lost for all time.."
+> "There was a screenshot of ebay here at one point but now it is lost for all time... sorry"
 
 The link to the left is an example of a simple search I performed on eBay for an iPad. The search comes back pretty quickly which is good but has a few issues I will go through now.
 

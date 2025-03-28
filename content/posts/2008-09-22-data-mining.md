@@ -29,9 +29,9 @@ Movie 2:1
 
 Now because the ratings are so different the users should have almost a 0% relation. However it ended up giving a relation of 99% which is obviously wrong. Now there are two ways to improve this. Feed in more movies to check which will increase the distance between the users, or modify the ratings so they are more separate. So 1 = -5, 2 = -2, 3 =0, 4=2, 5=5.
 
-I decided that I would do the second since it means no matter the amount of movies plugged in it should give better results. And the results are&#8230;.
+I decided that I would do the second since it means no matter the amount of movies plugged in it should give better results. And the results are…
 
-Im not sure. I haven't put the code in to do this. I will do it tonight (its a 30 job) and post the results for a few queries. Essentially the way the queries work is I put in some movies and how I rated them. The program then goes and finds movies which I might like based on that information.
+Im not sure. I haven't put the code in to do this. I will do it tonight (its a 30 min job) and post the results for a few queries. Essentially the way the queries work is I put in some movies and how I rated them. The program then goes and finds movies which I might like based on that information.
 
 **EDIT** I ended up implementing the above and then trying it out on a few queries.
 
