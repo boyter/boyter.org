@@ -27,7 +27,9 @@ You define a mapping by putting to the index/type inside elasticsearch before th
 }
 {{</highlight>}}
 
-With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and will ignore malformed dates. Malformed dates being dates which have a non matching format or are empty. It will also treat the `type` field of the document as a single keyword allowing us to perform aggregations and facets on this field.```
+With the below definition the `person.DOB` field will be treated as a date in the format `yyyy-MM-dd` and will ignore malformed dates. Malformed dates being dates which have a non matching format or are empty. It will also treat the `type` field of the document as a single keyword allowing us to perform aggregations and facets on this field.
+
+```
 PUT: <http://localhost:9200/film/>
 TYPE: application/json
 
@@ -78,9 +80,12 @@ Sticking with our example of Keanu you can see that in the below mock-up that we
 
 Facets are the result of setting the keyword type in the mapping. Once you have set the mapping then added the document you can then request facets to be produced for that field.
 
-To generate facts for a search you want to run a search with some aggregations set.```
-POST: http://localhost:9200/film/actor/_search
+To generate facts for a search you want to run a search with some aggregations set.
+
+```
+POST: <http://localhost:9200/film/actor/_search>
 TYPE: application/json
+
 ```
 
 {{<highlight json>}}
@@ -133,7 +138,9 @@ When run against an index with the mapping setup you will get back in your respo
 
 Which is a sum of each of the unique keys based on the field you specified. You can have multiple aggregation types if you have multiple facets, with each having the key of the name you set in your aggregation request.
 
-Once you have the facet you can then filter results down to just those containing it. You can do this like the below example that will filter down to a any document where the type is set to "Actor".```
+Once you have the facet you can then filter results down to just those containing it. You can do this like the below example that will filter down to a any document where the type is set to "Actor".
+
+```
 POST: <http://localhost:9200/film/actor/_search>
 TYPE: application/json
 

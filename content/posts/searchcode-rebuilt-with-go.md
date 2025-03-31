@@ -32,10 +32,11 @@ I realised after playing around with them that I could probably bring together a
 
 Several weeks later and it is here. A few changes were made though.
 
-I am now using redis as the cache coupled with a "level 1" cache in memory (github.com/allegro/bigcache). The level 1 cache saves on a network request, and as know the fastest network request is the one you don't take. If an item is missed from level 1 cache it looks to level 2. If found in level to it sticks the item into level one to save the next request. If an item is missing from both it hits the back-end then puts it into redis and the level one cache. I have never really used redis in anger before. I remember reading about its memory model back in 2016 and since it was susceptible memory fragmentation decided I would stick with memcached. This however has improved recently and as such I decided I would give it a try. As such I have the following config values set.```
+I am now using redis as the cache coupled with a "level 1" cache in memory (github.com/allegro/bigcache). The level 1 cache saves on a network request, and as know the fastest network request is the one you don't take. If an item is missed from level 1 cache it looks to level 2. If found in level to it sticks the item into level one to save the next request. If an item is missing from both it hits the back-end then puts it into redis and the level one cache. I have never really used redis in anger before. I remember reading about its memory model back in 2016 and since it was susceptible memory fragmentation decided I would stick with memcached. This however has improved recently and as such I decided I would give it a try. As such I have the following config values set.
+
+```
 maxmemory 8000mb
 maxmemory-policy allkeys-lfu
-
 ```
 
 LFU seems like it might work better for searchcode rather than LRU but I have no metrics to back that up. Looking at the stats out of it its memory fragmentation ratio is set to 1.0 which so it appears there are no issues there at least. I may try changing it around in a week or so and observe the difference on hit ratios.

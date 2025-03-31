@@ -28,10 +28,10 @@ The first thing to do is download and install Go. I would suggest always install
 
 Older guides will mention setting up your $GOPATH. This is something you can comfortably ignore in 2023. Check my [previous post](https://boyter.org/posts/how-to-start-go-project-2018/) if you are curious. However everything has or is moving to modules, so just consider this something you don't have to learn.
 
-One thing I do recommend is update your machines path to point to the `bin` directory of the default $GOPATH, `export PATH=$PATH:$(go env GOPATH)/bin` so that you can install anything you are working on quickly and have it available everywhere. For example, on my current machine it contains the following.```shell
+One thing I do recommend is update your machines path to point to the `bin` directory of the default $GOPATH, `export PATH=$PATH:$(go env GOPATH)/bin` so that you can install anything you are working on quickly and have it available everywhere. For example, on my current machine it contains the following.
 
+```shell
 # boyter @ Bens-MacBook-Air in ~/go/bin [10:04:57]
-
 $ tree
 .
 ├── boltbrowser
@@ -41,8 +41,7 @@ $ tree
 ├── gow
 ├── hashit
 ├── lc
-├── scc
-
+├── scc\
 ```
 
 My dotfile contains `export PATH=/Users/boyter/go/bin:$PATH` to achieve the above.
@@ -71,12 +70,16 @@ Getting a package is almost as simple as knowing its path and using `go get URL`
 
 Where getting packages can be confusing is if the package maintainer has moved on from semantic version 1 to 2 or further. In this case you will need to add the version you want at the end to pull in the version you want.
 
-For example my project `scc` is on version 3.1.0. If I were to import it without specifying the version,```shell
+For example my project `scc` is on version 3.1.0. If I were to import it without specifying the version,
+
+```shell
 $ go get github.com/boyter/scc/  
 go: added github.com/boyter/scc v2.12.0+incompatible
 ```
 
-I would get a version 2.12 package which can be confusing to those new to Go. When adding the latest version,```shell
+I would get a version 2.12 package which can be confusing to those new to Go. When adding the latest version,
+
+```shell
 $ go get github.com/boyter/scc/v3
 go: added github.com/boyter/scc/v3 v3.1.0
 
@@ -108,18 +111,24 @@ Note its best to not refer to the language as golang in casual conversation, as 
 
 ## Building / Installing
 
-For commands which have `package main````shell
+For commands which have `package main`
+
+```shell
 go build   builds the command and leaves the result in the current working directory.
 go install builds the command in a temporary directory then moves it to $GOPATH/bin.
 ```
 
-For packages```shell
+For packages
+
+```shell
 go build   builds your package then discards the results.
 go install builds then installs the package in your $GOPATH/pkg directory.
 
 ```
 
-If you want to cross compile, that is build on Linux for Windows or vice versa you can set what architecture your want to target and the OS through environment variables. You can view your defaults in `go env` but to change them you would do something like,```shell
+If you want to cross compile, that is build on Linux for Windows or vice versa you can set what architecture your want to target and the OS through environment variables. You can view your defaults in `go env` but to change them you would do something like,
+
+```shell
 GOOS=darwin GOARCH=amd64 go build
 GOOS=darwin GOARCH=arm64 go build
 GOOS=windows GOARCH=amd64 go build
@@ -130,7 +139,9 @@ GOOS=linux GOARCH=arm64 go build
 
 ### Trimming Builds
 
-Go binaries are by default "fat" and larger than you might expect. There is an easy way to reduce the size,```shell
+Go binaries are by default "fat" and larger than you might expect. There is an easy way to reduce the size,
+
+```shell
 go build -ldflags="-s -w"
 
 ```
@@ -147,7 +158,9 @@ While you can use sonar and various other tools for this, I prefer to have somet
 
 For linting and static analysis <https://github.com/golangci/golangci-lint>
 
-For security checks I like to use gitleaks <https://github.com/gitleaks/gitleaks> and run it with the following checks.```shell
+For security checks I like to use gitleaks <https://github.com/gitleaks/gitleaks> and run it with the following checks.
+
+```shell
 gitleaks detect -v -c gitleaks.toml
 gitleaks protect -v -c gitleaks.tom
 ```
@@ -190,7 +203,9 @@ _ = pprof.WriteHeapProfile(f)
 
 Putting the above behind a simple route dumps a snapshot of the heap to disk which I can then analyze.
 
-In either case the analysis of the profile is the same,```shell
+In either case the analysis of the profile is the same,
+
+```shell
 go tool pprof -http=localhost:8090 profile.pprof
 
 ```
@@ -199,29 +214,39 @@ The above will open a http server on port 8090 which you can then inspect. This 
 
 ## Unit Testing
 
-To run all the unit tests for your code (with caching there is no reason to not run them all anymore) you should run the following which will run all the unit tests```shell
+To run all the unit tests for your code (with caching there is no reason to not run them all anymore) you should run the following which will run all the unit tests
+
+```shell
 go test ./...
 ```
 
-To run benchmarks run the below inside the directory where the benchmark is. Say you have `./processor/` inside your project with a benchmark file inside there go to that directory and run,```shell
+To run benchmarks run the below inside the directory where the benchmark is. Say you have `./processor/` inside your project with a benchmark file inside there go to that directory and run,
+
+```shell
 go test --bench .
 
 ```
 
-To run the built in fuzz tests,```shell
+To run the built in fuzz tests,
+
+```shell
 go test -fuzz .
 ```
 
 To create a test file you need only create a file with `_test` as a suffix in the name. For example to create a test for a file called `file.go` you might want to call the file `file_test.go`.
 
-If you want to run an individual test you can do so,```shell
+If you want to run an individual test you can do so,
+
+```shell
 go test ./... -run NameOfTest
 
 ```
 
 Which will attempt to any test in all packages that have the name `NameOfTest`. Keep in mind that the argument `NameOfTest` supports regular expressions so its possible to target groups of tests assuming you name them well. For general running you can use `.` which matches everything.
 
-If you find yourself wanting or needing to run tests ignoring the cache you can do the following,```shell
+If you find yourself wanting or needing to run tests ignoring the cache you can do the following,
+
+```shell
 GOCACHE=off go test ./...
 ```
 
@@ -247,7 +272,9 @@ If you end up adding integration tests inside your Go code its common practice t
 package mypackage
 {{</highlight>}}
 
-You can then run them```shell
+You can then run them
+
+```shell
 go test --tags=integration ./...
 
 ```
@@ -256,7 +283,9 @@ This will still run the untagged tests. You can also use this to split tests int
 
 ### Test Caching
 
-Test results are cached by default which might not be ideal for integration tests. Where you want to override this `-count=1` can be added to your run command to run the test 1 time ignoring the cached results. You can replace 1 with a higher value if required.```shell
+Test results are cached by default which might not be ideal for integration tests. Where you want to override this `-count=1` can be added to your run command to run the test 1 time ignoring the cached results. You can replace 1 with a higher value if required.
+
+```shell
 go test -count=1 --tags=integration ./...
 ```
 
@@ -288,7 +317,9 @@ The following websites/blogs tend to have quality Go content worth paying attent
 
 There are times where you want to potentially have multiple entry points into an application by having multiple `main.go` files in the main package. One way to achieve this is to have shared code in one repository, and then import it into others. However this can be cumbersome when you want to use vendor imports.
 
-One common pattern for this is to have a directory inside the root of the application and place your main.go files in there. For example,```shell
+One common pattern for this is to have a directory inside the root of the application and place your main.go files in there. For example,
+
+```shell
 SRC
 ├── cmd
 │   ├── commandline
@@ -314,7 +345,9 @@ With the above you can now call into code exposed by the repository package in t
 
 ## OS Specific Code
 
-Occasionally you will require code in your application that will not compile or run on different operating systems. The most common way to deal with this is to have the following structure in your application,```shell
+Occasionally you will require code in your application that will not compile or run on different operating systems. The most common way to deal with this is to have the following structure in your application,
+
+```shell
 main_darwin.go
 main_linux.go
 main_windows.go
@@ -326,7 +359,9 @@ Assuming that the above just contained definitions for line breaks on multiple o
 
 Using the above techniques you can run inside Docker using multiple entry points easily. A sample dockerfile to achieve this is below using code from our hypothetical repository at `https://username@bitbucket.code.company-name.com.au/scm/code/random-code.git`
 
-The below would build and run the main application,```
+The below would build and run the main application,
+
+```
 FROM golang:1.20
 
 COPY ./ /go/src/bitbucket.code.company-name.com.au/scm/code/
@@ -338,7 +373,9 @@ CMD ["./main"]
 
 ```
 
-The below would build and run from the one of the alternate entry point's for the application,```shell
+The below would build and run from the one of the alternate entry point's for the application,
+
+```shell
 FROM golang:1.20
 
 COPY ./ /go/src/bitbucket.code.company-name.com.au/scm/code/
@@ -349,7 +386,9 @@ RUN go build main.go
 CMD ["./main"]
 ```
 
-A few people who have read this post suggested using multi stage docker builds <https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds> which works well with Docker 17.05 or higher. More details here <https://medium.com/travis-on-docker/multi-stage-docker-builds-for-creating-tiny-go-images-e0e1867efe5a> An example would be,```shell
+A few people who have read this post suggested using multi stage docker builds <https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds> which works well with Docker 17.05 or higher. More details here <https://medium.com/travis-on-docker/multi-stage-docker-builds-for-creating-tiny-go-images-e0e1867efe5a> An example would be,
+
+```shell
 FROM golang:1.20
 COPY . /go/src/bitbucket.code.company-name.com.au/scm/code
 WORKDIR /go/src/bitbucket.code.company-name.com.au/scm/code/

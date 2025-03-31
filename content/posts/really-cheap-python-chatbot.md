@@ -13,14 +13,18 @@ Generally most chat-bots are trying to work out what you want, and the funnel yo
 
 So given that I decided to create a very simple decision tree, and then code around that. I took the companies own help/about pages on the company website to get keywords, and built a simple work-flow where you either learn about the company or attempt to pay a bill using credit card or paypal.
 
-The result of my interacting with the bot is included below.```
+The result of my interacting with the bot is included below.
+
+```
 Hello! RCC (really cheap chatbot) here what are you trying to do today? At any time type quit to quit.: i want to pay a bill
 
 Do you want to pay your bill using a credit card or using paypal?: credit card please
 
 You can pay online using your credit card at <https://plumbus.com.au/pay>
 
-``````
+```
+
+```
 Hello! RCC (really cheap chatbot) here what are you trying to do today? At any time type quit to quit.: pay bill
 
 Do you want to pay your bill using a credit card or using paypal?: dunno
@@ -28,14 +32,16 @@ Sorry I did't quite catch what you were saying. Could you try typing it using di
 
 Do you want to pay your bill using a credit card or using paypal?: credit card mate
 
-You can pay online using your credit card at https://plumbus.com.au/pay
-``````
+You can pay online using your credit card at <https://plumbus.com.au/pay>
+```
 
+```
 Hello! RCC (really cheap chatbot) here what are you trying to do today? At any time type quit to quit.: pay bill using paypal
 
 You can pay online using paypal at <https://plumbus.com.au/paypal>
+```
 
-``````
+```
 Hello! RCC (really cheap chatbot) here what are you trying to do today? At any time type quit to quit.: i want to learn the history of your company
 
 We're the leading Australian company supplying things to 4.2 million customers and developing and producing natural widgets. We also aspire to be the number one plumbus company in Australia.

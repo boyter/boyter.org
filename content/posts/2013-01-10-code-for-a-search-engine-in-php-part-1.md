@@ -64,15 +64,10 @@ In order to crawl you need to come up with a list of URL's. There are a few comm
 Downloading the file shows it to be in the following format,
 
 ```
-
 # Quantcast Top Million U.S. Web Sites
-
 # Rankings estimated as of Nov 27, 2012
-
 # Copyright 2012 Quantcast Corporation
-
 # This data is subject to terms of use described at <http://www.quantcast.com/docs/measurement-tos>
-
 Rank    Site
 1       google.com
 2       youtube.com
@@ -84,7 +79,6 @@ Rank    Site
 8       wikipedia.org
 9       microsoft.com
 10      huffingtonpost.com
-
 ```
 
 Since we are only interested in the actual sites lets write a simple parser to pull the correct data out. Its a fairly simple script really,
@@ -134,7 +128,9 @@ grep "http" content.rdf.u8 | python parse.py | sort | uniq > urllist.txt
 
 ```
 
-Where parse.py is just the following,```
+Where parse.py is just the following,
+
+```
 import re
 import sys
 
@@ -151,7 +147,9 @@ The above DMOZ data gives about 4 million unique urls to crawl and use. Sadly a 
 
 ### DOWNLOADING
 
-Downloading the data is going to take a while, so be prepared for a long wait. You can write a very simple crawler in PHP simply by using a file\_get\_contents and sticking in a url. I like simple, so lets do that.```
+Downloading the data is going to take a while, so be prepared for a long wait. You can write a very simple crawler in PHP simply by using a file\_get\_contents and sticking in a url. I like simple, so lets do that.
+
+```
 $file_handle = fopen("urllist.txt", "r");
 
 while (!feof($file_handle)) {
@@ -173,7 +171,9 @@ At this point I quickly found is that the crawler is going to take forever to do
 
 **\*NB\*** Be careful when using hashes with URL's. While the square root of the number <http://www.skrenta.com/2007/08/md5_tutorial.html> of URL's is still a lot bigger then the current web size if you do get a collision you are going to get pages about Britney Spears when you were expecting pages about Bugzilla. Its probably a non issue in our case, but for billions of pages I would opt for a much larger hashing algorithm such as SHA 256 or avoid it altogether.
 
-First we change the crawler to be the below.```
+First we change the crawler to be the below.
+
+```
 $url = trim($argv[1]);
 
 $md5 = md5($url);
@@ -196,7 +196,9 @@ if(!file_exists('./documents/'.$one.'/'.$two.'/'.$md5)) {
 
 This simply checks for the arguments its supplied and expects the first argument (the one following the filename itself) to be the URL its going to download. It then hashes the URL so we know the filename and which directories need to be created. We then check if the file and save location exists, and if it dosn't we then crawl the site, create the directories and save the content to disk.
 
-Then with the following,```
+Then with the following,
+
+```
 cat urllist.txt | xargs -L1 -P32 php crawler.php
 
 ```
@@ -215,7 +217,9 @@ With that done I think we can cross off the crawler. Real world crawling of cour
 
 When I approach things in a test driven development manner I like to use a bottom up approach. It makes sense to me to begin with the feature that is least coupled to everything else. The standard search engine index is usually an inverted index of which there are two main types. The first is a record level index which contains a list of references to documents for each word/key. The second is a full inverted index which includes the locations/positions of each word in the document. For the sake of simplicity I am going to build the first. This means we cannot do a fast proximity search for terms, but we can always add this later.
 
-I decided that the index I was going to create should only have a few very simple responsibilities. The first is that it needs to store its contents to disk and retrieve them. It also needs to be able to clear itself when we decide to regenerate things. The last thing that would be useful is to have it validate documents that its storing. With these simple tasks defined I wrote the following interface,```
+I decided that the index I was going to create should only have a few very simple responsibilities. The first is that it needs to store its contents to disk and retrieve them. It also needs to be able to clear itself when we decide to regenerate things. The last thing that would be useful is to have it validate documents that its storing. With these simple tasks defined I wrote the following interface,
+
+```
 interface iindex {
  public function storeDocuments($name,array $documents);
  public function getDocuments($name);
@@ -227,19 +231,25 @@ interface iindex {
 
 which does pretty much every task I require. The reason for the interface is that I can write unit tests against just the interfaces without worrying about the implementation, and if required change how the backend works. Now we have what we are going to code against we need to have a long think about how we are going to implement this.
 
-For storing the documents I decided to go with the simplest thing that could possibly work which is a single folder index where each index file is stored in a separate file in a single directory. The documents in the index will be represented by 3 integers in an array like so,```
+For storing the documents I decided to go with the simplest thing that could possibly work which is a single folder index where each index file is stored in a separate file in a single directory. The documents in the index will be represented by 3 integers in an array like so,
+
+```
 array(inta,intb,intc);
 
 ```
 
-This gives us enough space to store a document id for lookups, and another two spaces to store a simple pre-rank, word count or possibly use some bit logic to store 32 or so signals when indexing (more on this in the indexing part). This means that each single document we are going to store requires 12 bytes. Lets assume that a document contains about 500 unique keywords and we can use some simple math to guess the size of the index,```
+This gives us enough space to store a document id for lookups, and another two spaces to store a simple pre-rank, word count or possibly use some bit logic to store 32 or so signals when indexing (more on this in the indexing part). This means that each single document we are going to store requires 12 bytes. Lets assume that a document contains about 500 unique keywords and we can use some simple math to guess the size of the index,
+
+```
 ((12 x 1,000,000 x 500) / 1024) / 1024 = 5722 Megabytes
 
 ```
 
 almost 6 gigabytes which isn't an outlandish size, and certainly easily stored on a single machine. Even if we double the index and even the assumed number of unique keywords we are still looking at less than 30 gigabytes which is easily done. Keep in mind however that we are writing a very slow index solution at this point and its unlikely that it will scale to this size. We will adjust it later to cope with this size.
 
-So having defined the interface and how the documents look on disk lets look into implementing this. Im not going to refer to the tests here, but suffice to say the whole thing was developed using them in your standard TDD approach. The first method I think we needed to tackle is validatedocument.```
+So having defined the interface and how the documents look on disk lets look into implementing this. Im not going to refer to the tests here, but suffice to say the whole thing was developed using them in your standard TDD approach. The first method I think we needed to tackle is validatedocument.
+
+```
 define('SINGLEINDEX_DOCUMENTCOUNT', 3);
 
 public function validateDocument(array $document=null) {
@@ -259,7 +269,9 @@ public function validateDocument(array $document=null) {
 
 ```
 
-Essentially this is what I have come up. Basically it just checks that the document supplied is an array and that it contains 3 integers which are greater then zero. The next function we need is storeDocuments.```
+Essentially this is what I have come up. Basically it just checks that the document supplied is an array and that it contains 3 integers which are greater then zero. The next function we need is storeDocuments.
+
+```
 public function storeDocuments($name, array $documents = null) {
  if($name === null || $documents === null || trim($name) == '') {
   return false;
@@ -287,7 +299,9 @@ public function storeDocuments($name, array $documents = null) {
 
 ```
 
-The above is what I came up with. It takes in an name (the word we are storing) and an array of documents to store. Essentially all its doing is writing the integers (4 bytes each) to a binary file. The only unusual thing happening is the new method _getFilePathName which when supplied a name (the word we are storing) returns a string which contains where the index is to be stored and its name. This function just looks like this,```
+The above is what I came up with. It takes in an name (the word we are storing) and an array of documents to store. Essentially all its doing is writing the integers (4 bytes each) to a binary file. The only unusual thing happening is the new method _getFilePathName which when supplied a name (the word we are storing) returns a string which contains where the index is to be stored and its name. This function just looks like this,
+
+```
 public function_getFilePathName($name) {
  return INDEXLOCATION.$name.SINGLEINDEX_DOCUMENTFILEEXTENTION;
 }
@@ -296,7 +310,9 @@ public function_getFilePathName($name) {
 
 Where INDEXLOCATION needs to be defined somewhere (enforced in the constructor) and the file extention is in the index file. The reason for the INDEXLOCATION to be defined outside this file is that we don't want to work it out ourselves but have the developer using this code define where the index should live.
 
-The next method we need is to get a document list, getDocuments.```
+The next method we need is to get a document list, getDocuments.
+
+```
 public function getDocuments($name) {
  if(!file_exists($this->_getFilePathName($name))) {
   return array();
@@ -326,7 +342,9 @@ public function getDocuments($name) {
 
 Its actually more complex then the write function because we need to know the number of bytes to get. An integer on a 32 bit x86 system in PHP is 4 bytes. So a document consists of 12 bytes since we said it would have 3 integers. We then just suck it all into a large array and return the whole thing. I did add a simple naive corrupt index check here just to make sure that we don't have any unexpected issues caused by bad writes. Of course this just means it will throw corrupt errors which isn't much better.
 
-The last method defined is the clear index. This is the simplest function to write in this case and looks like the below,```
+The last method defined is the clear index. This is the simplest function to write in this case and looks like the below,
+
+```
 public function clearIndex() {
  $fp = opendir(INDEXLOCATION);
  while(false !== ($file = readdir($fp))) {
@@ -344,7 +362,9 @@ Phew! not too much code with the whole file just being over 100 lines, and provi
 
 ### THE DOCUMENT STORE
 
-The document store is a somewhat unusual beast in that odds are if you are going to index things you probably already have what you wanted stored somewhere. The most obvious case being documents in a database, or documents that already exist. This means we really do need an interface so we can change the underlying structure of the document store as we go on without having to rewrite things over and over. Hence I came up with the following,```
+The document store is a somewhat unusual beast in that odds are if you are going to index things you probably already have what you wanted stored somewhere. The most obvious case being documents in a database, or documents that already exist. This means we really do need an interface so we can change the underlying structure of the document store as we go on without having to rewrite things over and over. Hence I came up with the following,
+
+```
 interface idocumentstore {
  public function storeDocument(array $document);
  public function getDocument($documentid);
@@ -353,7 +373,9 @@ interface idocumentstore {
 
 ```
 
-Nice and simple. Store a document which is just an array of values and returns a document id, get a document by id and clear all the documents stored. The implementation is similar to index store above and the key parts included below. For testing purposes I created a very simple single folder document store file. I will use this implementation to get everything working at first and then hook into our crawlers downloaded documents.```
+Nice and simple. Store a document which is just an array of values and returns a document id, get a document by id and clear all the documents stored. The implementation is similar to index store above and the key parts included below. For testing purposes I created a very simple single folder document store file. I will use this implementation to get everything working at first and then hook into our crawlers downloaded documents.
+
+```
 storeDocument
 
 $docid = $this->_getNextDocumentId();
@@ -363,8 +385,9 @@ fwrite($fp, $serialized);
 fclose($fp);
 return $docid;
 
-``````
+```
 
+```
 getDocument
 
 $filename = $this->_getFilePathName($documentid);
@@ -377,8 +400,9 @@ fclose($handle);
 $unserialized = unserialize($contents);
 return $unserialized;
 
-``````
+```
 
+```
 clearDocuments
 $fp = opendir(DOCUMENTLOCATION);
 while(false !== ($file = readdir($fp))) {
@@ -386,20 +410,24 @@ while(false !== ($file = readdir($fp))) {
   unlink(DOCUMENTLOCATION.$file);
  }
 }
-
 ```
 
 Each one is pretty simple to follow through. Store document just serialises the document to disk. Get document unserialises it and clear deletes every document in the documentstore. Odds are we will want a database version down the line as this is massively inefficient but for the moment this should serve us well.
 
 ### THE INDEXER
 
-The next step in building our search is to create an indexer. Essentially it takes in a document, breaks it apart and feeds it into the index, and possibly the document store depending on your implementation. A simple interface like the following should get us going,```
+The next step in building our search is to create an indexer. Essentially it takes in a document, breaks it apart and feeds it into the index, and possibly the document store depending on your implementation. A simple interface like the following should get us going,
+
+```
 interface iindexer {
  public function index(array $documents);
 }
+
 ```
 
-With that defined lets build a naive indexer. We are going to take in a list of documents, save it to disk, clean them up, split by spaces, build a concordance (list of words and how often they occur in the document) and the use this to feed into our indexer and our document store.```
+With that defined lets build a naive indexer. We are going to take in a list of documents, save it to disk, clean them up, split by spaces, build a concordance (list of words and how often they occur in the document) and the use this to feed into our indexer and our document store.
+
+```
 public function index(array $documents) {
  if(!is_array($documents)) {
   return false;
@@ -427,10 +455,12 @@ Pretty simple and does exactly what we have just mentioned. We take in an array 
 
 ### INDEXING
 
-Now that we have the ability to store and index some documents lets throw some code together which actually does so. The first thing is to set everything up and then pass in some documents to index.```
+Now that we have the ability to store and index some documents lets throw some code together which actually does so. The first thing is to set everything up and then pass in some documents to index.
+
+```
 set_time_limit(0);
-define('INDEXLOCATION',dirname(__FILE__).'/index/');
-define('DOCUMENTLOCATION',dirname(__FILE__).'/documents/');
+define('INDEXLOCATION',dirname(**FILE**).'/index/');
+define('DOCUMENTLOCATION',dirname(**FILE**).'/documents/');
 
 include_once('./classes/naieveindexer.class.php');
 include_once('./classes/singlefolderindex.class.php');
@@ -439,11 +469,14 @@ include_once('./classes/singlefolderdocumentstore.class.php');
 $index = new singlefolderindex();
 $docstore = new singlefolderdocumentstore();
 $indexer = new naieveindexer($index,$docstore);
+
 ```
 
 The first thing we do is set the time limit to unlimited as the indexing might take a long time. Then we define where the index and the documents are going to live to avoid the errors being throw further down the line. If you are following along you will need to allow whatever user php is running under to have the ability to at least write to these directories. The next 3 lines are including the relevant classes and the last 3 are setting the index document store and indexer up.
 
-With that done we can finally add some documents to be indexed.```
+With that done we can finally add some documents to be indexed.
+
+```
 $indexer->index(array('Setting the AuthzUserAuthoritative directive explicitly to Off allows for user authorization to be passed on to lower level modules (as defined in the modules.c files) if there is no user matching the supplied userID.'));
 $indexer->index(array('The Allow directive affects which hosts can access an area of the server. Access can be controlled by hostname, IP address, IP address range, or by other characteristics of the client request captured in environment variables.'));
 $indexer->index(array('This directive allows access to the server to be restricted based on hostname, IP address, or environment variables. The arguments for the Deny directive are identical to the arguments for the Allow directive.'));
@@ -457,15 +490,20 @@ The above are just some Apache directives taken from this list [http://searchcod
 
 ### SEARCHING
 
-Searching requires a relatively simple implementation. So simple in fact we only require a single method.```
+Searching requires a relatively simple implementation. So simple in fact we only require a single method.
+
+```
 interface isearch {
  public function dosearch($searchterms);
 }
+
 ```
 
 Of course the actual implementation can get pretty hairy. The reason for this is that a search is actually more complex then it first appears. Take for example the following search term "cool stuff". When someone searches for "cool stuff" they are expecting that a list of documents containing the words cool and stuff will appear in a list. What is actually happening under the hood however is a lot more work. The search term firstly needs to be parsed into a query. In the case of a default AND engine you need to find all documents containing the word "cool", and then all documents containing the word "stuff", get the intersection of those documents, rank them in order of relevance and return them to the user.
 
-Sticking to keeping it very simple we are going to do the following. Clean up the search term (removing characters that have no meaning), break it into individual works separated by spaces and then for each term just return all the documents that match. No ranking, or AND logic which makes things much simpler to work with. So we will effectively end up with an OR logic search engine.```
+Sticking to keeping it very simple we are going to do the following. Clean up the search term (removing characters that have no meaning), break it into individual works separated by spaces and then for each term just return all the documents that match. No ranking, or AND logic which makes things much simpler to work with. So we will effectively end up with an OR logic search engine.
+
+```
 public function dosearch($searchterms) {
  $doc = array();
  foreach($this->_cleanSearchTerms($searchterms) as $term) {
@@ -490,9 +528,11 @@ public function _cleanSearchTerms($searchterms) {
 
 The function _cleanSearchTerms takes in the terms, removes all non A-Z 0-9 characters using a regex and then removes all duplicate spaces. It then splits it up by a single space and returns the array. We then just loop over each of the terms query the index for the matching documents, then for each document that matches fetch it from the document store and finally return the list. It means we will get duplicate results where you have terms that are in the same document however.
 
-With the ability to search lets plug it into a simple PHP page and actually display the results.```
-define('INDEXLOCATION',dirname(__FILE__).'/index/');
-define('DOCUMENTLOCATION',dirname(__FILE__).'/documents/');
+With the ability to search lets plug it into a simple PHP page and actually display the results.
+
+```
+define('INDEXLOCATION',dirname(**FILE**).'/index/');
+define('DOCUMENTLOCATION',dirname(**FILE**).'/documents/');
 
 include_once('./classes/naieveindexer.class.php');
 include_once('./classes/naievesearch.class.php');
@@ -509,6 +549,7 @@ foreach($search->dosearch($_GET['q']) as $result) {
  echo '&lt;li>'.$result[0].'&lt;/li>';
 }
 echo '&lt;/ul>';
+
 ```
 
 Nothing fancy here, just set everything up, then do a search through our new function and loop over the results. A sample search for "AuthzUserAuthoritative" gives back the correct result, whereas searching for "user" gives back the 3 expected results.
@@ -519,7 +560,9 @@ Hurray! At this point we have done it. We have a minimalist implementation of a 
 
 The ranking of search results is the core of search engines secret sauce. Nobody with the knowledge how how it works really discusses how Google and Bing rank things. **\*NB\*** ProCog has an open algorithm, see here <http://procog.com/help/rank_details> We know they use many signals such as page speed, keywords links, title etc&#8230; but the details are still a mystery. Thankfully there are many published methods of ranking which we can explore. Any sort of search on this and you will turn up papers on things like BM25 and Vector Spaces. Once again we are going to take the simplest approach and just use the number of words in the document. So if you search for "cat" a document with two "cat" words in it will be ranked higher then one with a single instance of "cat". We are already storing this information in the index so it should be fairly simple the implement. Later we will look some more complex ways of ranking.
 
-Essentially the ranker can be very simple as it only needs to provide a function which we can plug into PHP's usort function.```
+Essentially the ranker can be very simple as it only needs to provide a function which we can plug into PHP's usort function.
+
+```
 interface iranker {
  public function rankDocuments($document,$document2);
 }
@@ -542,11 +585,20 @@ public function rankDocuments($document,$document2) {
  }
  return -1;
 }
+
 ```
 
-All we do is validate the input then based on the wordcount (which we kept in the second location of each document) we return 1 -1 or 0. This is then fed into usort like the following,```usort($results, array($this->ranker, 'rankDocuments'));```
+All we do is validate the input then based on the wordcount (which we kept in the second location of each document) we return 1 -1 or 0. This is then fed into usort like the following,
 
-Which sorts the $results in place. With that we can add it to our naievesearch implementation and see how it all works together. At line 21 of our search naievesearch implementation we just insert the following,```usort($ind, array($this->ranker, 'rankDocuments'));```
+```
+
+usort($results, array($this->ranker, 'rankDocuments'));
+
+```
+
+Which sorts the $results in place. With that we can add it to our naievesearch implementation and see how it all works together. At line 21 of our search naievesearch implementation we just insert the following,
+
+```usort($ind, array($this->ranker, 'rankDocuments'));```
 
 We can now go to our search page and see how things look. A sample search for the word "order" returns two documents with the first containing two instances of the word order and the second only one. Trying again with the word "the" has the same result with the first result having the word "the" 7 times compared to the last result with 4 instances of the word "the".
 

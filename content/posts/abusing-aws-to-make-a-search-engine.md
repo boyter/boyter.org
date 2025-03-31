@@ -93,7 +93,9 @@ The result of the above returns a list of interesting document id's which can th
 
 Once the candidates are picked, they are then processed using the brute force search I tried before, and those results are then passed off for ranking. Once that's done they are sorted, and the top 20 results have a snippet created and the result returned.
 
-Checking cloudwatch with the above implemented shows the following runtime's for a variety of searches being run, on a lambda allocated with 1024 MB of RAM.```
+Checking cloudwatch with the above implemented shows the following runtime's for a variety of searches being run, on a lambda allocated with 1024 MB of RAM.
+
+```
 2021-09-13T14:33:34.114+10:00 Duration: 142.89 ms Billed Duration: 143 ms
 2021-09-13T14:34:26.427+10:00 Duration: 6.44 ms Billed Duration: 7 ms
 2021-09-13T14:35:15.851+10:00 Duration: 3.40 ms Billed Duration: 4 ms
@@ -143,9 +145,11 @@ Crawling 12 million domains seems like a trivial task, up until you try it. A mi
 
 So I wrote a custom crawler. I locked it to only downloading for a single domain I supplied. I then had it process the documents as it went to extract out the content I wanted to index. This content I kept as a collection of JSON documents dumped one per line into a file, which I then stuffed into a tar.gz file for later processing and indexing.
 
-An example prettified truncated document follows. The content you see there is what is actually passed into the indexer, and potentially stored in the index.```
+An example prettified truncated document follows. The content you see there is what is actually passed into the indexer, and potentially stored in the index.
+
+```
 {
-    "url": "https://engineering.kablamo.com.au/",
+    "url": "<https://engineering.kablamo.com.au/>",
     "title": [
         "Kablamo Engineering Blog"
     ],
@@ -164,6 +168,7 @@ An example prettified truncated document follows. The content you see there is w
         "28.7.2021 - By Ben Boyter"
     ]
 }
+
 ```
 
 There are a few problems with this technique. The first is that by discarding the HTML if you have a bug in your processing code you need to re-crawl the page. It also adds more overhead to the crawler since part of the index process is is being done in the crawler. Crawlers are normally very CPU light but bandwidth heavy.

@@ -106,7 +106,9 @@ So the above is about as simple as it gets. To deal with say multiple searches o
 
 The results?
 
-Well the below is a dump of the map in memory a few seconds after a fresh deployment (which resets the map removing the restrictions, but thats not a huge issue in practice). The obscured portion is IP address. The annoying thing about the whole system is that now I need to IP address which frankly I never wanted to store (solves some privacy issues) but whatever. You can clearly see the first one is that individual I mentioned who apparently has still not gotten the message to please stop the hammering.```
+Well the below is a dump of the map in memory a few seconds after a fresh deployment (which resets the map removing the restrictions, but thats not a huge issue in practice). The obscured portion is IP address. The annoying thing about the whole system is that now I need to IP address which frankly I never wanted to store (solves some privacy issues) but whatever. You can clearly see the first one is that individual I mentioned who apparently has still not gotten the message to please stop the hammering.
+
+```
 "ipCount": {
     "x.x.x.x": 1706,
     "x.x.x.x": 1,
@@ -121,7 +123,6 @@ Well the below is a dump of the map in memory a few seconds after a fresh deploy
     "x.x.x.x": 1,
     "x.x.x.x": 5
 }
-
 ```
 
 I do keep an eye on the above while its running to ensure the map never fills up and thankfully the most entries I have ever seen was a few hundred at times and generally its cleared out except for a single IP address every time the decrement works. Probably not the most memory efficient thing around but does not appear to have triggered any additional GC pauses. In addition the load average on the search servers has gone down very slightly.

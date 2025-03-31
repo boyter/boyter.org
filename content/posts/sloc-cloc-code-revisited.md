@@ -21,18 +21,16 @@ I had been tracking the improvements in `tokei`, `loc` and `polyglot` over the l
 
 #### Denial: Step one of software debugging
 
-I tried testing it out on the example provided by `tokei` in the comparison page <https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md>```
--------------------------------------------------------------------------------
+I tried testing it out on the example provided by `tokei` in the comparison page <https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md>
 
+```
+-------------------------------------------------------------------------------
 Language                 Files     Lines     Code  Comments   Blanks Complexity
 -------------------------------------------------------------------------------
-
 Rust                         1        33       28         1        4          5
 -------------------------------------------------------------------------------
-
 Total                        1        33       28         1        4          5
 -------------------------------------------------------------------------------
-
 ```
 
 Wow. It really does misreport the number of lines. There should be 39 there.
@@ -102,7 +100,9 @@ class Foo
 
 {{</highlight>}}
 
-Getting the stats from our now correct `scc` (for lines counts anyway).```
+Getting the stats from our now correct `scc` (for lines counts anyway).
+
+```
 -------------------------------------------------------------------------------
 Language                 Files     Lines     Code  Comments   Blanks Complexity
 -------------------------------------------------------------------------------
@@ -122,21 +122,21 @@ In reality what should I should have done (which seems obvious in hindsight) is 
 
 #### Acceptance: Stage five of software debugging
 
-A quick change to resolve the above, never process whitespace characters and all of a sudden everything was working as it should.```
--------------------------------------------------------------------------------
-
-Language                 Files     Lines     Code  Comments   Blanks Complexity
--------------------------------------------------------------------------------
-
-Java                         1        23       16         4        3          0
--------------------------------------------------------------------------------
-
-Total                        1        23       16         4        3          0
--------------------------------------------------------------------------------
+A quick change to resolve the above, never process whitespace characters and all of a sudden everything was working as it should.
 
 ```
+-------------------------------------------------------------------------------
+Language                 Files     Lines     Code  Comments   Blanks Complexity
+-------------------------------------------------------------------------------
+Java                         1        23       16         4        3          0
+-------------------------------------------------------------------------------
+Total                        1        23       16         4        3          0
+-------------------------------------------------------------------------------
+```
 
-In fact running over the `tokei` samples everything worked (with on exception covered later). So I had a look again at the torture test posted.```
+In fact running over the `tokei` samples everything worked (with on exception covered later). So I had a look again at the torture test posted.
+
+```
 $ scc
 -------------------------------------------------------------------------------
 Language                 Files     Lines     Code  Comments   Blanks Complexity
@@ -147,19 +147,17 @@ Total                        1        38       29         5        4          5
 -------------------------------------------------------------------------------
 ```
 
-A much better result. However it still is not accurate, nor matching `tokei` which produces, (BTW I am not a fan of the new full width result `tokei` now produces and made it hard to get the below close to the above in terms of matching width).```
+A much better result. However it still is not accurate, nor matching `tokei` which produces, (BTW I am not a fan of the new full width result `tokei` now produces and made it hard to get the below close to the above in terms of matching width).
+
+```
 $ tokei
 --------------------------------------------------------------------------------
-
 Language             Files        Lines         Code     Comments       Blanks
 --------------------------------------------------------------------------------
-
 Rust                     1           38           32            2            4
 --------------------------------------------------------------------------------
-
 Total                    1           38           32            2            4
 --------------------------------------------------------------------------------
-
 ```
 
 What's the difference? One thing when looking at the source that caught my eye was the following,
@@ -172,13 +170,15 @@ Nested comments? In fact I remember looking into this when I first wrote `scc`. 
 
 So the reason for the difference is that `tokei` has some sort of stack for dealing with nested comments so it know when to finish with them. I didn't even know was a thing.
 
-Playing around with Rust and it turns out that it DOES support nested comments. My first thought was that this implementation is a bad idea. For example if you write the following `/*/**/` that is going to break `tokei` as everything will be a comment. Trying it out happens to be a compiler error... so it is not a case worth worrying about. If however you did happen to half implement a nested comment you get the following (I added it to the first line),```
+Playing around with Rust and it turns out that it DOES support nested comments. My first thought was that this implementation is a bad idea. For example if you write the following `/*/**/` that is going to break `tokei` as everything will be a comment. Trying it out happens to be a compiler error... so it is not a case worth worrying about. If however you did happen to half implement a nested comment you get the following (I added it to the first line),
+
+```
 -------------------------------------------------------------------------------
- Language            Files        Lines         Code     Comments       Blanks
+Language            Files        Lines         Code     Comments       Blanks
 -------------------------------------------------------------------------------
- Rust                    1           38            0           34            4
+Rust                    1           38            0           34            4
 -------------------------------------------------------------------------------
- Total                   1           38            0           34            4
+Total                   1           38            0           34            4
 -------------------------------------------------------------------------------
 ```
 
@@ -192,38 +192,35 @@ Well knowing what is wrong is the second step to fixing it, with the first being
 
 To fix this isn't a huge issue. Just need to keep a stack of the multi-line comment opens, and check when in comments for another one. Sadly during this process I noticed that `scc` was missing quite a few edge cases. Thankfully the `tokei` stress test is pretty brutal and allowed me to identify them all and resolve them.
 
-After much tweaking and fiddling with the logic.```
+After much tweaking and fiddling with the logic.
+
+```
 $ tokei
 --------------------------------------------------------------------------------
-
 Language             Files        Lines         Code     Comments       Blanks
 --------------------------------------------------------------------------------
-
 Rust                     1           38           32            2            4
 --------------------------------------------------------------------------------
-
 Total                    1           38           32            2            4
 --------------------------------------------------------------------------------
 
 $ scc
 -------------------------------------------------------------------------------
-
 Language                 Files     Lines     Code  Comments   Blanks Complexity
 -------------------------------------------------------------------------------
-
 Rust                         1        38       32         2        4          5
 -------------------------------------------------------------------------------
-
 Total                        1        38       32         2        4          5
 -------------------------------------------------------------------------------
-
 ```
 
 Excellent.
 
 However what price has `tokei` paid for this logic. For example is it intelligent enough to know that Java does not support nested multi-line comments? Turns out it is. Also turns out that nested multi-line comments are more common across languages than I expected, Lisp, Rust, Lean, Jai, Idris, Scheme, Swift, Julia and Kotlin all support them. As such I added in the same checks to ensure that `scc` is as accurate as `tokei`, unless of course there are differences in the languages.json file that both use.
 
-I tried then running across the full suite of tokei tests,```
+I tried then running across the full suite of tokei tests,
+
+```
 $ scc -c -co -s name tests
 -------------------------------------------------------------------------------
 Language                     Files       Lines      Code    Comments     Blanks
@@ -261,15 +258,14 @@ Xtend                            1          23        13           4          6
 -------------------------------------------------------------------------------
 Total                           31         542       299         116        127
 -------------------------------------------------------------------------------
-``````
+```
 
+```
 $ tokei tests
 --------------------------------------------------------------------------------
-
 Language             Files        Lines         Code     Comments       Blanks
 --------------------------------------------------------------------------------
-
-CMake                    1           25           16            3            6
+ CMake                    1           25           16            3            6
  Cogent                   1            7            2            2            3
  C++                      1           15            7            4            4
  C++ Header               1           21           11            5            5
@@ -300,10 +296,8 @@ CMake                    1           25           16            3            6
  Visual Basic             1            7            4            2            1
  Xtend                    1           23           13            4            6
 --------------------------------------------------------------------------------
-
 Total                   31          542          303          111          128
 --------------------------------------------------------------------------------
-
 ```
 
 The differences in the stats are down to how the language D works. I have a bug tracked for this <https://github.com/boyter/scc/issues/27> to be resolved at some point in the future. Annoying but not worrying enough at this point to spend too much time on it.

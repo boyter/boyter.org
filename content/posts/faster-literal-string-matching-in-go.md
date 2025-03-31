@@ -21,7 +21,9 @@ The generally always correct answer to case insensitive matching is to use Regul
 
 So I wrote my own implementation which does the same thing but without touching the regular expression engine <https://github.com/boyter/go-string/> thus making it much faster than using FindAllIndex for the majority of cases.
 
-Talk is cheap... show me the benchmarks. Included below is the output from a small application I wrote. A small program which you supply a search string and a filename. I have tested it against a 550MB file. First it runs case insensitive search using FindAllIndex in the regex package, then against IndexAllIgnoreCase my own implementation. The number on the end of each line is the number of matches found.```
+Talk is cheap... show me the benchmarks. Included below is the output from a small application I wrote. A small program which you supply a search string and a filename. I have tested it against a 550MB file. First it runs case insensitive search using FindAllIndex in the regex package, then against IndexAllIgnoreCase my own implementation. The number on the end of each line is the number of matches found.
+
+```
 $ ./csperf ſecret 550MB
 File length 576683100
 

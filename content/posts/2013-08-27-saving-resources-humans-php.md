@@ -11,7 +11,9 @@ categories:
 ---
 One of the issues I have run into running searchcode.com is that a huge amount of time spent serving pages is serving them to bots (about 900,000 hits a day are from bots). I have been watching the load averages and they can spike to over 30.00 occasionally which is pretty bad for a 4 core/ht system. I don't have any problems with bot's really other then the fact that I cannot really control them. Sure you can specify crawl delays but its of limited use if the bot chooses to ignore it.
 
-Another solution is to slow them down. Of course you don't want to go too crazy with this as I do want my site indexed but not at the expense of real users. Thankfully with PHP this can be accomplished using the sleep and usleep functions.```
+Another solution is to slow them down. Of course you don't want to go too crazy with this as I do want my site indexed but not at the expense of real users. Thankfully with PHP this can be accomplished using the sleep and usleep functions.
+
+```
 if(isHuman() == false) {
   usleep(500000); // 1,000,000 is 1 second
 }```

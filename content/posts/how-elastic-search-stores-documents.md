@@ -12,7 +12,9 @@ Developer? Need to know how to use Elasticsearch? Want to know how to get workin
 
 It is useful to understand is how elasticsearch stores documents. Documents that are indexed need to go into an index and have a type. Indexes can contain one or more types. This may sound limiting but you can search over all indexes or all types within an index or just one type within an index if you require.
 
-Consider it logically like the below. You can search at any part of the tree which will search across all children, or pull back a specific document if you know the key.```
+Consider it logically like the below. You can search at any part of the tree which will search across all children, or pull back a specific document if you know the key.
+
+```
 ElasticSearch
 ├── Index1
 │   ├── Type1

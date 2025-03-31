@@ -153,7 +153,9 @@ The best part is that if they use these reports to measure performance you can g
 
 Introducing subtle bugs.
 
-Read the art of writing unmaintainable code. Apply it. This will not only make things harder to fix ensuring you have a job for life but also make writing tests after the fact impossible for the double whammy. The harder the code is to maintain the harder it is to add tests. Be creative when doing this! A personal favorite,```
+Read the art of writing unmaintainable code. Apply it. This will not only make things harder to fix ensuring you have a job for life but also make writing tests after the fact impossible for the double whammy. The harder the code is to maintain the harder it is to add tests. Be creative when doing this! A personal favorite,
+
+```
 for(int j=0;j<array_len;j+=8){
   total += array[j+0];
   total += array[j+1];

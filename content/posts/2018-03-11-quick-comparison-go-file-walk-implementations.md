@@ -120,7 +120,9 @@ func main() {
 }
 {{</highlight>}}
 
-And the results. All were run in the WSL for Linux on a Surface Book 2 against a recent checkout of the Linux kernel with there being 67359 files in the directory.```
+And the results. All were run in the WSL for Linux on a Surface Book 2 against a recent checkout of the Linux kernel with there being 67359 files in the directory.
+
+```
 $ hyperfine './cwalk' && hyperfine './godirwalk' && hyperfine './nativewalk' && hyperfine './walk'
 Benchmark #1: ./cwalk
   Time (mean ± σ):      1.812 s ±  0.059 s    [User: 368.4 ms, System: 6545.8 ms]

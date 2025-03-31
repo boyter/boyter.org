@@ -23,7 +23,9 @@ There are two ways to fix this. The first would be to build the structures and c
 
 A few hours of fiddling around and I made the change and had a release. I ended up adding mutex locks around the hash that holds the language features. I did investigate using the Sync Map that Go added back in version 1.9 but it turned out this was actually slower then the few locks I added, so I stuck with those.
 
-With the implementation done the results are quite good with the time down for every run compared to version 2.0.0. A quick example comparing 2.0.0 to 2.1.0 using the redis code-base.```
+With the implementation done the results are quite good with the time down for every run compared to version 2.0.0. A quick example comparing 2.0.0 to 2.1.0 using the redis code-base.
+
+```
 Benchmark #1: scc-2.1.0 redis
   Time (mean ± σ):      81.6 ms ±   5.0 ms    [User: 173.8 ms, System: 265.4 ms]
   Range (min … max):    75.5 ms …  97.1 ms

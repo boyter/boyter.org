@@ -9,7 +9,9 @@ However this is often a painful process if allowed at all, and so with permissio
 
 I thought this Go function worth keeping on my blog as something I can refer back to. Given a global database connection as `DB` function will take in any query, run it against the database, and return it in a formatted way which you can then display to the user. I tend to just return it as plain text from a protected route.
 
-It's not perfect, but good enough for those situations where you just want a small bit of information from the database. Note it has an explicit rollback to prevent any data loss, but I wouldn't trust my life to that and you can of course still run queries that slow down the database. As such use with caution.```go
+It's not perfect, but good enough for those situations where you just want a small bit of information from the database. Note it has an explicit rollback to prevent any data loss, but I wouldn't trust my life to that and you can of course still run queries that slow down the database. As such use with caution.
+
+```go
 package data
 
 import "database/sql"

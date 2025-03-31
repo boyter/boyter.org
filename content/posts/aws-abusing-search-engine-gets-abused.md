@@ -22,7 +22,9 @@ The above shows from when I turned off the service, then back on once I had some
 
 In short automated scanners looking for websites to exploit, or spam.
 
-By default bonzamate has a [rate limiter](https://boyter.org/posts/building-an-api-rate-limiter-in-go-for-searchcode/) in place. Its based on code I lifted from searchcode.com. You can use it, but rapid fire queries will eventually land you in the sin bin and every response will return with the slightly snarky response,```
+By default bonzamate has a [rate limiter](https://boyter.org/posts/building-an-api-rate-limiter-in-go-for-searchcode/) in place. Its based on code I lifted from searchcode.com. You can use it, but rapid fire queries will eventually land you in the sin bin and every response will return with the slightly snarky response,
+
+```
 {"url":"<https://en.wikipedia.org/wiki/Exponential_backoff"}>
 
 ```
@@ -38,7 +40,7 @@ With the above all adding to a score which is returned, I can then determine if 
 
 In the former case the ip address that called this is instantly assigned a high value which results in the rate limit being applied instantly for an hour or so. The latter allows the query to run, but ensures they need wait a minute or so.
 
-I also changed the limiter to be more punative. If you keep making quries when limited it keeps adding to the cooldown value. The final step was to persist the list of spammy ip's and their cooldowns so restarting the service does not allow them a free pass.
+I also changed the limiter to be more punitive. If you keep making queries when limited it keeps adding to the cooldown value. The final step was to persist the list of spammy ip's and their cooldowns so restarting the service does not allow them a free pass.
 
 With that implemented all of the spam is now gone.
 
@@ -46,7 +48,9 @@ With that implemented all of the spam is now gone.
 
 All of the above 400 responses are 429 responses.
 
-Some bots clearly don't respect those 429 responses. In fact here are is sample, that despite getting 429 responses over the last week have then continued to make hundreds of thousands of queries. Hopefully at some point the bot operators realise something is wrong and do something about it.```
+Some bots clearly don't respect those 429 responses. In fact here are is sample, that despite getting 429 responses over the last week have then continued to make hundreds of thousands of queries. Hopefully at some point the bot operators realise something is wrong and do something about it.
+
+```
 "196.196.194.123": 635414,
 "196.196.194.86": 623684,
 "196.196.194.95": 614114,
@@ -61,6 +65,7 @@ Some bots clearly don't respect those 429 responses. In fact here are is sample,
 "196.196.31.191": 635040,
 "196.196.31.246": 640176,
 "196.196.31.92": 619990,
+
 ```
 
 In fact its actually fun watching them continue to hit the service. You can see IP's being blocked in real time by watching the logs, as well as see the queries that caused their spam status to be accounted for.

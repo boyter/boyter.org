@@ -23,7 +23,9 @@ If you look in the $GOPATH directory you will see three directories, `bin` `pkg`
 
 You can check your go environment variables with the command `go env`.
 
-One other thing I do is I update my machines path to point to the `bin` directory of my $GOPATH, `export PATH=$PATH:$(go env GOPATH)/bin` so that I can install anything I am working on quickly and have it available everywhere. For example,```
+One other thing I do is I update my machines path to point to the `bin` directory of my $GOPATH, `export PATH=$PATH:$(go env GOPATH)/bin` so that I can install anything I am working on quickly and have it available everywhere. For example,
+
+```
 $GOPATH
 ├── bin
 │   ├── caire
@@ -109,7 +111,9 @@ When you have your vendor dependencies setup you can commit the contents of the 
 
 There are times where you want to potentially have multiple entry points into an application by having multiple `main.go` files in the main package. One way to achieve this is to have shared code in one repository, and then import it into others. However this can be cumbersome when you want to use vendor imports.
 
-One common pattern for this is to have a directory inside the root of the application and place your main.go files in there. For example,```
+One common pattern for this is to have a directory inside the root of the application and place your main.go files in there. For example,
+
+```
 SRC
 ├── cmd
 │   ├── commandline
@@ -118,6 +122,7 @@ SRC
 │   │   └── main.go
 │   ├── convert1.0-2.0
 │   │   └── main.go
+
 ```
 
 Then each entry point can import from the root package and you can compile and run multiple entry points into your application. Assuming your application lives in `http://github.com/name/mycode` you would need to import like so in each application,
@@ -134,7 +139,9 @@ With the above you can now call into code exposed by the repository package in t
 
 ## OS Specific Code
 
-Occasionally you will require code in your application that will not compile or run on different operating systems. The most common way to deal with this is to have the following structure in your application,```
+Occasionally you will require code in your application that will not compile or run on different operating systems. The most common way to deal with this is to have the following structure in your application,
+
+```
 main_darwin.go
 main_linux.go
 main_windows.go
@@ -147,7 +154,9 @@ Assuming that the above just contained definitions for line breaks on multiple o
 
 Using the above techniques you can run inside Docker using multiple entry points easily. A sample dockerfile to achieve this is below using code from our hypothetical repository at `https://username@bitbucket.code.company-name.com.au/scm/code/random-code.git`
 
-The below would build and run the main application,```
+The below would build and run the main application,
+
+```
 FROM golang:1.10
 
 COPY ./ /go/src/bitbucket.code.company-name.com.au/scm/code/
@@ -156,9 +165,12 @@ WORKDIR /go/src/bitbucket.code.company-name.com.au/scm/code/
 RUN go build main.go
 
 CMD ["./main"]
+
 ```
 
-The below would build and run from the one of the alternate entry point's for the application,```
+The below would build and run from the one of the alternate entry point's for the application,
+
+```
 FROM golang:1.10
 
 COPY ./ /go/src/bitbucket.code.company-name.com.au/scm/code/
@@ -170,7 +182,9 @@ CMD ["./main"]
 
 ```
 
-A few people who have read this post suggested using multi stage docker builds <https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds> which works well with Docker 17.05 or higher. More details here <https://medium.com/travis-on-docker/multi-stage-docker-builds-for-creating-tiny-go-images-e0e1867efe5a> An example would be,```
+A few people who have read this post suggested using multi stage docker builds <https://docs.docker.com/develop/develop-images/multistage-build/#use-multi-stage-builds> which works well with Docker 17.05 or higher. More details here <https://medium.com/travis-on-docker/multi-stage-docker-builds-for-creating-tiny-go-images-e0e1867efe5a> An example would be,
+
+```
 FROM golang:1.10
 COPY . /go/src/bitbucket.code.company-name.com.au/scm/code
 WORKDIR /go/src/bitbucket.code.company-name.com.au/scm/code/
@@ -180,6 +194,7 @@ FROM alpine:3.7
 RUN apk add --no-cache ca-certificates
 COPY --from=0 /go/src/bitbucket.code.company-name.com.au/scm/code/main .
 CMD ["./main"]
+
 ```
 
 The result is much smaller images to run your code which is always nice.

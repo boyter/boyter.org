@@ -16,7 +16,9 @@ of the post that the user is boosting.
 
 In the case of follower instances, they receive the announce, then fetch the content of the announce using the `object` field.
 
-In the case of the owner, they take the announce and increment their boost count.```
+In the case of the owner, they take the announce and increment their boost count.
+
+```
 ┌────────────┐ ┌────────────┐ ┌───────────────┐ ┌────────────────┐
 │    User    │ │  Instance  │ │Remote Instance│ │ Owner Instance │
 └────────────┘ └────────────┘ └───────────────┘ └────────────────┘
@@ -48,25 +50,30 @@ In the case of the owner, they take the announce and increment their boost count
 
 ```
 
-An example announce appears like the below. Actor is whoever did the boost, cc is the user who's post is being boosted and object contains a link to the post itself. The below assumes the instance honk.boyter.org was boosting a post from another instance named some.instance in this case.```json
+An example announce appears like the below. Actor is whoever did the boost, cc is the user who's post is being boosted and object contains a link to the post itself. The below assumes the instance honk.boyter.org was boosting a post from another instance named some.instance in this case.
+
+```json
 {
-  "@context": "https://www.w3.org/ns/activitystreams",
-  "actor": "https://honk.boyter.org/u/boyter",
+  "@context": "<https://www.w3.org/ns/activitystreams>",
+  "actor": "<https://honk.boyter.org/u/boyter>",
   "cc": [
     "https://some.instance/users/someonemadup"
   ],
   "context": "tag:mastodon.social,2023-01-17:objectId=380216002:objectType=Conversation",
-  "id": "https://honk.boyter.org/u/boyter/bonk/234wetsdfw35345",
-  "object": "https://some.instance/users/someonemadup/statuses/1231235634623412",
+  "id": "<https://honk.boyter.org/u/boyter/bonk/234wetsdfw35345>",
+  "object": "<https://some.instance/users/someonemadup/statuses/1231235634623412>",
   "published": "2023-01-19T22:41:49Z",
-  "to": "https://www.w3.org/ns/activitystreams#Public",
+  "to": "<https://www.w3.org/ns/activitystreams#Public>",
   "type": "Announce"
 }
+
 ```
 
 When fetching content for the above every remote instance needs to call back to the owner instance in order to fetch the content for display. Instances can require a signed request for this to ensure only followers can see the post, and return 404 generally
 
-The fetch is done using the object value, with the appropriate header sent.```bash
+The fetch is done using the object value, with the appropriate header sent.
+
+```bash
 curl --location --request GET '<https://some.instance/users/someuser/statuses/123413513412312>' --header 'Accept: application/json'
 
 ```

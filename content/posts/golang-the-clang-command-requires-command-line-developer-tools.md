@@ -24,7 +24,9 @@ And then started installing about 2 minutes later.
 
 Regardless this did not resolve the issue, and trying to run my `go build` failed again with the same repeated steps. Out of curiosity I tried it again, with a reboot and there was no change.
 
-I have no idea as to the root cause of this, but the resolution was to run the following in the same command line,```
+I have no idea as to the root cause of this, but the resolution was to run the following in the same command line,
+
+```
 xcodebuild -runFirstLaunch
 
 ```

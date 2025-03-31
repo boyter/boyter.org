@@ -33,14 +33,16 @@ func BenchmarkBitwiseAnd(b *testing.B) {
 
 We keep the result of the `i & i` to ensure the compiler is not optimising anything away.
 
-Running on a 2020 M1 Macbook Air produced the following.```
+Running on a 2020 M1 Macbook Air produced the following.
+
+```
 BenchmarkBitwiseAnd-8    1000000000          0.5148 ns/op
 
 ```
 
 So about 0.5 ns for each operation. Which given the clock speed of the CPU means we are observing a single operation. With this as the baseline lets try the int to int32 cast.
 
-{{<highlight go>}} 
+{{<highlight go>}}
 func BenchmarkIntToInt32(b *testing.B) {
  var x int32
  for i := 0; i < b.N; i++ {
@@ -50,8 +52,11 @@ func BenchmarkIntToInt32(b *testing.B) {
  fmt.Println(x)
 }
 
-{{</highlight>}}```
+{{</highlight>}}
+
+```
 BenchmarkIntToInt32-8    1000000000          0.5150 ns/op
+
 ```
 
 Interesting. Almost the same as & meaning from a code point of view this is a free operation. What about casts to other integer types?
@@ -65,7 +70,9 @@ func BenchmarkIntToInt64(b *testing.B) {
  b.StopTimer()
  fmt.Println(x)
 }
-{{</highlight>}}```
+{{</highlight>}}
+
+```
 BenchmarkIntToInt64-8    1000000000          0.5147 ns/op
 
 ```
@@ -81,8 +88,11 @@ func BenchmarkIntToInt16(b *testing.B) {
  b.StopTimer()
  fmt.Println(x)
 }
-{{</highlight>}}```
+{{</highlight>}}
+
+```
 BenchmarkIntToInt16-8    1000000000          0.5143 ns/op
+
 ```
 
 {{<highlight go>}}
@@ -94,7 +104,9 @@ func BenchmarkIntToInt8(b *testing.B) {
  b.StopTimer()
  fmt.Println(x)
 }
-{{</highlight>}}```
+{{</highlight>}}
+
+```
 BenchmarkIntToInt8-8    1000000000          0.5149 ns/op
 
 ```
@@ -110,8 +122,11 @@ func BenchmarkIntToUInt32(b *testing.B) {
  b.StopTimer()
  fmt.Println(x)
 }
-{{</highlight>}}```
+{{</highlight>}}
+
+```
 BenchmarkIntToUInt32-8    1000000000          0.5131 ns/op
+
 ```
 
 Same story it seems. I tried the other unsigned types and got the same result. I then thought it worth trying casting to floats, just to get an idea of how much more expensive that is.
@@ -125,7 +140,9 @@ func BenchmarkIntToFloat32(b *testing.B) {
  b.StopTimer()
  fmt.Println(x)
 }
-{{</highlight>}}```
+{{</highlight>}}
+
+```
 BenchmarkIntToFloat32-8    775237407          1.540 ns/op
 
 ```
@@ -139,8 +156,11 @@ func BenchmarkIntToFloat64(b *testing.B) {
  b.StopTimer()
  fmt.Println(x)
 }
-{{</highlight>}}```
+{{</highlight>}}
+
+```
 BenchmarkIntToFloat64-8    778829048          1.555 ns/op
+
 ```
 
 So about 3x the overhead to convert from int to float.

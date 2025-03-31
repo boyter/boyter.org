@@ -54,7 +54,9 @@ I was discussing the issue on the TechZing podcast discord when someone mentione
 
 So I got to work on a few linux VM's with attached disks. Fiddling around with mounting disks with different filesystems in Linux is not something I had done since ReiserFS was a thing (I since discovered it has been removed from the kernel). I started looking at ZFS, since thats the only filesystem I knew supported compression. Knowing nothing about ZFS I was suggested to look at BTRFS since it should in theory be simpler and turned out to be trivial to setup with zstd compression.
 
-Initial tests on a subset of the data showed a pretty drastic compression ratio.```
+Initial tests on a subset of the data showed a pretty drastic compression ratio.
+
+```
 $ compsize /mnt/btrfs-partition
 Processed 1 file, 150753 regular extents (150753 refs), 0 inline.
 Type       Perc     Disk Usage   Uncompressed Referenced  
@@ -70,13 +72,16 @@ I explicitly coded it to back off when the system was under load and after sever
 
 With all of the above done I had one last thing to consider. Should I replace the server? searchcode.com was running on an older AMD 5950x. Still a powerful CPU, but I do like to replace the hardware every few years to get as much performance as possible. So I had a look around and decided to upgrade, to a new server. A real server. One with more cores, more RAM, ECC ram, and faster disks such as this from Hetzner <https://www.hetzner.com/dedicated-rootserver/ex130-r/> which interestingly turned out to be an Intel CPU. As such searchcode is now running on a Intel(R) Xeon(R) Gold 5412U with 256 GB of RAM. The increase in RAM allows me to grow the index by some factor (at least 2x) as well as improve it't false positive match rates by tweaking the bloom filters.
 
-I ordered and with it setup a day later, started migration over the network (this took a day or two) after setting up the new box box with the BRFS partition. Sadly the data turned out to be less compressible than my tests first suggested, but it still fits nicely into the storage I have for it with a fair amount of room to grow, albeit less than I had hoped for.```
+I ordered and with it setup a day later, started migration over the network (this took a day or two) after setting up the new box box with the BRFS partition. Sadly the data turned out to be less compressible than my tests first suggested, but it still fits nicely into the storage I have for it with a fair amount of room to grow, albeit less than I had hoped for.
+
+```
 $ compsize /mnt/data/searchcode.db
 Processed 1 file, 16481352 regular extents (16481360 refs), 0 inline.
 Type       Perc     Disk Usage   Uncompressed Referenced  
-TOTAL       76%      4.8T         6.3T         6.3T       
-none       100%      4.3T         4.3T         4.3T       
-zstd        23%      470G         1.9T         1.9T       
+TOTAL       76%      4.8T         6.3T         6.3T
+none       100%      4.3T         4.3T         4.3T
+zstd        23%      470G         1.9T         1.9T
+
 ```
 
 So with everything setup and ready to do I flipped over the DNS entries to the new server and observed. Nothing appeared to go amiss, and so I left the updated DNS records in place. If you visit <https://searchcode.com/> you should be using the brand new code with SQLite backend. This post is already pretty long so I am not going to go through the new functionality that was released, instead saving it for another post.

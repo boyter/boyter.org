@@ -21,9 +21,10 @@ for i := 1; i < toCount; i++ {
 highlighted = strings.Replace(highlighted, "<li></li>\n", "", 1)
 {{</highlight>}}
 
-Now this worked well enough most of the time, however it was now the cause of the sudden CPU spikes. Most annoyingly I actually added the following prophetic comment.```
-// TODO this is probably problematic due to the strings.Replace in a loop producing a lot of false positives, benchmark later
+Now this worked well enough most of the time, however it was now the cause of the sudden CPU spikes. Most annoyingly I actually added the following prophetic comment
 
+```
+// TODO this is probably problematic due to the strings.Replace in a loop producing a lot of false positives, benchmark later
 ```
 
 Indeed it was a problem. The problem bing that the replace had to loop over the same string multiple times. For larger inputs IE code with lots of lines this could mean hundreds of loops. I never noticed it as an issue because most code does not fall into this group.

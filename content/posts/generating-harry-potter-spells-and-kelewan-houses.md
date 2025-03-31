@@ -9,7 +9,9 @@ I had recently re-read a book series I remember loving a while ago which is the 
 
 I started wondering how hard it would be to generate names of houses, clans, parties and Lord/Ladies based on the names in the book. So I started recording all the names I came across for later use.
 
-If I were more intelligent I would have fed them though some of the more fancy AI/DL techniques that are all the rage these days, but it seemed like overkill. What I did instead was break them up based on syllable's then randomly join them together. The results I think turned out rather well.```
+If I were more intelligent I would have fed them though some of the more fancy AI/DL techniques that are all the rage these days, but it seemed like overkill. What I did instead was break them up based on syllable's then randomly join them together. The results I think turned out rather well.
+
+```
 Lady Malia of house Shonpan and clan Omechan member of the Jade Eye Party
 Lady Irshi of house Ekecas and clan Shonla member of the Party for Progress
 Lady Jaanlan of house Tustai and clan Shonnawai member of the War Party
@@ -38,7 +40,9 @@ Lord Detora of house Tujun and clan Shonzawai member of the Jade Eye Party
 
 ```
 
-However it made me wonder if this simple technique applies to other things. Could I for instance generate Harry Potter Spell names?```
+However it made me wonder if this simple technique applies to other things. Could I for instance generate Harry Potter Spell names?
+
+```
 Scourliafy
 Exlify Muffio
 Epihidtor
@@ -59,6 +63,7 @@ Locolettem
 Incanenius
 Bombto
 Revhidio Impelrius
+
 ```
 
 Turns out it works reasonably well there. Same technique, get a list of spell names, break them into syllable's and then combine them together to produce what look like spell names from the series.

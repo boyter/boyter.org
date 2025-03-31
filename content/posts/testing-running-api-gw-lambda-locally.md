@@ -25,23 +25,31 @@ func (s service) Handler(ctx context.Context, request events.APIGatewayProxyRequ
 }
 {{</highlight>}}
 
-The above allowed you to run the lambda locally, passing in database connection details via environmental config. You could then configure your service function to call into the database, acting as it would when deployed in AWS and allowing for integration testing.```
+The above allowed you to run the lambda locally, passing in database connection details via environmental config. You could then configure your service function to call into the database, acting as it would when deployed in AWS and allowing for integration testing.
+
+```
 DB_USER=user DB_PASS=pass go run . ANYTHING
 
 ```
 
 When you added additional methods such as POST/PUT/DELETE and such you can modify the code and move on. However this is not a great solution, because ideally I would like to not have to keep modifying the same code over and over. I would also like to be able to keep things around such that I can write integration tests over them.
 
-By extending the above we can create a way to pass in everything we want into our lambda as a restful service, allowing us to recreate how it works in API gateway. The format to call it is as follows,```
+By extending the above we can create a way to pass in everything we want into our lambda as a restful service, allowing us to recreate how it works in API gateway. The format to call it is as follows,
+
+```
 # GET requests
-go run . GET 
+
+go run . GET
 go run . GET key:value,id:123
 
 # POST request
+
 go run . POST content
 
 # POST request
+
 go run . DELETE "" auth:tokenvalue
+
 ```
 
 The arguments are in order
@@ -186,8 +194,8 @@ func allHandler(dir string, w http.ResponseWriter, r *http.Request) {
   cmdArgs = append(cmdArgs, string(all))
  case "OPTIONS":
   w.Header().Add("Access-Control-Allow-Methods", "OPTIONS,POST,GET,PUT,DELETE")
-  w.Header().Add("Access-Control-Allow-Origin", "*")
-  w.Header().Add("Access-Control-Allow-Headers", "*")
+  w.Header().Add("Access-Control-Allow-Origin", "_")
+  w.Header().Add("Access-Control-Allow-Headers", "_")
   w.WriteHeader(http.StatusNoContent)
   return
  }

@@ -169,7 +169,9 @@ It was also around this time I started tweeting my results.
 
 Comparisons to ripgrep brought out some discussion with Andrew Gallant probably better known as BurntSushi and the author of ripgrep. He was mostly interested in the lackluster speed I was getting from ripgrep. This was pretty quickly established to be due to me using WSL on Windows which is known to have disk performance issues. If you read the ripgrep announcement you can see he comprehensively proves that mmaps are not as fast as you would believe. This also came out in our brief twitter conversation. Not that I don't believe him but I would like some independent confirmation, and I wanted to find out at what point are memory maps worth using.
 
-The first question I had was what is the average file size for the Linux Kernel. With this we can test on a file of a similar length and know if reading such a file using memory maps is faster.```
+The first question I had was what is the average file size for the Linux Kernel. With this we can test on a file of a similar length and know if reading such a file using memory maps is faster.
+
+```
 $ find . -name "*.c" | xargs ls -l | gawk '{sum += $5; n++;} END {print sum/n;}'
 18554.8
 
@@ -177,12 +179,17 @@ $ find . -name "*.c" | xargs ls -l | gawk '{sum += $5; n++;} END {print sum/n;}'
 
 The above should find all the C files in a directory and then average their length in bytes. I think. My bash-fu is lacking.
 
-Given the above lets try a benchmark on a file of that length.```
+Given the above lets try a benchmark on a file of that length.
+
+```
 $ dd if=/dev/urandom of=linuxaverage bs=18554 count=1
 18554 bytes (19 kB, 18 KiB) copied, 0.003102 s, 6.0 MB/s
+
 ```
 
-The above is used to make the file using random bytes from urandom which should avoid any disk tweaks to speed things up. Then using an implementation that opens the file using IoUtil and another using memory maps.```
+The above is used to make the file using random bytes from urandom which should avoid any disk tweaks to speed things up. Then using an implementation that opens the file using IoUtil and another using memory maps.
+
+```
 $ go test -bench .
 pkg: github.com/boyter/scc/examples/mmap
 BenchmarkIoUtilOpen-8              20000            111981 ns/op
@@ -190,19 +197,24 @@ BenchmarkMmapUtilOpen-8              500           2614086 ns/op
 
 ```
 
-Not brilliant. Memory maps appear to be ~26x slower. So what size file does make a difference then? A bit of experimentation and I managed to get the results to converge at about 6 MB on my development machine which is a Surface Book 2 running in the WSL.```
+Not brilliant. Memory maps appear to be ~26x slower. So what size file does make a difference then? A bit of experimentation and I managed to get the results to converge at about 6 MB on my development machine which is a Surface Book 2 running in the WSL.
+
+```
 $ dd if=/dev/urandom of=linuxaverage bs=6000000 count=1 && go test -bench .
 6000000 bytes (6.0 MB, 5.7 MiB) copied, 0.013786 s, 435 MB/s
 pkg: github.com/boyter/scc/examples/mmap
 BenchmarkIoUtilOpen-8                500           2661080 ns/op
 BenchmarkMmapUtilOpen-8              500           2530480 ns/op
+
 ```
 
 Considering the average size of a file we are searching is under 20 KB there is no point in using memory maps based on the above.
 
 However scc is still slower than ripgrep and the above does not explain it. Maybe its something to do with the way I am reading the file? In the above I just read the whole file at once. Perhaps mmap wants me to read chunks, process and then finish at the end. The other issue could be that because the access isn't random across the disk. Checking the latter is easier so I tried that.
 
-I modified the test so that it walks loops over a copy of redis calculating as we go.```
+I modified the test so that it walks loops over a copy of redis calculating as we go.
+
+```
 $ go test -bench .
 pkg: github.com/boyter/scc/examples/mmap
 BenchmarkIoUtilOpen-8                 10         138882400 ns/op
@@ -210,11 +222,14 @@ BenchmarkMmapUtilOpen-8               10         140421700 ns/op
 
 ```
 
-Interesting. It actually gets to be almost the same performance when doing it this way. The redis source isn't exactly huge, so I tried the same test out against the benchmark of the linux kernel.```
+Interesting. It actually gets to be almost the same performance when doing it this way. The redis source isn't exactly huge, so I tried the same test out against the benchmark of the linux kernel.
+
+```
 $ go test -bench .
 pkg: github.com/boyter/scc/examples/mmap
 BenchmarkIoUtilOpen-8                  1        15183734000 ns/op
 BenchmarkMmapUtilOpen-8                1        15455014000 ns/op
+
 ```
 
 Pretty much a dead heat. So it seems that using mmaps in the real world has no performance gains unless you hit a large file. I was getting suspicious at this point that my development machine using WSL was influencing the results. I created a virtual machine on Digital Ocean running Ubuntu to see how that fared. The results turned out to be very similar.
@@ -285,7 +300,9 @@ func bufferedReadFile(fileLocation string, buffersize int) []byte {
 }
 {{</highlight>}}
 
-and the results,```
+and the results,
+
+```
 BenchmarkIoUtilRead10k-8                           10000            105909 ns/op
 BenchmarkBuffIoRead10k32768-8                      10000            104491 ns/op
 BenchmarkIoUtilRead100k-8                          10000            134854 ns/op
@@ -305,11 +322,14 @@ At this point I started looking at running parallel reads of the same file. Howe
 
 So all I managed to establish in the above was that the way I used memory maps makes no difference for small files and that I cannot write better code than the Go maintainers (not a big surprise there). I did so pretty comprehensively though so I have that going for me.
 
-Assuming that the reading from disk is about as efficient as it can be for the moment lets look at what else it could be. It was around here I started looking at profilers (which I should have done from the start) and adding more verbose output. One of the things I did was add a simple millisecond timer to determine how long it took to walk the file tree.```
+Assuming that the reading from disk is about as efficient as it can be for the moment lets look at what else it could be. It was around here I started looking at profilers (which I should have done from the start) and adding more verbose output. One of the things I did was add a simple millisecond timer to determine how long it took to walk the file tree.
+
+```
 $ time scc linux
 DEBUG 2018-03-27T21:34:26Z: milliseconds to walk directory: 7593
 --SNIP--
 scc linux  11.02s user 19.92s system 669% cpu 7.623 total
+
 ```
 
 Oh... so that would be why it is slow. Notice that the time to walk matches the time to run almost exactly.
@@ -324,7 +344,9 @@ I modified the code to inspect the initial directory passed in and spawn a go-ro
 
 This approach has the problem that it makes performance unpredictable between different directories. If there are many directories we spawn more go-routines and if there is only one folder we only spawn one. The best vs worst case performance profiles of this are wildly different, which is probably why the official Go implementation does not do this.
 
-So with the above simple process in place.```
+So with the above simple process in place.
+
+```
 $ time scc linux
 DEBUG 2018-03-27T21:48:56Z: milliseconds to walk directory: 3648
 --SNIP--
@@ -358,7 +380,9 @@ xxxxxxx
 xxxxxxx     ");
 {{</highlight>}}
 
-Cloc counts it as 1 line of code and 4 of comments. However it should be counted as 5 lines of code. Of the sample programs I am comparing against, tokei, loc, gocloc, cloc and sloccount, only tokei and sloccount get the counts correct.```
+Cloc counts it as 1 line of code and 4 of comments. However it should be counted as 5 lines of code. Of the sample programs I am comparing against, tokei, loc, gocloc, cloc and sloccount, only tokei and sloccount get the counts correct.
+
+```
 $ cloc samplefile
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
@@ -368,20 +392,20 @@ Java                             1              0              4              1
 
 $ tokei samplefile
 -------------------------------------------------------------------------------
- Language            Files        Lines         Code     Comments       Blanks
+Language            Files        Lines         Code     Comments       Blanks
 -------------------------------------------------------------------------------
- Java                    1            5            5            0            0
+Java                    1            5            5            0            0
 -------------------------------------------------------------------------------
- Total                   1            5            5            0            0
+Total                   1            5            5            0            0
 -------------------------------------------------------------------------------
 
 $ loc samplefile
 --------------------------------------------------------------------------------
- Language             Files        Lines        Blank      Comment         Code
+Language             Files        Lines        Blank      Comment         Code
 --------------------------------------------------------------------------------
- Java                     1            5            0            3            2
+Java                     1            5            0            3            2
 --------------------------------------------------------------------------------
- Total                    1            5            0            3            2
+Total                    1            5            0            3            2
 --------------------------------------------------------------------------------
 
 $ gocloc samplefile
@@ -406,7 +430,9 @@ So I decided that if I was not using regular expressions I would scan byte by by
 
 Another option would be to build an AST which would probably be much slower than byte counting and possibly slower than the regular expression parser.
 
-Why look at every byte? This is pretty easy to answer actually. Because it has to. We need to know where strings start and end, where comments begin etc... Since a comment can be a single byte we need to check every byte to know where they are. It is unlikely to be the slowest part of the application. It's more likely that reading from disk is going to slow things down than the CPU. Note that ripgrep uses a far fancier technique <https://blog.burntsushi.net/ripgrep/#linux-literal-default> as written by BurntSushi```
+Why look at every byte? This is pretty easy to answer actually. Because it has to. We need to know where strings start and end, where comments begin etc... Since a comment can be a single byte we need to check every byte to know where they are. It is unlikely to be the slowest part of the application. It's more likely that reading from disk is going to slow things down than the CPU. Note that ripgrep uses a far fancier technique <https://blog.burntsushi.net/ripgrep/#linux-literal-default> as written by BurntSushi
+
+```
 Counting lines can be quite expensive. A naive solution—a loop over every byte and comparing it to a \n—will
 be quite slow for example. Universal Code Grep counts lines using SIMD and ripgrep counts lines using
 packed comparisons (16 bytes at a time). However, in the Linux code search benchmarks, because the size of
@@ -636,7 +662,9 @@ This was a good start but there is a lot more that can be done, not only to impr
 
 I implemented the first which yielded some gains, but then realized I could convert the whole thing over to a large switch statement, which would jump to the current state and then do the checks just for that state. This would incorporate both of the above changes.
 
-I changed over to the the switch statement, verified it worked as well as the skip checks implemented before and went back to profiling. Here is the the output looking at a run of the linux kernel once it has been warmed into disk cache.```
+I changed over to the the switch statement, verified it worked as well as the skip checks implemented before and went back to profiling. Here is the the output looking at a run of the linux kernel once it has been warmed into disk cache.
+
+```
 (pprof) top10
 Showing nodes accounting for 28.34s, 90.17% of 31.43s total
 Dropped 225 nodes (cum <= 0.16s)
@@ -652,6 +680,7 @@ Showing top 10 nodes out of 80
      0.26s  0.83% 89.28%      0.36s  1.15%  runtime.greyobject
      0.16s  0.51% 89.79%      0.16s  0.51%  path/filepath.matchChunk
      0.12s  0.38% 90.17%      0.32s  1.02%  path/filepath.Match
+
 ```
 
 Looking at the above you can see that the core loop function countStats is still close to the top, but that checkForMatchMultiOpen, checkForMatchMultiClose and checkComplexity are methods called by it that I wrote that would be worth investigating. A good sign is that cgocall is called almost as much as countStats so we are getting close to be bottlenecked by disk access and not the CPU.
@@ -690,7 +719,9 @@ complexityBytes := []byte{
 
 A quick benchmark I ran showed that having a loop over 8 elements was much faster than a map so left it as a loop rather than a map.
 
-And the results,```
+And the results,
+
+```
 (pprof) top10
 Showing nodes accounting for 49.46s, 89.12% of 55.50s total
 Dropped 279 nodes (cum <= 0.28s)
@@ -713,15 +744,20 @@ A nice optimization. The method checkComplexity is down in terms of cumulative c
 
 Another change I added was that if there is a match in checkComplexity, checkForMatchMultiOpen or checkForMatchMultiClose it would return the number of bytes that the method had looked ahead. This allows us to jump ahead by that many bytes as we have already inspected them. This did however cause a new problem.
 
-Turns out that allocations can be expensive when run in a tight loop. Look at the last line in the below where I return 0 with a new empty byte allocation used to indicate how long the match, and to know what to look for on the next loop.```
+Turns out that allocations can be expensive when run in a tight loop. Look at the last line in the below where I return 0 with a new empty byte allocation used to indicate how long the match, and to know what to look for on the next loop
+
+```
 (pprof) list github.com/boyter/scc/processor.checkForMatchMultiOpen
 Total: 50.30s
 ROUTINE ======================== github.com/boyter/scc/processor.checkForMatchMultiOpen in C:\Users\bboyter\Documents\Go\src\github.com\boyter\scc\processor\workers.go
          .          .     77:   if !hasMatch {
      3.08s     11.05s     78:           return 0, []byte{}
+
 ```
 
-The second value is not actually required in this case because we have no match. By changing it to a nil return we get the following profile, which is a massive improvement due to not having an allocation and by taking pressure off the garbage collector.```
+The second value is not actually required in this case because we have no match. By changing it to a nil return we get the following profile, which is a massive improvement due to not having an allocation and by taking pressure off the garbage collector.
+
+```
          .          .     77:   if !hasMatch {
      1.56s      1.56s     78:           return 0, nil
 
@@ -751,11 +787,14 @@ for j := 0; j < len(one); j++ {
 
 Which one would you think was the slowest? Which one the fastest? As you probably expected the slowest uses reflect. Reflection is almost always slow. However oddly enough the fastest is the basic for loop. Usually the answer to what is the fastest is whatever is in the standard library. However in this case the loop is able to avoid the length check required to see if the slices are the same length. This makes sense as it cannot assume that the slices are of the same length.
 
-Also since in our case we already know that the first byte matches we can save some additional time by starting the loop at 1. How much of a saving does this produce?```
+Also since in our case we already know that the first byte matches we can save some additional time by starting the loop at 1. How much of a saving does this produce?
+
+```
 BenchmarkCheckByteEqualityReflect-8                                      5000000               344 ns/op
 BenchmarkCheckByteEqualityBytes-8                                       300000000                5.52 ns/op
 BenchmarkCheckByteEqualityLoopWithAddtional-8                           500000000                3.76 ns/op
 BenchmarkCheckByteEqualityLoop-8                                        500000000                3.41 ns/op
+
 ```
 
 As you can see reflection is right out. However by using our own loop with the 1 byte offset we can get an additional saving. Extreme? Yes. But remember this happens in the core hot loop so these savings all add up. If you have very constrained requirements it can be worth checking to see if you can do better than the standard libraries.
@@ -770,7 +809,9 @@ if Trace {
 }
 {{</highlight>}}
 
-Another place to save some time was to add caches for certain actions. An example would be getting the extension of a file. Its pretty common to have multiple files with the same name. As such a cache to save the processing can dramatically speed things up at the expense of some memory. A simple benchmark shows that the gains are not insignificant.```
+Another place to save some time was to add caches for certain actions. An example would be getting the extension of a file. Its pretty common to have multiple files with the same name. As such a cache to save the processing can dramatically speed things up at the expense of some memory. A simple benchmark shows that the gains are not insignificant.
+
+```
 BenchmarkGetExtensionDifferent-8                                          200000              6077 ns/op
 BenchmarkGetExtensionSame-8                                             10000000               138 ns/op
 
@@ -778,11 +819,14 @@ BenchmarkGetExtensionSame-8                                             10000000
 
 The final thing I looked to optimize was the printing code. While generally it was not an issue I noticed that if the files option was used it would take a considerable amount of time processing the lists. I was using <https://github.com/ryanuber/columnize/> for this and while it worked well the additional overhead was a problem. I poked through the code and the slowdown was because it takes in any length and stuffs the values into a column it needs to loop the input a few times in order to know output sizes.
 
-However I could work out the sizes in advance, or just define them and avoid those additional loops. As such I rolled my own formatter. Well aware that string concatenation is usually very slow, a quick search showed that <https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go> there are quite a few ways to do it in Go. Thankfully someone included a benchmark of the common ways to do it.```
+However I could work out the sizes in advance, or just define them and avoid those additional loops. As such I rolled my own formatter. Well aware that string concatenation is usually very slow, a quick search showed that <https://stackoverflow.com/questions/1760757/how-to-efficiently-concatenate-strings-in-go> there are quite a few ways to do it in Go. Thankfully someone included a benchmark of the common ways to do it.
+
+```
 BenchmarkConcat-8                1000000             64850 ns/op
 BenchmarkBuffer-8               200000000                6.76 ns/op
 BenchmarkCopy-8                 1000000000               3.06 ns/op
 BenchmarkStringBuilder-8        200000000                7.74 ns/op
+
 ```
 
 Based on the above I decided to go with the Go 1.10 specific method and use string builder. Its almost as fast as buffer and copy but much easier to understand. Since the formatting happens at the very end with only a few iterations for the summary and with what can be done as results come in for the files options there is no real need to over complicate things. It also ensures that scc can only be built with a modern Go compiler so we get at least a decent level of baseline performance.
@@ -800,13 +844,13 @@ So after all of the above the final profile ended up looking like the below. The
 
 ## Example Output
 
-Of course everything is about the output and what you actually get with it. With everything working the output looks like the below of a basic calculation of the redis source code.```
+Of course everything is about the output and what you actually get with it. With everything working the output looks like the below of a basic calculation of the redis source code.
+
+```
 $ scc redis
 -------------------------------------------------------------------------------
-
 Language                 Files     Lines     Code  Comments   Blanks Complexity
 -------------------------------------------------------------------------------
-
 C                          215    114488    85341     15175    13972      21921
 C Header                   144     20042    13308      4091     2643       1073
 TCL                         93     15702    12933       922     1847       1482
@@ -824,18 +868,17 @@ Batch                        1        28       26         0        2          3
 Plain Text                   1       499      499         0        0          0
 C++                          1        46       30         0       16          5
 -------------------------------------------------------------------------------
-
 Total                      545    179264   133120     22419    23725      26057
 -------------------------------------------------------------------------------
-
 Estimated Cost to Develop $4,592,517
 Estimated Schedule Effort 27.382310 months
 Estimated People Required 19.867141
 -------------------------------------------------------------------------------
-
 ```
 
-In order to evaluate how well the complexity calculation works I tried it against my personal project searchcode server <http://github.com/boyter/searchcode-server> where I would expect that the files SearchCodeLib, IndexService and CodeMatcher to be the most complex based on what I know about the code-base.```
+In order to evaluate how well the complexity calculation works I tried it against my personal project searchcode server <http://github.com/boyter/searchcode-server> where I would expect that the files SearchCodeLib, IndexService and CodeMatcher to be the most complex based on what I know about the code-base.
+
+```
 $ scc --wl java --files -s complexity searchcode-server
 -------------------------------------------------------------------------------
 Language                 Files     Lines     Code  Comments   Blanks Complexity
@@ -852,13 +895,13 @@ Java                       131     19445    13913      1716     3816       1107
 ~e/route/CodeRouteService.java       453      348         9       96         50
 ```
 
-Indeed that is exactly what I would have expected from the results. So it looks for at least for my use case that the complexity calculations work pretty well. Of course if you don't want them,```
+Indeed that is exactly what I would have expected from the results. So it looks for at least for my use case that the complexity calculations work pretty well. Of course if you don't want them,
+
+```
 $ scc -c --co redis
 -------------------------------------------------------------------------------
-
 Language                     Files       Lines      Code    Comments     Blanks
 -------------------------------------------------------------------------------
-
 C                              215      114480     85333       15175      13972
 C Header                       144       20042     13308        4091       2643
 TCL                             93       15702     12933         922       1847
@@ -876,10 +919,8 @@ C++ Header                       1           9         5           3          1
 C++                              1          46        30           0         16
 Plain Text                       1         499       499           0          0
 -------------------------------------------------------------------------------
-
 Total                          545      179262    133118       22419      23725
 -------------------------------------------------------------------------------
-
 ```
 
 Not only can you turn off the complexity calculations you can turn off the COCOMO output as well.

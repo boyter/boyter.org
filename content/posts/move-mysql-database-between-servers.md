@@ -11,12 +11,16 @@ I started looking into doing the dump/import directly over mysql through a remot
 
 A bit of searching around however and I discovered you can actually do it using SSH. This turned out to be a total game changer for me, hence writing this blog so I can keep reference to it.
 
-The command is as follows,```
+The command is as follows,
+
+```
 mysqldump -u username -ppassword db-name | ssh user@remote mysql -u username -ppassword db-name
 
 ```
 
-In my case I added some additional options in order to not smash the active MySQL instance, and deal with some of the larger content thats stored in it.```
+In my case I added some additional options in order to not smash the active MySQL instance, and deal with some of the larger content thats stored in it.
+
+```
 ionice -c2 -n7 nice -n19 mysqldump --single-transaction --max_allowed_packet=512M -u user -ppassword db-name | ssh user@remote mysql -u user -ppassword db-name
 ```
 

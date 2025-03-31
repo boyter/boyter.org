@@ -15,18 +15,24 @@ In truth its a mixed bag. Some things like like crawling are easy, others such a
 
 Thankfully crawling is one of the things that you really don't have to put any work into. Once you have a list of sources (repo locations) you can use source control download for you. Just clone/checkout the code to disk and you are done. The only exception to this is getting the list of projects, you can crawl website (not advisable) but emailing the website owners usually gives you a hook into their data. The best thing about crawling this way is that refreshing your data is easy, just update your source or checkout/clone it again.
 
-Indexing is where things get difficult. The first problem is knowing how to split terms. Most index engines are designed to work with words, and when it comes to words its fairly easy to determine what is considered at term by looking at spaces. In code this is far more difficult. This is best illustrated with an example. Take the following search term,```
+Indexing is where things get difficult. The first problem is knowing how to split terms. Most index engines are designed to work with words, and when it comes to words its fairly easy to determine what is considered at term by looking at spaces. In code this is far more difficult. This is best illustrated with an example. Take the following search term,
+
+```
 i++
 
 ```
 
-and then consider the following code snippets which should all match,```
+and then consider the following code snippets which should all match,
+
+```
 for(i=0; i++; i&lt;100) {
 for(i=0;i++;i&lt;100) {
 spliti++;
 ```
 
-How do you split them into terms? By spaces results in the following,```
+How do you split them into terms? By spaces results in the following,
+
+```
 for(i=0;
 i++;
 i&lt;100)

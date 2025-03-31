@@ -98,7 +98,9 @@ fn main() {
 }
 {{</highlight>}}
 
-I then compiled rust in release mode `cargo build --release` and to ensure they both produced the same output tried them both on the same directory with 172 files.```
+I then compiled rust in release mode `cargo build --release` and to ensure they both produced the same output tried them both on the same directory with 172 files.
+
+```
 
 # bboyter @ SurfaceBook2 in ~/Projects/rust on git:master x [15:36:35]
 
@@ -112,7 +114,10 @@ $ ./rust | sort | uniq | sha256sum
 
 ```
 
-With the above confirming they both produced the same results I went and did a quick benchmark,```
+With the above confirming they both produced the same results I went and did a quick benchmark,
+
+```
+
 $ hyperfine './go' && hyperfine './rust'
 Benchmark #1: ./go
   Time (mean ± σ):      29.1 ms ±   2.4 ms    [User: 4.0 ms, System: 25.4 ms]
@@ -121,6 +126,7 @@ Benchmark #1: ./go
 Benchmark #1: ./rust
   Time (mean ± σ):     103.7 ms ±   2.2 ms    [User: 9.4 ms, System: 96.2 ms]
   Range (min … max):    99.3 ms … 108.5 ms
+
 ```
 
 Clearly I have done something wrong here. It seems at odd that Go would be so much faster in this case. Looking again at the Rust docs its possible to read the file into a Vector from the start. Since the Go code actually reads the whole file into memory this seemed like a likely candidate as to the difference.
@@ -162,7 +168,10 @@ fn main() {
 }
 {{</highlight>}}
 
-And the benchmark after another release compile.```
+And the benchmark after another release compile.
+
+```
+
 Benchmark #1: ./go
   Time (mean ± σ):      28.6 ms ±   2.9 ms    [User: 3.8 ms, System: 28.5 ms]
   Range (min … max):    24.3 ms …  39.4 ms
@@ -175,7 +184,10 @@ Benchmark #1: ./rust
 
 Thats a bit more like it. Seems like Rust is one of these languages that has a few ways to do things and if you do it the wrong way performance can suffer. It is better, but still not great though.
 
-Just to be sure my laptop was not influsing the result I created a Digital Ocean instance and tried it out on a copy of the linux kernel.```
+Just to be sure my laptop was not influsing the result I created a Digital Ocean instance and tried it out on a copy of the linux kernel.
+
+```
+
 root@ubuntu-c-16-sgp1-01:~/linux# hyperfine './go' && hyperfine './rust'
 Benchmark #1: ./go
   Time (mean ± σ):      1.131 s ±  0.022 s    [User: 708.5 ms, System: 534.7 ms]
@@ -184,6 +196,7 @@ Benchmark #1: ./go
 Benchmark #1: ./rust
   Time (mean ± σ):      2.222 s ±  0.016 s    [User: 1.639 s, System: 0.578 s]
   Range (min … max):    2.198 s …  2.255 s
+
 ```
 
 Seems it was not a case of just my laptop being silly. Wondering if perhaps the first version was faster on linux I copied that up and ran it. It took even longer.
@@ -232,7 +245,10 @@ fn main() -> Result<(), io::Error> {
 }
 {{</highlight>}}
 
-With the following runtime.```
+With the following runtime.
+
+```
+
 Benchmark #1: ./go
   Time (mean ± σ):      51.8 ms ±   4.0 ms    [User: 7.8 ms, System: 50.2 ms]
   Range (min … max):    46.8 ms …  66.2 ms
@@ -243,7 +259,10 @@ Benchmark #1: ./rust
 
 ```
 
-Which is much closer to what I was expecting. Incidentally this introduced me to the `?` [operator](https://stackoverflow.com/questions/42917566/what-is-this-question-mark-operator-about) in Rust. Trying it out on a much larger repository, which is a fresh checkout of the Linux kernel.```
+Which is much closer to what I was expecting. Incidentally this introduced me to the `?` [operator](https://stackoverflow.com/questions/42917566/what-is-this-question-mark-operator-about) in Rust. Trying it out on a much larger repository, which is a fresh checkout of the Linux kernel.
+
+```
+
 Benchmark #1: ./go
   Time (mean ± σ):      1.661 s ±  0.046 s    [User: 1.069 s, System: 0.658 s]
   Range (min … max):    1.563 s …  1.722 s
@@ -251,6 +270,7 @@ Benchmark #1: ./go
 Benchmark #1: ./rust
   Time (mean ± σ):      2.076 s ±  0.029 s    [User: 1.534 s, System: 0.531 s]
   Range (min … max):    2.034 s …  2.131 s
+
 ```
 
 Which is better than before but still not as good as I had hoped. Its not a blocking issue in my goal of porting `scc` though.

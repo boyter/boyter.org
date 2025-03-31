@@ -41,7 +41,9 @@ You should see something like the above. In this case the version number is 6.5.
 
 At this point you should investigate running elastic locally so you can avoid impacting anyone else, requiring network connectivity and to speed up local development. You have two options. The easiest is run a docker image. However due to licensing issues elastic (the company) has made this a little harder. A while ago elastic released the source code to XPack which is a collection of their propitiatory tools. You can read the release here <https://www.elastic.co/blog/doubling-down-on-open> however one catch is that it means you can accidentally run the XPack tools and potentially run into licensing issues. You can read the HN discussion here <https://news.ycombinator.com/item?id=16487440>
 
-To avoid this and potentially avoid some angry emails I have set the below to use the OSS versions of elastic.```
+To avoid this and potentially avoid some angry emails I have set the below to use the OSS versions of elastic.
+
+```
 docker pull docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.0
 docker run -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -d docker.elastic.co/elasticsearch/elasticsearch-oss:6.5.0
 
@@ -72,7 +74,9 @@ I have included an export of the postman queries to assist with getting started 
 
 The next thing to understand is how elastic stores documents. Documents that are indexed need to go into an index and have a type. Indexes can contain one or more types. This may sound limiting but you can search over all indexes or all types within an index or just one type within an index if you require.
 
-Consider it logically like the below. You can search at any part of the tree which will search across all children, or pull back a specific document if you know the key.```
+Consider it logically like the below. You can search at any part of the tree which will search across all children, or pull back a specific document if you know the key.
+
+```
 ElasticSearch
 ├── Index1
 │   ├── Type1
@@ -88,6 +92,7 @@ ElasticSearch
 │   │   └── Document6
 │   ├── Type4
 │   │   └── Document7
+
 ```
 
 The confusing thing however is that documents stored in elastic don't actually need to have the same structure. You can index both of the documents,
@@ -205,9 +210,13 @@ With the above you get all of the usual elastic syntax. Boolean searches `keanu 
 
 The other option is to post to the same endpoints using the elasticsearch syntax. This is more complex and involved but provides the option to perform facet/aggregations and as such is likely what you will need to do.
 
-If craft the following HTTP requests and POST like the following,```
-POST: http://localhost:9200/film/actor/_search
+If craft the following HTTP requests and POST like the following,
+
+```
+
+POST: <http://localhost:9200/film/actor/_search>
 TYPE: application/json
+
 ```
 
 {{<highlight json>}}
@@ -301,8 +310,9 @@ The below has a special field which I called `_everything` but could be whatever
 {{</highlight>}}
 
 At this point the following search will work.```
-POST: http://localhost:9200/film/actor/_search
+POST: <http://localhost:9200/film/actor/_search>
 TYPE: application/json
+
 ```
 
 {{<highlight json>}}
@@ -344,8 +354,9 @@ GET: <http://localhost:9200/film/actor/id>
 Highlights are how you show the relevant portion of the search to your user. Usually they just consist of a relevant potion of text extracted from the document with the matching terms highlighted. I am not sure how elastic actually achieves this under the hood, but if you are curious you can read [Building a Search Result Extract/Snippet/Highlight generator in PHP](https://boyter.org/2013/04/building-a-search-result-extract-generator-in-php/) which explains how I created one some years ago and compared it to other solutions.
 
 Thankfully elastic can do this for you saving you the effort. Add highlight to your query and it will return highlights for the matching fields.```
-POST: http://localhost:9200/film/actor/_search
+POST: <http://localhost:9200/film/actor/_search>
 TYPE: application/json
+
 ```
 
 {{<highlight json>}}
@@ -447,8 +458,9 @@ When run against an index with the mapping setup you will get back in your respo
 Which is a sum of each of the unique keys based on the field you specified. You can have multiple aggregation types if you have multiple facets, with each having the key of the name you set in your aggregation request.
 
 Once you have the facet you can then filter results down to just those containing it. You can do this like the below example that will filter down to a any document where the type is set to "Actor".```
-POST: http://localhost:9200/film/actor/_search
+POST: <http://localhost:9200/film/actor/_search>
 TYPE: application/json
+
 ```
 
 {{<highlight json>}}
@@ -559,7 +571,8 @@ The above will return the below if the index exists and it was able to be delete
 > I always read the above using the Red Alert Soviet voice in my head which causes me to giggle to the annoyance of my colleagues
 
 To delete a single document from the index you need to know its id which you can find by using a query and looking at the value `_id` which for auto generated id's will be something like `x-Apn2cB5wabZ-h5-SLf`. To remove it you send a DELETE against the index/type with the id like so.```
-DELETE: http://localhost:9200/film/actor/x-Apn2cB5wabZ-h5-SLf
+DELETE: <http://localhost:9200/film/actor/x-Apn2cB5wabZ-h5-SLf>
+
 ```
 
 Which when run with the correct id will produce a result like the below.

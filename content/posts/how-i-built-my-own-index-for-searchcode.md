@@ -277,14 +277,18 @@ Consider a bloom filter with the following properties.
 - 8 bit vector or bloom filter.
 - Single hash function, so each term added is hashed once and flips one bit.
 
-Normal view, where we have documents as rows and the columns contain the bloom filter.```
+Normal view, where we have documents as rows and the columns contain the bloom filter.
+
+```
 document1 10111010
 document2 01100100
 document3 00100111
 
 ```
 
-Rotated view, where we have terms as the rows and columns are for a single document.```
+Rotated view, where we have terms as the rows and columns are for a single document.
+
+```
 term1 001
 term2 101
 term3 011
@@ -297,14 +301,19 @@ term8 100
 
 So when you search for a term such as "dog" you hash that term, and fetch that row. So assuming it hashed to the 5th bit we would know that row 5 would be the one to look at and that document1 potentially contains dog.
 
-Working with two or more terms is just as easy. Assuming you have "cat dog" where cat hashes to term 2, you get rows 5 for dog and 2 for cat.```
+Working with two or more terms is just as easy. Assuming you have "cat dog" where cat hashes to term 2, you get rows 5 for dog and 2 for cat.
+
+```
 101
 100
 
 ```
 
-Then you logically & them together and look for which column remains set.```
+Then you logically & them together and look for which column remains set.
+
+```
 101 & 100 = 100
+
 ```
 
 Now the above confused me for a while. In your normal view the row is constrained by the size of your bloom filter, so it's fixed to 1500 bits or something for bing. But the number of documents is unbound. So if flipped means you have these huge million/billion long rows to worry about. The trick I implemented is to restrict the number of documents per what I called a "block". If you restrict it to 64 documents you all of a sudden can store everything using 64 bit integers in a list of whatever works out to be the best size for your bloom filter.
@@ -345,7 +354,9 @@ The index is a 100% non-positional memory index, based on bloom filters, sharded
 
 The index is split into shards which are further split into 8-12 buckets. Each bucket has a differently configured bloom filter, designed to save space while preserving a target false positive value. A result of this is that buckets contain documents of similar length with the smaller bloom filters getting shorter documents.
 
-When a document is enqueued to be indexed, it is routed to the appropriate shard, and the number of distinct trigrams in that document is calculated. This is important because there is a relationship between the number of trigrams and the number of bits set within the bloom filter. In order to avoid wasting space, a bucket is chosen which gives an appropriate amount of bits set, where the idea is to lower the false positive rate without wasting memory. Documents are truncated to ensure they don't overfill bloom filters, so even if searchcode is working with 1 MB file, only the head of that file will be added to the index, without overfilling its filter.```
+When a document is enqueued to be indexed, it is routed to the appropriate shard, and the number of distinct trigrams in that document is calculated. This is important because there is a relationship between the number of trigrams and the number of bits set within the bloom filter. In order to avoid wasting space, a bucket is chosen which gives an appropriate amount of bits set, where the idea is to lower the false positive rate without wasting memory. Documents are truncated to ensure they don't overfill bloom filters, so even if searchcode is working with 1 MB file, only the head of that file will be added to the index, without overfilling its filter.
+
+```
 ┌──────────────────┐   ┌──────────────────┐   ┌──────────────────┐
 │     caisson      ├─┬▶│  caisson shard   ├┬─▶│     bucket-1     │
 └──────────────────┘ │ └──────────────────┘│  └──────────────────┘
@@ -377,7 +388,9 @@ Once the target filter is picked, the document is added, with the bits in the bl
 
 In memory the buckets look like the following, which is just a huge slice of 64 bit integers one after the other. These are organised into blocks, consisting of as many integers as there are bits in the bloom filter. So a 512 bit bloom filter would have 512 integers in each block, with each block containing 64 documents.
 
-When the 64th document is added filling the left most bits, another block is appended onto the current one, and the bits start filling right the left again.```
+When the 64th document is added filling the left most bits, another block is appended onto the current one, and the bits start filling right the left again.
+
+```
 ┌──────────────────┐    ┌───────────────────────────────────────────────────────────────────┐
 │      bucket      │───▶│                                                                   │
 └──────────────────┘    │ 0011100000000000000000000000000011010010000000000000010000111111  │
@@ -398,6 +411,7 @@ When the 64th document is added filling the left most bits, another block is app
                         │ 0000000000100001110000001000000001000000000000000000101001111111  │
                         │                                                                   │
                         └───────────────────────────────────────────────────────────────────┘
+
 ```
 
 Searches against the index have the query term and facets passed in, where they are run in parallel across each shard, with the shard itself determining which buckets should be searched and in what order. When a search runs it returns all of the possible document id's that match, the number of matches, the document size and some other metadata that is required. All of the values from each shard are joined together, and then ranking is applied.
@@ -543,7 +557,9 @@ fn main() {
 }
 {{</highlight>}}
 
-Followed by a quick compile and run,```
+Followed by a quick compile and run,
+
+```
 $ go run main.go && cargo run --release
 time: 11205 ms
     Finished release [optimized] target(s) in 0.03s
@@ -564,10 +580,13 @@ for i:=0;i<1_000_000;i++ {
 }
 {{</highlight>}}
 
-Which speeds up the Go version a bit. In addition, I tried this with the latest version of Go 1.19 and it sped up yet again from my previous attempts running faster than the Rust version. I have no idea how to do a non allocation version in Rust, but even without on my machine Go is now faster for this task. Remember to upgrade your compiler people! Still not fast enough for my purposes, but hey free performance is always good.```
-$ go run 1/main.go && go run 2/main.go 
+Which speeds up the Go version a bit. In addition, I tried this with the latest version of Go 1.19 and it sped up yet again from my previous attempts running faster than the Rust version. I have no idea how to do a non allocation version in Rust, but even without on my machine Go is now faster for this task. Remember to upgrade your compiler people! Still not fast enough for my purposes, but hey free performance is always good.
+
+```
+$ go run 1/main.go && go run 2/main.go
 time: 6383 ms                              <-- non allocating runtime here
 time: 6783 ms
+
 ```
 
 For comparison a mate of mine tried C++ with -O3 compile option and got a runtime of around 2 seconds. Not sure what voodoo it's doing to achieve that. We compared the output to ensure it was the same and it was. Our best guess was it unrolls the loop to fit the CPU/RAM best. This is rather annoying because if I were using C++ I would be very close to being done with that sort of performance.

@@ -57,7 +57,9 @@ Every time the method is called it goes back to the language lookup and looks fo
 
 What does this translate to in the real world?
 
-Before```
+Before
+
+```
 $ hyperfine 'scc redis'
 Benchmark #1: scc redis
   Time (mean ± σ):     239.7 ms ±  43.7 ms    [User: 607.0 ms, System: 822.3 ms]
@@ -65,16 +67,21 @@ Benchmark #1: scc redis
 
 ```
 
-After```
+After
+
+```
 $ hyperfine 'scc redis'
 Benchmark #1: scc redis
   Time (mean ± σ):     199.7 ms ±  26.1 ms    [User: 608.0 ms, System: 716.6 ms]
   Range (min … max):   180.5 ms … 268.8 ms
+
 ```
 
 Not a bad saving there. Following this easy win I started poking around the code-base and identified some additional lookups and method calls that could be removed. These changes were largely a result of changing the logic to skip whitespace characters which improve accuracy.
 
-The result of the above tweaks was that the complexity calculation inside `scc` is now calculated almost for free on small code bases and for a 10% time hit on larger ones. Trying it out on the redis code-base on a more powerful machine.```
+The result of the above tweaks was that the complexity calculation inside `scc` is now calculated almost for free on small code bases and for a 10% time hit on larger ones. Trying it out on the redis code-base on a more powerful machine.
+
+```
 $ hyperfine 'scc redis'
 Benchmark #1: scc ~/Projects/redis
   Time (mean ± σ):      93.2 ms ±   5.1 ms    [User: 183.4 ms, System: 398.2 ms]
@@ -89,15 +96,20 @@ Benchmark #1: scc -c ~/Projects/redis
 
 Only 2 ms difference between the run with complexity vs the one without when running against the redis source code. It does give an idea of just how inefficient that lookup was, and how those additional savings helped. So much so that a 100 ms run had no real difference in the runtime. I really did not expect there to be such a massive performance gain that easily.
 
-Moving on. Another thought I had was that the core matching algorithm has a very tight nested loop like so```
+Moving on. Another thought I had was that the core matching algorithm has a very tight nested loop like so
+
+```
 for match in complexity_checks:
   for char in match
-    check if match 
+    check if match
+
 ```
 
 Loop in a loop can be a performance problem as I found in a previous play with performance <https://boyter.org/2017/03/golang-solution-faster-equivalent-java-solution/> where flattening the loop improved an algorithms performance considerably in both Java and Go.
 
-So I tried flattening the loop. My first candidate to try was the complexity check logic. I turned the following structure which has a nested loop over the items, and then the bytes they have in turn,```
+So I tried flattening the loop. My first candidate to try was the complexity check logic. I turned the following structure which has a nested loop over the items, and then the bytes they have in turn,
+
+```
 [
   "for ",
   "for(",
@@ -114,8 +126,11 @@ So I tried flattening the loop. My first candidate to try was the complexity che
 
 ```
 
-into the following representation,```
+into the following representation,
+
+```
 "for _for(_if _if(_switch _while _else _||_&&_!=_=="
+
 ```
 
 Separated by a null byte separator (represented by _ above). I could then reset the state when that was hit in order to determine if we have a match or not. The loop became similar to the below.
@@ -143,7 +158,9 @@ for i := 0; i < len(complexity); i++ {
 }
 {{</highlight>}}
 
-The theory being that by avoiding the nested loop it should have less bookkeeping to do. We just reset the state when we hit a null byte and continue processing. I was fairly confident that this would produce a meaningful result. A quick benchmark later, with the existing method and the new one.```
+The theory being that by avoiding the nested loop it should have less bookkeeping to do. We just reset the state when we hit a null byte and continue processing. I was fairly confident that this would produce a meaningful result. A quick benchmark later, with the existing method and the new one.
+
+```
 BenchmarkCheckComplexity-8        3000000        466 ns/op
 BenchmarkCheckComplexityNew-8     2000000        699 ns/op
 
@@ -151,9 +168,12 @@ BenchmarkCheckComplexityNew-8     2000000        699 ns/op
 
 A meaningful result, but not the one I wanted. Turns out that at this small level of nested looping there is no performance to be gained here. In fact in this case the opposite occurred and it actually ran slower. This was especially annoying because any gains here could have been applied universally and would have really helped speed up the hot methods.
 
-Another thought was to do what the complexity check does in the checking for open matches (it finds open comments, strings etc..) and build a small list of the first bytes for each lookup and then loop that to see if we should process any further. As mentioned the complexity check does this and as such it was a fairly simple thing to add, since similar code already existed. Another benchmark later.```
+Another thought was to do what the complexity check does in the checking for open matches (it finds open comments, strings etc..) and build a small list of the first bytes for each lookup and then loop that to see if we should process any further. As mentioned the complexity check does this and as such it was a fairly simple thing to add, since similar code already existed. Another benchmark later.
+
+```
 github.com/boyter/scc/processor.checkForMatchMultiOpen (15.15%, 0.75s) "with byte check"
 github.com/boyter/scc/processor.checkForMatchMultiOpen (12.97%, 0.62s) "without byte check"
+
 ```
 
 Alas the number of bytes to check here is generally too small to make it worthwhile, it ends up doing more work as a result and this does not save any time but actually slows down processing.
@@ -162,7 +182,9 @@ At this point I was running out of ideas.
 
 I decided I would have a look at changing the order of the if statements in the different state cases. Due to how they had a bailout condition ideally you want to hit the most common ones first in order to trigger these conditions and avoid additional processing. Note that this is a serious micro optimization. It only makes sense to even consider something like this because the application runs in a very tight loop.
 
-I started tweaking the order of the if conditions in the blank state processor. The results were rather surprising.```
+I started tweaking the order of the if conditions in the blank state processor. The results were rather surprising.
+
+```
 $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
   Time (mean ± σ):     551.7 ms ±  22.5 ms    [User: 1.936 s, System: 1.737 s]
@@ -182,7 +204,9 @@ Benchmark #1: scc cpython
 
 I set hyperfine to run 50 times to try and remove any noise from the results and converge on a result. As you can see from the above, changing the if conditions on such a tight loop can actually improve performance quite a bit. In this case the time to process ended up taking ~10 ms less for the best order of the statements I found.
 
-With the blank state sorted I made the change permanent and had a look at the other conditions, starting with multi-line comments.```
+With the blank state sorted I made the change permanent and had a look at the other conditions, starting with multi-line comments.
+
+```
 $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
   Time (mean ± σ):     540.6 ms ±  20.0 ms    [User: 1.936 s, System: 1.825 s]
@@ -192,9 +216,12 @@ $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
   Time (mean ± σ):     527.1 ms ±   9.5 ms    [User: 1.899 s, System: 1.793 s]
   Range (min … max):   502.6 ms … 577.8 ms
+
 ```
 
-Another small gain of almost ~10 ms from re-ordering the if statements. I then moved to the last state that with if conditionals, the code state. This state is where the application spends most of its time so any wins here are likely to yield the biggest benefits.```
+Another small gain of almost ~10 ms from re-ordering the if statements. I then moved to the last state that with if conditionals, the code state. This state is where the application spends most of its time so any wins here are likely to yield the biggest benefits.
+
+```
 Benchmark #1: scc cpython
   Time (mean ± σ):     522.9 ms ±   9.3 ms    [User: 1.890 s, System: 1.740 s]
   Range (min … max):   510.1 ms … 577.7 ms
@@ -216,7 +243,9 @@ In short instead of looking for positive matches assuming they may be there, che
 
 Logically this makes sense. After all we spend most of the loop not moving between states. So why bother checking if we should move state and instead check if we shouldn't? In theory it should be less processing. Even if we only do this check inside the check code state there is potentially a massive gain here.
 
-Mercifully this was a quick thing to implement as it is very similar to the complexity check shortcut that is already in the code-base.```
+Mercifully this was a quick thing to implement as it is very similar to the complexity check shortcut that is already in the code-base.
+
+```
 $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
   Time (mean ± σ):     535.3 ms ±   8.0 ms    [User: 1.974 s, System: 1.751 s]
@@ -226,6 +255,7 @@ $ hyperfine -m 50 'scc cpython'
 Benchmark #1: scc cpython
   Time (mean ± σ):     461.6 ms ±  11.0 ms    [User: 1.310 s, System: 1.890 s]
   Range (min … max):   445.3 ms … 519.8 ms
+
 ```
 
 The result is not a bad one at all. In fact this was a very large performance gain vs the amount of work required.
@@ -234,7 +264,9 @@ I then started thinking about the problem some more. The following struck me aft
 
 The application as written has a main loop which processes over every byte in the file. It keeps track of the state it is in and uses a switch over that state to know what processing should happen. I was wondering if rather than having a large single loop over the whole byte array, what if when we entered a new state we started a new loop which processed bytes until the state changed or we hit a newline? That is, rather than loop and check the state, change state and then loop. Would this be faster?
 
-In effect the loop structure of```
+In effect the loop structure of
+
+```
 for byte in file
   switch
     code state
@@ -246,7 +278,9 @@ for byte in file
 
 ```
 
-becomes```
+becomes
+
+```
 for byte in file
   switch
     code state
@@ -258,6 +292,7 @@ for byte in file
     comment state
       loop bytes
         process
+
 ```
 
 This seems counter intuitive at first because it introduces a loop in loop, but because each of the state loops would be very tight it would mean that the looping code would be much shorter. In theory this increases the chance that the loops spend time faster CPU caches. It also has the added benefit of improving the visibility of the flame graph as each state loop can more easily be pulled out into another method.
@@ -270,7 +305,9 @@ And the new profile output,
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/methods-refactor.png)
 
-Both of which suggest that the `shouldProcess` method is our next target. More importantly is what affect has this has on the core loop. I took version 1.9.0 of `scc` and tried it out against the current branch version on the Linux kernel.```
+Both of which suggest that the `shouldProcess` method is our next target. More importantly is what affect has this has on the core loop. I took version 1.9.0 of `scc` and tried it out against the current branch version on the Linux kernel.
+
+```
 Benchmark #1: ./scc1.9.0 linux
   Time (mean ± σ):      2.343 s ±  0.097 s    [User: 27.740 s, System: 0.868 s]
   Range (min … max):    2.187 s …  2.509 s
@@ -293,10 +330,13 @@ A few PR fixes later and boom another performance gain. It also allowed me to si
 
 ![Flame Graph Start](/static/sloc-cloc-code-revisited/methods-refactor-bitmask.png)
 
-Another very nice thing David raised was that there was contention for the number of go-routines launched when walking the file system <https://github.com/boyter/scc/pull/31> and he graciously supplied a very nice nice patch which resolved the issue. It also had the nice benefit of reducing load on the go-routine scheduler which translated into some additional speed.```
-* linux-4.19-rc1 on a 4 core c5.xlarge:
+Another very nice thing David raised was that there was contention for the number of go-routines launched when walking the file system <https://github.com/boyter/scc/pull/31> and he graciously supplied a very nice nice patch which resolved the issue. It also had the nice benefit of reducing load on the go-routine scheduler which translated into some additional speed.
+
+```
+- linux-4.19-rc1 on a 4 core c5.xlarge:
 before: Time (mean ± σ):      4.680 s ±  0.727 s    [User: 17.920 s, System: 0.632 s]
 after:  Time (mean ± σ):      4.532 s ±  0.005 s    [User: 17.340 s, System: 0.705 s]
+
 ```
 
 The above made me think about the core loop as well It operates using a switch statement. A bit of searching about how Go optimise's switch statements turned up the following by Ken Thomson <https://groups.google.com/forum/#!msg/golang-nuts/IURR4Z2SY7M/R7ORD_yDix4J>
@@ -305,7 +345,9 @@ The above made me think about the core loop as well It operates using a switch s
 
 Interesting. This means it might be possible to convert the switch over to just if/else statements or to a map of function and get some more speed. Alas trying this locally keep running into CPU throttling issues.
 
-I tried with an if statement against the Linux kernel on fresh virtual machine,```
+I tried with an if statement against the Linux kernel on fresh virtual machine,
+
+```
 Benchmark #1: ./scc-switch linux
   Time (mean ± σ):      3.278 s ±  0.012 s    [User: 24.999 s, System: 0.784 s]
   Range (min … max):    3.258 s …  3.293 s
@@ -324,7 +366,9 @@ I won't insult your intelligence by describing what a trie is, but here is a lin
 
 Once nice thing about the trie is that because of how it works you can remove the bit-mask checks entirely, which means potentially less processing, and a faster program.
 
-The PR came with some timings.```
+The PR came with some timings.
+
+```
 4 cores, master: Time (mean ± σ): 6.360 s ± 0.007 s [User: 24.677 s, System: 0.679 s]
 4 cores, tries: Time (mean ± σ): 5.489 s ± 0.008 s [User: 21.145 s, System: 0.690 s]
 
@@ -333,11 +377,14 @@ The PR came with some timings.```
 
 16 cores, master: Time (mean ± σ): 1.660 s ± 0.016 s [User: 24.936 s, System: 0.778 s]
 16 cores, tries: Time (mean ± σ): 1.446 s ± 0.014 s [User: 21.378 s, System: 0.801 s]
+
 ```
 
 I merged the change in and started verifying. Sadly at first I noticed that the results were inconsistent.
 
-For example, the non trie version```
+For example, the non trie version
+
+```
 $ hyperfine 'scc -c ~/Projects/cpython'
 Benchmark #1: scc -c ~/Projects/cpython
   Time (mean ± σ):     481.4 ms ±  18.4 ms    [User: 1.100 s, System: 2.306 s]
@@ -345,14 +392,19 @@ Benchmark #1: scc -c ~/Projects/cpython
 
 ```
 
-vs trie version```
+vs trie version
+
+```
 $ hyperfine 'scc -c ~/Projects/cpython'
 Benchmark #1: scc -c ~/Projects/cpython
   Time (mean ± σ):     526.2 ms ±  14.5 ms    [User: 1.334 s, System: 2.235 s]
   Range (min … max):   502.6 ms … 560.8 ms
+
 ```
 
-However thinking about how the application works. As mentioned before it spends most of its time not moving state. As such you want to identify this state as quickly as possible, even if it means redoing work when you do need to move. Putting the bit-mask back in for just the code state calculations,```
+However thinking about how the application works. As mentioned before it spends most of its time not moving state. As such you want to identify this state as quickly as possible, even if it means redoing work when you do need to move. Putting the bit-mask back in for just the code state calculations,
+
+```
 $ hyperfine 'scc -c ~/Projects/cpython'
 Benchmark #1: scc -c ~/Projects/cpython
   Time (mean ± σ):     505.2 ms ±  14.1 ms    [User: 1.034 s, System: 2.401 s]
@@ -360,11 +412,14 @@ Benchmark #1: scc -c ~/Projects/cpython
 
 ```
 
-Seems its worth keeping the bit-mask checks, at least for the hotter methods. However David had other ideas, and instead split out the trie similar to how the the bit-masks had worked so that they were more targeted per state. Following a merge,```
+Seems its worth keeping the bit-mask checks, at least for the hotter methods. However David had other ideas, and instead split out the trie similar to how the the bit-masks had worked so that they were more targeted per state. Following a merge,
+
+```
 $ hyperfine 'scc -c ~/Projects/cpython'
 Benchmark #1: scc -c ~/Projects/cpython
   Time (mean ± σ):     430.6 ms ±  25.0 ms    [User: 554.5 ms, System: 2327.7 ms]
   Range (min … max):   417.8 ms … 500.7 ms
+
 ```
 
 And now we are faster again for every repository I tried.
@@ -375,7 +430,9 @@ One thing I had identified in my original post about `scc` was that the Go garba
 
 I really wish Go would allow you to configure the GC to be throughput focused rather than latency focused. Seeing as this is possible in Java I imagine it might happen eventually.
 
-One annoying thing that comes out of the very tight benchmarks posted is that `scc` spends a non trivial amount of time parsing the JSON it uses for language features. For example over a few runs with the trace logging enabled I recorded the following,```
+One annoying thing that comes out of the very tight benchmarks posted is that `scc` spends a non trivial amount of time parsing the JSON it uses for language features. For example over a few runs with the trace logging enabled I recorded the following,
+
+```
 TRACE 2018-09-14T07:20:21Z: milliseconds build language features: 42
 
 ```
@@ -414,7 +471,9 @@ I compiled `tokei` and `loc` on the machine used for testing using the latest ve
 
 I am not going to include any commentary about the benchmarks.
 
-To start lets try the accuracy test using the `tokei` torture test file <https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md#accuracy> with the correct result being 1 file, 38 lines, 32 code lines, 2 comments and 5 blank lines.```
+To start lets try the accuracy test using the `tokei` torture test file <https://github.com/Aaronepower/tokei/blob/master/COMPARISON.md#accuracy> with the correct result being 1 file, 38 lines, 32 code lines, 2 comments and 5 blank lines.
+
+```
 root@ubuntu-c-32-sgp1-01:~# ./scc tokeitest/
 -------------------------------------------------------------------------------
 Language                 Files     Lines     Code  Comments   Blanks Complexity
@@ -424,16 +483,16 @@ Rust                         1        38       32         2        4          5
 
 root@ubuntu-c-32-sgp1-01:~# tokei tokeitest/
 --------------------------------------------------------------------------------
- Language             Files        Lines         Code     Comments       Blanks
+Language             Files        Lines         Code     Comments       Blanks
 --------------------------------------------------------------------------------
- Rust                     1           38           32            2            4
+Rust                     1           38           32            2            4
 --------------------------------------------------------------------------------
 
 root@ubuntu-c-32-sgp1-01:~# loc tokeitest/
 --------------------------------------------------------------------------------
- Language             Files        Lines        Blank      Comment         Code
+Language             Files        Lines        Blank      Comment         Code
 --------------------------------------------------------------------------------
- Rust                     1           38            4           34            0
+Rust                     1           38            4           34            0
 --------------------------------------------------------------------------------
 
 root@ubuntu-c-32-sgp1-01:~# cloc tokeitest/
@@ -443,12 +502,11 @@ Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
 Rust                             1              4             10             24
 -------------------------------------------------------------------------------
-
 root@ubuntu-c-32-sgp1-01:~# ./polyglot tokeitest/
 -------------------------------------------------------------------------------
- Language             Files       Lines         Code     Comments       Blanks
+Language             Files       Lines         Code     Comments       Blanks
 -------------------------------------------------------------------------------
- Rust                     1          38           34            0            4
+Rust                     1          38           34            0            4
 -------------------------------------------------------------------------------
 ```
 
@@ -547,7 +605,9 @@ This is the purely artificial benchmark I discussed above. Each of the 8 directo
 
 #### Linuxes 10 copies of the linux kernel
 
-This test consists of 10 copies of the linux kernel in the following directory structure```
+This test consists of 10 copies of the linux kernel in the following directory structure
+
+```
 linuxes
 ├── linux0
 ├── linux1
@@ -559,7 +619,6 @@ linuxes
 ├── linux7
 ├── linux8
 └── linux9
-
 ```
 
 | Program | Runtime |

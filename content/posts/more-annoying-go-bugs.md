@@ -15,7 +15,9 @@ When a record is being edited a flag "This is being edited" is added to the reco
 
 I spent a lot of time looking through this. Then penny dropped when given some additional information "Oh we wanted to put a timestamp in the edit message".
 
-Tracking back to how this message is created, and we find this code.```
+Tracking back to how this message is created, and we find this code.
+
+```
 var EditedMessage string = time.Now().UTC().Format(time.RFC3339) + ": this record is being edited."
 
 ```

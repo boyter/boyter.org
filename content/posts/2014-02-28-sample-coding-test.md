@@ -10,7 +10,9 @@ categories:
 ---
 Being in the job market again I been doing quite a few tests. Since I have already put in the effort to a test without result I thought I would post it here.
 
-The test involved producing output from a supplied CSV input file which contained insurance claims. Something about taking the input and using it to predict future claims. Please forgive my explanation as I am not a financial expert. Anyway the idea was to take an input such as the following,```
+The test involved producing output from a supplied CSV input file which contained insurance claims. Something about taking the input and using it to predict future claims. Please forgive my explanation as I am not a financial expert. Anyway the idea was to take an input such as the following,
+
+```
 Header
 One, 1992, 1992, 110.0
 One, 1992, 1993, 170.0
@@ -27,15 +29,20 @@ Two, 1993, 1993, 100.0
 
 ```
 
-into the following,```
+into the following,
+
+```
 1990, 4
 One, 0, 0, 0, 0, 0, 0, 0, 110, 280, 200
 Two, 45.2, 110, 110, 147, 50, 125, 150, 55, 140, 100
+
 ```
 
 The test was mostly about proving that you can write maintainable code which is unit testable and the like. Anyway here is my solution. It takes in a list of objects which represent each of the four columns of the input.
 
-The feedback I received back was that the coverage I achieved was high (I had a collection of tests over the methods), the code clean and well documented.```
+The feedback I received back was that the coverage I achieved was high (I had a collection of tests over the methods), the code clean and well documented
+
+```C#
 public class TriangleCSVLine
 {
     public string product { get; set; }

@@ -18,7 +18,9 @@ go func() {
 }()
 {{</highlight>}}
 
-With that done, I start searchcode, wait 30 seconds for it to index and then can look at the profile.```
+With that done, I start searchcode, wait 30 seconds for it to index and then can look at the profile.
+
+```
 go tool pprof -http=localhost:8090 profile.pprof
 
 ```

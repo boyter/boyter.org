@@ -51,7 +51,9 @@ func DedupeUint64(s []uint64) []uint64 {
 
 Wondering if I was about to lose some performance but save on the memory pressure I wrote a few benchmarks. I could then determine if it was worth it.
 
-The results for an array of length 10 with random integers.```
+The results for an array of length 10 with random integers.
+
+```
 BenchmarkDedupeUint64
 BenchmarkDedupeUint64-8               9487034        126.9 ns/op
 BenchmarkDedupeUint64Old
@@ -59,14 +61,18 @@ BenchmarkDedupeUint64Old-8             1939953        618.0 ns/op
 
 ```
 
-Another benchmark for much longer arrays with random integers.```
+Another benchmark for much longer arrays with random integers.
+
+```
 BenchmarkDedupeUint64
 BenchmarkDedupeUint64-8                 26967     120721 ns/op
 BenchmarkDedupeUint64Old
 BenchmarkDedupeUint64Old-8               10000     814634 ns/op
 ```
 
-Benchmark where all of the elements in the array are the same IE input of more than one element but only one should be returned.```
+Benchmark where all of the elements in the array are the same IE input of more than one element but only one should be returned.
+
+```
 BenchmarkDedupeUint64Old
 BenchmarkDedupeUint64Old-8               10000     109336 ns/op
 BenchmarkDedupeUint64
@@ -74,14 +80,18 @@ BenchmarkDedupeUint64-8                 10000     112851 ns/op
 
 ```
 
-Then a test with random ints picked from the first 100 (so there will be some duplicates).```
+Then a test with random ints picked from the first 100 (so there will be some duplicates).
+
+```
 BenchmarkDedupeUint64Old
 BenchmarkDedupeUint64Old-8               10000     726771 ns/op
 BenchmarkDedupeUint64
 BenchmarkDedupeUint64-8                 10000     348226 ns/op
 ```
 
-Finally a test where there are random numbers from the first 2048 ints.```
+Finally a test where there are random numbers from the first 2048 ints.
+
+```
 BenchmarkDedupeUint64Old
 BenchmarkDedupeUint64Old-8               10000     437698 ns/op
 BenchmarkDedupeUint64

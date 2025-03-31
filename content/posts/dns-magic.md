@@ -13,13 +13,15 @@ The first step with DNS is to buy a domain. You can do this with whatever domain
 
 So for our hosted app we have the DNS in GoDaddy. We are going to change over to Vultrs name servers simply because we can then control them using Vultrs API.
 
-DNS has what's known as records. These are mappings between the domain and various services the dommain uses. The main ones you need to worry about are A and MX. The A records are mapping between the domain name and an IPv4 address, so the way you actually connect to your server. MX records are used for email. You may eventually need to use AAAA records which are similar to A but map to an IPv6 record.
+DNS has what's known as records. These are mappings between the domain and various services the domain uses. The main ones you need to worry about are A and MX. The A records are mapping between the domain name and an IPv4 address, so the way you actually connect to your server. MX records are used for email. You may eventually need to use AAAA records which are similar to A but map to an IPv6 record.
 
 To do this we need to find the name servers for Vultr.
 
 STEPS TO DO THE ABOVE HERE
 
-To verify the above you can use the `dig` command. Check that the domain you are digging points to the IP address of your server.```
+To verify the above you can use the `dig` command. Check that the domain you are digging points to the IP address of your server.
+
+```
 bboyter@Conan:~$ dig portfold.com
 
 ; <<>> DiG 9.10.3-P4-Ubuntu <<>> portfold.com

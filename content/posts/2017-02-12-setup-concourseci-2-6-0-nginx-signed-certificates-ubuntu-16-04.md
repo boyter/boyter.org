@@ -30,23 +30,38 @@ Also keep in mind that with this install everything is running on a single insta
 
 Prerequisites are that you have a Ubuntu instance running somewhere. If you want to run the fly execute command you will also need a valid domain name to point at your machine. This is an annoying thing caused by GoLang when using SSL certs. Turns out you cannot set a hostfile entry and use it as such. You can in a insecure non SSL mode but otherwise cannot.
 
-If you are using a virual machine from DigitalOcean/AWS/Vultr or other you will need to add some swap space. I noticed a lot of issues where this was missing. You can do so by running the following commands which will configure your server to have 4G of swap space,```sudo fallocate -l 4G /swapfile
- sudo chmod 600 /swapfile
- sudo mkswap /swapfile
- sudo swapon /swapfile
- sudo echo "/swapfile none swap sw 0 0" &gt;&gt; /etc/fstab```
+If you are using a virual machine from DigitalOcean/AWS/Vultr or other you will need to add some swap space. I noticed a lot of issues where this was missing. You can do so by running the following commands which will configure your server to have 4G of swap space,
 
-We will need to get the concourse binary, and to make it executable. For convenience and to match the concourse documentation lets also rename it to concourse. To do so run the following command.```wget https://github.com/concourse/concourse/releases/download/v2.6.0/concourse_linux_amd64 && mv concourse_linux_amd64 concourse && chmod +x concourse```
+```
+sudo fallocate -l 4G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+sudo echo "/swapfile none swap sw 0 0" &gt;&gt; /etc/fstab
+```
 
-We now need to generate the keys that concourse requires.```mkdir keys
- cd keys
+We will need to get the concourse binary, and to make it executable. For convenience and to match the concourse documentation lets also rename it to concourse. To do so run the following command.
+
+```
+wget https://github.com/concourse/concourse/releases/download/v2.6.0/concourse_linux_amd64 && mv concourse_linux_amd64 concourse && chmod +x concourse
+```
+
+We now need to generate the keys that concourse requires.
+
+```
+mkdir keys
+cd keys
 
 ssh-keygen -t rsa -f tsa_host_key -N '' && ssh-keygen -t rsa -f worker_key -N '' && ssh-keygen -t rsa -f session_signing_key -N '' && cp worker_key.pub authorized_worker_keys
- cd ..```
+cd ..
+```
 
 The above commands will create a directory called keys and setup all of the keys that concourse 2.6.0 requires.
 
-We can now create some helper scripts which we can use to run concourse easily.```pico concourse.sh
+We can now create some helper scripts which we can use to run concourse easily.
+
+```
+pico concourse.sh
 
 ./concourse web \
  --basic-auth-username main \
@@ -57,9 +72,13 @@ We can now create some helper scripts which we can use to run concourse easily.`
  --external-url <https://YOURDNSHERE/> \
  --postgres-data-source postgres://concourse:concourse@127.0.0.1/concourse
 
-chmod +x concourse.sh```
+chmod +x concourse.sh
+```
 
-This script will start running concourse. Keep in mind that the username and password used here are for the main group and as such you should protect them as they have the ability to create additional groups on your concourse instance.```pico worker.sh
+This script will start running concourse. Keep in mind that the username and password used here are for the main group and as such you should protect them as they have the ability to create additional groups on your concourse instance.
+
+```
+pico worker.sh
 
 ./concourse worker \
  --work-dir /opt/concourse/worker \
@@ -67,7 +86,8 @@ This script will start running concourse. Keep in mind that the username and pas
  --tsa-public-key ./keys/tsa_host_key.pub \
  --tsa-worker-private-key ./keys/worker_key
 
-chmod +x worker.sh```
+chmod +x worker.sh
+```
 
 This script will spin up a worker which will communicate with the main concourse instance and do all the building. It can be useful to lower the priority of this command using nice and ionice if you are running on a single core machine.
 
@@ -110,7 +130,10 @@ Make a copy of the file server.crt which will be needed for the concourse fly to
 
 With that done lets enable the site,```sudo nano /etc/nginx/sites-available/mydesireddomain.com```
 
-And enter in the following details,```upstream concourse_app_server {
+And enter in the following details,
+
+```
+upstream concourse_app_server {
  server localhost:8080;
  }
 
@@ -137,10 +160,16 @@ location / {
 
 The above nginx config defines an upstream concourse server running on port 8080. It then defines a server listening on port 80 that redirects all traffic to the same server on HTTPS. The last server config defines out site, sets up the keys and forwards everything to the upstream concourse server.
 
-We can now enable it,```sudo ln -s /etc/nginx/sites-available/mydesireddomain.com /etc/nginx/sites-enabled/mydesireddomain.com
+We can now enable it,
+
+```
+
+sudo ln -s /etc/nginx/sites-available/mydesireddomain.com /etc/nginx/sites-enabled/mydesireddomain.com
  rm -f /etc/nginx/sites-available/default
 
-service nginx restart```
+service nginx restart
+
+```
 
 We need to remove the default file above because nginx will not allow you to have two default servers.
   

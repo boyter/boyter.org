@@ -15,14 +15,18 @@ To save you a click I have included the most relevant quote,
 
 At the time I was busy doing other things, and I had been wanting to fix .gitignore support in scc by moving it to use [gocodewalker](https://github.com/boyter/gocodewalker). With that recently done I remembered this feature and took another look at it.
 
-What really helped was that the link contained an implementation (this makes implementing it much easier)```
+What really helped was that the link contained an implementation (this makes implementing it much easier)
+
+```
 sort -u *.h*.c | wc -l
 
 ```
 
 I have always been pretty open with adding new metrics into scc, such as the complexity estimate, the COCOMO calculations, and frankly this sounded like it could be useful. Especially with the suggestion by minimax at lobste.rs of a DRYness calculation where `DRYness = ULOC / SLOC`. Since scc does have the SLOC count, this makes adding a DRYness calculation into the app rather trivial.
 
-Now looking at the supplied calculation, it of course has a few problems in that it does not recurse directories, does not respect .gitignore files and groups languages together which may not be ideal. We can overcome all of that by adding this into scc. Which is what I did.```
+Now looking at the supplied calculation, it of course has a few problems in that it does not recurse directories, does not respect .gitignore files and groups languages together which may not be ideal. We can overcome all of that by adding this into scc. Which is what I did.
+
+```
 $ scc -i go,java -a --no-cocomo
 ───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
@@ -40,13 +44,16 @@ DRYness %                           0.30
 ───────────────────────────────────────────────────────────────────────────────
 Processed 524736 bytes, 0.525 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
+
 ```
 
 scc now has two additional flags for this, `-a --dryness` and `-u --uloc` with the former implying the latter. Adding a new metric to the output of what was already a very condensed display was took a while but we can now see per language the ULOC value, and of course the total. NB I am not sold on this output yet, and am happy to change it if someone comes up with something better.
 
 Now what does this tell us? I know that the inclusion of Java here is a lot of redundant copy pasted Java files used in scc to test the duplication detection. This is reflected in the ULOC calculation of Java where only 102 of the lines are unique compared to the 3913 that exist.
 
-Restriction to just Go gives the following output, with the corresponding DRYness % value increasing as is expected.```
+Restriction to just Go gives the following output, with the corresponding DRYness % value increasing as is expected.
+
+```
 $ scc -i go -a --no-cocomo
 ───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
@@ -64,7 +71,9 @@ Processed 395673 bytes, 0.396 megabytes (SI)
 
 ```
 
-Is the DRYness % there a good value? I had no idea. So I tried it against the C portion of the redis fork [Valkey](https://github.com/valkey-io/valkey) since it is/was well known to be a pretty clean codebase.```
+Is the DRYness % there a good value? I had no idea. So I tried it against the C portion of the redis fork [Valkey](https://github.com/valkey-io/valkey) since it is/was well known to be a pretty clean codebase.
+
+```
 $ scc -a -i c --no-cocomo valkey
 ───────────────────────────────────────────────────────────────────────────────
 Language                 Files     Lines   Blanks  Comments     Code Complexity
@@ -79,11 +88,14 @@ DRYness %                           0.55
 ───────────────────────────────────────────────────────────────────────────────
 Processed 8553843 bytes, 8.554 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
+
 ```
 
 As expected the higher the value the more "clean" the codebase is, with a value of 0.55 being what I am guessing is a very good value. The closer you get to 1 the more DRY your code is, with a score close to 0.5 being considered "good".
 
-Alas its not a free lunch with the new metric eating into the runtime of scc... by a lot.```
+Alas its not a free lunch with the new metric eating into the runtime of scc... by a lot.
+
+```
 $ hyperfine 'scc -i c valkey' 'scc -i c -a valkey'
 Benchmark 1: scc -i c valkey
   Time (mean ± σ):      48.8 ms ±   0.5 ms    [User: 94.5 ms, System: 38.5 ms]

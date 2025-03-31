@@ -1,6 +1,6 @@
 ---
 title: Building a Atlassian Bitbucket Plugin
-date: 2029-03-17
+date: 2040-03-17
 ---
 
 So I thought I would try to implement Sloc Cloc and Code into Atlassian's Bitbucket as a plugin. With the marketplace they have it seemed like it would be potentially a good source of mostly passive income. Plus because many developers find Java and Java 8 distasteful it seemed like a good market to get into compared to Wordpress for example.
@@ -9,7 +9,9 @@ To start vist the following and follow the instructions for your OS of choice. I
 
 <https://developer.atlassian.com/server/framework/atlassian-sdk/set-up-the-atlassian-plugin-sdk-and-build-a-project/>
 
-Keep in mind you need a good internet connection and some free time as this process takes a very long time to get started. Once setup it will create a series of command line tools for you to use which I have listed below.```
+Keep in mind you need a good internet connection and some free time as this process takes a very long time to get started. Once setup it will create a series of command line tools for you to use which I have listed below.
+
+```
 atlas-clean                                atlas-create-confluence-plugin             atlas-create-jira5-plugin                  atlas-debug                                atlas-remote-test
 atlas-clean.bat                            atlas-create-confluence-plugin.bat         atlas-create-jira5-plugin.bat              atlas-debug.bat                            atlas-remote-test.bat
 atlas-cli                                  atlas-create-confluence-plugin-module      atlas-create-jira-plugin                   atlas-help                                 atlas-ruin

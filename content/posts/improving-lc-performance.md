@@ -31,7 +31,9 @@ for i, arg := range args {
 wg.Wait()
 {{</highlight>}}
 
-So they are running parallel walkers through the directories of their tests. My first thought is that this is rather unfair to `lc` as it was build to produce SPDX outputs. Because of this requirement it is unable to walk through the tree in parallel. It needs to check for a license at the root, and only then is it possible to run it in parallel. The tree looks like so,```
+So they are running parallel walkers through the directories of their tests. My first thought is that this is rather unfair to `lc` as it was build to produce SPDX outputs. Because of this requirement it is unable to walk through the tree in parallel. It needs to check for a license at the root, and only then is it possible to run it in parallel. The tree looks like so,
+
+```
 dataset
 ├── 30DaysofSwift
 │   └── README.md
@@ -54,16 +56,20 @@ Because they run `lc` at the root it checks the root directory for license files
 
 With that handicap in mind I tried it out on a single directory to force it to be single threaded. The resulting test showed that all of the threading was done at this high level. In fact you can see it pretty easily by running it like so (I used `lc` as the repository to check)
 
-Checking the directory below,```
+Checking the directory below,
+
+```
 $ time license-detector lc
 ---
 license-detector lc  8.03s user 0.33s system 95% cpu 8.733 total
+
 ```
 
-And from inside the directory,```
+And from inside the directory,
+
+```
 $ time license-detector *
 license-detector*  10.78s user 0.64s system 101% cpu 11.228 total
-
 ```
 
 The different runtimes is a huge tip off that one of them is running in parallel. The fact that the the one running in parallel was slower is a little bit of a suprise though.
@@ -86,13 +92,16 @@ In the post the numbers sited for accuracy (and speed) are as such,
 | go-license-detector | 99% (897/902) | 13.5 |
 | lc | 88% (797/902) | 548 |
 
-The accuracy number is a little suspect based on the above. For a start it means that a license file was identified and some license attached to it even if it is incorrect. I was a little curious where the 879 number came from. It looked like it was related to how the speed tests were run,```
-$ time license-detector * | grep -Pzo '\n[-0-9a-zA-Z]+\n\tno license' | grep -Pa '\tno ' | wc -l
+The accuracy number is a little suspect based on the above. For a start it means that a license file was identified and some license attached to it even if it is incorrect. I was a little curious where the 879 number came from. It looked like it was related to how the speed tests were run,
+
+```
+$ time license-detector *| grep -Pzo '\n[-0-9a-zA-Z]+\n\tno license' | grep -Pa '\tno ' | wc -l
 62
-license-detector *  82.28s user 7.50s system 447% cpu 20.041 total
+license-detector*  82.28s user 7.50s system 447% cpu 20.041 total
 grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn} -Pzo   0.02s user 0.02s system 0% cpu 20.037 total
 grep --color=auto --exclude-dir={.bzr,CVS,.git,.hg,.svn} -Pa '\tno '  0.00s user 0.00s system 0% cpu 20.032 total
-wc -l  0.00s user 0.00s system 0% cpu 20.028 total 
+wc -l  0.00s user 0.00s system 0% cpu 20.028 total
+
 ```
 
 For `lc` it was run like so
@@ -158,27 +167,33 @@ Of course the other big thing to improve is that when I wrote lc I made it singl
 
 What I wanted to do is move to processing pipelines. So to start by building a very fast way of finding candidate files. The catch is the way licenses are identified. Because a licence file begins at the top of a directory and affects those below it means that I needed a way to keep this information and have it available to sub folders. We also need to look inside each directory as we process looking for new license files.
 
-Looking```
+```
 $ time lc .
 lc .  196.88s user 1.64s system 106% cpu 3:07.12 total
 
 ```
 
-to```
+to
+
+```
 $ time ./lc .
 ./lc .  29.59s user 0.98s system 614% cpu 4.975 total
+
 ```
 
 Not a bad improvement. It would appear that moving over to multi processing has speed things up considerably. However there is more that can be done.
 
 I also added in the tweak to remove the hash calculation if the output is going to be the default tabular.
 
-After tweaking the processing pipeline and running against the sample that sourced had on my local machine I had the following runtime.```
-lc .  73.19s user 2.48s system 698% cpu 10.837 total
+After tweaking the processing pipeline and running against the sample that sourced had on my local machine I had the following runtime.
 
 ```
+lc .  73.19s user 2.48s system 698% cpu 10.837 total
+```
 
-compared to license-detectors runtime of```
+compared to license-detectors runtime of
+
+```
 license-detector *  47.34s user 4.30s system 519% cpu 9.935 total
 ```
 
@@ -214,7 +229,9 @@ Not much in it. However remember that lc is needlessly processing the file twice
 
 Great. From slightly slower to about 30% faster.
 
-There is one other tweak that could be done however. It would be far faster to check the top 20 most common licenses first, and only fall back to checking the rest if there was no match.```
+There is one other tweak that could be done however. It would be far faster to check the top 20 most common licenses first, and only fall back to checking the rest if there was no match.
+
+```
 (pprof) top20
 Showing nodes accounting for 28.63s, 94.86% of 30.18s total
 Dropped 175 nodes (cum <= 0.15s)
@@ -255,7 +272,9 @@ I coded it to work with the following license detectors because I was able to ge
 
 <https://github.com/google/licenseclassifier>
 
-The results,```
+The results,
+
+```
 $ python check_accuracy.py
 count::370
 checking::lc
@@ -266,6 +285,7 @@ checking::identify_license
 correct:121::32.7027027027 percent::time:399.533063889
 checking::askalono
 correct:330::89.1891891892 percent::time:166.055674076
+
 ```
 
 Don't pay too much attention to the time values. They are just taken using pythons `time.time()` and are best viewed as that it takes about 20x as long to run `license-detector` than it takes `lc` most likely  because it has a slower startup time.
