@@ -18,7 +18,6 @@ silicles-oafs-blob-tael-declassified -> {5111c1e5-0af5-b10b-7ae1-dec1a551f1ed}
 deedless-gait-soft-goes-eisteddfodic -> {deed1e55-9a17-50f7-90e5-e157eddf0d1c}
 libelist-diel-alls-flit-disaffiliate -> {11be1157-d1e1-a115-f117-d15aff111a7e}
 offstage-diel-labs-scat-classifiable -> {0ff57a9e-d1e1-1ab5-5ca7-c1a551f1ab1e}
-
 ```
 
 None of the above are make much sense, but by looking at the outputs you can attempt to write something such as,
@@ -29,4 +28,4 @@ cassette soft gold dice collectibles
 
 ```
 
-Very zen. Some rough back of napkin calculations gives my program something like 10,000,000,000,000 combinations of GUID's based on the word list I supplied. I may just turn it into a online GUID generator like this one <http://www.guidgenerator.com/>
+Very zen. Some rough back of napkin calculations gives my program something like 10,000,000,000,000 combinations of GUID's based on the word list I supplied. I may just turn it into a online GUID generator like this one <http://www.guidgenerator.com/> or you can get it via this gist <https://gist.github.com/boyter/6f5b7c1b375e79449d01916f5828e1db>
