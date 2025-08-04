@@ -18,3 +18,31 @@ Setting the above after getting your SQLite database connection will totally res
 I was curious about how common this was and checked against [searchcode.com](searchcode.com) [1](https://searchcode.com/?q=lang%3Ago+SetMaxOpenConns+sqlite) and [2](https://searchcode.com/?q=lang%3Ago+db.SetMaxOpenConns%281%29+sqlite). Rather unsurprisingly it seems like a common thing.
 
 Since I had a great deal of issues finding a simple resolution to the problem I thought this post might help someone else.
+
+**EDIT/UPDATE**
+
+While the above works, it limits your reads. I find now that the  best solution in Go is to have two connections. The first being limited to the number of CPU's for reading and another with a single connection for writing. Something like the below achieves this, and ensures you still have excellent read performance while avoiding the aforementioned error.
+
+{{<highlight go>}}
+dbRead, _ := connectSqliteDb("dbname.db")
+defer dbRead.Close()
+dbRead.SetMaxOpenConns(runtime.NumCPU())
+
+dbWrite, _ := connectSqliteDb("dbname.db")
+defer dbWrite.Close()
+dbWrite.SetMaxOpenConns(1)
+{{</highlight>}}
+
+Note that you will need to setup your WAL like the below in order to benefit most from this,
+
+{{<highlight go>}}
+_, err = db.Exec(`pragma journal_mode = wal;
+pragma synchronous = normal;
+pragma temp_store = memory;
+pragma mmap_size = 268435456;
+pragma foreign_keys = on;`)
+{{</highlight>}}
+
+The most important one being `journal_mode = wal` which sets write ahead locking ensuring you can read and write at the same time.
+
+I have been using the above on searchcode.com for a long time now with no issues on a 6.4TB database.
