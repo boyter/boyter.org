@@ -5,7 +5,7 @@ date: 2025-08-28
 
 By the time you are reading this, searchcode.com's DNS should have been updated to point at a placeholder index.html file I created.
 
-In short I am shutting down the current iteration of searchcode.com, unless something drastic happens in the next week.
+In short I am shutting down the current iteration of searchcode.com, unless something drastic happens in the next few days.
 
 The reasons for this... are few, but worth exploring.
 
@@ -14,7 +14,7 @@ While I have often described searchcode as a fun forever project, big enough to 
 1. It was inexpensive to run
 2. It was able to cover its own costs
 
-The first has not been true for a while now. The large index size 6.4 TB at last count, the RAM requirement of 100 GB and the number of CPU cores needed to use that RAM meant it needed a fairly decent server to run on. I had been running it via Hetzner (who a great BTW) to get the maximum value for money. Which was fine up until point number two.
+The first has not been true for a while now. The large index size 6.4 TB at last count, the RAM requirement of 100 GB and the number of CPU cores needed to use that RAM meant it needed a fairly decent server to run on. I had been running it via Hetzner (who are great BTW) to get the maximum value for money. Which was fine up until point number two.
 
 The falling value of the Australian dollar. Hetzner bills in Euros, which is especially painful to me right now. Coupled with the bottom falling out of the Ad market, and rise of LLM's and zero click info meaning no click-thru's has resulted in an approximate 10x drop in advertising revenue.
 
@@ -32,7 +32,7 @@ Find alternative revenue sources. While the searchcode.com API is very popular w
 
 > If you are using the API and really need it, contact me in the next week and we can work something out. Otherwise prepare for it to be gone soon.
 
-I think that frankly, large scale code search, while useful is not something anyone is willing to pay for, which shouldn't be a surprise considering how black duck kill koders.com a while ago.
+I think that frankly, large scale code search, while useful is not something anyone is willing to pay for, which shouldn't be a surprise considering how black duck killed koders.com a while ago.
 
 Anyway.
 
