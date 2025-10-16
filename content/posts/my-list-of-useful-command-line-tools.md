@@ -14,4 +14,5 @@ A post that is constantly a work in progress.
 - hexyl - Hex view of files with highlighting and the like. Find BOM in files quickly! <https://github.com/sharkdp/hexyl>
 - hyperfine - A command line benchmark tool. Give it two commands `hyperfine 'scc' 'tokei'` to determine which one is faster. <https://github.com/sharkdp/hyperfine>
 - z - A shell script that enables quick jumping to your most recently used directories. For example I work with scc a lot and its directory is `/c/Users/bboyter/Documents/Go/src/github.com/boyter/scc` which is a pain to remember. Having changed to it a few times I can now type `z scc` and it takes me right there. A massive time saver. <https://github.com/rupa/z/>
+- zoxide - Similar to z above, but I prefer it over z these days <https://github.com/ajeetdsouza/zoxide>
 - stu - A small TUI application explorer for AWS S3 or any other S3 compatible storage. Very useful when used with localstack `stu --endpoint-url http://localhost:4566` <https://github.com/lusingander/stu>
