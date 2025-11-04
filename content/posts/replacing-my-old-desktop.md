@@ -24,7 +24,7 @@ Here is the full list of parts, and I will go through the rationale of some of t
 
 #### CPU
 
-I have never had allegiance to either Intel or AMD for CPU's and will happily pick either. However I had read about stability issues with the modern Intel ones, and being on a dead platform made them less appealing. Its unlikely I will upgrade the CPU anytime soon but the thought that I should be able to nice. As for why the x3D chip over the regular one, thats because I found a deal on it and it worked out to be about the same price. The potential performance gains of the x3D cache sound like something I would like to experiment with as well.
+I have never had allegiance to either Intel or AMD for CPU's and will happily pick either. However I had read about stability issues with the modern Intel ones, and being on a dead platform made them less appealing. It is unlikely I will upgrade the CPU anytime soon but the thought that I should be able to do so is nice. As for why the x3D chip over the regular one, thats because I found a deal on it and it worked out to be about the same price. The potential performance gains of the x3D cache sound like something I would like to experiment with as well.
 
 #### Cooler
 
