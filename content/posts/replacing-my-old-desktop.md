@@ -68,7 +68,7 @@ I was not interested in anything with RGB, and hence have the solid panel design
 
 My rule for power supplies is work out how much power the system can draw at max load, and add 20% for safety. This ensures it would meet any load spikes, and since PSU's degrade over time will still have enough headroom in the future. My choice of parts had it listed at about 970w so 1200w was where I wanted to be.
 
-I picked the be quiet! unit because it was not the lowest tier unit, had decent reviews, has japanese capacitors, had a quieter fan than other units in the same price range, and because I couldn't find a reasonably priced Seasonic unit.
+I picked the be quiet! supply because it was not the lowest tier unit, had decent reviews, has japanese capacitors, had a quieter fan than other units in the same price range, and because I couldn't find a reasonably priced Seasonic unit.
 
 I have no complaints with it, and never hear the thing, which also fits into the 20% safety margin, since it means running under load it will be firmly in the most efficient band of the PSU and when idling should't have the fan doing anything.
 
