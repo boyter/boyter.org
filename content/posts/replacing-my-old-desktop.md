@@ -28,7 +28,7 @@ I have never had allegiance to either Intel or AMD for CPU's and will happily pi
 
 #### Cooler
 
-I used the Noctua D15 in my previous desktop when trying to make it quiet and was shocked at how well it worked. While there is a new version available, its almost twice the price in Australia.
+I used the Noctua D15 in my previous desktop when trying to make it quiet and was shocked at how well it worked. While there is a new version available, its almost twice the price in Australia. Since you don't get twice the performance I opted for the older unit.
 
 Why not an AIO? I don't trust the seals, I don't like that I have to replace the whole unit if anything fails, I don't like pump noise and I don't want more moving parts. Fans are pretty simple, as is a heat-sink. I know they can have better cooling power (probably useful in Australia) but that isn't enough incentive for me. Plus I have known a few people with them and most have had an AIO issue at one point or another.
 
