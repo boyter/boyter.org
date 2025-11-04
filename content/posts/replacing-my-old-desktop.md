@@ -126,6 +126,6 @@ I also configured it to work remotely so I can use the LLM's on my M1 Mac laptop
 
 In short though, while standard desktop work feels 100% the same as before, anything that required the CPU to actually work is so much faster. Compile times are blazingly quick, things open instantly and I never worry about running out of RAM anymore... other that VRAM but thats another matter.
 
-Fedora 42 worked more or less out of the box, although it was slightly laggy at 4K till I had the nVidia drivers
+Fedora 42 worked more or less out of the box, although it was slightly laggy at 4K till I had the nVidia drivers installed.
 
 In fact the only thing I could think I would want different is a 6000 RTX PRO GPU with 96 GB of VRAM, but I don't even know where to order one of those and it costs more than the entire system I just built. Maybe in a few years I can pick up one second hand.
