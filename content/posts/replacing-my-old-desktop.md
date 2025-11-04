@@ -36,7 +36,7 @@ As for why I used the KryoSheet over thermal paste. Remember how I said I wanted
 
 #### GPU
 
-Although buying a 5090 is a contentius decision for pure gaming, I am not gaming using this machine very much. The main reason for it is the large 32 GB VRAM allowing me to load larger LLM models. With any model that fits in its RAM I get 200+ tokens per second out of it. This is a game changer for me when it comes to testing agentic code, or any other LLM shenanigans I am getting into.
+Although buying a 5090 is a contentious decision for pure gaming, I am not gaming using this machine very much. The main reason for it is the large 32 GB VRAM allowing me to load larger LLM models. With any model that fits in its RAM I get 200+ tokens per second out of it. This is a game changer for me when it comes to testing agentic code, or any other LLM shenanigans I am getting into.
 
 As for why Palit? It was the cheapest one I could find. I actually got it BELOW the RRP (MSRP for USA people) which turned out to be an amazing deal. In fact the price was below the RRP nVidia lists for the 5090 in Australia.
 
