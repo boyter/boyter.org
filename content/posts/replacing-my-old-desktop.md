@@ -46,7 +46,7 @@ Expensive? Yes. But I have saved several hundred dollars already using models on
 
 The memory I picked has the sweet spot DDR5 bandwidth of 6000MT/s albeit with not the best latency of CL36. Thankfully the x3D chip offsets this slightly with its huge L3 cache making it less sensitive.
 
-As for why 2 sticks of RAM? I wanted to populate only 2 channels, allowing for EXPO to be enabled and I couldn't find reasonably priced 64 GB sticks. This gives me more than enough RAM for 99% of tasks, while giving me the full speed.
+As for why 2 sticks of RAM? I wanted to populate only 2 channels, allowing for EXPO to be enabled. I did want 128 GB but I couldn't find reasonably priced 64 GB sticks. This gives me more than enough RAM for 99% of tasks, while giving me the full speed.
 
 I think I got a little lucky buying this when I did as literally 2 weeks later the price of DD5 RAM shot through the roof due to it being used in data centers to run LLM's.
 
