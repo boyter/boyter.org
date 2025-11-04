@@ -32,7 +32,7 @@ I used the Noctua D15 in my previous desktop when trying to make it quiet and wa
 
 Why not an AIO? I don't trust the seals, I don't like that I have to replace the whole unit if anything fails, I don't like pump noise and I don't want more moving parts. Fans are pretty simple, as is a heat-sink. I know they can have better cooling power (probably useful in Australia) but that isn't enough incentive for me. Plus I have known a few people with them and most have had an AIO issue at one point or another.
 
-As for why I used the KryoSheet over thermal paste. Remember how I said I wanted this build to last 10 years? This is an answer to paste drying out over time. Literally a set and forget solution.
+As for why I used the KryoSheet over thermal paste. Remember how I said I wanted this build to last 10 years? This is an answer to paste drying out over time. Literally a set and forget solution, albeit take some care when using it because its conductive. I used a small amount of the oil that was supplied to stick it to the center, with 4 tiny amounts of thermal paste on the corners to assist.
 
 #### GPU
 
@@ -46,7 +46,7 @@ Expensive? Yes. But I have saved several hundred dollars already using models on
 
 The memory I picked has the sweet spot DDR5 bandwidth of 6000MT/s albeit with not the best latency of CL36. Thankfully the x3D chip offsets this slightly with its huge L3 cache making it less sensitive.
 
-As for why 2 sticks of RAM? I wanted to populate only 2 channels, allowing for EXPO to be enabled and I couldn't find reasonably priced 64 GB sticks. This gives me more than enough RAM for 99% of tasks, will giving me the full speed.
+As for why 2 sticks of RAM? I wanted to populate only 2 channels, allowing for EXPO to be enabled and I couldn't find reasonably priced 64 GB sticks. This gives me more than enough RAM for 99% of tasks, while giving me the full speed.
 
 I think I got a little lucky buying this when I did as literally 2 weeks later the price of DD5 RAM shot through the roof due to it being used in data centers to run LLM's.
 
@@ -66,7 +66,9 @@ I was not interested in anything with RGP, and hence have the solid panel design
 
 #### Power Supply
 
-My rule for power supplies is work out how much power the system can draw at max load, and add 20% for safety. This ensures it would meet any load spikes, and since PSU's degrade over time will still have enough headroom in the future. My choice of parts had it listed at about 970w so 1200w was where I wanted to be. I picked the be quiet! unit because it was not the lowest tier, had decent reviews, has japanese capacitors, had a quieter fan than other units in the same price range, and because I couldn't find a reasonably priced Seasonic unit.
+My rule for power supplies is work out how much power the system can draw at max load, and add 20% for safety. This ensures it would meet any load spikes, and since PSU's degrade over time will still have enough headroom in the future. My choice of parts had it listed at about 970w so 1200w was where I wanted to be.
+
+I picked the be quiet! unit because it was not the lowest tier unit, had decent reviews, has japanese capacitors, had a quieter fan than other units in the same price range, and because I couldn't find a reasonably priced Seasonic unit.
 
 I have no complaints with it, and never hear the thing, which also fits into the 20% safety margin, since it means running under load it will be firmly in the most efficient band of the PSU and when idling should't have the fan doing anything.
 
