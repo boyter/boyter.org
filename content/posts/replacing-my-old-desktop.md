@@ -52,7 +52,7 @@ I think I got a little lucky buying this when I did as literally 2 weeks later t
 
 #### Motherboard
 
-I picked the ASUS board for one main reason. The main being CSM (Corporate Stable Model) which means it is designed for stability. I only care that it runs, and does not break. I am not overclocking, I am not chasing the last 3% of performance. I just want it to work all the time.
+I picked the ASUS board for one main reason. That reason being CSM (Corporate Stable Model), which means it is designed for stability. I only care that it runs, and does not break. I am not overclocking, I am not chasing the last 3% of performance. I just want it to work all the time. I think its also lower power usage too which is a plus.
 
 #### Storage
 
@@ -124,6 +124,6 @@ I also configured it to work remotely so I can use the LLM's on my M1 Mac laptop
 
 In short though, while standard desktop work feels 100% the same as before, anything that required the CPU to actually work is so much faster. Compile times are blazingly quick, things open instantly and I never worry about running out of RAM anymore... other that VRAM but thats another matter.
 
-Fedora 42 worked more or less out of the box, although it was slightly laggy at 4K till I had the nVidia drivers installed.
+Fedora 42 worked more or less out of the box, although it was slightly laggy at 4K till I had the nVidia drivers
 
 In fact the only thing I could think I would want different is a 6000 RTX PRO GPU with 96 GB of VRAM, but I don't even know where to order one of those and it costs more than the entire system I just built. Maybe in a few years I can pick up one second hand.
