@@ -44,7 +44,7 @@ Expensive? Yes. But I have saved several hundred dollars already using models on
 
 #### Memory
 
-The memory I picked has the sweet spot DDR5 bandwidth of 6000MT/s albeit with not the best latency of CL36. Thankfully the x3D chip offsets this slightly with its huge L3 cache making it less sensitive.
+The memory I picked has the sweet spot DDR5 bandwidth of 6000MT/s albeit with not the best latency of CL36. Thankfully the x3D chip offsets this slightly with its huge L3 cache making it less sensitive to RAM latency.
 
 As for why 2 sticks of RAM? I wanted to populate only 2 channels, allowing for EXPO to be enabled. I did want 128 GB but I couldn't find reasonably priced 64 GB sticks. This gives me more than enough RAM for 99% of tasks, while giving me the full speed.
 
@@ -60,7 +60,7 @@ I need a fair amount of storage, so wanted at least 4 TB. However there was a sa
 
 #### Case
 
-I picked the Torrent over some cases I liked from be quiet! mostly because it was available and I got it on special. It was not my first choice, but I think probably the right one which I will cover in the lowering noise section. One big advantage it has is shipping with 5 high quality fans, meaning I didn't need to worry about buying any extras.
+I picked the Torrent over some cases I liked from be quiet! mostly because it was available and I got it on special (being on special is a pattern). It was not my first choice, but I think probably the right one which I will cover in the lowering noise section. One big advantage it has is shipping with 5 high quality fans, meaning I didn't need to worry about buying any extras.
 
 I was not interested in anything with RGB, and hence have the solid panel design. Boring, but for me the desktop is a tool not a toy.
 
