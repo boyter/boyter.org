@@ -78,7 +78,7 @@ I have always been a big believer in the first approach, and it took a lot of co
 
 I had picked components where possible to reduce noise, such as the power supply and cooler.
 
-Keeping things quiet was always going to be challenge with a 170w CPU and a 575w GPU. However I was aware you could turn on eco mode for the CPU and either under-volt or power limit the GPU. While this sounds horrible, it turns out that over the last 10 years the manufacturers have been shipping hardware that is more or less factory overclocked. They do this because having a product that is 5% faster that the competition matters, and sitting at the top of chart matters.
+Keeping things quiet was always going to be challenge with a 170w CPU and a 575w GPU. However I was aware you could turn on eco mode for the CPU and either under-volt or power limit the GPU. While this sounds horrible, it turns out that over the last 10 years the manufacturers have been shipping hardware that is more or less factory overclocked. They do this because having a product that is 5% faster than the competition matters, and sitting at the top of chart matters even more.
 
 However that last 5% of performance takes ~20% of the power budget to achieve. Lower the power budget and while technically you lose some performance, its often in the range of 3-5% which is probably not noticeable day to day.
 
