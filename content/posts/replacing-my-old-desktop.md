@@ -1,5 +1,5 @@
 ---
-title: Replacing my old desktop, a high-end Linux PC 
+title: Replacing my old desktop with a high-end Linux PC 
 date: 2025-11-03
 ---
 
