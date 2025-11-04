@@ -60,7 +60,7 @@ I need a fair amount of storage, so wanted at least 4 TB. However there was a sa
 
 #### Case
 
-I picked the Torrent over some cases I liked from be quiet! mostly because it was available and I got it on special (being on special is a pattern). It was not my first choice, but I think probably the right one which I will cover in the lowering noise section. One big advantage it has is shipping with 5 high quality fans, meaning I didn't need to worry about buying any extras.
+I picked the Torrent over some cases I liked from be quiet! mostly because it was available and I got it on special (being on special is a pattern with my purchase decisions). It was not my first choice, but I think probably the right one which I will cover in the lowering noise section. One big advantage it has is shipping with 5 high quality fans, meaning I didn't need to worry about buying any extras.
 
 I was not interested in anything with RGB, and hence have the solid panel design. Boring, but for me the desktop is a tool not a toy.
 
