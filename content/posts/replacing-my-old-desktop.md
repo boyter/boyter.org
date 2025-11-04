@@ -116,7 +116,7 @@ The only time I have ever really heard it is when I ran Furmark and WPrime for a
 
 Its possible you may still want the acoustic foam however if you have components that exhibit coil whine. Thankfully none of mine seem to have this, and on the odd occasion I do push the machine hard I don't hear that much from it.
 
-The memory training portion of the startup took a lot longer than I thought it would. While I was aware there is a training process, I was not aware it would take 5+ minutes. It's a little worrying when you first turn the PC on and nothing happens for a while. Knowing to wait here is something that cannot be underestimated.
+The memory training portion of the startup took a lot longer than I thought it would. While I was aware there is a training process, I was not aware it would take 5+ minutes. It's a little worrying when you first turn the PC on and nothing happens for a while. Knowing to wait here is something that cannot be understated and probably needs more call out.
 
 For LLM calls I get 200+ tokens per second when the model fits into VRAM which is more than fast enough for my needs, and has freed me up from waiting very long or opening my wallet every day to OpenAI. Of course its a little more frustrating trying to find a model that works but thats part of the fun.
 
