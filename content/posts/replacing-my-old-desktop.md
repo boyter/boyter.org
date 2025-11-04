@@ -80,7 +80,7 @@ I had picked components where possible to reduce noise, such as the power supply
 
 Keeping things quiet was always going to be challenge with a 170w CPU and a 575w GPU. However I was aware you could turn on eco mode for the CPU and either under-volt or power limit the GPU. While this sounds horrible, it turns out that over the last 10 years the manufacturers have been shipping hardware that is more or less factory overclocked. They do this because having a product that is 5% faster than the competition matters, and sitting at the top of chart matters even more.
 
-However that last 5% of performance takes ~20% of the power budget to achieve. Lower the power budget and while technically you lose some performance, its often in the range of 3-5% which is probably not noticeable day to day.
+However that last 5% of performance takes ~20% of the power budget to achieve. Lower the power budget and while technically you lose some performance, it is often in the range of 3-5% which is probably not noticeable day to day.
 
 With the CPU this is easy to achieve, turn on ECO mode in the BIOS and done. The CPU is now power limited to 105W, with [minimal to no impact](https://www.youtube.com/watch?v=W6aKQ-eBFk0) on day to day tasks.
 
@@ -123,5 +123,7 @@ For LLM calls I get 200+ tokens per second when the model fits into VRAM which i
 I also configured it to work remotely so I can use the LLM's on my M1 Mac laptop while working at home or remotely.
 
 In short though, while standard desktop work feels 100% the same as before, anything that required the CPU to actually work is so much faster. Compile times are blazingly quick, things open instantly and I never worry about running out of RAM anymore... other that VRAM but thats another matter.
+
+Fedora 42 worked more or less out of the box, although it was slightly laggy at 4K till I had the nVidia drivers installed.
 
 In fact the only thing I could think I would want different is a 6000 RTX PRO GPU with 96 GB of VRAM, but I don't even know where to order one of those and it costs more than the entire system I just built. Maybe in a few years I can pick up one second hand.
