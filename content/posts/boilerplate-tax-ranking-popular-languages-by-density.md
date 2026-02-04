@@ -13,9 +13,9 @@ This is a measure that has been in `scc` for about 2 years now, and yet not used
 
 > Anyway is this useful? I have no idea.
 
-What I really needed was to calculate ULOC over a lot of repositories. I could then objectively say what is a normal value or not. For example we all Go has more boilerplate repetition than Rust, but by how much?
+What I really needed was to calculate ULOC over a lot of repositories. I could then objectively say what is a normal value or not. For example we all know Go has more boilerplate repetition than Rust, but by how much?
 
-I didn't want to run it over millions of repositories, but how about the top 1,000 or so? A brief search turned up this GitHub repository https://github.com/EvanLi/Github-Ranking/ which contains the top 100 repositories for difference languages! Perfect. I cloned it down and it looks like it would be perfect for this test. 
+I didn't want to run it over millions of repositories, but how about the top 1,000 or so? A brief search turned up this GitHub repository https://github.com/EvanLi/Github-Ranking/ which contains the top 100 repositories for different languages! Perfect. I cloned it down and it looks like it would be perfect for this test. 
 
 > Turn's out `scc` is not in the top 100 most starred GitHub repositories... sadge...
 
@@ -187,7 +187,7 @@ Clojure and indeed all lisp style languages are the final boss of density here t
 
 If you compare Clojure (77.91%) to C# (58.4%), it seems the average C# developer writes 20% more redundant code every single day just to satisfy the compiler. Even with tools like resharper and LLM's to help thats not a insignificant amount of effort.
 
-Although I previously claimed `we all Go has more boilerplate repetition than Rust` (I write blog posts as I go BTW and don't revise statements like that as results come in) but as it turns out they are almost identical in their redundancy footprint. Looking at the data suggests they are much closer than you think.
+Although I previously claimed `we all know Go has more boilerplate repetition than Rust` (I write blog posts as I go BTW and don't revise statements like that as results come in) but as it turns out they are almost identical in their redundancy footprint. Looking at the data suggests they are much closer than you think.
 
 > The Go Zealot: "Go is simple!" "Yes, so simple you write the same thing over and over."
 
