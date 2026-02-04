@@ -4,7 +4,7 @@ date: 2026-02-03
 ---
 
 I was looking though [Google Scholar](https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=github.com%2Fboyter%2Fscc&btnG=) the other day looking for references to [`scc`](https://github.com/boyter/scc) since I had previously had people reach out to me about how they were using it for their thesis (It's not narcissism, its research I swear!). I was curious to see how it was being used. One thing that I noticed was how researchers were using it to measure size of projects. A valid use case IMHO. However I was surprised about the lack of use of some of the more interesting features in `scc`. 
-`
+
 A while ago I wrote about a new code measurement in [`scc`](https://github.com/boyter/scc) called [ULOC (Unique Lines of Code)](https://boyter.org/posts/sloc-cloc-code-new-metic-uloc/). In the interests of respecting your time here is the relevant quote from it,
 
 > In my opinion, the number this produces should be a better estimate of the complexity of a project. Compared to SLOC, not only are blank lines discounted, but so are close-brace lines and other repetitive code such as common includes. On the other hand, ULOC counts comments, which require just as much maintenance as the code around them does, while avoiding inflating the result with license headers which appear in every file, for example.
@@ -62,7 +62,7 @@ sqlite> select count(*) from metadata;
 
 400 million lines of code ought to be enough for any sort of comparison!
 
-My first query was to find out what is the uniqueness percentage across all languages.
+My first query was to find out what is the uniqueness percentage across all languages. Uniqueness being take all the lines in a file, throw away anything thats a duplicate with the sum that remains being the unique count.
 
 ```
 sqlite> SELECT
