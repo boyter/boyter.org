@@ -28,7 +28,6 @@ I need a Python script.
 
 It is going to do the following. Accept an argument to a directory. Look through that directory for .md markdown files. It needs to extract the name of the file minus the extension, so `java.md` would become `java`. It then opens each file and looks through each line to find github repositories, the format looks like this,
 
-
 | 1 | [JavaGuide](https://github.com/Snailclimb/JavaGuide) | 153711 | 46107 | Java | 74 | Java 面试 & 后端通用面试指南，覆盖计算机基础、数据库、分布式、高并发与系统设计。准备后端技术面试，首
 选 JavaGuide！ | 2026-01-31T15:55:16Z |
 | 2 | [hello-algo](https://github.com/krahets/hello-algo) | 122078 | 14820 | Java | 6 | 《Hello 算法》：动画图解、一键运行的数据结构与算法教程。支持简中、繁中、English、日本語，提供 Python, Java, C++, C, C#, JS, Go, Swift, Rust, Ruby, Kotlin, TS, Dart 等代码实现 | 2026-01-23T10:40:44Z |
@@ -177,9 +176,9 @@ Note that this is applied per file, per repository. This has a few benefits,
 | CSS | 99 | 58.24% |
 
 Much better. This actually fits in what I would expect. Lisp style languages at the top, with scripts and other non reusable things just below. The same thing to the bottom languages which as you would expect have more repetition.
-.
 
-Coffeescript is another interesting case. As it was designed to be terse, it beats out TypeScript when it comes to being concise. You could use this to point out that the modern tooling increased the redundancy of the codebase compared to the terse era of old, as even JavaScript has more unique code.
+
+Coffeescript is an interesting case. As it was designed to be terse, it beats out TypeScript when it comes to being concise. You could use this to point out that the modern tooling increased the redundancy of the codebase compared to the terse era of old, as even JavaScript has more unique code.
 
 What strikes me right away is that Java is a lot more DRY than I would have initially guessed! Was is really interesting is that this "proves" that modern doesn't always mean cleaner or more DRY. The other JVM Languages are interesting too. Java is not as bad as you would first think compared to Groovy, Scala and Kotlin (lets ignore clojure here as its a different programming paradigm). Groovy having less uniqueness probably makes sense given that its used in DevOps scripting a fair bit, and if you have ever used CloudFormation or Terraform are aware how much repetition goes on there. What we can say though is that it looks like Kotlin didn't just make Java prettier, it made it more dense.
 
