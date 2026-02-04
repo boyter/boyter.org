@@ -115,20 +115,22 @@ Lua|7333761|2874755|39.2
 Interesting. This suggests what we probably knew already, that things like shell scripts are generally bespoke hence having the most uniqueness. However I suspect there are outliers ruining the results here. There is no good reason for Lua to be at the bottom of the list. Lets try again trying to average them out,
 
 ```sql
-SELECT 
+sqlite> SELECT
     Language,
     COUNT(DISTINCT Project) as Repo_Count,
-    ROUND(AVG(Project_Uniqueness), 2) as Median_Project_Uniqueness
+    ROUND(AVG(Project_Dryness), 2) as Dryness
 FROM (
-    SELECT 
-        Project, 
+    SELECT
+        Project,
         Language,
-        (CAST(SUM(nUloc) AS FLOAT) / SUM(nCode + nComment + nBlank) * 100) as Project_Uniqueness
+        -- DRYness = ULOC / (Code + Comment + Blank)
+        (CAST(SUM(nUloc) AS FLOAT) / NULLIF(SUM(nCode + nComment + nBlank), 0) * 100) as Project_Dryness
     FROM t
     GROUP BY Project, Language
 )
+WHERE Project_Dryness IS NOT NULL
 GROUP BY Language
-ORDER BY Median_Project_Uniqueness DESC;
+ORDER BY Dryness DESC;
 ```
 
 Note that this is applied per file, per repository. This has a few benefits,
@@ -177,7 +179,6 @@ Note that this is applied per file, per repository. This has a few benefits,
 
 Much better. This actually fits in what I would expect. Lisp style languages at the top, with scripts and other non reusable things just below. The same thing to the bottom languages which as you would expect have more repetition.
 
-
 Coffeescript is an interesting case. As it was designed to be terse, it beats out TypeScript when it comes to being concise. You could use this to point out that the modern tooling increased the redundancy of the codebase compared to the terse era of old, as even JavaScript has more unique code.
 
 What strikes me right away is that Java is a lot more DRY than I would have initially guessed! Was is really interesting is that this "proves" that modern doesn't always mean cleaner or more DRY. The other JVM Languages are interesting too. Java is not as bad as you would first think compared to Groovy, Scala and Kotlin (lets ignore clojure here as its a different programming paradigm). Groovy having less uniqueness probably makes sense given that its used in DevOps scripting a fair bit, and if you have ever used CloudFormation or Terraform are aware how much repetition goes on there. What we can say though is that it looks like Kotlin didn't just make Java prettier, it made it more dense.
@@ -192,72 +193,15 @@ Although I previously claimed `we all Go has more boilerplate repetition than Ru
 
 > The Rust Zealot: "Rust is perfectly expressive!" "Yes, but you spend 40% of your time in setup code and trait impls."
 
-Lastly a query to get what I actually need which is the dryness calculation, the calculation of it being `DRYness = ULOC / SLOC`.
+So there it is. The dryness in order against each language. A baseline I can add to the scc repository as an example of what is considered average across very popular repositories.
 
-```sql
-sqlite> SELECT
-    Language,
-    COUNT(DISTINCT Project) as Repo_Count,
-    ROUND(AVG(Project_Dryness), 2) as Dryness
-FROM (
-    SELECT
-        Project,
-        Language,
-        -- DRYness = ULOC / (Code + Comment + Blank)
-        (CAST(SUM(nUloc) AS FLOAT) / NULLIF(SUM(nCode + nComment + nBlank), 0) * 100) as Project_Dryness
-    FROM t
-    GROUP BY Project, Language
-)
-WHERE Project_Dryness IS NOT NULL
-GROUP BY Language
-ORDER BY Dryness DESC;
 ```
-
-| Language | Repo Count | Dryness |
-| :--- | :---: | :---: |
-| Clojure | 100 | 77.91% |
-| Haskell | 99 | 77.25% |
-| MATLAB | 105 | 75.72% |
-| DM | 99 | 74.41% |
-| Shell | 82 | 72.24% |
-| TeX | 62 | 71.81% |
-| Vim Script | 95 | 70.4% |
-| CoffeeScript | 99 | 70.05% |
-| R | 100 | 68.11% |
-| Python | 100 | 67.78% |
-| Lua | 99 | 67.77% |
-| Kotlin | 100 | 67.72% |
-| Julia | 100 | 67.4% |
-| LaTeX | 38 | 67.23% |
-| Perl | 86 | 67.03% |
-| Scala | 99 | 66.1% |
-| Dart | 99 | 65.79% |
-| ActionScript | 98 | 65.74% |
-| Java | 100 | 65.72% |
-| Groovy | 93 | 64.58% |
-| JavaScript | 98 | 64.52% |
-| Powershell | 101 | 63.73% |
-| TypeScript | 100 | 63.34% |
-| Swift | 100 | 63.28% |
-| Objective C | 120 | 63.15% |
-| HTML | 99 | 62.76% |
-| Ruby | 95 | 62.73% |
-| PHP | 100 | 62.05% |
-| Rust | 100 | 60.5% |
-| C | 97 | 59.71% |
-| C++ | 100 | 59.33% |
-| Elixir | 100 | 58.97% |
-| Go | 99 | 58.78% |
-| C# | 99 | 58.4% |
-| CSS | 99 | 58.24% |
-
-There it is. The dryness in order against each language. A baseline I can add to the scc repository as an example of what is considered average across very popular repositories.
-
 Interpreting Dryness,
 
 - 75% (High Density): Very terse, expressive code. Every line counts. (Example: Clojure, Haskell)
 - 60% - 70% (Standard): A healthy balance of logic and structural ceremony. (Example: Java, Python)
 - < 55% (High Boilerplate): High repetition. Likely due to mandatory error handling, auto-generated code, or verbose configuration. (Example: C#, CSS)
+```
 
 We spent decades building modern languages like Go, Rust, and TypeScript to solve some of the language mistakes of old. For some cases this is a huge success. But according to the data, if you want the highest ratio of human thought to keystrokes, the winner is the 60 year old concept, Lisp running as a modern JVM language Clojure.
 
