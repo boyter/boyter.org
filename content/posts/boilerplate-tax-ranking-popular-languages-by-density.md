@@ -3,7 +3,7 @@ title: Boilerplate Tax - Ranking popular programming languages by density
 date: 2026-02-03
 ---
 
-I was looking though [Google Scholar](https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=github.com%2Fboyter%2Fscc&btnG=) the other day looking for references to [`scc`](https://github.com/boyter/scc) since I had previously had people reach out to me about how they were using it for their thesis (It's not narcissism, its research I swear!). I was curious to see how it was being used. One thing that I noticed was how researchers were using it to measure size of projects. A valid use case IMHO. However I was surprised about the lack of use of some of the more interesting features in `scc`. 
+I was looking through [Google Scholar](https://scholar.google.com/scholar?hl=en&as_sdt=0%2C5&q=github.com%2Fboyter%2Fscc&btnG=) the other day looking for references to [`scc`](https://github.com/boyter/scc) since I had previously had people reach out to me about how they were using it for their thesis (It's not narcissism, its research I swear!). I was curious to see how it was being used. One thing that I noticed was how researchers were using it to measure size of projects. A valid use case IMHO. However I was surprised about the lack of use of some of the more interesting features in `scc`.
 
 A while ago I wrote about a new code measurement in [`scc`](https://github.com/boyter/scc) called [ULOC (Unique Lines of Code)](https://boyter.org/posts/sloc-cloc-code-new-metic-uloc/). In the interests of respecting your time here is the relevant quote from it,
 
@@ -15,7 +15,7 @@ This is a measure that has been in `scc` for about 2 years now, and yet not used
 
 What I really needed was to calculate ULOC over a lot of repositories. I could then objectively say what is a normal value or not. For example we all know Go has more boilerplate repetition than Rust, but by how much?
 
-I didn't want to run it over millions of repositories, but how about the top 1,000 or so? A brief search turned up this GitHub repository https://github.com/EvanLi/Github-Ranking/ which contains the top 100 repositories for different languages! Perfect. I cloned it down and it looks like it would be perfect for this test. 
+I didn't want to run it over millions of repositories, but how about the top 1,000 or so? A brief search turned up this GitHub repository <https://github.com/EvanLi/Github-Ranking/> which contains the top 100 repositories for different languages! Perfect. I cloned it down and it looks like it would be perfect for this test.
 
 > Turn's out `scc` is not in the top 100 most starred GitHub repositories... sadge...
 
@@ -211,6 +211,6 @@ Food for thought there. Then again, perhaps LLM's make this all moot now anyway.
 
 Want to do this yourself? Feel free to improve on the results! I'll link back to you, just contact me.
 
-- Script to automate the processing https://gist.github.com/boyter/47d8dcc968a03edaecda196097c3822b
-- scc https://github.com/boyter/scc but you will need to compile from source to get the uloc fix
-- Top 100 language lists https://github.com/EvanLi/Github-Ranking/
+- Script to automate the processing <https://gist.github.com/boyter/47d8dcc968a03edaecda196097c3822b>
+- scc <https://github.com/boyter/scc> but you will need to compile from source to get the uloc fix
+- Top 100 language lists <https://github.com/EvanLi/Github-Ranking/>
