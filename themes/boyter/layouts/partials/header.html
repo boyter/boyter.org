@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <title>{{ .Title }} | {{ .Site.Title }}</title>
+
+    {{/* Open Graph */}}
+    <meta property="og:title" content="{{ .Title }}">
+    <meta property="og:site_name" content="{{ .Site.Title }}">
+    <meta property="og:url" content="{{ .Permalink }}">
+    {{ if .IsPage }}<meta property="og:type" content="article">{{ else }}<meta property="og:type" content="website">{{ end }}
+    {{ with .Description | default .Summary }}<meta property="og:description" content="{{ . | plainify | truncate 200 }}">{{ end }}
+    {{ with .Params.image }}<meta property="og:image" content="{{ . | absURL }}">{{ end }}
+
+    {{/* Twitter Card */}}
+    <meta name="twitter:card" content="{{ if .Params.image }}summary_large_image{{ else }}summary{{ end }}">
+    <meta name="twitter:title" content="{{ .Title }}">
+    {{ with .Description | default .Summary }}<meta name="twitter:description" content="{{ . | plainify | truncate 200 }}">{{ end }}
+    {{ with .Params.image }}<meta name="twitter:image" content="{{ . | absURL }}">{{ end }}
+
+    {{ with .Description | default .Summary }}<meta name="description" content="{{ . | plainify | truncate 200 }}">{{ end }}
+
     <link rel="stylesheet" href="{{ "/css/pico.min.css" | relURL }}" />
     {{/* <link rel="stylesheet" href="{{ "/css/fonts.css" | relURL }}" /> */}}
     <link rel="alternate" type="application/rss+xml" title="boyter.org feed" href="https://boyter.org/index.xml"/>
