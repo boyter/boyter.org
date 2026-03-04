@@ -3,6 +3,8 @@ title: searchcode.com is being rebooted (maybe?)
 date: 2025-08-28
 ---
 
+**searchcode HAS been rebooted** see <https://boyter.org/posts/searchcode-has-been-rebooted/> for details.
+
 By the time you are reading this, searchcode.com's DNS should have been updated to point at a placeholder index.html file I created.
 
 In short I am shutting down the current iteration of searchcode.com, unless something drastic happens in the next few days.
