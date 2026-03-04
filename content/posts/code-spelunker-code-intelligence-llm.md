@@ -1,7 +1,59 @@
 ---
-title: BM25 Ranking Without an Index - How codespelunker ranks results
-date: 2056-01-20
+title: codespelunker code intelligence for LLM's
+date: 2056-03-03
 ---
+
+The idea for code spelunker came about in 2019 during the Australian Bushfires and just before covid. I was working in the city at the time in a nice large private office known as "the fishbowl" due to it being all glass and having curved windows.
+
+We were looking though code and I remarked it could be nice if we could search through the code more easily. The response was use grep/ripgrep/ag/ack to do so. But what I really wanted was not line matching but a search experience similar to what Elastic/Solr/Sphinx/Manticore provide, but without the index.
+
+I worked on and off the idea before [releasing it in 2023](https://boyter.org/posts/code-spelunker-a-code-search-command-line-tool/) in a usable but somewhat primitive version. I used it almost every day, and so I wanted to revisit it and turn it into the tool I envisaged back when I first talked about it.
+
+## What is it?
+
+There are 2 main camps when it comes to searching.
+
+- Grep style. Fast, but "dumb", no contextual awareness, no ranking. Get ALL the matches with some noise. Is never stale.
+- Index style. Fast, "smart", contextually aware. Index requires maintenance. Can become stale.
+
+codespelunker, is a hybrid of both ideas. It brute forces like grep, has contextual awareness of code, comments and strings. Has a ranking algorithm to pop best matches to the top of results and is never stale.
+
+You will notice I didn't mention scale, as a benefit or negative of either style. Indexes come with their own problems at scale, but the main reason is because brute force for a problem like this actually scales very well. Don't believe me? Read this [Systems Engineering Before Algorithms](https://www.dataset.com/blog/systems-engineering-before-algorithms/). In short though,
+
+> Brute force works if you have a brute problem (and a lot of force).
+
+Even a slightly older now Macbook M1 Air is more than capable of searching a lot of code using brute force. While codespelunker won't scale to 10's of gigabytes of content to search on a single machine, such a problem scales out to multiple machines fairly easily. Reminder you can buy a CPU with ~1GB of level 3 cache these days!
+
+## Searching Fast
+
+Anyone familiar with Go is aware that the easiest way to search though strings in a unicode aware manner is to reach for the regular expression engine in it. They are also probably aware that its not the fastest way to do it. The next step is to use a lower on all the code, and strings.Index, however this is not unicode aware.
+
+My answer to this was to write my own IndexAllIgnoreCase function. It copies one of the core ideas of ripgrep, so a search for `foo` creates a string of all possible cases `foo Foo fOo FOo foO FoO fOO FOO` and searches for those. This uses the strings.Index call, which is incredibly fast. I [wrote about this previously](https://boyter.org/posts/faster-literal-string-matching-in-go/)
+
+## LLM Driven Development
+
+Once I have MCP configured, what followed next was what I think is going to become the next big thing, **LLM Driven Development**. With the push towards LLM style chat interfaces, the tools we write are going to be less about appeasing humans, and more about doing what best helps the LLM.
+
+When using `cs` with Opus 4.6, Sonnet 4.6 and Qwen 3.5 I spent a lot of time doing the following.
+
+- Build release of `cs`
+- Open new chat window
+- Ask it to find something in the code
+- Ask why it used the tools in a specific way, and get feedback
+- Tweak the MCP description to better suit the LLM
+- Sometimes add a new small piece of functionality
+
+## Did it work?
+
+Pointed `cs` at ~3gb of source code and connected
+Opus 4.6 remarked that it would have prefered better ranking,
+until
+
+> "I had no idea it was brute-forcing. It felt like it was hitting an index."
+
+<https://www.reddit.com/r/golang/comments/1rc1uwj/codespelunker_cli_code_search_tool_that/>
+
+> OK, had some time, ran a few tests with gemini/opus/codex 5.3, mostly in codex + crush. Gemini loved it. Opus loved it. Codex thought it is a good compliment to existing tools when in "structural modes"
 
 **Intro**
 
