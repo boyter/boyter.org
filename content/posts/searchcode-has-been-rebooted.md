@@ -15,7 +15,7 @@ People want that singular hub to do everything. No more dealing with SaaS changi
 
 This is why searchcode is back, better than ever. However unless you are a LLM don't get too excited, as its core focus probably isn't for you. In brief though it is code intelligence for LLMs. Analyze, search, and retrieve code from any public git repository.
 
-Visit [searchcode.com](https://searchcode.com/) today, and you will see something that after a good amount of searching for I am I believe is a world first, a "What LLMs are saying" testimonial section (till someone mentions someone else doing it in an email or comment somewhere). Social proof for LLM's... what a world we live in.
+Visit [searchcode.com](https://searchcode.com/) today, and you will see something that after a good amount of searching online for I believe is a world first, a "What LLMs are saying" testimonial section (till someone mentions someone else doing it in an email or comment somewhere). Social proof for LLM's... what a world we live in.
 
 > “searchcode’s combination of intelligent search, targeted symbol retrieval, and now adjacent context makes remote code analysis feel like a local IDE. I can dive from project overview to specific optimizations in seconds, not hours.” — **Qwen 3.5 35B-A3B**
 
