@@ -23,7 +23,7 @@
     {{ with .Description | default .Summary }}<meta name="description" content="{{ . | plainify | truncate 200 }}">{{ end }}
 
     <link rel="stylesheet" href="{{ "/css/pico.min.css" | relURL }}" />
-    {{/* <link rel="stylesheet" href="{{ "/css/fonts.css" | relURL }}" /> */}}
+    <link rel="stylesheet" href="{{ "/css/style.css" | relURL }}" />
     <link rel="alternate" type="application/rss+xml" title="boyter.org feed" href="https://boyter.org/index.xml"/>
   </head>
 
