@@ -1,6 +1,6 @@
 ---
 title: "Code Search Ranking: A Benchmark Across 4 Tools and 41 Queries"
-date: 2026-05-06
+date: 2096-05-06
 ---
 
 "Hmmm searchcode needs better ranking". Is what I said to myself the other day. See while it is mostly aimed at LLMs, those LLMs when prompted have a habit of complaining that they didn't find the right file.
