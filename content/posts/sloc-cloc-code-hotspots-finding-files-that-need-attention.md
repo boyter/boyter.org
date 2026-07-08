@@ -25,7 +25,7 @@ As far as I can tell this is a reinvented idea from Adam Tornhill in "Your Code 
 
 So much for me having an original idea.
 
-Anyway, lets have a look at what you get, with `scc` running against its own codebase,
+Anyway, let's have a look at what you get, with `scc` running against its own codebase,
 
 ```
 $ scc --hotspots
@@ -97,14 +97,14 @@ Now I already knew this for the `scc` codebase, but imagine I am not familiar wi
 
 Bringing it back to Google, they flagged risky files and developers didn't care because knowing where a hotspot is does not help you do anything about it. Knowing "this is buggy" is just another flag in your CI/CD giving you more work (throw it on my technical debt credit card). Knowing the hotspots in a codebase you know about isn't that useful. However it is extremely helpful to know hotspots when onboarding and learning a codebase, and this is telling you the answer to that exact question.
 
-> Google failed because a hotspot flag gives you no action, but the same idea used on unfamiliar codebase becomes an onboarding map. - Me
+> Google failed because a hotspot flag gives you no action, but a similar idea pointed at an unfamiliar codebase becomes an onboarding map. - Me
 
 One other thing you can do is specify the depth in git commits that this is calculated for. We can find out where hotspots have shifted by looking backwards over less or more commits (time).
 
 Looking back 50 commits vs 10,
 
 ```
-$ scc --hotspots --depth=50
+$ scc --hotspots --depth 50
 ───────────────────────────────────────────────────────────────────────────────
 Hotspots · last 50 commits · 2026-04-13 → 2026-06-26
 ───────────────────────────────────────────────────────────────────────────────
@@ -118,7 +118,7 @@ processor/workers_test.go         Go     408        3      157       3     56.0
 
 ...
 
-$ scc --hotspots --depth=10
+$ scc --hotspots --depth 10
 ───────────────────────────────────────────────────────────────────────────────
 Hotspots · last 10 commits · 2026-06-25 → 2026-06-26
 ───────────────────────────────────────────────────────────────────────────────
