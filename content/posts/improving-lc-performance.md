@@ -1,6 +1,6 @@
 ---
 title: Improving lc's performance - Optimising the hell out of a Go application
-date: 2028-05-27
+date: 2098-05-27
 ---
 
 <https://blog.sourced.tech/post/gld/>

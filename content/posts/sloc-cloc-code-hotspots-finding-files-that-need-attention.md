@@ -164,9 +164,71 @@ Summary
 
 The above was calculated on my Macbook Air 2020 M1 against the `scc` codebase itself. It's not slow per se, but certainly not as fast as the ~12ms it takes `scc` to run normally over that codebase on the same machine. Is this fast? I have no idea. I have not used codescene myself. Perhaps someone can let me know. I did try running [bugspots](https://github.com/igrigorik/bugspots) for comparison, but perhaps due to the age of the codebase could not get it working.
 
+## Change Coupling
+
+Since I was already lifting the hotspot idea from CodeScene I thought I would also take change coupling feature. The general idea is that files are dependent on each other if they appear in the same commit constantly regardless of whether a compiler enforced dependency exists.
+
+Running it against `scc` itself produces the following trimmed output,
+
+```
+$ scc --coupling
+───────────────────────────────────────────────────────────────────────────────
+Change Coupling · last 1000 commits · 2019-07-25 → 2026-07-20
+───────────────────────────────────────────────────────────────────────────────
+File A                      File B                      Shared Commits Coupling
+───────────────────────────────────────────────────────────────────────────────
+languages.json              processor/constants.go                 198    67.8%
+LANGUAGES.md                languages.json                         167    61.2%
+LANGUAGES.md                processor/constants.go                 153    58.2%
+SCC-OUTPUT-REPORT.html      processor/constants.go                 149    37.7%
+```
+
+Where the output shows that a change in `languages.json` modifies `processor/constants.go` most of the time. This is true, as are the other outputs in the above, as every time a new language is added or modified each of the files above change as well.
+
+While interesting, its far more useful when applied per file,
+
+```
+$ scc --coupling-for ./processor/detector.go
+───────────────────────────────────────────────────────────────────────────────
+Change Coupling · last 1000 commits · 2019-07-25 → 2026-07-20
+───────────────────────────────────────────────────────────────────────────────
+Related File                                          Shared Commits   Coupling
+───────────────────────────────────────────────────────────────────────────────
+processor/detector_test.go                                        26      49.1%
+processor/workers.go                                              15      12.1%
+processor/structs.go                                               9      11.1%
+processor/file_test.go                                             7       9.7%
+processor/workers_test.go                                          6       9.7%
+processor/processor_test.go                                        5       9.4%
+```
+
+Now this is far more interesting, although in this case showing the obvious. If you change the detector you probably need to change the tests for it. Where this really helps is when you are working on random files and want to know the potential blast radius that isn't covered by your compiler checks.
+
+However coupling like this potentially has the same issue that files that aren't code may get picked up. As such we can apply our hotspots trick of weighting by complexity to get the below,
+
+```
+$ scc --coupling-weighted --coupling-for ./processor/detector.go
+───────────────────────────────────────────────────────────────────────────────
+Change Coupling · last 1000 commits · 2019-07-25 → 2026-07-20
+───────────────────────────────────────────────────────────────────────────────
+Related File                                          Shared Commits      Score
+───────────────────────────────────────────────────────────────────────────────
+processor/detector_test.go                                        26      100.0
+processor/workers.go                                              15       57.7
+processor/processor.go                                            13       50.0
+processor/workers_test.go                                          6       23.1
+processor/file_test.go                                             7       22.7
+processor/file.go                                                 10       21.6
+processor/formatters.go                                            8       16.9
+```
+
+The file `structs.go` has fallen out of the top results due to this, which is probably correct considering it just contains struct definitions. So in effect low logic files are demoted. Is this tweak useful? I don't know, hence it being gated behind another CLI flag.
+
+Regardless, the coupling options themselves are there for use, and possibly most useful exposed over MCP for LLMs to consume.
+
 ## Git Metrics
 
-In addition to the hotspot calculation you get other git outputs, such as working out what is the trend of code over time? Useful for watching that JS to TS rewrite in real time.
+In addition to the hotspot and coupling calculation you get other git outputs, such as working out what is the trend of code over time? Useful for watching that JS to TS rewrite in real time.
 
 ```
 $ scc --timeline
@@ -195,29 +257,30 @@ Or perhaps you want to calculate the bus factor of your application?
 ```
 $ scc --by-author
 ───────────────────────────────────────────────────────────────────────────────
-Authors · last 1000 commits · 2019-07-21 → 2026-06-26
+Authors · last 1000 commits · 2019-07-24 → 2026-07-08
 ───────────────────────────────────────────────────────────────────────────────
 Author                               Code     Cmplx   Files     Owns  Last seen
 ───────────────────────────────────────────────────────────────────────────────
-Ben Boyter                         17,557     1,668      54    36.2% 2026-06-26
-apocelipes                         16,751       300      11    34.5% 2026-06-26
-Ben Boyter                          6,018       458      19    12.4% 2026-06-26
+Ben Boyter (github.com)            18,901     1,839      59    37.9% 2026-07-06
+apocelipes                         16,740       299      11    33.6% 2026-06-26
+Ben Boyter (boyter.org)             6,013       469      19    12.1% 2026-07-04
 David Baggerman                       361        26       2     0.7% 2021-03-29
 Douglas DeMars                        256         9       0     0.5% 2026-01-06
 Daniel                                240         4       0     0.5% 2026-04-30
 qwerty8811                            198        24       0     0.4% 2026-03-25
 Gaël Selig                            193         0       0     0.4% 2025-06-21
-Daulet Zhanguzin                      183        23       0     0.4% 2026-05-04
 Jan Günter                            182         8       0     0.4% 2021-12-13
+Daulet Zhanguzin                      171        23       0     0.3% 2026-05-04
 Erik                                   96         2       0     0.2% 2024-10-23
 Jeff Foster                            85         0       0     0.2% 2026-01-12
 Daniel Poelzleithner                   78         0       0     0.2% 2026-05-04
 Richard Simison                        77        16       0     0.2% 2026-04-13
 masukomi                               62         0       0     0.1% 2023-01-03
-others (80)                         1,277        71       —     2.6%          —
-(before window)                     4,944       260       6    10.2%          —
+others (80)                         1,272        71       —     2.5%          —
+(before window)                     4,960       259       6     9.9%          —
 ───────────────────────────────────────────────────────────────────────────────
-Bus factor 2 · Ben Boyter + apocelipes last-touched 79% of in-window code
+Bus factor 2 · Ben Boyter (github.com) + apocelipes
+               last-touched 79% of in-window code
 ───────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -291,7 +354,7 @@ But the thing that really matters here is not the nesting, it's the shape of the
 
 > `++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.`
 
-In which case I say to you, "Woah calm down over there satan.".
+In which case I say to you, "Woah calm down over there satan".
 
 The shape of the code matters more than what those indents actually are. This probably remains true for any linted code and Python, and frankly if you aren't linting your code I'd like to know why. Regardless try squinting at the code above so the details disappear, and tell me which one you would rather make a production change to. Incidentally this is the same argument that Adam Tornhill made in his book, although he actually blurred the code.
 
