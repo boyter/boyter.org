@@ -1,6 +1,6 @@
 ---
 title: "Sloc Cloc and Code 4.0 (scc) - Finding the files that need the most attention"
-date: 2096-06-25
+date: 2026-08-23
 ---
 
 So today I release the v4.0.0 version of sloc cloc and code AKA `scc`. While I was considering going from 3.7.0 to 3.8.0 enough new functionality landed in it that I figured a move to a new major version was worthwhile. It also was large enough to warrant another blog post going into some details, because I am genuinely excited about some of the new features in it.
