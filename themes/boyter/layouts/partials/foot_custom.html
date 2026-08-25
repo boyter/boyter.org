@@ -1,5 +1,8 @@
 </main>
-<footer class="container">
-  <hr>
+<footer>
+  {{ with .Site.Params.footer }}
+  <hr/>
+  {{ . | markdownify }}
+  {{ end }}
   © <a href="https://boyter.org/">Ben Boyter</a> | <a href="https://github.com/boyter">Github</a> | <a href="https://twitter.com/boyter">Twitter</a> | <a href="https://honk.boyter.org/">@boyter@honk.boyter.org</a>
 </footer>
