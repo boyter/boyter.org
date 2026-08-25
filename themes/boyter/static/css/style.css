@@ -1,5 +1,6 @@
 :root {
   --background-color: #fff;
+  --page-background-color: #fff;
   --text-color: #121416d8;
   --muted-color: #6b7280;
   --link-color: #543fd7;
@@ -12,12 +13,14 @@
   --blockquote-border-color: #ccc;
   --border-color: #ddd;
   --code-background-color: #f9f9f9;
+  --font-sans: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "SFMono-Regular", "Lucida Console", Monaco, Consolas, "Liberation Mono", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --background-color: #1e2021;
+    --page-background-color: #13171f;
     --text-color: #c1c1c1;
     --muted-color: #8a8f98;
     --link-color: #828fff;
@@ -42,6 +45,24 @@
   }
 }
 
+/* ===== reset ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background-color: var(--page-background-color);
+}
+
+/* ===== base typography ===== */
 body {
   max-width: 1000px;
   margin: auto;
@@ -49,8 +70,122 @@ body {
   line-height: 1.6;
   color: var(--text-color);
   background-color: var(--background-color);
+  font-family: var(--font-sans);
+  font-size: 1rem;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1.25;
+  margin: 1.5em 0 0.5em;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 2rem;
+}
+h2 {
+  font-size: 1.5rem;
+}
+h3 {
+  font-size: 1.25rem;
+}
+h4 {
+  font-size: 1.125rem;
+}
+h5 {
+  font-size: 1rem;
+}
+h6 {
+  font-size: 0.875rem;
+}
+
+p {
+  margin: 0 0 1em;
+}
+
+ul,
+ol {
+  padding-left: 1.5em;
+  margin: 0 0 1em;
+}
+
+li {
+  margin: 0.25em 0;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 2em 0;
+}
+
+mark {
+  background: #fff3a3;
+  color: inherit;
+  padding: 0 0.2em;
+}
+
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--code-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+}
+
+sub,
+sup {
+  font-size: 0.75em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sub {
+  bottom: -0.25em;
+}
+sup {
+  top: -0.5em;
+}
+
+details {
+  margin: 0 0 1em;
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+figure {
+  margin: 1em 0;
+}
+
+figcaption {
+  margin-top: 0.5em;
+  font-size: 0.875em;
+  color: var(--muted-color);
+}
+
+dl {
+  margin: 0 0 1em;
+}
+
+dt {
+  font-weight: 600;
+}
+
+dd {
+  margin: 0 0 0.5em 1.5em;
+}
+
+/* ===== links ===== */
 a {
   color: var(--link-color);
   text-decoration: none;
@@ -214,8 +349,4 @@ footer a {
 }
 footer a:hover {
   text-decoration: underline;
-}
-
-html, pre, code {
-  text-size-adjust: 100%;
 }
