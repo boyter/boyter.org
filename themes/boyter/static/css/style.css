@@ -278,6 +278,7 @@ pre {
   border: 1px solid var(--border-color);
   box-shadow: 5px 5px 5px var(--shadow-color);
   padding: 1em;
+  margin: 0 0 1em;
   overflow-x: auto;
   line-height: 1.2em !important;
   max-width: 100%;
@@ -293,8 +294,12 @@ pre code {
   white-space: pre;
   word-wrap: normal;
 }
+div.highlight {
+  margin: 0 0 1em;
+}
 div.highlight > pre {
   border-radius: 10px;
+  margin: 0;
 }
 
 /* misc elements */
