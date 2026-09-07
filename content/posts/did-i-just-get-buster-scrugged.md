@@ -178,7 +178,7 @@ $ strace -f -e trace=openat,fcntl,epoll_ctl,read,close,write ./openone rawopen .
 [pid 3320746] close(4)                  = 0
 ```
 
-Five calls before a byte is read. Opens the file, makes it non-blocking, offers to epoll, gets told no, and puts the flag back. The kernel is doing the right thing here, epoll answers "would I/O on this block?", and for a socket or pipe makes sense, but for a file on disk... which should always be ready this is redundant. The raw open by contrast is doing none of this.
+Five calls before a byte is read. Opens the file, makes it non-blocking, offers to epoll, gets told no, and puts the flag back. The kernel is doing the right thing here, epoll answers "would I/O on this block?", and for a socket or pipe makes sense, but for a file on disk... which should always be ready. The raw open by contrast does none of that.
 
 Note Go is not doing anything wrong here either, `os.File` is an abstraction covering sockets, pipes and files, so this is expected.
 
@@ -296,9 +296,11 @@ The `exp-per-language-counters` is just a flag I set to turn this functionality 
 
 So... that's processing 1,516,845,281 bytes in ~86,000 files... 1.9 µs per file (in wall clock time). I suspect we're getting close to the limits of the hardware at this point? At least in terms of counting every byte in those files.
 
-That's about 9 GB/s of throughput, which I know is lower than the theoretical maximum a CPU can do, but still fairly impressive for non-contiguous file reads. Each file takes about 44 µs of CPU time to process, with the kernel itself spending about 10 µs of that just opening, reading, and closing the files. The machine has 16 physical cores and 32 threads, which with SMT scaling works out to roughly 23–24 effective cores. Dividing that 44 µs of work across those cores gives us that 1.9 µs wall-clock time per file. For this machine, that's essentially 100% saturation.
+That's about 9 GB/s of throughput, which I know is lower than the theoretical maximum a CPU can do, but still fairly impressive for non-contiguous file reads. Each file takes about 44 µs of CPU time to process, with the kernel itself spending about 10 µs of that just opening, reading, and closing the files. The machine has 16 physical cores and 32 threads, which with SMT scaling works out to roughly 23–24 effective cores. Dividing that 44 µs of work across those cores gives us that 1.9 µs wall-clock time per file. For this machine, that's essentially 100% saturation. I guess `io_uring` might be the answer here, something for me to consider at a later date.
 
 With the above done I have cut a [new v4.1.0 release](https://github.com/boyter/scc) of `scc` with the above in it. Go get it. BTW, if you are running `scc` at scale, deploy this and see a nice change in your metrics please contact me as I'd love to see it.
+
+In the end there was no trick in `mezura` I was missing. It was just me being stupid and missing some, in hindsight, obvious issues. Sometimes your own mistakes catch up to you.
 
 That issue ended with this line,
 
