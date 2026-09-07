@@ -1,7 +1,9 @@
 ---
-title: "Treat faster tools as a profile, not an insult."
+title: "Sloc Cloc and Code - Did I just get Buster Scrugged?"
 date: 2026-09-06
 ---
+
+> Treat Faster Tools as a Profile, Not an Insult
 
 I recently had this [gracious github issue](https://github.com/boyter/scc/issues/769) raised against [scc](https://github.com/boyter/scc) related to another [code counter mezura](https://github.com/subamanis/mezura) which has some impressive [performance claims](https://github.com/subamanis/mezura#how-it-compares).
 
@@ -22,9 +24,9 @@ Summary
     2.56 ± 0.13 times faster than scc ./linux
 ```
 
-Damn. Did I just get Buster Scrugged?
+Damn, I just got Buster Scrugged.
 
-![Buster Scruggs](/static/treat-faster-tools-as-a-profile/buster-scruggs.jpg#center)
+![Buster Scruggs](/static/did-i-just-get-buster-scrugged/buster-scruggs.jpg#center)
 
 At the time I was enjoying a splash of whisky to celebrate the wind down of a stressful project and keep my singing voice in fettle. I was astonished at the result. However, before trading my spurs for wings, I decided to sleep on it, and have a look around at what I could do.
 
@@ -93,7 +95,7 @@ The thing that stands out there to me is the total number of calls. I have `scc`
 - `epoll_ctl`: 95,898 calls, 95,897 errors. Almost every single one failed.
 - `fcntl`: 383,594. Approximately four per file processed.
 - `newfstatat`: 286,428. About three stats per file.
-- `futex`: ~134,000, and 64% of the traced time. A symptom of thread starvation.
+- `futex`: ~134,000. A symptom of thread starvation.
 
 As predicted a lot of file processing, although the `futex` is a bit of a surprise considering how much effort I have put into `scc`.
 
@@ -176,11 +178,11 @@ $ strace -f -e trace=openat,fcntl,epoll_ctl,read,close,write ./openone rawopen .
 [pid 3320746] close(4)                  = 0
 ```
 
-Five calls before a byte is read. Opens the file, makes it non-blocking, offers to epoll, gets told no, and puts the flag back. The kernel is doing the right thing here, epoll answers "would I/O on this block?", and for a socket or pipe makes sense, but for a file on disk... which should always be ready this is redundant.
+Five calls before a byte is read. Opens the file, makes it non-blocking, offers to epoll, gets told no, and puts the flag back. The kernel is doing the right thing here, epoll answers "would I/O on this block?", and for a socket or pipe makes sense, but for a file on disk... which should always be ready this is redundant. The raw open by contrast is doing none of this.
 
 Note Go is not doing anything wrong here either, `os.File` is an abstraction covering sockets, pipes and files, so this is expected.
 
-However on BSDs and macOS there is a switch for runtime.GOOS in os/file_unix.go that spends an fstat to find out it is a regular file and skip the whole thing. Linux is not in that list, and the comment right next to it says why it does not matter:
+However on BSDs and macOS there is a switch for runtime.GOOS in os/file_unix.go that spends an fstat to find out it is a regular file and skip the whole thing. Linux is not in that list, and the comment right next to it says why,
 
 ```
     // An error here indicates a failure to register
@@ -263,7 +265,7 @@ But.... can we do better?
 
 So with `mezura` going into plaid, I need to engage ludicrous speed.
 
-![Gone to Plaid](/static/treat-faster-tools-as-a-profile/plaid.jpg#center)
+![Gone to Plaid](/static/did-i-just-get-buster-scrugged/plaid.jpg#center)
 
 One idea I had bubbling in the back of my mind for a long time was to write optimised state machines for popular languages. The state machine that `scc` uses is designed to work for all languages. This makes adding a new one trivial. Set the rules of the language and it can now count it. However as we know, a generic solution to a problem is often not the most optimal.
 
