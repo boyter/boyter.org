@@ -217,7 +217,7 @@ There were a heap of other tweaks that went into this, including some fixes in [
 So with the above fixes in place, where does `scc` land now? A quick comparison between the new build, the old one and mezura.
 
 ```
-boyter@spongehead:/mnt/data/projects/scc$ hyperfine './scc -c ./linux' 'scc -c ./linux' 'mezura ./linux'
+boyter@spongehead:/mnt/data/projects$ hyperfine './scc -c ./linux' 'scc -c ./linux' 'mezura ./linux'
 Benchmark 1: ./scc -c ./linux
   Time (mean ± σ):     192.4 ms ±   3.0 ms    [User: 3815.7 ms, System: 882.9 ms]
   Range (min … max):   187.5 ms … 197.5 ms    15 runs
@@ -276,7 +276,7 @@ I have never implemented this before now, because of the amount of work it invol
 So I did exactly that. I handed over the exact details to `Claude` with exactly what I wanted and let it cook implementing this for C and Java. Results?
 
 ```
-boyter@spongehead:/mnt/data/projects/scc$ hyperfine './scc -c --exp-per-language-counters ./linux' 'mezura ./linux'
+boyter@spongehead:/mnt/data/projects$ hyperfine './scc -c --exp-per-language-counters ./linux' 'mezura ./linux'
 Benchmark 1: ./scc -c --exp-per-language-counters ./linux
   Time (mean ± σ):     166.7 ms ±   2.9 ms    [User: 2867.3 ms, System: 944.7 ms]
   Range (min … max):   159.5 ms … 171.3 ms    17 runs
