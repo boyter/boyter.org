@@ -8,7 +8,7 @@ I recently had this [gracious github issue](https://github.com/boyter/scc/issues
 Naturally, I decided to check it out.
 
 ```
-boyter@spongehead:/mnt/data/projects/scc$ hyperfine 'scc ./linux' 'mezura ./linux'
+boyter@spongehead:/mnt/data/projects$ hyperfine 'scc ./linux' 'mezura ./linux'
 Benchmark 1: scc ./linux
   Time (mean ± σ):     512.2 ms ±   4.6 ms    [User: 10362.5 ms, System: 985.7 ms]
   Range (min … max):   506.6 ms … 519.5 ms    10 runs
@@ -32,7 +32,7 @@ As I said on the [stto comparison](https://boyter.org/posts/scc-stto-head-to-hea
 
 > This is not because I am hurt if my tool is slower. In fact that would make me happy, as I can learn from my mistakes.
 
-So looking at the times, we have this on my Desktop, a 9950x3d and Go 1.27, rerun the next morning.
+So looking at the times, we have this on my Desktop, a 9950x3D and Go 1.27, rerun the next morning.
 
 | | wall |
 |---|---|
@@ -237,6 +237,25 @@ Summary
 ```
 
 Nice. Note we are still counting more files than mezura here (~86,000 to ~67,000), so the above is not an equal amount of work. However we are now running in half the time we were before.
+
+Running on my M1 Macbook Air, gives the following result of the new `scc` compared to the old one against my general projects directory.
+
+```
+$ hyperfine './scc ../' 'scc ../'
+Benchmark 1: ./scc ../
+  Time (mean ± σ):     173.6 ms ±  10.2 ms    [User: 374.4 ms, System: 292.0 ms]
+  Range (min … max):   155.6 ms … 189.4 ms    15 runs
+
+Benchmark 2: scc ../
+  Time (mean ± σ):     386.1 ms ±   9.7 ms    [User: 644.9 ms, System: 450.7 ms]
+  Range (min … max):   377.1 ms … 406.7 ms    10 runs
+
+Summary
+  ./scc ../ ran
+    2.22 ± 0.14 times faster than scc ../
+```
+
+No regressions on macOS.
 
 But.... can we do better?
 
