@@ -210,7 +210,7 @@ One thing I should add before moving on though is that I am giving up what `os.F
 
 ## Other
 
-There were a heap of other tweaks that went into this, including some fixes in [gocodewalker](https://github.com/boyter/gocodewalker/) to help. Normally I would go into detail here, but i'll be honest I forgot to keep my usual notes. Suffice to say while some bug fixes made it based on that bug report many were performance orientated.
+There were a heap of other tweaks that went into this, including some fixes in [gocodewalker](https://github.com/boyter/gocodewalker/) to help. Normally I would go into detail here, but i'll be honest I forgot to keep my usual notes. Suffice to say while some bug fixes made it based on that bug report many were performance orientated. I suspect this is where the `newfstatat` stats were lowered, but I honestly don't remember.
 
 ## Results
 
