@@ -1,5 +1,5 @@
 ---
-title: "Did I just get Buster Scrugged?"
+title: "Treat faster tools as a profile, not an insult."
 date: 2026-09-06
 ---
 
@@ -24,7 +24,7 @@ Summary
 
 Damn. Did I just get Buster Scrugged?
 
-![Buster Scruggs](/static/did-i-just-get-buster-scrugged/buster-scruggs.jpg#center)
+![Buster Scruggs](/static/treat-faster-tools-as-a-profile/buster-scruggs.jpg#center)
 
 At the time I was enjoying a splash of whisky to celebrate the wind down of a stressful project and keep my singing voice in fettle. I was astonished at the result. However, before trading my spurs for wings, I decided to sleep on it, and have a look around at what I could do.
 
@@ -42,7 +42,7 @@ So looking at the times, we have this on my Desktop, a 9950x3D and Go 1.27, reru
 
 Two things of note. I used `-c` which turns off complexity calculations to make it a closer comparison since mezura does not do this (as far as I can tell) and secondly, they are not doing an equal amount of work. `scc` is counting ~86,000 files compared to mezura counting ~67,000. However there is still no reason `scc` should be taking 2x the wall clock time for this task.
 
-Now I could go and read the source of mezura to see if there is some trick I'm missing, or as I decided, to black box it, by looking at strace output instead. This is because it gives a good idea of where to go looking for wins, and I have never really used it that much. Treat faster tools as a profile, not an insult.
+Now I could go and read the source of mezura to see if there is some trick I'm missing, or as I decided, to black box it, by looking at strace output instead. This is because it gives a good idea of where to go looking for wins, and I have never really used it that much.
 
 So with `strace -f -c` we get the following trimmed output, for `scc`
 
@@ -263,7 +263,7 @@ But.... can we do better?
 
 So with `mezura` going into plaid, I need to engage ludicrous speed.
 
-![Gone to Plaid](/static/did-i-just-get-buster-scrugged/plaid.jpg#center)
+![Gone to Plaid](/static/treat-faster-tools-as-a-profile/plaid.jpg#center)
 
 One idea I had bubbling in the back of my mind for a long time was to write optimised state machines for popular languages. The state machine that `scc` uses is designed to work for all languages. This makes adding a new one trivial. Set the rules of the language and it can now count it. However as we know, a generic solution to a problem is often not the most optimal.
 
