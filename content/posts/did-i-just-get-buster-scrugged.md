@@ -42,7 +42,7 @@ So looking at the times, we have this on my Desktop, a 9950x3D and Go 1.27, reru
 
 Two things of note. I used `-c` which turns off complexity calculations to make it a closer comparison since mezura does not do this (as far as I can tell) and secondly, they are not doing an equal amount of work. `scc` is counting ~86,000 files compared to mezura counting ~67,000. However there is still no reason `scc` should be taking 2x the wall clock time for this task.
 
-Now I could go and read the source of mezura to see if there is some trick I'm missing, or as I decided, to black box it, by looking at strace output instead. This is because it gives a good idea of where to go looking for wins, and I have never really used it that much.
+Now I could go and read the source of mezura to see if there is some trick I'm missing, or as I decided, to black box it, by looking at strace output instead. This is because it gives a good idea of where to go looking for wins, and I have never really used it that much. Treat faster tools as a profile, not an insult.
 
 So with `strace -f -c` we get the following trimmed output, for `scc`
 
@@ -210,7 +210,7 @@ One thing I should add before moving on though is that I am giving up what `os.F
 
 ## Other
 
-There were a heap of other tweaks that went into this, including some fixes in [gocodewalker](https://github.com/boyter/gocodewalker/) to help. Normally I would go into detail here, but i'll be honest I forgot to keep my usual notes. Suffice to say while some bug fixes made it based on that bug report many were performance orientated. I suspect this is where the `newfstatat` stats were lowered, but I honestly don't remember.
+There were a heap of other tweaks that went into this, including some fixes in [gocodewalker](https://github.com/boyter/gocodewalker/) to help. Normally I would go into detail here, but I'll be honest I forgot to keep my usual notes. Suffice to say while some bug fixes made it based on that bug report many were performance orientated. I suspect this is where the `newfstatat` stats were lowered, but I honestly don't remember.
 
 ## Results
 
@@ -238,7 +238,7 @@ Summary
 
 Nice. Note we are still counting more files than mezura here (~86,000 to ~67,000), so the above is not an equal amount of work. However we are now running in half the time we were before.
 
-Running on my M1 Macbook Air, gives the following result of the new `scc` compared to the old one against my general projects directory.
+Running on my M1 MacBook Air gives the following result of the new `scc` compared to the old one against my general projects directory.
 
 ```
 $ hyperfine './scc ../' 'scc ../'
@@ -296,7 +296,7 @@ So... that's processing 1,516,845,281 bytes in ~86,000 files... 1.9 µs per file
 
 That's about 9 GB/s of throughput, which I know is lower than the theoretical maximum a CPU can do, but still fairly impressive for non-contiguous file reads. Each file takes about 44 µs of CPU time to process, with the kernel itself spending about 10 µs of that just opening, reading, and closing the files. The machine has 16 physical cores and 32 threads, which with SMT scaling works out to roughly 23–24 effective cores. Dividing that 44 µs of work across those cores gives us that 1.9 µs wall-clock time per file. For this machine, that's essentially 100% saturation.
 
-With the above done I have cut a [new v4.1.0 release](https://github.com/boyter/scc) of `scc` with the above in it. Go get it. BTW, If you are running `scc` at scale, deploy this and see a nice change in your metrics please contact me as I'd love to see it.
+With the above done I have cut a [new v4.1.0 release](https://github.com/boyter/scc) of `scc` with the above in it. Go get it. BTW, if you are running `scc` at scale, deploy this and see a nice change in your metrics please contact me as I'd love to see it.
 
 That issue ended with this line,
 
