@@ -1,6 +1,6 @@
 ---
 title: "Sloc Cloc and Code - Did I just get Buster Scrugged?"
-date: 2026-09-06
+date: 2026-09-07
 ---
 
 > Treat Faster Tools as a Profile, Not an Insult
@@ -300,7 +300,7 @@ That's about 9 GB/s of throughput, which I know is lower than the theoretical ma
 
 With the above done I have cut a [new v4.1.0 release](https://github.com/boyter/scc) of `scc` with the above in it. Go get it. BTW, if you are running `scc` at scale, deploy this and see a nice change in your metrics please contact me as I'd love to see it.
 
-In the end there was no trick in `mezura` I was missing. It was just me being stupid and missing some, in hindsight, obvious issues. Sometimes your own mistakes catch up to you.
+In the end there was no trick in `mezura` I was missing. It was just me being stupid and missing some, in hindsight, obvious issues. Eventually your own mistakes catch up to you.
 
 That issue ended with this line,
 
