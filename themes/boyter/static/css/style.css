@@ -7,7 +7,8 @@
   --link-hover-color: #0048ff;
   --button-background-color: #eee;
   --shadow-color: #eee;
-  --table-background-color: #eee;
+  --table-stripe-color: #f6f6f7;
+  --table-hover-color: #eef0f4;
   --table-border-color: #666;
   --blockquote-background-color: #f9f9f9;
   --blockquote-border-color: #ccc;
@@ -27,7 +28,8 @@
     --link-hover-color: #5a69f1;
     --button-background-color: #364044;
     --shadow-color: #242729;
-    --table-background-color: #364044;
+    --table-stripe-color: rgba(255, 255, 255, 0.035);
+    --table-hover-color: rgba(255, 255, 255, 0.07);
     --table-border-color: #666;
     --blockquote-background-color: #1f2020;
     --blockquote-border-color: #3f3f3f;
@@ -319,25 +321,68 @@ blockquote {
   margin: 1em 0;
 }
 
-table {
-  margin: auto;
-  border-top: 1px solid var(--table-border-color);
-  border-bottom: 1px solid var(--table-border-color);
-  width: 100%;
-  display: block;
+/* tables */
+.table-wrap {
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 0 1.5em;
 }
-table thead th {
-  border-bottom: 1px solid var(--border-color);
+
+table {
+  border-collapse: collapse;
+  width: 100%;
 }
+
+/* shrink to fit the content, but never look cramped, and centre it */
+.table-wrap table {
+  width: auto;
+  min-width: 50%;
+  margin: 0 auto;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.table-wrap th,
+.table-wrap td {
+  padding: 0.5em 0.9em;
+  text-align: left;
+  vertical-align: top;
+}
+
+.table-wrap thead th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted-color);
+  white-space: nowrap;
+  border-bottom: 2px solid var(--table-border-color);
+}
+
+.table-wrap tbody tr + tr {
+  border-top: 1px solid var(--border-color);
+}
+
+.table-wrap tbody tr:nth-child(even) {
+  background: var(--table-stripe-color);
+}
+
+.table-wrap tbody tr:hover {
+  background: var(--table-hover-color);
+}
+
+/* numeric columns line up on the decimal point */
+.table-wrap th.num,
+.table-wrap td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* fallback for hand written HTML tables */
 th,
 td {
   padding: 5px;
-}
-thead,
-tfoot,
-tr:nth-child(even) {
-  background: var(--table-background-color);
 }
 
 /* footer */
