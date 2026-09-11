@@ -50,7 +50,19 @@ The main part to note there is the user time, dropping from 9.5 seconds to 2.6. 
 
 Thats on my MacBook Air M1. How about a powerful machine, a 9950x3D?
 
-```
+```bash
+$ hyperfine --warmup 3 'cs_new nvidia' 'cs_old nvidia'
+Benchmark 1: cs_new nvidia
+  Time (mean ± σ):     196.0 ms ±   4.2 ms    [User: 1679.8 ms, System: 781.7 ms]
+  Range (min … max):   189.8 ms … 206.3 ms    15 runs
+
+Benchmark 2: cs_old nvidia
+  Time (mean ± σ):     376.8 ms ±  17.3 ms    [User: 3931.8 ms, System: 1105.5 ms]
+  Range (min … max):   361.0 ms … 408.4 ms    10 runs
+
+Summary
+  cs_new nvidia ran
+    1.92 ± 0.10 times faster than cs_old nvidia
 ```
 
 So how was this achieved?
