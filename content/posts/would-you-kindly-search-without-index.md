@@ -65,6 +65,8 @@ Summary
     1.92 ± 0.10 times faster than cs_old nvidia
 ```
 
+Not bad.
+
 So how was this achieved?
 
 Some of the performance in the above (and all the gains in `scc`) are due to fixes implemented in [gocodewalker](https://github.com/boyter/gocodewalker/).
