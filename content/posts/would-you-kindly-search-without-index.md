@@ -1,6 +1,6 @@
 ---
 title: "Would You Kindly... Search Without an Index?"
-date: 2096-06-28
+date: 2026-09-10
 ---
 
 I am boyter, and I'm here to ask you a question.
@@ -48,6 +48,11 @@ Summary
 
 The main part to note there is the user time, dropping from 9.5 seconds to 2.6. Please note it.
 
+Thats on my MacBook Air M1. How about a powerful machine, a 9950x3D?
+
+```
+```
+
 So how was this achieved?
 
 Some of the performance in the above (and all the gains in `scc`) are due to fixes implemented in [gocodewalker](https://github.com/boyter/gocodewalker/).
@@ -70,4 +75,4 @@ I didn't share you the the best part about this though. I didn't write the SIMD 
 
 No index. No shards. No cold start. Just a rare character and some stolen SIMD. Oh and some pooled memory reuse, which helped a lot too.
 
-So, would you kindly `go install github.com/boyter/cs@latest` and let me know how it works for you?
+So, would you kindly `go install github.com/boyter/cs@latest` or get the [v3.2.0 release](https://github.com/boyter/cs/releases/tag/v3.2.0) and let me know how it works for you?
